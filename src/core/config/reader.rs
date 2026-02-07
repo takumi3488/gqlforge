@@ -2,9 +2,7 @@ use std::path::Path;
 
 use futures_util::future::join_all;
 use rustls_pemfile;
-use rustls_pki_types::{
-    CertificateDer, PrivateKeyDer, PrivatePkcs1KeyDer, PrivatePkcs8KeyDer, PrivateSec1KeyDer,
-};
+use rustls_pki_types::{CertificateDer, PrivateKeyDer};
 use tailcall_valid::{Valid, ValidationError, Validator};
 use url::Url;
 
@@ -148,31 +146,30 @@ impl ConfigReader {
 
     /// Reads the certificate from a given file
     async fn load_cert(&self, content: String) -> anyhow::Result<Vec<CertificateDer<'static>>> {
-        let certificates = rustls_pemfile::certs(&mut content.as_bytes())?;
+        let certificates: Vec<CertificateDer<'static>> =
+            rustls_pemfile::certs(&mut content.as_bytes()).collect::<Result<Vec<_>, _>>()?;
 
-        Ok(certificates.into_iter().map(CertificateDer::from).collect())
+        Ok(certificates)
     }
 
     /// Reads a private key from a given file
     async fn load_private_key(&self, content: String) -> anyhow::Result<Vec<PrivateKey>> {
-        let keys = rustls_pemfile::read_all(&mut content.as_bytes())?;
-
-        Ok(keys
-            .into_iter()
-            .filter_map(|key| match key {
-                rustls_pemfile::Item::RSAKey(key) => {
-                    Some(PrivateKeyDer::Pkcs1(PrivatePkcs1KeyDer::from(key)))
+        let keys: Vec<PrivateKey> = rustls_pemfile::read_all(&mut content.as_bytes())
+            .filter_map(|item| match item {
+                Ok(rustls_pemfile::Item::Pkcs1Key(key)) => {
+                    Some(PrivateKey::from(PrivateKeyDer::Pkcs1(key)))
                 }
-                rustls_pemfile::Item::ECKey(key) => {
-                    Some(PrivateKeyDer::Sec1(PrivateSec1KeyDer::from(key)))
+                Ok(rustls_pemfile::Item::Sec1Key(key)) => {
+                    Some(PrivateKey::from(PrivateKeyDer::Sec1(key)))
                 }
-                rustls_pemfile::Item::PKCS8Key(key) => {
-                    Some(PrivateKeyDer::Pkcs8(PrivatePkcs8KeyDer::from(key)))
+                Ok(rustls_pemfile::Item::Pkcs8Key(key)) => {
+                    Some(PrivateKey::from(PrivateKeyDer::Pkcs8(key)))
                 }
                 _ => None,
             })
-            .map(PrivateKey::from)
-            .collect())
+            .collect();
+
+        Ok(keys)
     }
 
     /// Reads a single file and returns the config

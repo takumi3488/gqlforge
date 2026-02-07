@@ -149,7 +149,10 @@ impl From<&Blueprint> for Index {
                                 .map(|v| (v.name.clone(), v.clone()))
                                 .collect::<Vec<_>>(),
                         );
-                        fields_map.insert(field.name.clone(), QueryField::Field(Box::new((field, args_map))));
+                        fields_map.insert(
+                            field.name.clone(),
+                            QueryField::Field(Box::new((field, args_map))),
+                        );
                     }
 
                     map.insert(

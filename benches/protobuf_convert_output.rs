@@ -4,7 +4,7 @@ use anyhow::Result;
 use criterion::{black_box, Criterion};
 use gqlforge::core::blueprint::GrpcMethod;
 use gqlforge::core::grpc::protobuf::ProtobufSet;
-use rand::{thread_rng, Fill};
+use rand::Rng;
 use serde_json::{json, Value};
 
 const PROTO_DIR: &str = "benches/grpc";
@@ -14,7 +14,7 @@ const N: usize = 1000;
 const M: usize = 100;
 
 fn create_dummy_value(n: usize, m: usize) -> Result<Value> {
-    let rng = &mut thread_rng();
+    let mut rng = rand::rng();
     let mut ints = vec![0i32; n];
     let mut floats = vec![0f32; n];
     let mut flags = vec![false; n];
@@ -22,15 +22,15 @@ fn create_dummy_value(n: usize, m: usize) -> Result<Value> {
         .map(|_| {
             let mut chars = vec![' '; m];
 
-            chars.try_fill(rng)?;
+            rng.fill(chars.as_mut_slice());
 
             Ok(chars.into_iter().collect::<String>())
         })
         .collect::<Result<_>>()?;
 
-    ints.try_fill(rng)?;
-    floats.try_fill(rng)?;
-    flags.try_fill(rng)?;
+    rng.fill(ints.as_mut_slice());
+    rng.fill(floats.as_mut_slice());
+    rng.fill(flags.as_mut_slice());
 
     let value = json!({
         "ints": ints,

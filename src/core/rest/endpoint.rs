@@ -283,8 +283,9 @@ mod tests {
 
         use async_graphql::Variables;
         use async_graphql_value::{ConstValue, Name};
+        use bytes::Bytes;
         use http::{Method, Request, Uri, Version};
-        use hyper::Body;
+        use http_body_util::Full;
         use maplit::btreemap;
         use pretty_assertions::assert_eq;
 
@@ -292,12 +293,12 @@ mod tests {
         use crate::core::rest::endpoint::tests::TEST_QUERY;
         use crate::core::rest::endpoint::Endpoint;
 
-        fn test_request(method: Method, uri: &str) -> Result<http::Request<Body>> {
+        fn test_request(method: Method, uri: &str) -> Result<http::Request<Full<Bytes>>> {
             Ok(Request::builder()
                 .method(method)
                 .uri(Uri::from_str(uri)?)
                 .version(Version::HTTP_11)
-                .body(Body::empty())?)
+                .body(Full::default())?)
         }
 
         fn test_matches(query: &str, method: Method, uri: &str) -> Option<Variables> {

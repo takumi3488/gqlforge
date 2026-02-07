@@ -6,6 +6,7 @@ use std::sync::Arc;
 use std::{fs, panic};
 
 use anyhow::Context;
+use bytes::Bytes;
 use colored::Colorize;
 use futures_util::future::join_all;
 use gqlforge::core::app_context::AppContext;
@@ -20,7 +21,7 @@ use gqlforge::core::print_schema::print_schema;
 use gqlforge::core::Mustache;
 use gqlforge_formatter::Parser;
 use http::{Request, Response};
-use hyper::Body;
+use http_body_util::{BodyExt, Full};
 use serde::{Deserialize, Serialize};
 use tailcall_valid::{Cause, Valid, ValidationError, Validator};
 
@@ -167,7 +168,10 @@ async fn run_query_tests_on_spec(
                 headers,
                 body: Some(APIBody::Value(
                     serde_json::from_slice(
-                        &hyper::body::to_bytes(response.into_body()).await.unwrap(),
+                        &BodyExt::collect(response.into_body())
+                            .await
+                            .unwrap()
+                            .to_bytes(),
                     )
                     .unwrap_or_default(),
                 )),
@@ -268,7 +272,7 @@ pub async fn load_and_test_execution_spec(path: &Path) -> anyhow::Result<()> {
 async fn run_test(
     app_ctx: Arc<AppContext>,
     request: &APIRequest,
-) -> anyhow::Result<http::Response<Body>> {
+) -> anyhow::Result<http::Response<Full<Bytes>>> {
     let request_count = request.concurrency;
 
     let futures = (0..request_count).map(|_| {
@@ -276,7 +280,7 @@ async fn run_test(
         let body = request
             .body
             .as_ref()
-            .map(|body| Body::from(body.to_bytes()))
+            .map(|body| Full::new(Bytes::from(body.to_bytes())))
             .unwrap_or_default();
 
         let method = request.method.clone();
@@ -315,7 +319,7 @@ async fn run_test(
     // ensure all the received responses are the same.
     for response in responses {
         let (head, body) = response.into_parts();
-        let body = hyper::body::to_bytes(body).await?;
+        let body = BodyExt::collect(body).await?.to_bytes();
 
         if let Some((_, base_body)) = &base_response {
             if *base_body != body {
@@ -327,5 +331,5 @@ async fn run_test(
     }
 
     let (head, body) = base_response.ok_or_else(|| anyhow::anyhow!("No Response received."))?;
-    Ok(Response::from_parts(head, Body::from(body)))
+    Ok(Response::from_parts(head, Full::new(body)))
 }

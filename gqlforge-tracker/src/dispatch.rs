@@ -166,8 +166,7 @@ fn client_id() -> String {
 
 // Get the number of CPU cores
 fn cores() -> usize {
-    let sys = System::new_all();
-    sys.physical_core_count().unwrap_or(0)
+    System::physical_core_count().unwrap_or(0)
 }
 
 // Get the uptime in minutes
@@ -181,7 +180,7 @@ fn version() -> String {
 }
 
 fn user() -> String {
-    whoami::username()
+    whoami::username().unwrap_or_default()
 }
 
 fn cwd() -> Option<String> {

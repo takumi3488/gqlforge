@@ -2,7 +2,6 @@ use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use anyhow::Context;
 use futures_util::future::{join_all, BoxFuture};
 use futures_util::FutureExt;
 use prost_reflect::prost_types::{FileDescriptorProto, FileDescriptorSet};
@@ -179,14 +178,17 @@ impl ProtoReader {
         parent_dir: Option<&Path>,
         proto_paths: Option<&[PathBuf]>,
     ) -> anyhow::Result<FileDescriptorProto> {
-        let content = if let Ok(file) = GoogleFileResolver::new().open_file(path.as_ref()) {
-            file.source()
-                .context("Unable to extract content of google well-known proto file")?
-                .to_string()
-        } else {
-            let path = Self::resolve_path(path.as_ref(), parent_dir, proto_paths);
-            self.reader.read_file(path).await?.content
-        };
+        if let Ok(file) = GoogleFileResolver::new().open_file(path.as_ref()) {
+            // protox 0.9+ returns pre-parsed file descriptors for well-known types
+            // without source text, so use the descriptor directly
+            if let Some(source) = file.source() {
+                return Ok(protox_parse::parse(path.as_ref(), source)?);
+            }
+            return Ok(file.file_descriptor_proto().clone());
+        }
+
+        let resolved_path = Self::resolve_path(path.as_ref(), parent_dir, proto_paths);
+        let content = self.reader.read_file(resolved_path).await?.content;
         Ok(protox_parse::parse(path.as_ref(), &content)?)
     }
     /// Checks if path is absolute else it joins file path with relative dir

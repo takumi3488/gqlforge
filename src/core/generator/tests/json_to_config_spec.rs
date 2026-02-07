@@ -46,11 +46,9 @@ struct JsonFixture {
     field_name: String,
 }
 
-datatest_stable::harness!(
-    run_json_to_config_spec,
-    "src/core/generator/tests/fixtures/json",
-    r"^.*\.json"
-);
+datatest_stable::harness! {
+    { test = run_json_to_config_spec, root = "src/core/generator/tests/fixtures/json", pattern = r"^.*\.json" },
+}
 
 pub fn run_json_to_config_spec(path: &Path) -> datatest_stable::Result<()> {
     let json_data = load_json(path)?;

@@ -205,8 +205,8 @@ mod test {
     use std::collections::BTreeMap;
 
     use anyhow::Result;
+    use bytes::Bytes;
     use http::header::{HeaderMap, HeaderName, HeaderValue};
-    use hyper::body::Bytes;
     use pretty_assertions::assert_eq;
     use reqwest::Request;
     use rquickjs::{Context, FromJs, IntoJs, Object, Runtime, String as JsString};

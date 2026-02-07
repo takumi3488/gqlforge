@@ -238,7 +238,13 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
                     hook,
                 }))
             } else {
-                IR::IO(Box::new(IO::Grpc { req_template, group_by: None, dl_id: None, dedupe, hook }))
+                IR::IO(Box::new(IO::Grpc {
+                    req_template,
+                    group_by: None,
+                    dl_id: None,
+                    dedupe,
+                    hook,
+                }))
             };
 
             (io, &grpc.select)

@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::fmt::Display;
 
-use hyper::body::Bytes;
+use bytes::Bytes;
 use reqwest::Request;
 use serde::de::DeserializeOwned;
 use serde::{Deserialize, Serialize};

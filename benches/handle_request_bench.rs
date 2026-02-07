@@ -35,7 +35,7 @@ pub fn benchmark_handle_request(c: &mut Criterion) {
                 let req = Request::builder()
                     .method("POST")
                     .uri("http://localhost:8000/graphql")
-                    .body(hyper::Body::from(QUERY))
+                    .body(http_body_util::Full::new(bytes::Bytes::from(QUERY)))
                     .unwrap();
 
                 let _ = handle_request::<GraphQLRequest>(req, server_config.app_ctx.clone())
@@ -58,7 +58,7 @@ pub fn benchmark_handle_request(c: &mut Criterion) {
                 let req = Request::builder()
                     .method("POST")
                     .uri("http://localhost:8000/graphql")
-                    .body(hyper::Body::from(QUERY))
+                    .body(http_body_util::Full::new(bytes::Bytes::from(QUERY)))
                     .unwrap();
 
                 let _ = handle_request::<GraphQLRequest>(req, server_config.app_ctx.clone())

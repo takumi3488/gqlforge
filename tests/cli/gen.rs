@@ -100,10 +100,10 @@ pub mod file {
 
 pub mod http {
     use anyhow::Result;
+    use bytes::Bytes;
     use gqlforge::core::http::Response;
     use gqlforge::core::HttpIO;
     use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-    use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 
@@ -230,10 +230,10 @@ pub mod test {
 
     mod http {
         use anyhow::Result;
+        use bytes::Bytes;
         use gqlforge::core::http::Response;
         use gqlforge::core::HttpIO;
         use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-        use hyper::body::Bytes;
         use reqwest::Client;
         use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 
@@ -344,4 +344,6 @@ pub mod test {
     }
 }
 
-datatest_stable::harness!(test::run, "tests/cli/fixtures/generator", r"^.*\.md");
+datatest_stable::harness! {
+    { test = test::run, root = "tests/cli/fixtures/generator", pattern = r"^.*\.md" },
+}

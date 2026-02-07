@@ -49,9 +49,9 @@ pub mod test {
 
     use anyhow::{anyhow, Result};
     use async_graphql::Value;
+    use bytes::Bytes;
     use gqlforge_http_cache::HttpCacheManager;
     use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-    use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};

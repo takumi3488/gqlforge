@@ -45,10 +45,10 @@ mod tests {
 
     use anyhow::Result;
     use async_trait::async_trait;
+    use bytes::Bytes;
     use gqlforge_fixtures::protobuf;
     use http::header::HeaderMap;
     use http::{Method, StatusCode};
-    use hyper::body::Bytes;
     use reqwest::Request;
     use serde_json::json;
     use tonic::{Code, Status};

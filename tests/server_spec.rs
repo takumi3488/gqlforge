@@ -7,6 +7,7 @@ pub mod test {
 
     use anyhow::{anyhow, Result};
     use async_graphql::Value;
+    use bytes::Bytes;
     use gqlforge::cli::javascript::init_worker_io;
     use gqlforge::core::blueprint::{Script, Upstream};
     use gqlforge::core::cache::InMemoryCache;
@@ -16,7 +17,6 @@ pub mod test {
     use gqlforge::core::{EnvIO, FileIO, HttpIO};
     use gqlforge_http_cache::HttpCacheManager;
     use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-    use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};

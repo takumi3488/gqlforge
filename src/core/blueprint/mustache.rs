@@ -142,36 +142,36 @@ impl<'a> MustachePartsValidator<'a> {
                     .trace(config::GraphQL::trace_name().as_str())
                 }
                 IO::Grpc { req_template, .. } => {
-                Valid::from_iter(req_template.url.expression_segments(), |parts| {
-                    self.validate(parts, false).trace("path")
-                })
-                .and(
-                    Valid::from_iter(req_template.headers.clone(), |(_, mustache)| {
-                        Valid::from_iter(mustache.expression_segments(), |parts| {
-                            self.validate(parts, true).trace("headers")
-                        })
+                    Valid::from_iter(req_template.url.expression_segments(), |parts| {
+                        self.validate(parts, false).trace("path")
                     })
-                    .unit(),
-                )
-                .and_then(|_| {
-                    if let Some(body) = &req_template.body {
-                        if let Some(mustache) = &body.mustache {
+                    .and(
+                        Valid::from_iter(req_template.headers.clone(), |(_, mustache)| {
                             Valid::from_iter(mustache.expression_segments(), |parts| {
-                                self.validate(parts, true).trace("body")
+                                self.validate(parts, true).trace("headers")
                             })
+                        })
+                        .unit(),
+                    )
+                    .and_then(|_| {
+                        if let Some(body) = &req_template.body {
+                            if let Some(mustache) = &body.mustache {
+                                Valid::from_iter(mustache.expression_segments(), |parts| {
+                                    self.validate(parts, true).trace("body")
+                                })
+                            } else {
+                                // TODO: needs review
+                                Valid::succeed(Default::default())
+                            }
                         } else {
-                            // TODO: needs review
                             Valid::succeed(Default::default())
                         }
-                    } else {
-                        Valid::succeed(Default::default())
-                    }
-                })
-                .unit()
-                .trace(config::Grpc::trace_name().as_str())
+                    })
+                    .unit()
+                    .trace(config::Grpc::trace_name().as_str())
                 }
                 _ => Valid::succeed(()),
-            }
+            },
             // TODO: add validation for @expr
             _ => Valid::succeed(()),
         }

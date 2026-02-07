@@ -1,35 +1,25 @@
 ---
 source: tests/cli/gen.rs
 expression: config.to_sdl()
-snapshot_kind: text
 ---
 schema @server @upstream {
   query: Query
 }
 
 type Album {
-  data: [JSON]
+  data: [GEN__177]
   total: Int
 }
 
 type Artist {
-  id: Int
-  link: String
-  name: String
-  picture: String
-  picture_big: String
-  picture_medium: String
-  picture_small: String
-  picture_xl: String
-  radio: Boolean
-  tracklist: String
-  type: String
+  data: [GEN__179]
+  total: Int
 }
 
 type Chart {
   albums: Album
-  artists: GEN__169
-  playlists: GEN__181
+  artists: Artist
+  playlists: GEN__192
   podcasts: Podcast
   tracks: GEN__166
 }
@@ -58,13 +48,14 @@ type Creator {
 }
 
 type Datum {
-  album: GEN__M2
+  album: GEN__43
   artist: GEN__42
   duration: Int
   explicit_content_cover: Int
   explicit_content_lyrics: Int
   explicit_lyrics: Boolean
   id: Int
+  isrc: String
   link: String
   md5_image: String
   preview: String
@@ -78,13 +69,13 @@ type Datum {
 }
 
 type Editorial {
-  data: [GEN__185]
+  data: [GEN__196]
   total: Int
 }
 
 type GEN__165 {
   album: GEN__M2
-  artist: Artist
+  artist: GEN__M3
   duration: Int
   explicit_content_cover: Int
   explicit_content_lyrics: Int
@@ -106,7 +97,25 @@ type GEN__166 {
   total: Int
 }
 
-type GEN__168 {
+type GEN__177 {
+  artist: GEN__M3
+  cover: String
+  cover_big: String
+  cover_medium: String
+  cover_small: String
+  cover_xl: String
+  explicit_lyrics: Boolean
+  id: Int
+  link: String
+  md5_image: String
+  position: Int
+  record_type: String
+  title: String
+  tracklist: String
+  type: String
+}
+
+type GEN__179 {
   id: Int
   link: String
   name: String
@@ -121,17 +130,14 @@ type GEN__168 {
   type: String
 }
 
-type GEN__169 {
-  data: [GEN__168]
-  total: Int
-}
-
-type GEN__180 {
+type GEN__191 {
+  add_date: String
   checksum: String
   creation_date: String
   id: Int
   link: String
   md5_image: String
+  mod_date: String
   nb_tracks: Int
   picture: String
   picture_big: String
@@ -146,12 +152,12 @@ type GEN__180 {
   user: Creator
 }
 
-type GEN__181 {
-  data: [GEN__180]
+type GEN__192 {
+  data: [GEN__191]
   total: Int
 }
 
-type GEN__182 {
+type GEN__193 {
   available: Boolean
   description: String
   fans: Int
@@ -167,7 +173,7 @@ type GEN__182 {
   type: String
 }
 
-type GEN__185 {
+type GEN__196 {
   id: Int
   name: String
   picture: String
@@ -175,6 +181,19 @@ type GEN__185 {
   picture_medium: String
   picture_small: String
   picture_xl: String
+  type: String
+}
+
+type GEN__199 {
+  id: Int
+  link: String
+  name: String
+  picture: String
+  picture_big: String
+  picture_medium: String
+  picture_small: String
+  picture_xl: String
+  tracklist: String
   type: String
 }
 
@@ -190,6 +209,26 @@ type GEN__2 {
   radio: Boolean
   share: String
   tracklist: String
+  type: String
+}
+
+type GEN__249 {
+  album: GEN__M2
+  artist: GEN__199
+  duration: Int
+  explicit_content_cover: Int
+  explicit_content_lyrics: Int
+  explicit_lyrics: Boolean
+  id: Int
+  isrc: String
+  link: String
+  md5_image: String
+  preview: String
+  rank: Int
+  readable: Boolean
+  title: String
+  title_short: String
+  title_version: String
   type: String
 }
 
@@ -316,6 +355,20 @@ type GEN__42 {
   type: String
 }
 
+type GEN__43 {
+  cover: String
+  cover_big: String
+  cover_medium: String
+  cover_small: String
+  cover_xl: String
+  id: Int
+  md5_image: String
+  title: String
+  tracklist: String
+  type: String
+  upc: String
+}
+
 type GEN__5 {
   id: Int
   name: String
@@ -348,11 +401,26 @@ type GEN__M2 {
   type: String
 }
 
+type GEN__M3 {
+  id: Int
+  link: String
+  name: String
+  picture: String
+  picture_big: String
+  picture_medium: String
+  picture_small: String
+  picture_xl: String
+  radio: Boolean
+  tracklist: String
+  type: String
+}
+
 type Genre {
   data: [GEN__5]
 }
 
 type Playlist {
+  add_date: String
   checksum: String
   collaborative: Boolean
   creation_date: String
@@ -364,6 +432,7 @@ type Playlist {
   is_loved_track: Boolean
   link: String
   md5_image: String
+  mod_date: String
   nb_tracks: Int
   picture: String
   picture_big: String
@@ -380,7 +449,7 @@ type Playlist {
 }
 
 type Podcast {
-  data: [GEN__182]
+  data: [GEN__193]
   total: Int
 }
 
@@ -396,7 +465,7 @@ type Query {
 }
 
 type Search {
-  data: [JSON]
+  data: [GEN__249]
   next: String
   total: Int
 }

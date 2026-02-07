@@ -234,16 +234,18 @@ where
         node: &'a Field<Value>,
         path: &[PathSegment],
     ) -> Box<Positioned<Error>> {
-        Box::new(Positioned::new(error, node.pos).with_path(
-            path.iter()
-                .map(|x| match x {
-                    PathSegment::Field(cow) => {
-                        PathSegment::Field(Cow::Owned(cow.clone().into_owned()))
-                    }
-                    PathSegment::Index(i) => PathSegment::Index(*i),
-                })
-                .collect(),
-        ))
+        Box::new(
+            Positioned::new(error, node.pos).with_path(
+                path.iter()
+                    .map(|x| match x {
+                        PathSegment::Field(cow) => {
+                            PathSegment::Field(Cow::Owned(cow.clone().into_owned()))
+                        }
+                        PathSegment::Index(i) => PathSegment::Index(*i),
+                    })
+                    .collect(),
+            ),
+        )
     }
 }
 

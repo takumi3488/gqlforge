@@ -6,13 +6,13 @@ use std::sync::Arc;
 
 use async_graphql::futures_util::future::join_all;
 use async_graphql_value::ConstValue;
+use bytes::Bytes;
 use criterion::Criterion;
 use gqlforge::core::config::Batch;
 use gqlforge::core::http::{DataLoaderRequest, HttpDataLoader, Response};
 use gqlforge::core::ir::model::IoId;
 use gqlforge::core::runtime::TargetRuntime;
 use gqlforge::core::{cache, EnvIO, FileIO, HttpIO};
-use hyper::body::Bytes;
 use reqwest::Request;
 
 #[derive(Clone)]

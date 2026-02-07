@@ -1,12 +1,15 @@
 #![allow(clippy::too_many_arguments)]
 use std::sync::Arc;
 
-use hyper::server::conn::AddrIncoming;
-use hyper::service::{make_service_fn, service_fn};
-use hyper::Server;
-use hyper_rustls::TlsAcceptor;
+use http_body_util::{BodyExt, Full};
+use hyper::body::Incoming;
+use hyper::service::service_fn;
+use hyper_util::rt::{TokioExecutor, TokioIo};
+use hyper_util::server::conn::auto::Builder;
 use rustls_pki_types::CertificateDer;
+use tokio::net::TcpListener;
 use tokio::sync::oneshot;
+use tokio_rustls::TlsAcceptor;
 
 use super::server_config::ServerConfig;
 use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest};
@@ -21,30 +24,18 @@ pub async fn start_http_2(
     server_up_sender: Option<oneshot::Sender<()>>,
 ) -> anyhow::Result<()> {
     let addr = sc.addr();
-    let incoming = AddrIncoming::bind(&addr)?;
-    let acceptor = TlsAcceptor::builder()
-        .with_single_cert(cert, key.into_inner())?
-        .with_http2_alpn()
-        .with_incoming(incoming);
-    let make_svc_single_req = make_service_fn(|_conn| {
-        let state = Arc::clone(&sc);
-        async move {
-            Ok::<_, anyhow::Error>(service_fn(move |req| {
-                handle_request::<GraphQLRequest>(req, state.app_ctx.clone())
-            }))
-        }
-    });
 
-    let make_svc_batch_req = make_service_fn(|_conn| {
-        let state = Arc::clone(&sc);
-        async move {
-            Ok::<_, anyhow::Error>(service_fn(move |req| {
-                handle_request::<GraphQLBatchRequest>(req, state.app_ctx.clone())
-            }))
-        }
-    });
+    let mut server_config = rustls::ServerConfig::builder_with_provider(Arc::new(
+        rustls::crypto::aws_lc_rs::default_provider(),
+    ))
+    .with_safe_default_protocol_versions()?
+    .with_no_client_auth()
+    .with_single_cert(cert, key.into_inner())?;
+    server_config.alpn_protocols = vec![b"h2".to_vec(), b"http/1.1".to_vec()];
+    let tls_acceptor = TlsAcceptor::from(Arc::new(server_config));
 
-    let builder = Server::builder(acceptor).http2_only(true);
+    let listener = TcpListener::bind(&addr).await.map_err(Errata::from)?;
+    let enable_batch = sc.blueprint.server.enable_batch_requests;
 
     super::log_launch(sc.as_ref());
 
@@ -54,14 +45,41 @@ pub async fn start_http_2(
             .or(Err(anyhow::anyhow!("Failed to send message")))?;
     }
 
-    let server: std::prelude::v1::Result<(), hyper::Error> =
-        if sc.blueprint.server.enable_batch_requests {
-            builder.serve(make_svc_batch_req).await
-        } else {
-            builder.serve(make_svc_single_req).await
-        };
+    loop {
+        let (stream, _addr) = listener.accept().await?;
+        let tls_acceptor = tls_acceptor.clone();
+        let sc = sc.clone();
 
-    let result = server.map_err(Errata::from);
+        tokio::spawn(async move {
+            let tls_stream = match tls_acceptor.accept(stream).await {
+                Ok(s) => s,
+                Err(e) => {
+                    tracing::error!("TLS handshake error: {}", e);
+                    return;
+                }
+            };
+            let io = TokioIo::new(tls_stream);
 
-    Ok(result?)
+            let svc = service_fn(move |req: http::Request<Incoming>| {
+                let sc = sc.clone();
+                async move {
+                    let (parts, body) = req.into_parts();
+                    let bytes = body.collect().await?.to_bytes();
+                    let req = http::Request::from_parts(parts, Full::new(bytes));
+                    if enable_batch {
+                        handle_request::<GraphQLBatchRequest>(req, sc.app_ctx.clone()).await
+                    } else {
+                        handle_request::<GraphQLRequest>(req, sc.app_ctx.clone()).await
+                    }
+                }
+            });
+
+            let mut builder = Builder::new(TokioExecutor::new());
+            builder.http2();
+
+            if let Err(e) = builder.serve_connection(io, svc).await {
+                tracing::error!("Error serving connection: {}", e);
+            }
+        });
+    }
 }
