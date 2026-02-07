@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000)
-  @upstream(batch: {delay: 1, headers: []}, httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000)
+@upstream(batch: { delay: 1, headers: [] }, httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -19,7 +18,12 @@ type Foo {
   a: Int
   b: Int
   bar: Bar
-    @http(url: "http://jsonplaceholder.typicode.com/bar", body: {id: "{{.value.a}}"}, batchKey: ["a"], method: "POST")
+  @http(
+    url: "http://jsonplaceholder.typicode.com/bar"
+    body: { id: "{{.value.a}}" }
+    batchKey: ["a"]
+    method: "POST"
+  )
 }
 
 type Post {
@@ -27,12 +31,12 @@ type Post {
   id: Int!
   title: String!
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      body: {key: "id", value: "{{.value.userId}}"}
-      batchKey: ["id"]
-      method: "POST"
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    body: { key: "id", value: "{{.value.userId}}" }
+    batchKey: ["id"]
+    method: "POST"
+  )
   userId: Int!
 }
 
@@ -48,10 +52,10 @@ type User {
   id: Int!
   name: String!
   post: Post
-    @http(
-      url: "http://jsonplaceholder.typicode.com/posts"
-      body: {userId: "{{.value.id}}", title: "title", body: "body"}
-      batchKey: ["userId"]
-      method: "POST"
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts"
+    body: { userId: "{{.value.id}}", title: "title", body: "body" }
+    batchKey: ["userId"]
+    method: "POST"
+  )
 }

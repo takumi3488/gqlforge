@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -17,7 +16,7 @@ type Query {
   qInt32: Int32 @expr(body: 9)
   qInt64: Int64 @expr(body: "10")
   qInt8: Int8 @expr(body: 11)
-  qJSON: JSON @expr(body: {a: 1, b: 2})
+  qJSON: JSON @expr(body: { a: 1, b: 2 })
   qPhoneNumber: PhoneNumber @expr(body: "+1234567890")
   qUInt128: UInt128 @expr(body: "2")
   qUInt16: UInt16 @expr(body: 3)

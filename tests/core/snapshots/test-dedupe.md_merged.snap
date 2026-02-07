@@ -1,9 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(port: 8000) @upstream(batch: {delay: 1, headers: []}) @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(port: 8000)
+@upstream(batch: { delay: 1, headers: [] })
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -12,17 +14,18 @@ type Post {
   id: Int
   title: String
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      batchKey: ["id"]
-      query: [{key: "id", value: "{{.value.userId}}"}]
-      dedupe: true
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    batchKey: ["id"]
+    query: [{ key: "id", value: "{{.value.userId}}" }]
+    dedupe: true
+  )
   userId: Int!
 }
 
 type Query {
-  posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts?id=1", dedupe: true)
+  posts: [Post]
+  @http(url: "http://jsonplaceholder.typicode.com/posts?id=1", dedupe: true)
 }
 
 type User {

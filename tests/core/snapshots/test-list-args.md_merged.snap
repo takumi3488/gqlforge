@@ -1,14 +1,20 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(queryValidation: true) @upstream @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(queryValidation: true)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
-  f1(q: [Int!]!): T1 @http(url: "http://localhost:3000/api", query: [{key: "q", value: "{{.args.q}}"}])
+  f1(q: [Int!]!): T1
+  @http(
+    url: "http://localhost:3000/api"
+    query: [{ key: "q", value: "{{.args.q}}" }]
+  )
 }
 
 type T1 {

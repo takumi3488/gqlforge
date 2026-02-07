@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -23,5 +22,9 @@ type MyType {
 
 type Query {
   queryTest(filter: StringFilter): [MyType]
-    @graphQL(args: [{key: "filter", value: "{{.args.filter}}"}], url: "http://localhost:8083/mesh", name: "getMyType")
+  @graphQL(
+    args: [{ key: "filter", value: "{{.args.filter}}" }]
+    url: "http://localhost:8083/mesh"
+    name: "getMyType"
+  )
 }

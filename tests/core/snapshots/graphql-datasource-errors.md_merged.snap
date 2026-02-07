@@ -1,14 +1,18 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
-  user(id: Int): User @graphQL(args: [{key: "id", value: "{{.args.id}}"}], url: "http://upstream/graphql", name: "user")
+  user(id: Int): User
+  @graphQL(
+    args: [{ key: "id", value: "{{.args.id}}" }]
+    url: "http://upstream/graphql"
+    name: "user"
+  )
 }
 
 type User {

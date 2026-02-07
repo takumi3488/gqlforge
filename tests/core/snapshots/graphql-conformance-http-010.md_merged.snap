@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -28,8 +27,11 @@ type Point {
 
 type Query {
   nearby(location: LocationInput): Point
-    @http(
-      url: "http://upstream/nearby"
-      query: [{key: "lon", value: "{{.args.location.lon}}"}, {key: "lat", value: "{{.args.location.lat}}"}]
-    )
+  @http(
+    url: "http://upstream/nearby"
+    query: [
+      { key: "lon", value: "{{.args.location.lon}}" }
+      { key: "lat", value: "{{.args.location.lat}}" }
+    ]
+  )
 }

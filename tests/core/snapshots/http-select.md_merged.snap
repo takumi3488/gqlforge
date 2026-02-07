@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -16,12 +15,13 @@ type Company {
 }
 
 type Query {
-  userCompany(id: Int!): Company @http(url: "http://upstream/users/{{.args.id}}", select: "{{.company}}")
+  userCompany(id: Int!): Company
+  @http(url: "http://upstream/users/{{.args.id}}", select: "{{.company}}")
   userDetails(id: Int!): UserDetails
-    @http(
-      url: "http://upstream/users/{{.args.id}}"
-      select: {id: "{{.id}}", city: "{{.address.city}}", phone: "{{.phone}}"}
-    )
+  @http(
+    url: "http://upstream/users/{{.args.id}}"
+    select: { id: "{{.id}}", city: "{{.address.city}}", phone: "{{.phone}}" }
+  )
 }
 
 type UserDetails {

@@ -1,25 +1,26 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(enableFederation: false, port: 8000)
-  @upstream(batch: {delay: 100, headers: []}, httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(enableFederation: false, port: 8000)
+@upstream(batch: { delay: 100, headers: [] }, httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
-type Post @expr(body: {id: "{{.value.id}}", title: "post-title-{{.value.id}}"}) {
+type Post
+@expr(body: { id: "{{.value.id}}", title: "post-title-{{.value.id}}" }) {
   id: Int!
   title: String!
 }
 
 type Query {
-  user(id: Int!): User @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
+  user(id: Int!): User
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
-type User @call(steps: [{query: "user", args: {id: "{{.value.id}}"}}]) {
+type User @call(steps: [{ query: "user", args: { id: "{{.value.id}}" } }]) {
   id: Int!
   name: String!
 }

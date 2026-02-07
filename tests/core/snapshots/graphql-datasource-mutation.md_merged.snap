@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -16,7 +15,11 @@ input UserInput {
 
 type Mutation {
   createUser(user: UserInput!): User
-    @graphQL(args: [{key: "user", value: "{{.args.user}}"}], url: "http://upstream/graphql", name: "createUser")
+  @graphQL(
+    args: [{ key: "user", value: "{{.args.user}}" }]
+    url: "http://upstream/graphql"
+    name: "createUser"
+  )
 }
 
 type Query {

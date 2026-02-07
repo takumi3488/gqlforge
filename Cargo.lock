@@ -113,6 +113,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d301b3b94cb4b2f23d7917810addbbaff90738e0ca2be692bd027e70d7e0330c"
 
 [[package]]
+name = "apollo-parser"
+version = "0.8.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c8f05cbc7da3c2e3bb2f86e985aad5f72571d2e2cd26faf8caa7782131576f84"
+dependencies = [
+ "memchr",
+ "rowan",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "ascii-canvas"
 version = "3.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1063,6 +1074,12 @@ checksum = "b49ba7ef1ad6107f8824dbe97de947cbaac53c44e7f9756a1fba0d37c1eec505"
 dependencies = [
  "memchr",
 ]
+
+[[package]]
+name = "countme"
+version = "3.0.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7704b5fdd17b18ae31c4c1da5a2e0305a2bf17b5249300a9ee9ed7b72114c636"
 
 [[package]]
 name = "cpufeatures"
@@ -2269,10 +2286,10 @@ dependencies = [
  "genai",
  "getrandom 0.2.17",
  "gqlforge-fixtures",
+ "gqlforge-formatter",
  "gqlforge-hasher",
  "gqlforge-http-cache",
  "gqlforge-macros",
- "gqlforge-prettier",
  "gqlforge-tracker",
  "gqlforge-typedefs-common",
  "gqlforge-version",
@@ -2411,6 +2428,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "gqlforge-formatter"
+version = "0.1.0"
+dependencies = [
+ "pretty_graphql",
+ "thiserror 1.0.69",
+]
+
+[[package]]
 name = "gqlforge-hasher"
 version = "0.1.0"
 dependencies = [
@@ -2440,16 +2465,6 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.114",
-]
-
-[[package]]
-name = "gqlforge-prettier"
-version = "0.1.0"
-dependencies = [
- "lazy_static",
- "strum_macros 0.26.4",
- "thiserror 1.0.69",
- "tokio",
 ]
 
 [[package]]
@@ -4612,6 +4627,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "pretty_graphql"
+version = "0.2.3"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "ea8c38ecedb3d28a998ea783469a78587f5f984d61226cf071f6979861e9e6a9"
+dependencies = [
+ "apollo-parser",
+ "memchr",
+ "rowan",
+ "tiny_pretty",
+]
+
+[[package]]
 name = "prettyplease"
 version = "0.2.37"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5371,6 +5398,18 @@ name = "rle-decode-fast"
 version = "1.0.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3582f63211428f83597b51b2ddb88e2a91a9d52d12831f9d08f5e624e8977422"
+
+[[package]]
+name = "rowan"
+version = "0.16.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "417a3a9f582e349834051b8a10c8d71ca88da4211e4093528e36b9845f6b5f21"
+dependencies = [
+ "countme",
+ "hashbrown 0.14.5",
+ "rustc-hash 1.1.0",
+ "text-size",
+]
 
 [[package]]
 name = "rquickjs"
@@ -6316,6 +6355,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "text-size"
+version = "1.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f18aa187839b2bdb1ad2fa35ead8c4c2976b64e4363c386d45ac0f7ee85c9233"
+
+[[package]]
 name = "thiserror"
 version = "1.0.69"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6403,6 +6448,12 @@ checksum = "2c9d3793400a45f954c52e73d068316d76b6f4e36977e3fcebb13a2721e80237"
 dependencies = [
  "crunchy",
 ]
+
+[[package]]
+name = "tiny_pretty"
+version = "0.2.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "650d82e943da333637be9f1567d33d605e76810a26464edfd7ae74f7ef181e95"
 
 [[package]]
 name = "tinystr"

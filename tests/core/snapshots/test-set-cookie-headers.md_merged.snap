@@ -1,17 +1,17 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(headers: {setCookies: true}, hostname: "0.0.0.0", port: 8080)
-  @upstream
-  @link(src: "schema_0.graphql", type: Config) {
+@server(headers: { setCookies: true }, hostname: "0.0.0.0", port: 8080)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
-  user(id: Int!): User @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
+  user(id: Int!): User
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
 type User {

@@ -1,6 +1,8 @@
+use std::fmt;
+
 use super::{Error, Result};
 
-#[derive(strum_macros::Display, Clone)]
+#[derive(Clone)]
 pub enum Parser {
     Gql,
     Yml,
@@ -8,6 +10,19 @@ pub enum Parser {
     Md,
     Ts,
     Js,
+}
+
+impl fmt::Display for Parser {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            Parser::Gql => write!(f, "gql"),
+            Parser::Yml => write!(f, "yml"),
+            Parser::Json => write!(f, "json"),
+            Parser::Md => write!(f, "md"),
+            Parser::Ts => write!(f, "ts"),
+            Parser::Js => write!(f, "js"),
+        }
+    }
 }
 
 impl Parser {

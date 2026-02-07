@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -23,8 +22,10 @@ type Post {
 }
 
 type Query {
-  post(input: PostInput!): Post @http(url: "http://localhost:8080/user/{{.args.input.id}}")
-  user(input: UserInput!): User @http(url: "http://localhost:8080/user/{{.args.input.id}}")
+  post(input: PostInput!): Post
+  @http(url: "http://localhost:8080/user/{{.args.input.id}}")
+  user(input: UserInput!): User
+  @http(url: "http://localhost:8080/user/{{.args.input.id}}")
 }
 
 type User {

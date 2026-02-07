@@ -1,14 +1,13 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server
-  @upstream
-  @link(src: "link-expr.graphql", type: Config)
-  @link(src: "link-enum.graphql", type: Config)
-  @link(src: "schema_0.graphql", type: Config) {
+@server
+@upstream
+@link(src: "link-expr.graphql", type: Config)
+@link(src: "link-enum.graphql", type: Config)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 

@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -23,7 +22,8 @@ type User {
   id: Int!
   name: String!
   phone: String
-  posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.id}}/posts")
+  posts: [Post]
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.id}}/posts")
   username: String!
   website: String
 }

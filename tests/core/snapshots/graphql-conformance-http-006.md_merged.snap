@@ -1,32 +1,41 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
-  user(id: ID!): User! @http(url: "http://upstream/user", query: [{key: "id", value: "{{.args.id}}"}])
+  user(id: ID!): User!
+  @http(
+    url: "http://upstream/user"
+    query: [{ key: "id", value: "{{.args.id}}" }]
+  )
 }
 
 type User {
   friends(first: Int): [User!]!
-    @http(
-      url: "http://upstream/friends"
-      query: [{key: "id", value: "{{.value.id}}"}, {key: "first", value: "{{.args.first}}"}]
-    )
+  @http(
+    url: "http://upstream/friends"
+    query: [
+      { key: "id", value: "{{.value.id}}" }
+      { key: "first", value: "{{.args.first}}" }
+    ]
+  )
   id: ID!
   mutualFriends(first: Int): [User!]!
-    @http(
-      url: "http://upstream/mutual-friends"
-      query: [{key: "id", value: "{{.value.id}}"}, {key: "first", value: "{{.args.first}}"}]
-    )
+  @http(
+    url: "http://upstream/mutual-friends"
+    query: [
+      { key: "id", value: "{{.value.id}}" }
+      { key: "first", value: "{{.args.first}}" }
+    ]
+  )
   name: String!
   profilePic(size: Int, width: Int, height: Int): String!
-    @expr(body: "{{.value.id}}_{{.args.size}}_{{.args.width}}_{{.args.height}}")
+  @expr(body: "{{.value.id}}_{{.args.size}}_{{.args.width}}_{{.args.height}}")
 }

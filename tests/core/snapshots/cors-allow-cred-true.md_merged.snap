@@ -1,23 +1,26 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(
-    headers: {
-      cors: {
-        allowCredentials: true
-        allowMethods: ["OPTIONS", "POST", "GET"]
-        allowOrigins: ["abc.com", "xyz.com"]
-        exposeHeaders: [""]
-        maxAge: 23
-        vary: ["origin", "access-control-request-method", "access-control-request-headers"]
-      }
+@server(
+  headers: {
+    cors: {
+      allowCredentials: true
+      allowMethods: ["OPTIONS", "POST", "GET"]
+      allowOrigins: ["abc.com", "xyz.com"]
+      exposeHeaders: [""]
+      maxAge: 23
+      vary: [
+        "origin"
+        "access-control-request-method"
+        "access-control-request-headers"
+      ]
     }
-  )
-  @upstream(batch: {delay: 1, headers: [], maxSize: 1000})
-  @link(src: "schema_0.graphql", type: Config) {
+  }
+)
+@upstream(batch: { delay: 1, headers: [], maxSize: 1000 })
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 

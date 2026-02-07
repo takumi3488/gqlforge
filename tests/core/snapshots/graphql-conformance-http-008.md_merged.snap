@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -32,7 +31,10 @@ type Page implements Profile {
 
 type Query {
   profiles(handles: [ID!]!): [Profile!]!
-    @http(url: "http://upstream/profiles", query: [{key: "handles", value: "{{.args.handles}}"}])
+  @http(
+    url: "http://upstream/profiles"
+    query: [{ key: "handles", value: "{{.args.handles}}" }]
+  )
 }
 
 type User implements Profile {

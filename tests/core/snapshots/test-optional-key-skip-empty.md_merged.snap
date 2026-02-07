@@ -1,9 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(port: 8000) @upstream @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(port: 8000)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -13,10 +15,13 @@ type Bar {
 
 type Foo {
   bar: Bar
-    @http(
-      url: "http://example.com/bar"
-      query: [{key: "tagEmpty", value: "{{.value.tag}}", skipEmpty: true}, {key: "tag", value: "{{.value.tag}}"}]
-    )
+  @http(
+    url: "http://example.com/bar"
+    query: [
+      { key: "tagEmpty", value: "{{.value.tag}}", skipEmpty: true }
+      { key: "tag", value: "{{.value.tag}}" }
+    ]
+  )
   id: Int!
   tag: String
 }

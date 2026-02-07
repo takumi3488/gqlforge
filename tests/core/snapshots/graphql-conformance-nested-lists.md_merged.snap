@@ -1,19 +1,23 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
   addUsers(userNames: [[String!]!]!): Boolean
-    @graphQL(args: [{key: "userNames", value: "{{.args.userNames}}"}], url: "http://upstream/graphql", name: "addUsers")
-  userGroups: [[User!]!]! @graphQL(url: "http://upstream/graphql", name: "users")
+  @graphQL(
+    args: [{ key: "userNames", value: "{{.args.userNames}}" }]
+    url: "http://upstream/graphql"
+    name: "addUsers"
+  )
+  userGroups: [[User!]!]!
+  @graphQL(url: "http://upstream/graphql", name: "users")
 }
 
 type User {

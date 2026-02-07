@@ -1,13 +1,12 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000)
-  @upstream(httpCache: 42)
-  @link(src: "http://localhost:50051", type: Grpc)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000)
+@upstream(httpCache: 42)
+@link(src: "http://localhost:50051", type: Grpc)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -30,5 +29,6 @@ type NewsData {
 }
 
 type Query {
-  news: NewsData! @grpc(url: "http://localhost:50051", method: "news.NewsService.GetAllNews")
+  news: NewsData!
+  @grpc(url: "http://localhost:50051", method: "news.NewsService.GetAllNews")
 }

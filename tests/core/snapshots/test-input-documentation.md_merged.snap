@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -20,7 +19,11 @@ input Foo {
 
 type Mutation {
   testDocumentation(input: Foo!): Post
-    @http(url: "http://jsonplaceholder.typicode.com/posts", body: "{{.args.input}}", method: "POST")
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts"
+    body: "{{.args.input}}"
+    method: "POST"
+  )
 }
 
 type Post {
@@ -33,5 +36,6 @@ Some Documentation
 """
 type Query {
   foo: String @http(url: "http://jsonplaceholder.typicode.com/foo")
-  postFromFoo(id: Int!): Post @http(url: "http://jsonplaceholder.typicode.com/posts?id={{.args.id}}")
+  postFromFoo(id: Int!): Post
+  @http(url: "http://jsonplaceholder.typicode.com/posts?id={{.args.id}}")
 }

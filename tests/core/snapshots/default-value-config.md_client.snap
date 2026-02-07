@@ -1,14 +1,13 @@
 ---
 source: tests/core/spec.rs
 expression: formatted
-snapshot_kind: text
 ---
 input Input {
   id: Int = 1
 }
 
 type Query {
-  bar(input: Input = {id: 3}): Int
+  bar(input: Input = { id: 3 }): Int
   foo(input: Input!): Int
 }
 

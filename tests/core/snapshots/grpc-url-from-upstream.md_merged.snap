@@ -1,13 +1,12 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000)
-  @upstream(batch: {delay: 10, headers: []}, httpCache: 42)
-  @link(id: "news", src: "news.proto", type: Protobuf)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000)
+@upstream(batch: { delay: 10, headers: [] }, httpCache: 42)
+@link(id: "news", src: "news.proto", type: Protobuf)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -30,7 +29,12 @@ type NewsData {
 }
 
 type Query {
-  news: NewsData! @grpc(url: "http://localhost:50051", method: "news.NewsService.GetAllNews")
+  news: NewsData!
+  @grpc(url: "http://localhost:50051", method: "news.NewsService.GetAllNews")
   newsById(news: NewsInput!): News!
-    @grpc(url: "http://localhost:50051", body: "{{.args.news}}", method: "news.NewsService.GetNews")
+  @grpc(
+    url: "http://localhost:50051"
+    body: "{{.args.news}}"
+    method: "news.NewsService.GetNews"
+  )
 }

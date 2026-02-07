@@ -1,14 +1,13 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server
-  @upstream
-  @link(id: "htpasswd", src: ".htpasswd", type: Htpasswd)
-  @link(id: "jwks", src: "jwks.json", type: Jwks)
-  @link(src: "schema_0.graphql", type: Config) {
+@server
+@upstream
+@link(id: "htpasswd", src: ".htpasswd", type: Htpasswd)
+@link(id: "jwks", src: "jwks.json", type: Jwks)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 

@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: response
-snapshot_kind: text
 ---
 {
   "status": 200,
@@ -12,7 +11,7 @@ snapshot_kind: text
     "data": {
       "customer": {
         "id": 4,
-        "name": "Tailcall",
+        "name": "Gqlforge",
         "date_of_birth": "2000-01-01"
       }
     }

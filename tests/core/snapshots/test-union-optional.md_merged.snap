@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -16,7 +15,14 @@ type Page {
 
 type Query {
   node: Node @expr
-  nodes: [Node]! @expr(body: [{User: {id: 1, username: "user"}}, null, {Page: {id: 2, slug: "page"}}])
+  nodes: [Node]!
+  @expr(
+    body: [
+      { User: { id: 1, username: "user" } }
+      null
+      { Page: { id: 2, slug: "page" } }
+    ]
+  )
 }
 
 type User {

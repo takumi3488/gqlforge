@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000)
-  @upstream(batch: {delay: 10, headers: [], maxSize: 1000})
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000)
+@upstream(batch: { delay: 10, headers: [], maxSize: 1000 })
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -18,11 +17,14 @@ type Bar {
 type Foo {
   barId: String!
   bars: [Bar!]!
-    @http(
-      url: "http://jsonplaceholder.typicode.com/bar"
-      batchKey: ["bars", "id"]
-      query: [{key: "baz", value: "static_value"}, {key: "barId[]", value: "{{.value.barId}}"}]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/bar"
+    batchKey: ["bars", "id"]
+    query: [
+      { key: "baz", value: "static_value" }
+      { key: "barId[]", value: "{{.value.barId}}" }
+    ]
+  )
   fooName: String!
   id: ID!
 }

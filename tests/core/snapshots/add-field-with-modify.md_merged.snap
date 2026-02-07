@@ -1,13 +1,14 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
-type Query @addField(name: "user1", path: ["person1", "name"]) @addField(name: "user2", path: ["person2", "name"]) {
+type Query
+@addField(name: "user1", path: ["person1", "name"])
+@addField(name: "user2", path: ["person2", "name"]) {
   person1: User @http(url: "http://jsonplaceholder.typicode.com/users/1")
   person2: User @http(url: "http://jsonplaceholder.typicode.com/users/2")
 }

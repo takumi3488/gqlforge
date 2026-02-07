@@ -21,7 +21,7 @@ use gqlforge::core::http::handle_request;
 use gqlforge::core::mustache::PathStringEval;
 use gqlforge::core::print_schema::print_schema;
 use gqlforge::core::Mustache;
-use gqlforge_prettier::Parser;
+use gqlforge_formatter::Parser;
 use tailcall_valid::{Cause, Valid, ValidationError, Validator};
 
 use super::file::File;
@@ -114,12 +114,12 @@ async fn check_identity(spec: &ExecutionSpec, reader_ctx: &ConfigReaderContext<'
             let path_str = spec.path.display().to_string();
             let context = format!("path: {}", path_str);
 
-            let actual = gqlforge_prettier::format(actual, &gqlforge_prettier::Parser::Gql)
+            let actual = gqlforge_formatter::format(actual, &gqlforge_formatter::Parser::Gql)
                 .await
                 .map_err(|e| e.with_context(context.clone()))
                 .unwrap();
 
-            let expected = gqlforge_prettier::format(content, &gqlforge_prettier::Parser::Gql)
+            let expected = gqlforge_formatter::format(content, &gqlforge_formatter::Parser::Gql)
                 .await
                 .map_err(|e| e.with_context(context.clone()))
                 .unwrap();
@@ -220,7 +220,7 @@ async fn test_spec(spec: ExecutionSpec) {
     let config_module = config_module.to_result().unwrap();
     let merged = config_module.to_sdl();
 
-    let formatter = gqlforge_prettier::format(merged, &Parser::Gql)
+    let formatter = gqlforge_formatter::format(merged, &Parser::Gql)
         .await
         .unwrap();
 
@@ -238,7 +238,7 @@ async fn test_spec(spec: ExecutionSpec) {
         .to_schema(),
     );
 
-    let formatted = gqlforge_prettier::format(client, &Parser::Gql)
+    let formatted = gqlforge_formatter::format(client, &Parser::Gql)
         .await
         .unwrap();
     let snapshot_name = format!("{}_client", spec.safe_name);

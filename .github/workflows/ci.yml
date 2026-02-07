@@ -137,13 +137,6 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.20.0"
-      - name: Install Prettier
-        run: npm i -g prettier
-
       - name: Install Rust Toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 

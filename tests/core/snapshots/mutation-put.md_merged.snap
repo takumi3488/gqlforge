@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -17,7 +16,11 @@ input PostInput {
 
 type Mutation {
   insertPost(input: PostInput!): Post
-    @http(url: "http://jsonplaceholder.typicode.com/posts/{{.args.input.id}}", body: "{{.args.input}}", method: "PUT")
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts/{{.args.input.id}}"
+    body: "{{.args.input}}"
+    method: "PUT"
+  )
 }
 
 type Post {

@@ -1,9 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server @upstream(allowedHeaders: ["authorization"]) @link(src: "schema_0.graphql", type: Config) {
+schema
+@server
+@upstream(allowedHeaders: ["authorization"])
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -15,5 +17,8 @@ type Post {
 }
 
 type Query {
-  post1: Post @http(url: "http://jsonplaceholder.typicode.com/posts/{{.headers.authorization}}")
+  post1: Post
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts/{{.headers.authorization}}"
+  )
 }

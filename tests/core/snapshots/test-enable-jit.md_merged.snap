@@ -1,16 +1,19 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(hostname: "0.0.0.0", port: 8000) @upstream @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(hostname: "0.0.0.0", port: 8000)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Post {
   id: Int!
   title: String!
-  user: User @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
+  user: User
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
   userId: Int!
 }
 

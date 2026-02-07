@@ -1,12 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000, queryValidation: false)
-  @upstream(batch: {delay: 1, headers: [], maxSize: 1000}, httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000, queryValidation: false)
+@upstream(batch: { delay: 1, headers: [], maxSize: 1000 }, httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -14,7 +13,8 @@ type Post {
   body: String
   id: Int
   title: String
-  user: User @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
+  user: User
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
   userId: Int!
 }
 

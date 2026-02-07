@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -12,5 +11,7 @@ input Foo {
 }
 
 type Query {
-  foo(input: Foo): String @http(url: "http://jsonplaceholder.typicode.com/foo") @modify(name: "data")
+  foo(input: Foo): String
+  @http(url: "http://jsonplaceholder.typicode.com/foo")
+  @modify(name: "data")
 }

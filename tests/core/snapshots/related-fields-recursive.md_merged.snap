@@ -1,9 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(hostname: "0.0.0.0", port: 8000) @upstream @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(hostname: "0.0.0.0", port: 8000)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -18,5 +20,6 @@ type NodeB {
 }
 
 type Query {
-  queryNodeA: [NodeA] @graphQL(url: "http://localhost:8083/graphql", name: "queryNodeA")
+  queryNodeA: [NodeA]
+  @graphQL(url: "http://localhost:8083/graphql", name: "queryNodeA")
 }

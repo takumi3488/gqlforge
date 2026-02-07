@@ -1,14 +1,13 @@
 ---
 source: tests/core/spec.rs
 expression: response
-snapshot_kind: text
 ---
 {
   "status": 200,
   "headers": {
     "content-type": "application/json",
     "x-experimental": "experimental-header",
-    "x-tailcall": "tailcall-header"
+    "x-gqlforge": "gqlforge-header"
   },
   "body": {
     "data": {

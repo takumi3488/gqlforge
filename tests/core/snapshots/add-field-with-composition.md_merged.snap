@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -18,8 +17,8 @@ type Geo {
 }
 
 type Query
-  @addField(name: "lat", path: ["user", "address", "geo", "lat"])
-  @addField(name: "lng", path: ["user", "address", "geo", "lng"]) {
+@addField(name: "lat", path: ["user", "address", "geo", "lat"])
+@addField(name: "lng", path: ["user", "address", "geo", "lng"]) {
   user: User @http(url: "http://jsonplaceholder.typicode.com/users/1")
 }
 

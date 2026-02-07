@@ -1,13 +1,12 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(port: 8000)
-  @upstream(batch: {delay: 10, headers: []}, httpCache: 42)
-  @link(src: "map.proto", type: Protobuf)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(port: 8000)
+@upstream(batch: { delay: 10, headers: [] }, httpCache: 42)
+@link(src: "map.proto", type: Protobuf)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -17,7 +16,11 @@ input map__MapRequest {
 
 type Query {
   map__MapService__GetMap(mapRequest: map__MapRequest!): map__MapResponse!
-    @grpc(url: "http://localhost:50051", body: "{{.args.mapRequest}}", method: "map.MapService.GetMap")
+  @grpc(
+    url: "http://localhost:50051"
+    body: "{{.args.mapRequest}}"
+    method: "map.MapService.GetMap"
+  )
 }
 
 type map__MapResponse {

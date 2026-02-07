@@ -1,12 +1,15 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Query {
-  foo: String @http(url: "http://localhost:4000/foo", headers: [{key: "foo", value: "bar"}])
+  foo: String
+  @http(
+    url: "http://localhost:4000/foo"
+    headers: [{ key: "foo", value: "bar" }]
+  )
 }

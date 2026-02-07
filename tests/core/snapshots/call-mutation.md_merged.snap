@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -22,25 +21,50 @@ input PostInputWithoutUserId {
 
 type Mutation {
   attachPostToFirstUser(postId: Int!): User
-    @call(steps: [{mutation: "attachPostToUser", args: {postId: "{{.args.postId}}", userId: 1}}])
+  @call(
+    steps: [
+      {
+        mutation: "attachPostToUser"
+        args: { postId: "{{.args.postId}}", userId: 1 }
+      }
+    ]
+  )
   attachPostToUser(userId: Int!, postId: Int!): User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.args.userId}}"
-      body: "{\"postId\":{{.args.postId}}}"
-      method: "PATCH"
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users/{{.args.userId}}"
+    body: "{\"postId\":{{.args.postId}}}"
+    method: "PATCH"
+  )
   insertMockedPost: Post
-    @call(steps: [{mutation: "insertPost", args: {input: {body: "post-body", title: "post-title", userId: 1}}}])
+  @call(
+    steps: [
+      {
+        mutation: "insertPost"
+        args: { input: { body: "post-body", title: "post-title", userId: 1 } }
+      }
+    ]
+  )
   insertPost(input: PostInput): Post
-    @http(url: "http://jsonplaceholder.typicode.com/posts", body: "{{.args.input}}", method: "POST")
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts"
+    body: "{{.args.input}}"
+    method: "POST"
+  )
   insertPostToFirstUser(input: PostInputWithoutUserId): Post
-    @call(steps: [{mutation: "insertPostToUser", args: {input: "{{.args.input}}", userId: 1}}])
+  @call(
+    steps: [
+      {
+        mutation: "insertPostToUser"
+        args: { input: "{{.args.input}}", userId: 1 }
+      }
+    ]
+  )
   insertPostToUser(input: PostInputWithoutUserId!, userId: Int!): Post
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.args.userId}}/posts"
-      body: "{{.args.input}}"
-      method: "POST"
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users/{{.args.userId}}/posts"
+    body: "{{.args.input}}"
+    method: "POST"
+  )
 }
 
 type Post {
@@ -52,11 +76,15 @@ type Post {
 
 type Query {
   firstUser: User @http(url: "http://jsonplaceholder.typicode.com/users/1")
-  postFromUser(userId: Int!): Post @http(url: "http://jsonplaceholder.typicode.com/posts?userId={{.args.userId}}")
+  postFromUser(userId: Int!): Post
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts?userId={{.args.userId}}"
+  )
 }
 
 type User {
   id: Int
   name: String
-  posts: [Post] @call(steps: [{query: "postFromUser", args: {userId: "{{.value.id}}"}}])
+  posts: [Post]
+  @call(steps: [{ query: "postFromUser", args: { userId: "{{.value.id}}" } }])
 }

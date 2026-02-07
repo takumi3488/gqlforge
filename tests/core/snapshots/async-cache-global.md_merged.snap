@@ -1,9 +1,11 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server(port: 8000, queryValidation: false) @upstream @link(src: "schema_0.graphql", type: Config) {
+schema
+@server(port: 8000, queryValidation: false)
+@upstream
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -15,7 +17,8 @@ type Post {
 }
 
 type Query {
-  posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts?id=1", dedupe: true)
+  posts: [Post]
+  @http(url: "http://jsonplaceholder.typicode.com/posts?id=1", dedupe: true)
 }
 
 type User {

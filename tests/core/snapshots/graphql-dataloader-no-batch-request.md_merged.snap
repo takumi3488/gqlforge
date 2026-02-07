@@ -1,16 +1,23 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
-schema @server @upstream(batch: {delay: 1, headers: []}) @link(src: "schema_0.graphql", type: Config) {
+schema
+@server
+@upstream(batch: { delay: 1, headers: [] })
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type Post {
   id: Int
   title: String
-  user: User @graphQL(args: [{key: "id", value: "{{.value.userId}}"}], url: "http://upstream/graphql", name: "user")
+  user: User
+  @graphQL(
+    args: [{ key: "id", value: "{{.value.userId}}" }]
+    url: "http://upstream/graphql"
+    name: "user"
+  )
   userId: Int
 }
 

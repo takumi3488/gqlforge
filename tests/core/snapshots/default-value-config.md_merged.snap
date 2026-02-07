@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -12,6 +11,7 @@ input Input {
 }
 
 type Query {
-  bar(input: Input = {id: 3}): Int @http(url: "http://abc.com/foo/{{.args.input.id}}")
+  bar(input: Input = { id: 3 }): Int
+  @http(url: "http://abc.com/foo/{{.args.input.id}}")
   foo(input: Input!): Int @http(url: "http://abc.com/foo/{{.args.input.id}}")
 }

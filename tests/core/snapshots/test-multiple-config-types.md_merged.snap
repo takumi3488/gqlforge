@@ -1,13 +1,12 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server
-  @upstream
-  @link(id: "types", src: "types.graphql", type: Config)
-  @link(src: "schema_0.graphql", type: Config) {
+@server
+@upstream
+@link(id: "types", src: "types.graphql", type: Config)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
@@ -22,5 +21,6 @@ type Output {
 }
 
 type Query {
-  bar(input: Input): Output @expr(body: {id: "{{.args.input.id}}", name: "{{.args.input.name}}"})
+  bar(input: Input): Output
+  @expr(body: { id: "{{.args.input.id}}", name: "{{.args.input.name}}" })
 }

@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatted
-snapshot_kind: text
 ---
 input Foo {
   bar: String! = "BUZZ"
@@ -12,7 +11,7 @@ type Query {
 }
 
 type User {
-  featuredVideo(video: VideoSize! = {width: 1600, height: 900}): String!
+  featuredVideo(video: VideoSize! = { width: 1600, height: 900 }): String!
   featuredVideoPreview(video: VideoSize! = {}): String!
   id: ID!
   name: String!

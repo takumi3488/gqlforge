@@ -1,19 +1,28 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema
-  @server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
-  @upstream(httpCache: 42)
-  @link(src: "schema_0.graphql", type: Config) {
+@server(hostname: "0.0.0.0", port: 8001, queryValidation: false)
+@upstream(httpCache: 42)
+@link(src: "schema_0.graphql", type: Config) {
   query: Query
 }
 
 type A {
-  b: B @graphQL(args: [{key: "id", value: "{{.value.bid}}"}], url: "http://upstream/graphql", name: "b")
+  b: B
+  @graphQL(
+    args: [{ key: "id", value: "{{.value.bid}}" }]
+    url: "http://upstream/graphql"
+    name: "b"
+  )
   bid: Int!
-  c: C @graphQL(args: [{key: "id", value: "{{.value.cid}}"}], url: "http://upstream/graphql", name: "c")
+  c: C
+  @graphQL(
+    args: [{ key: "id", value: "{{.value.cid}}" }]
+    url: "http://upstream/graphql"
+    name: "c"
+  )
   cid: Int!
   id: Int!
 }

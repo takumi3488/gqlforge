@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -14,7 +13,8 @@ input ConnectionInput {
 }
 
 input UserInput {
-  connections: [ConnectionInput] @http(url: "http://jsonplaceholder.typicode.com/connections/{{.value.id}}")
+  connections: [ConnectionInput]
+  @http(url: "http://jsonplaceholder.typicode.com/connections/{{.value.id}}")
   id: Int!
   name: String
 }
@@ -26,7 +26,11 @@ type Connection {
 
 type Mutation {
   createUser(user: UserInput): User
-    @http(url: "http://jsonplaceholder.typicode.com/user", body: "{{.args.user}}", method: "POST")
+  @http(
+    url: "http://jsonplaceholder.typicode.com/user"
+    body: "{{.args.user}}"
+    method: "POST"
+  )
 }
 
 type Query {
@@ -34,7 +38,8 @@ type Query {
 }
 
 type User {
-  connections: [Connection] @http(url: "http://jsonplaceholder.typicode.com/connections/{{.value.id}}")
+  connections: [Connection]
+  @http(url: "http://jsonplaceholder.typicode.com/connections/{{.value.id}}")
   id: Int!
   name: String
 }

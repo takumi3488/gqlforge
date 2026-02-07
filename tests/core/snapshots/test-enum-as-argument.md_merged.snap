@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: formatter
-snapshot_kind: text
 ---
 schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
   query: Query
@@ -14,10 +13,10 @@ enum Test {
 
 type Query {
   user(id: Int!, test: Test): User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}"
-      query: [{key: "enum", value: "{{.args.test}}"}]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}"
+    query: [{ key: "enum", value: "{{.args.test}}" }]
+  )
 }
 
 type User {

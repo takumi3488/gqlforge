@@ -1,0 +1,8 @@
+[package]
+name = "gqlforge-formatter"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+pretty_graphql = "0.2.3"
+thiserror.workspace = true
