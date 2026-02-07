@@ -1,9 +1,9 @@
-[![Gqlforge Logo](https://raw.githubusercontent.com/takumi3488/gqlforge/refs/heads/main/assets/logo_light.svg)](https://gqlforge.pages.dev)
+[![Gqlforge Logo](./assets/logo_light.svg)](https://gqlforge.pages.dev)
 
 Gqlforge is an open-source solution for building [high-performance] GraphQL backends.
 
 Please support us by giving the repository a star
-![image](https://raw.githubusercontent.com/takumi3488/gqlforge/main/assets/star-our-repo.gif)
+![image](./assets/star-our-repo.gif)
 
 [high-performance]: https://github.com/takumi3488/graphql-benchmarks
 
