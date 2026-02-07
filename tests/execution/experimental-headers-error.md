@@ -7,7 +7,7 @@ error: true
 ```yaml @config
 server:
   headers:
-    experimental: ["non-experimental", "foo", "bar", "tailcall"]
+    experimental: ["non-experimental", "foo", "bar", "gqlforge"]
 ```
 
 ```graphql @schema

@@ -1,9 +1,9 @@
-use tailcall_version::VERSION;
+use gqlforge_version::VERSION;
 
 const UTM_MEDIUM: &str = "server";
-const DEBUG_UTM_SOURCE: &str = "tailcall-debug";
-const RELEASE_UTM_SOURCE: &str = "tailcall-release";
-const BASE_PLAYGROUND_URL: &str = "https://tailcall.run/playground/";
+const DEBUG_UTM_SOURCE: &str = "gqlforge-debug";
+const RELEASE_UTM_SOURCE: &str = "gqlforge-release";
+const BASE_PLAYGROUND_URL: &str = "https://gqlforge.pages.dev/playground/";
 
 pub fn build_url(graphiql_url: &str) -> String {
     let utm_source = if VERSION.is_dev() {

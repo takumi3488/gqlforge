@@ -7,7 +7,7 @@ use async_graphql::{BatchRequest, Value};
 use async_graphql_value::{ConstValue, Extensions};
 use futures_util::stream::FuturesOrdered;
 use futures_util::StreamExt;
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 
 use super::{AnyResponse, BatchResponse, Response};
 use crate::core::app_context::AppContext;
@@ -63,7 +63,7 @@ impl JITExecutor {
 
     #[inline(always)]
     fn req_hash(request: &async_graphql::Request) -> OPHash {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         request.query.hash(&mut hasher);
 
         OPHash::new(hasher.finish())

@@ -229,7 +229,7 @@ mod test_proto_config {
 
     use anyhow::Result;
     use pretty_assertions::assert_eq;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
 
     use crate::core::proto_reader::ProtoReader;
     use crate::core::resource_reader::{Cached, ResourceReader};
@@ -281,7 +281,7 @@ mod test_proto_config {
         let runtime = crate::core::runtime::test::init(None);
         let reader = ProtoReader::init(ResourceReader::<Cached>::cached(runtime.clone()), runtime);
         let proto_no_pkg =
-            PathBuf::from(tailcall_fixtures::configs::SELF).join("proto_no_pkg.graphql");
+            PathBuf::from(gqlforge_fixtures::configs::SELF).join("proto_no_pkg.graphql");
         let config_module = reader.read(proto_no_pkg.to_str().unwrap(), None).await;
         assert!(config_module.is_err());
         Ok(())

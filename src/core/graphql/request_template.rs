@@ -5,7 +5,7 @@ use std::hash::{Hash, Hasher};
 
 use derive_setters::Setters;
 use http::header::{HeaderMap, HeaderValue};
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 use tracing::info;
 
 use crate::core::config::{GraphQLOperationType, KeyValue};
@@ -194,7 +194,7 @@ impl RequestTemplate {
 
 impl<Ctx: PathGraphql + HasHeaders + GraphQLOperationContext> CacheKey<Ctx> for RequestTemplate {
     fn cache_key(&self, ctx: &Ctx) -> Option<IoId> {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         let graphql_query = self.render_graphql_query(ctx);
         graphql_query.hash(&mut hasher);
         Some(IoId::new(hasher.finish()))

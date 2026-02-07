@@ -1,8 +1,8 @@
 use criterion::Criterion;
 use http::Method;
-use tailcall::cli::runtime::NativeHttp;
-use tailcall::core::blueprint::Blueprint;
-use tailcall::core::HttpIO;
+use gqlforge::cli::runtime::NativeHttp;
+use gqlforge::core::blueprint::Blueprint;
+use gqlforge::core::HttpIO;
 
 pub fn benchmark_http_execute_method(c: &mut Criterion) {
     let tokio_runtime = tokio::runtime::Runtime::new().unwrap();

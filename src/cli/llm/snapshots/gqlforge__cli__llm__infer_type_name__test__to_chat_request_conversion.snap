@@ -1,0 +1,23 @@
+---
+source: src/cli/llm/infer_type_name.rs
+expression: request
+---
+ChatRequest {
+    system: None,
+    messages: [
+        ChatMessage {
+            role: System,
+            content: Text(
+                "Given the sample schema of a GraphQL type, suggest 5 meaningful names for it.\nThe name should be concise, preferably a single word and must not be in the `ignore` list.\n\nExample Input:\n{\"ignore\":[\"User\"],\"fields\":[[\"id\",\"String\"],[\"name\",\"String\"],[\"age\",\"Int\"]]}\n\nExample Output:\n{\"suggestions\":[\"Person\",\"Profile\",\"Member\",\"Individual\",\"Contact\"]}\n\nEnsure the output is in valid JSON format.\n",
+            ),
+            extra: None,
+        },
+        ChatMessage {
+            role: User,
+            content: Text(
+                "{\"fields\":[[\"id\",\"String\"],[\"name\",\"String\"],[\"age\",\"Int\"]]}",
+            ),
+            extra: None,
+        },
+    ],
+}

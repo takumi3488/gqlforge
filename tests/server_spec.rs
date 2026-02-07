@@ -11,14 +11,14 @@ pub mod test {
     use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-    use tailcall::cli::javascript::init_worker_io;
-    use tailcall::core::blueprint::{Script, Upstream};
-    use tailcall::core::cache::InMemoryCache;
-    use tailcall::core::http::Response;
-    use tailcall::core::runtime::TargetRuntime;
-    use tailcall::core::worker::{Command, Event};
-    use tailcall::core::{EnvIO, FileIO, HttpIO};
-    use tailcall_http_cache::HttpCacheManager;
+    use gqlforge::cli::javascript::init_worker_io;
+    use gqlforge::core::blueprint::{Script, Upstream};
+    use gqlforge::core::cache::InMemoryCache;
+    use gqlforge::core::http::Response;
+    use gqlforge::core::runtime::TargetRuntime;
+    use gqlforge::core::worker::{Command, Event};
+    use gqlforge::core::{EnvIO, FileIO, HttpIO};
+    use gqlforge_http_cache::HttpCacheManager;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     #[derive(Clone)]
@@ -161,8 +161,8 @@ pub mod test {
 mod server_spec {
     use reqwest::Client;
     use serde_json::json;
-    use tailcall::cli::server::Server;
-    use tailcall::core::config::reader::ConfigReader;
+    use gqlforge::cli::server::Server;
+    use gqlforge::core::config::reader::ConfigReader;
 
     async fn test_server(configs: &[&str], url: &str) {
         let runtime = crate::test::init(None);

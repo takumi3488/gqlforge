@@ -1,54 +1,54 @@
-[![Tailcall Logo](https://raw.githubusercontent.com/tailcallhq/tailcall/refs/heads/main/assets/logo_light.svg)](https://tailcall.run)
+[![Gqlforge Logo](https://raw.githubusercontent.com/takumi3488/gqlforge/refs/heads/main/assets/logo_light.svg)](https://gqlforge.pages.dev)
 
-Tailcall is an open-source solution for building [high-performance] GraphQL backends.
+Gqlforge is an open-source solution for building [high-performance] GraphQL backends.
 
 Please support us by giving the repository a star
-![image](https://raw.githubusercontent.com/tailcallhq/tailcall/main/assets/star-our-repo.gif)
+![image](https://raw.githubusercontent.com/takumi3488/gqlforge/main/assets/star-our-repo.gif)
 
-[high-performance]: https://github.com/tailcallhq/graphql-benchmarks
+[high-performance]: https://github.com/takumi3488/graphql-benchmarks
 
-[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=for-the-badge&logo=x&color=black&labelColor=black)](https://twitter.com/intent/tweet?text=%40tailcallhq%20is%20building%20a%20high-performance%20API%20Orchestration%20solution%20over%20%23GraphQL.%0A%0ACheck%20it%20out%20at%3A%0A%F0%9F%94%97%20https%3A%2F%2Ftailcall.run%20%0A%F0%9F%94%97%20https%3A%2F%2Fgithub.com%2Ftailcallhq%2Ftailcall%20%0A%0A&hashtags=api,http,rest,grpc,graphql,nocode,microservice,opensource)
+[![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=for-the-badge&logo=x&color=black&labelColor=black)](https://twitter.com/intent/tweet?text=%40takumi3488%20is%20building%20a%20high-performance%20API%20Orchestration%20solution%20over%20%23GraphQL.%0A%0ACheck%20it%20out%20at%3A%0A%F0%9F%94%97%20https%3A%2F%2Fgqlforge.pages.dev%20%0A%F0%9F%94%97%20https%3A%2F%2Fgithub.com%2Ftakumi3488%2Fgqlforge%20%0A%0A&hashtags=api,http,rest,grpc,graphql,nocode,microservice,opensource)
 [![Discord](https://img.shields.io/discord/1044859667798568962?style=for-the-badge&cacheSeconds=120&logo=discord)](https://discord.gg/kRZBPpkgwq)
 
-[![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Ftailcallhq%2Fbounties%3Fstatus%3Dopen&style=for-the-badge)](https://console.algora.io/org/tailcallhq/bounties?status=open)
-[![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Ftailcallhq%2Fbounties%3Fstatus%3Dcompleted&style=for-the-badge)](https://console.algora.io/org/tailcallhq/bounties?status=completed)
-[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/tailcallhq/tailcall/ci.yml?style=for-the-badge)](https://github.com/tailcallhq/tailcall/actions)
-![GitHub release (by tag)](https://img.shields.io/github/downloads/tailcallhq/tailcall/total?style=for-the-badge)
+[![Open Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Ftakumi3488%2Fbounties%3Fstatus%3Dopen&style=for-the-badge)](https://console.algora.io/org/takumi3488/bounties?status=open)
+[![Rewarded Bounties](https://img.shields.io/endpoint?url=https%3A%2F%2Fconsole.algora.io%2Fapi%2Fshields%2Ftakumi3488%2Fbounties%3Fstatus%3Dcompleted&style=for-the-badge)](https://console.algora.io/org/takumi3488/bounties?status=completed)
+[![GitHub Workflow Status (with event)](https://img.shields.io/github/actions/workflow/status/takumi3488/gqlforge/ci.yml?style=for-the-badge)](https://github.com/takumi3488/gqlforge/actions)
+![GitHub release (by tag)](https://img.shields.io/github/downloads/takumi3488/gqlforge/total?style=for-the-badge)
 [![Discord](https://img.shields.io/discord/1044859667798568962?style=for-the-badge&cacheSeconds=60)](https://discord.gg/kRZBPpkgwq)
-[![Codecov](https://img.shields.io/codecov/c/github/tailcallhq/tailcall?style=for-the-badge)](https://app.codecov.io/gh/tailcallhq/tailcall)
+[![Codecov](https://img.shields.io/codecov/c/github/takumi3488/gqlforge?style=for-the-badge)](https://app.codecov.io/gh/takumi3488/gqlforge)
 
 ## Installation
 
 ### NPM
 
 ```bash
-npm i -g @tailcallhq/tailcall
+npm i -g @gqlforge/gqlforge
 ```
 
 ### Yarn
 
 ```bash
-yarn global add @tailcallhq/tailcall
+yarn global add @gqlforge/gqlforge
 ```
 
 ### Home Brew
 
 ```bash
-brew tap tailcallhq/tailcall
-brew install tailcall
+brew tap takumi3488/gqlforge
+brew install gqlforge
 ```
 
 ### Curl
 
 ```bash
-curl -sSL https://raw.githubusercontent.com/tailcallhq/tailcall/master/install.sh | bash
+curl -sSL https://raw.githubusercontent.com/takumi3488/gqlforge/master/install.sh | bash
 ```
 
 ### Docker
 
 ```bash
-docker pull ghcr.io/tailcallhq/tailcall/tc-server
-docker run -p 8080:8080 -p 8081:8081 ghcr.io/tailcallhq/tailcall/tc-server
+docker pull ghcr.io/takumi3488/gqlforge/tc-server
+docker run -p 8080:8080 -p 8081:8081 ghcr.io/takumi3488/gqlforge/tc-server
 ```
 
 ## Get Started
@@ -86,12 +86,12 @@ type Post {
 Now, run the following command to start the server with the full path to the jsonplaceholder.graphql file that you created above.
 
 ```bash
-tailcall start ./jsonplaceholder.graphql
+gqlforge start ./jsonplaceholder.graphql
 ```
 
-Head out to [docs] to learn about other powerful tailcall features.
+Head out to [docs] to learn about other powerful gqlforge features.
 
-[docs]: https://tailcall.run/docs
+[docs]: https://gqlforge.pages.dev/docs
 
 ### Benchmarks
 
@@ -109,15 +109,15 @@ query {
 }
 ```
 
-![Throughput Histogram](https://raw.githubusercontent.com/tailcallhq/graphql-benchmarks/main/assets/req_sec_histogram1.png)
+![Throughput Histogram](https://raw.githubusercontent.com/takumi3488/graphql-benchmarks/main/assets/req_sec_histogram1.png)
 
-Check out detailed benchmarks on our benchmarking [repository](https://github.com/tailcallhq/graphql-benchmarks).
+Check out detailed benchmarks on our benchmarking [repository](https://github.com/takumi3488/graphql-benchmarks).
 
 ### Contributing
 
 Your contributions are invaluable! Kindly go through our [contribution guidelines] if you are a first time contributor.
 
-[contribution guidelines]: https://tailcall.run/docs/contribution-guidelines
+[contribution guidelines]: https://gqlforge.pages.dev/docs/contribution-guidelines
 
 ### Support Us
 

@@ -153,7 +153,7 @@ impl Transform for AmbiguousType {
 mod tests {
     use insta::assert_snapshot;
     use prost_reflect::prost_types::FileDescriptorSet;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
     use tailcall_valid::Validator;
 
     use crate::core::config::transformer::AmbiguousType;
@@ -244,7 +244,7 @@ mod tests {
 
     #[tokio::test]
     async fn test_resolve_ambiguous_news_types() -> anyhow::Result<()> {
-        let news_proto = tailcall_fixtures::protobuf::NEWS;
+        let news_proto = gqlforge_fixtures::protobuf::NEWS;
         let set = compile_protobuf(&[protobuf::NEWS])?;
         let url = "http://localhost:50051".to_string();
 

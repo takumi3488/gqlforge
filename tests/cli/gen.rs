@@ -72,7 +72,7 @@ pub mod file {
     use std::sync::Arc;
 
     use async_trait::async_trait;
-    use tailcall::core::FileIO;
+    use gqlforge::core::FileIO;
     use tokio::sync::RwLock;
 
     #[derive(Clone, Default)]
@@ -104,8 +104,8 @@ pub mod http {
     use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-    use tailcall::core::http::Response;
-    use tailcall::core::HttpIO;
+    use gqlforge::core::http::Response;
+    use gqlforge::core::HttpIO;
 
     use super::cacache_manager::CaCacheManager;
 
@@ -144,7 +144,7 @@ pub mod env {
     use std::borrow::Cow;
     use std::collections::HashMap;
 
-    use tailcall::core::EnvIO;
+    use gqlforge::core::EnvIO;
 
     #[derive(Clone)]
     pub struct Env(pub HashMap<String, String>);
@@ -234,8 +234,8 @@ pub mod test {
         use hyper::body::Bytes;
         use reqwest::Client;
         use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-        use tailcall::core::http::Response;
-        use tailcall::core::HttpIO;
+        use gqlforge::core::http::Response;
+        use gqlforge::core::HttpIO;
 
         use super::cacache_manager::CaCacheManager;
 
@@ -275,10 +275,10 @@ pub mod test {
         use std::path::Path;
         use std::sync::Arc;
 
-        use tailcall::cli::generator::Generator;
-        use tailcall::core::blueprint::Blueprint;
-        use tailcall::core::config::{self, ConfigModule};
-        use tailcall::core::generator::Generator as ConfigGenerator;
+        use gqlforge::cli::generator::Generator;
+        use gqlforge::core::blueprint::Blueprint;
+        use gqlforge::core::config::{self, ConfigModule};
+        use gqlforge::core::generator::Generator as ConfigGenerator;
         use tailcall_valid::{ValidateInto, Validator};
 
         use super::http::NativeHttpTest;
@@ -291,7 +291,7 @@ pub mod test {
             let IO { fs, paths } = spec.configs.into_io().await;
             let path = paths.first().unwrap().as_str();
 
-            let mut runtime = tailcall::cli::runtime::init(&Blueprint::default());
+            let mut runtime = gqlforge::cli::runtime::init(&Blueprint::default());
             runtime.http = Arc::new(NativeHttpTest::default());
             runtime.file = Arc::new(fs);
             if let Some(env) = spec.env {

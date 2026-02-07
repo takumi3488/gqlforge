@@ -9,11 +9,11 @@ use async_graphql_value::ConstValue;
 use criterion::Criterion;
 use hyper::body::Bytes;
 use reqwest::Request;
-use tailcall::core::config::Batch;
-use tailcall::core::http::{DataLoaderRequest, HttpDataLoader, Response};
-use tailcall::core::ir::model::IoId;
-use tailcall::core::runtime::TargetRuntime;
-use tailcall::core::{cache, EnvIO, FileIO, HttpIO};
+use gqlforge::core::config::Batch;
+use gqlforge::core::http::{DataLoaderRequest, HttpDataLoader, Response};
+use gqlforge::core::ir::model::IoId;
+use gqlforge::core::runtime::TargetRuntime;
+use gqlforge::core::{cache, EnvIO, FileIO, HttpIO};
 
 #[derive(Clone)]
 struct MockHttpClient {
@@ -50,7 +50,7 @@ impl FileIO for File {
 
 struct Cache;
 #[async_trait::async_trait]
-impl tailcall::core::Cache for Cache {
+impl gqlforge::core::Cache for Cache {
     type Key = IoId;
     type Value = ConstValue;
 

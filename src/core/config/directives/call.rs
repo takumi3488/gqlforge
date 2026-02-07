@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall_macros::DirectiveDefinition;
+use gqlforge_macros::DirectiveDefinition;
 
 use crate::core::is_default;
 

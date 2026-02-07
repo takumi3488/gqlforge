@@ -38,7 +38,7 @@ type User {
       data:
         user:
           city: Globe
-          name: Tailcall
+          name: Gqlforge
 - request:
     method: POST
     url: http://upstream/graphql
@@ -50,7 +50,7 @@ type User {
       data:
         user:
           city: Globe
-          name: Tailcall
+          name: Gqlforge
           id: 4
 - request:
     method: POST
@@ -63,7 +63,7 @@ type User {
       data:
         user:
           id: 4
-          name: Tailcall
+          name: Gqlforge
           city: Globe
 ```
 

@@ -1,17 +1,17 @@
 use std::path::Path;
 
-use super::helpers::{TAILCALL_RC, TAILCALL_RC_SCHEMA};
+use super::helpers::{GQLFORGE_RC, GQLFORGE_RC_SCHEMA};
 use crate::core::runtime::TargetRuntime;
 
 pub async fn validate_rc_config_files(runtime: TargetRuntime, file_paths: &[String]) {
     // base config files.
-    let tailcallrc = include_str!("../../../generated/.tailcallrc.graphql");
-    let tailcallrc_json = include_str!("../../../generated/.tailcallrc.schema.json");
+    let gqlforgerc = include_str!("../../../generated/.gqlforgerc.graphql");
+    let gqlforgerc_json = include_str!("../../../generated/.gqlforgerc.schema.json");
 
     // Define the config files to check with their base contents
     let rc_config_files = vec![
-        (TAILCALL_RC, tailcallrc),
-        (TAILCALL_RC_SCHEMA, tailcallrc_json),
+        (GQLFORGE_RC, gqlforgerc),
+        (GQLFORGE_RC_SCHEMA, gqlforgerc_json),
     ];
 
     for path in file_paths {
@@ -40,7 +40,7 @@ pub async fn validate_rc_config_files(runtime: TargetRuntime, file_paths: &[Stri
         if !outdated_files.is_empty() {
             let outdated_files = outdated_files.join(", ");
             tracing::warn!(
-                "[{}] {} outdated, reinitialize using tailcall init.",
+                "[{}] {} outdated, reinitialize using gqlforge init.",
                 outdated_files,
                 pluralizer::pluralize("is", outdated_files.len() as isize, false)
             );

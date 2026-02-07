@@ -4,10 +4,10 @@
     "method": "POST",
     "body": {
       "name": "Tailcall User",
-      "username": "tailcall_user",
-      "email": "tailcall@test.in",
+      "username": "gqlforge_user",
+      "email": "gqlforge@test.in",
       "phone": "8888888888",
-      "website": "tailcall.run"
+      "website": "gqlforge.pages.dev"
     }
   },
   "isMutation": true,
@@ -17,10 +17,10 @@
     "body": {
       "id": 1,
       "name": "Tailcall User",
-      "username": "tailcall_user",
-      "email": "tailcall@test.in",
+      "username": "gqlforge_user",
+      "email": "gqlforge@test.in",
       "phone": "8888888888",
-      "website": "tailcall.run"
+      "website": "gqlforge.pages.dev"
     }
   }
 }

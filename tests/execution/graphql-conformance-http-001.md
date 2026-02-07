@@ -34,7 +34,7 @@ type User {
     status: 200
     body:
       id: 4
-      name: Tailcall
+      name: Gqlforge
       city: Globe
 ```
 

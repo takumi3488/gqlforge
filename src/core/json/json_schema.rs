@@ -329,7 +329,7 @@ mod tests {
     use async_graphql::Name;
     use indexmap::IndexMap;
     use pretty_assertions::assert_eq;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
     use tailcall_valid::{Valid, Validator};
 
     use crate::core::blueprint::GrpcMethod;

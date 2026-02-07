@@ -1,0 +1,15 @@
+---
+source: src/core/generator/json/operation_generator.rs
+expression: config.to_sdl()
+---
+
+input Input1 {
+  body: String
+  id: Int
+  title: String
+  userId: Int
+}
+
+type Mutation {
+  postComments(GEN__Input1: Input1): T44 @http(url: "https://jsonplaceholder.typicode.com/posts", body: "{{.args.GEN__Input1}}", method: "POST")
+}

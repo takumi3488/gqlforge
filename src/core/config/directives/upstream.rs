@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use derive_setters::Setters;
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 use crate::core::macros::MergeRight;
 use crate::core::{default_verify_ssl, is_default, verify_ssl_is_default};
@@ -79,7 +79,7 @@ pub struct Upstream {
     pub connect_timeout: Option<u64>,
 
     #[serde(default, skip_serializing_if = "is_default")]
-    /// Providing httpCache size enables Tailcall's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.
+    /// Providing httpCache size enables Gqlforge's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.
     pub http_cache: Option<u64>,
 
     #[setters(strip_option)]
@@ -133,7 +133,7 @@ pub struct Upstream {
 
     #[serde(default, skip_serializing_if = "is_default")]
     /// The User-Agent header value to be used in HTTP requests. @default
-    /// `Tailcall/1.0`
+    /// `Gqlforge/1.0`
     pub user_agent: Option<String>,
 
     #[serde(
@@ -142,7 +142,7 @@ pub struct Upstream {
         skip_serializing_if = "verify_ssl_is_default"
     )]
     /// A boolean value that determines whether to verify certificates.
-    /// Setting this as `false` will make tailcall accept self-signed
+    /// Setting this as `false` will make gqlforge accept self-signed
     /// certificates. NOTE: use this *only* during development or testing.
     /// It is highly recommended to keep this enabled (`true`) in
     /// production.
@@ -177,7 +177,7 @@ impl Upstream {
     pub fn get_user_agent(&self) -> String {
         self.user_agent
             .clone()
-            .unwrap_or("Tailcall/1.0".to_string())
+            .unwrap_or("Gqlforge/1.0".to_string())
     }
     pub fn get_http_cache_size(&self) -> u64 {
         self.http_cache.unwrap_or(0)

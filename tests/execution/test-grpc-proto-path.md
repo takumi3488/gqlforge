@@ -7,7 +7,7 @@ error: true
 ```yaml @config
 links:
   - id: news
-    src: tailcall/src/grpcnews.proto
+    src: gqlforge/src/grpcnews.proto
     type: Protobuf
 ```
 

@@ -18,7 +18,7 @@ use crate::core::resource_reader::{Resource, ResourceReader};
 use crate::core::runtime::TargetRuntime;
 use crate::core::{Mustache, Transform};
 
-/// CLI that reads the the config file and generates the required tailcall
+/// CLI that reads the the config file and generates the required gqlforge
 /// configuration.
 pub struct Generator {
     /// path of config file.

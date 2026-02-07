@@ -244,7 +244,7 @@ impl Transform for TypeMerger {
 
 #[cfg(test)]
 mod test {
-    use tailcall_fixtures;
+    use gqlforge_fixtures;
     use tailcall_valid::Validator;
 
     use super::TypeMerger;
@@ -352,7 +352,7 @@ mod test {
 
     #[test]
     fn test_input_types() {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::INPUT_TYPE_CONFIG).unwrap();
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::INPUT_TYPE_CONFIG).unwrap();
         let config = Config::from_sdl(&sdl).to_result().unwrap();
         let config = TypeMerger::default().transform(config).to_result().unwrap();
         insta::assert_snapshot!(config.to_sdl());
@@ -360,7 +360,7 @@ mod test {
 
     #[test]
     fn test_union_types() {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::UNION_CONFIG).unwrap();
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::UNION_CONFIG).unwrap();
         let config = Config::from_sdl(&sdl).to_result().unwrap();
         let config = TypeMerger::default().transform(config).to_result().unwrap();
         insta::assert_snapshot!(config.to_sdl());
@@ -368,7 +368,7 @@ mod test {
 
     #[test]
     fn test_list_field_types() {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::USER_LIST).unwrap();
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::USER_LIST).unwrap();
         let config = Config::from_sdl(&sdl).to_result().unwrap();
         let config = TypeMerger::default().transform(config).to_result().unwrap();
         insta::assert_snapshot!(config.to_sdl());

@@ -9,7 +9,7 @@ assignees: ""
 ### Prerequisites
 
 - [ ] I have checked the existing issues to ensure this is not a duplicate.
-- [ ] I am running the latest version of Tailcall.
+- [ ] I am running the latest version of Gqlforge.
 
 ### Describe the bug
 
@@ -36,7 +36,7 @@ If applicable, add screenshots to help explain your problem.
 ### Environment information:
 
 - **Operating System**: (e.g., Ubuntu 20.04, macOS Big Sur, Windows 10)
-- **Tailcall Version**: (e.g., v1.0.2)
+- **Gqlforge Version**: (e.g., v1.0.2)
 - **Rust Version**: (e.g., `rustc 1.58.0`)
 - **GraphQL Client/version** (e.g., `curl/8.1.2`)
 

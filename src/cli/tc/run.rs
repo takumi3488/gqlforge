@@ -24,7 +24,7 @@ pub async fn run() -> Result<()> {
 
     // Dispatch the command as an event
     let _ = TRACKER
-        .dispatch(tailcall_tracker::EventKind::Command(
+        .dispatch(gqlforge_tracker::EventKind::Command(
             cli.command.to_string(),
         ))
         .await;

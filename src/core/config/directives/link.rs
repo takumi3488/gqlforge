@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tailcall_macros::DirectiveDefinition;
+use gqlforge_macros::DirectiveDefinition;
 
 use crate::core::config::KeyValue;
 use crate::core::is_default;
@@ -17,7 +17,7 @@ use crate::core::is_default;
 )]
 pub enum LinkType {
     #[default]
-    /// Points to another Tailcall Configuration file. The imported
+    /// Points to another Gqlforge Configuration file. The imported
     /// configuration will be merged into the importing configuration.
     Config,
 

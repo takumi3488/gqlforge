@@ -3,7 +3,7 @@ use std::ops::Deref;
 use async_graphql::parser::types::ConstDirective;
 use async_graphql::Positioned;
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{CustomResolver, MergeRight};
+use gqlforge_macros::{CustomResolver, MergeRight};
 use tailcall_valid::{Valid, Validator};
 
 use super::{Call, EntityResolver, Expr, GraphQL, Grpc, Http, JS};
@@ -77,7 +77,7 @@ impl ResolverSet {
 // Implement custom serializer to provide backward compatibility for JSON/YAML
 // formats when converting config to config file. In case the only one resolver
 // is defined serialize it as flatten structure instead of `resolvers: []`
-// TODO: this is not required in case Tailcall drop defining type schema in
+// TODO: this is not required in case Gqlforge drop defining type schema in
 // json/yaml files
 impl Serialize for ResolverSet {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
@@ -97,7 +97,7 @@ impl Serialize for ResolverSet {
 // Implement custom deserializer to provide backward compatibility for JSON/YAML
 // formats when parsing config files. In case the `resolvers` field is defined
 // in config parse it as vec of [Resolver] and otherwise try to parse it as
-// single [Resolver] TODO: this is not required in case Tailcall drop defining
+// single [Resolver] TODO: this is not required in case Gqlforge drop defining
 // type schema in json/yaml files
 impl<'de> Deserialize<'de> for ResolverSet {
     fn deserialize<D>(deserializer: D) -> Result<Self, D::Error>

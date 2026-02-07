@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use anyhow::Result;
 use derive_setters::Setters;
 use http::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 use url::Url;
 
 use super::request::create_grpc_request;
@@ -119,7 +119,7 @@ impl RenderedRequestTemplate {
 
 impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
     fn cache_key(&self, ctx: &Ctx) -> Option<IoId> {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         let rendered_req = self.render(ctx).unwrap();
         rendered_req.hash(&mut hasher);
         Some(IoId::new(hasher.finish()))
@@ -135,7 +135,7 @@ mod tests {
     use http::header::{HeaderMap, HeaderName, HeaderValue};
     use http::Method;
     use pretty_assertions::assert_eq;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
 
     use super::{RequestBody, RequestTemplate};
     use crate::core::blueprint::GrpcMethod;

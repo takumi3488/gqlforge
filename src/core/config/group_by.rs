@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::is_default;
 
-/// The `groupBy` parameter groups multiple data requests into a single call. For more details please refer out [n + 1 guide](https://tailcall.run/docs/guides/n+1#solving-using-batching).
+/// The `groupBy` parameter groups multiple data requests into a single call. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
 #[derive(Clone, Debug, Eq, Serialize, Deserialize, PartialEq, schemars::JsonSchema)]
 pub struct GroupBy {
     #[serde(default, skip_serializing_if = "is_default")]

@@ -9,9 +9,9 @@
     },
     {
       "proto": {
-        "src": "tailcall-fixtures/fixtures/protobuf/news_proto_paths.proto",
+        "src": "gqlforge-fixtures/fixtures/protobuf/news_proto_paths.proto",
         "url": "http://localhost:50051",
-        "protoPaths": ["tailcall-fixtures/fixtures/"]
+        "protoPaths": ["gqlforge-fixtures/fixtures/"]
       }
     }
   ],

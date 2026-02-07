@@ -253,7 +253,7 @@ mod grpc_fetch {
         let runtime = crate::core::runtime::test::init(None);
         let resp = grpc_reflection.get_by_service("news.NewsService").await?;
 
-        let content = runtime.file.read(tailcall_fixtures::protobuf::NEWS).await?;
+        let content = runtime.file.read(gqlforge_fixtures::protobuf::NEWS).await?;
         let expected = protox_parse::parse("news.proto", &content)?;
 
         assert_eq!(expected.name(), resp.name());
@@ -284,7 +284,7 @@ mod grpc_fetch {
 
         let content = runtime
             .file
-            .read(tailcall_fixtures::protobuf::NEWS_DTO)
+            .read(gqlforge_fixtures::protobuf::NEWS_DTO)
             .await?;
         let expected = protox_parse::parse("news_dto.proto", &content)?;
 

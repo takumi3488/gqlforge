@@ -30,9 +30,9 @@ jobs:
       - name: Run Cargo Build
         run: cargo build --release
 
-      - name: Run Tailcall
+      - name: Run Gqlforge
         run: |
-          TAILCALL_LOG_LEVEL=error ./target/release/tailcall start ci-benchmark/benchmark.graphql &
+          GQLFORGE_LOG_LEVEL=error ./target/release/gqlforge start ci-benchmark/benchmark.graphql &
 
       - name: Install Wrk
         run: |

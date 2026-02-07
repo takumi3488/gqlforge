@@ -43,7 +43,7 @@ type Query {
 - method: POST
   url: http://localhost:8000/graphql
   body:
-    query: '{ url(value: "https://tailcall.run/") }'
+    query: '{ url(value: "https://gqlforge.pages.dev/") }'
 
 - method: POST
   url: http://localhost:8000/graphql

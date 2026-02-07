@@ -38,7 +38,7 @@ type User {
       data:
         user:
           id: 4
-          name: Tailcall
+          name: Gqlforge
           profilePic: pic_100
 - request:
     method: POST
@@ -51,7 +51,7 @@ type User {
       data:
         user:
           id: 4
-          name: Tailcall
+          name: Gqlforge
           profilePic: pic_100_200
 ```
 

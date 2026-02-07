@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, MergeRight};
+use gqlforge_macros::{DirectiveDefinition, MergeRight};
 
 /// The @alias directive indicates that aliases of one enum value.
 #[derive(

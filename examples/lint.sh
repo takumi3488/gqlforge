@@ -8,12 +8,12 @@ error_exit() {
   exit 1
 }
 
-# Function to check files with the specified extensions using tailcall
+# Function to check files with the specified extensions using gqlforge
 check_files() {
   local path="./examples"
   local depth=1
   local -a extensions=("-name" "*.json" -o "-name" "*.yml" -o "-name" "*.yaml" -o "-name" "*.graphql" -o "-name" "*.gql")
-  local command="./target/debug/tailcall check"
+  local command="./target/debug/gqlforge check"
   local -a ignore=("!" "-name" "grpc-reflection.graphql" "!" "-name" "generate.yml")
 
   # Execute find command with constructed options and extensions
@@ -22,7 +22,7 @@ check_files() {
             echo "Checking file: $file"
             '"$command"' "$file" || exit 255
         done
-    ' sh {} + || error_exit "tailcall check failed for one or more files."
+    ' sh {} + || error_exit "gqlforge check failed for one or more files."
 }
 
 # Main script execution

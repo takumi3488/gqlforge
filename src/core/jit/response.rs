@@ -174,7 +174,7 @@ mod test {
 
     #[test]
     fn test_with_response() {
-        let value = ConstValue::String("Tailcall - Modern GraphQL Runtime".into());
+        let value = ConstValue::String("Gqlforge - Modern GraphQL Runtime".into());
         let response = Response::<ConstValue>::new(Ok(value.clone()));
 
         assert_eq!(response.data, value);
@@ -198,7 +198,7 @@ mod test {
 
     #[test]
     fn test_adding_errors() {
-        let value = ConstValue::String("Tailcall - Modern GraphQL Runtime".into());
+        let value = ConstValue::String("Gqlforge - Modern GraphQL Runtime".into());
         let mut response = Response::<ConstValue>::new(Ok(value.clone()));
 
         // Initially no errors

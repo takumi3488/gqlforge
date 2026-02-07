@@ -8,9 +8,9 @@ use std::sync::Arc;
 use anyhow::anyhow;
 use http::header::{HeaderName, HeaderValue};
 use hyper::body::Bytes;
-use tailcall::core::http::Response;
-use tailcall::core::ir::Error;
-use tailcall::core::HttpIO;
+use gqlforge::core::http::Response;
+use gqlforge::core::ir::Error;
+use gqlforge::core::HttpIO;
 
 use super::runtime::{ExecutionMock, ExecutionSpec};
 

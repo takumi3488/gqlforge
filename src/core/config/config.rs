@@ -8,9 +8,9 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum::IntoEnumIterator;
-use tailcall_typedefs_common::directive_definition::DirectiveDefinition;
-use tailcall_typedefs_common::input_definition::InputDefinition;
-use tailcall_typedefs_common::ServiceDocumentBuilder;
+use gqlforge_typedefs_common::directive_definition::DirectiveDefinition;
+use gqlforge_typedefs_common::input_definition::InputDefinition;
+use gqlforge_typedefs_common::ServiceDocumentBuilder;
 use tailcall_valid::{Valid, Validator};
 
 use super::directive::Directive;
@@ -40,14 +40,14 @@ use crate::core::scalar::Scalar;
 )]
 pub struct RuntimeConfig {
     ///
-    /// Dictates how the server behaves and helps tune tailcall for all ingress
+    /// Dictates how the server behaves and helps tune gqlforge for all ingress
     /// requests. Features such as request batching, SSL, HTTP2 etc. can be
     /// configured here.
     #[serde(default, skip_serializing_if = "is_default")]
     pub server: Server,
 
     ///
-    /// Dictates how tailcall should handle upstream requests/responses.
+    /// Dictates how gqlforge should handle upstream requests/responses.
     /// Tuning upstream can improve performance and reliability for connections.
     #[serde(default, skip_serializing_if = "is_default")]
     pub upstream: Upstream,
@@ -65,13 +65,13 @@ pub struct RuntimeConfig {
 #[derive(Clone, Debug, Default, Setters, PartialEq, Eq, MergeRight)]
 pub struct Config {
     ///
-    /// Dictates how the server behaves and helps tune tailcall for all ingress
+    /// Dictates how the server behaves and helps tune gqlforge for all ingress
     /// requests. Features such as request batching, SSL, HTTP2 etc. can be
     /// configured here.
     pub server: Server,
 
     ///
-    /// Dictates how tailcall should handle upstream requests/responses.
+    /// Dictates how gqlforge should handle upstream requests/responses.
     /// Tuning upstream can improve performance and reliability for connections.
     pub upstream: Upstream,
 
@@ -798,7 +798,7 @@ mod tests {
 
     #[test]
     fn test_union_types() {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::UNION_CONFIG).unwrap();
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::UNION_CONFIG).unwrap();
         let config = Config::from_sdl(&sdl).to_result().unwrap();
         let union_types = config.union_types();
         let expected_union_types: HashSet<String> = ["Bar", "Baz", "Foo"]
@@ -811,7 +811,7 @@ mod tests {
 
     #[test]
     fn test_interfaces_types_map() {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::INTERFACE_CONFIG).unwrap();
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::INTERFACE_CONFIG).unwrap();
         let config = Config::from_sdl(&sdl).to_result().unwrap();
         let interfaces_types_map = config.interfaces_types_map();
 

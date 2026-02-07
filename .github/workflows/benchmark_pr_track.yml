@@ -41,7 +41,7 @@ jobs:
       - name: Track Benchmarks with Bencher
         run: |
           bencher run \
-          --project tailcall \
+          --project gqlforge \
           --token '${{ secrets.BENCHER_API_TOKEN }}' \
           --branch "$PR_HEAD" \
           --start-point "$PR_BASE" \

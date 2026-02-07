@@ -132,7 +132,7 @@ mod test {
         let body = r#"
             {
             "id": 1,
-            "title": "tailcall: modern graphQL runtime",
+            "title": "gqlforge: modern graphQL runtime",
             "body": "modern graphQL runtime",
             "userId": 1
             }

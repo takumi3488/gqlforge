@@ -36,7 +36,7 @@ async function getBuildDefinitions(): Promise<string[]> {
 
 async function genServerPackage(buildDefinitions: string[]) {
   const packageVersion = options.version || "0.1.0"
-  const name = options.name || "@tailcallhq/tailcall"
+  const name = options.name || "@gqlforge/gqlforge"
 
   console.log(`Generating package.json with version ${packageVersion}`)
 
@@ -44,14 +44,14 @@ async function genServerPackage(buildDefinitions: string[]) {
   const optionalDependencies: Record<string, string> = {}
 
   for (const buildDef of buildDefinitions) {
-    optionalDependencies[`@tailcallhq/core-${buildDef}`] = packageVersion
+    optionalDependencies[`@gqlforge/core-${buildDef}`] = packageVersion
   }
 
   const packageJson = await fs.readFile(resolve(__dirname, "./package.json"), "utf8")
   const basePackage = JSON.parse(packageJson) as IPackageJSON
   const {description, license, repository, homepage, keywords} = basePackage
 
-  const tailcallPackage: IPackageJSON = {
+  const gqlforgePackage: IPackageJSON = {
     description: description!,
     license: license!,
     repository: repository!,
@@ -76,7 +76,7 @@ async function genServerPackage(buildDefinitions: string[]) {
   }
 
   // Define the directory path where the package.json should be created
-  const directoryPath = resolve(__dirname, "@tailcallhq/tailcall")
+  const directoryPath = resolve(__dirname, "@gqlforge/gqlforge")
   const scriptsPath = resolve(directoryPath, "./scripts")
 
   await fs.mkdir(scriptsPath, {recursive: true})
@@ -92,7 +92,7 @@ async function genServerPackage(buildDefinitions: string[]) {
 
   await fs.writeFile(resolve(scriptsPath, "post-install.js"), postInstallScriptContent, "utf8")
   await fs.writeFile(resolve(scriptsPath, "pre-install.js"), preInstallScriptContent, "utf8")
-  await fs.writeFile(resolve(directoryPath, "./package.json"), JSON.stringify(tailcallPackage, null, 2), "utf8")
+  await fs.writeFile(resolve(directoryPath, "./package.json"), JSON.stringify(gqlforgePackage, null, 2), "utf8")
 
   await fs.copyFile(resolve(__dirname, "../README.md"), resolve(directoryPath, "./README.md"))
 }

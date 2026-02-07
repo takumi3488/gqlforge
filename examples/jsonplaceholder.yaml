@@ -1,4 +1,4 @@
-# yaml-language-server: $schema=../generated/.tailcallrc.schema.json
+# yaml-language-server: $schema=../generated/.gqlforgerc.schema.json
 
 server:
   port: 8000

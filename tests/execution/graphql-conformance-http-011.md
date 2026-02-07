@@ -4,7 +4,7 @@ skip: true
 
 # Test scalars and remote directives.
 
-TODO: Skipped because Tailcall does not parse the scalar type correctly into a string.
+TODO: Skipped because Gqlforge does not parse the scalar type correctly into a string.
 
 ```yaml @config
 server:

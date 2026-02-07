@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 use crate::core::config::KeyValue;
 use crate::core::is_default;
@@ -38,7 +38,7 @@ pub struct Grpc {
     /// parameters will be added in the body in `protobuf` format.
     pub body: Option<Value>,
     #[serde(rename = "batchKey", default, skip_serializing_if = "is_default")]
-    /// The `batchKey` dictates the path Tailcall will follow to group the returned items from the batch request. For more details please refer out [n + 1 guide](https://tailcall.run/docs/guides/n+1#solving-using-batching).
+    /// The `batchKey` dictates the path Gqlforge will follow to group the returned items from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
     pub batch_key: Vec<String>,
     #[serde(default, skip_serializing_if = "is_default")]
     /// The `headers` parameter allows you to customize the headers of the HTTP

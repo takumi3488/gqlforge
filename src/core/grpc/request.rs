@@ -50,7 +50,7 @@ mod tests {
     use hyper::body::Bytes;
     use reqwest::Request;
     use serde_json::json;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
     use tonic::{Code, Status};
 
     use crate::core::blueprint::GrpcMethod;

@@ -8,12 +8,12 @@
 .envrc
 .env
 
-npm/@tailcallhq
+npm/@gqlforge
 node_modules/
 
 # cloudflare
 .wrangler/
-tailcall-/cloudflare/build
+gqlforge-/cloudflare/build
 
 *.snap.new
 flamegraph.svg

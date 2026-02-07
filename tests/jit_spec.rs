@@ -4,13 +4,13 @@ mod tests {
     use std::sync::Arc;
 
     use async_graphql_value::ConstValue;
-    use tailcall::core::app_context::AppContext;
-    use tailcall::core::blueprint::Blueprint;
-    use tailcall::core::config::{Config, ConfigModule};
-    use tailcall::core::http::RequestContext;
-    use tailcall::core::jit::{ConstValueExecutor, Request};
-    use tailcall::core::json::JsonLike;
-    use tailcall::core::rest::EndpointSet;
+    use gqlforge::core::app_context::AppContext;
+    use gqlforge::core::blueprint::Blueprint;
+    use gqlforge::core::config::{Config, ConfigModule};
+    use gqlforge::core::http::RequestContext;
+    use gqlforge::core::jit::{ConstValueExecutor, Request};
+    use gqlforge::core::json::JsonLike;
+    use gqlforge::core::rest::EndpointSet;
     use tailcall_valid::Validator;
 
     struct TestExecutor {
@@ -21,10 +21,10 @@ mod tests {
     impl TestExecutor {
         async fn try_new() -> anyhow::Result<Self> {
             let sdl =
-                tokio::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER).await?;
+                tokio::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER).await?;
             let config = Config::from_sdl(&sdl).to_result()?;
             let blueprint = Blueprint::try_from(&ConfigModule::from(config))?;
-            let runtime = tailcall::cli::runtime::init(&blueprint);
+            let runtime = gqlforge::cli::runtime::init(&blueprint);
             let app_ctx = Arc::new(AppContext::new(blueprint, runtime, EndpointSet::default()));
             let req_ctx = Arc::new(RequestContext::from(app_ctx.as_ref()));
 

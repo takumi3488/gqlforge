@@ -42,7 +42,7 @@ links:
 ```
 
 ```graphql @schema
-# for test upstream server see [repo](https://github.com/tailcallhq/rust-grpc)
+# for test upstream server see [repo](https://github.com/takumi3488/rust-grpc)
 schema {
   query: Query
 }

@@ -53,7 +53,7 @@ pub mod test {
     use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-    use tailcall_http_cache::HttpCacheManager;
+    use gqlforge_http_cache::HttpCacheManager;
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     use crate::cli::javascript::init_worker_io;

@@ -1,0 +1,24 @@
+---
+source: src/core/jit/response.rs
+expression: response
+---
+Response {
+    data: String(
+        "Gqlforge - Modern GraphQL Runtime",
+    ),
+    errors: [
+        ServerError {
+            message: "internal: non-null types require a return value",
+            locations: [
+                Pos(1:2),
+            ],
+            path: [],
+            extensions: None,
+        },
+    ],
+    extensions: [],
+    cache_control: CacheControl {
+        max_age: 0,
+        public: true,
+    },
+}

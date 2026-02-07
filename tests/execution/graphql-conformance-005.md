@@ -4,7 +4,7 @@ skip: true
 
 # Test field aliasing.
 
-TODO: Skipped because Tailcall does not send the alias to the remote server.
+TODO: Skipped because Gqlforge does not send the alias to the remote server.
 
 ```yaml @config
 server:
@@ -44,7 +44,7 @@ type User {
       data:
         user: # TODO should we alias it ????
           id: 4
-          name: Tailcall
+          name: Gqlforge
           dob: "2000-01-01"
 ```
 
@@ -63,7 +63,7 @@ type User {
       }
 
 # Negative: non existent field alias
-# TODO: Tailcall should return error indicating extra field (current: skip unknown fields)
+# TODO: Gqlforge should return error indicating extra field (current: skip unknown fields)
 # - method: POST
 #   url: http://localhost:8080/graphql
 #   body:

@@ -1,0 +1,20 @@
+---
+source: src/cli/generator/config.rs
+expression: actual
+---
+{
+  "inputs": [
+    {
+      "curl": {
+        "src": "https://example.com",
+        "headers": {
+          "user-agent": "gqlforge-v1"
+        },
+        "method": "GET",
+        "fieldName": "test"
+      }
+    }
+  ],
+  "output": {},
+  "schema": {}
+}

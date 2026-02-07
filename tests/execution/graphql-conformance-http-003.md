@@ -43,7 +43,7 @@ type User {
     status: 200
     body:
       id: 4
-      name: Tailcall
+      name: Gqlforge
 - request:
     method: GET
     url: http://upstream/pic?id=4&size=100&width&height

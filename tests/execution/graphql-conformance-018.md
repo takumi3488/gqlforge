@@ -38,7 +38,7 @@ type User {
       data:
         user:
           city: Globe
-          name: Tailcall
+          name: Gqlforge
 ```
 
 ```yml @test

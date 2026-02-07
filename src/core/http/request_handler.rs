@@ -17,7 +17,7 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use super::request_context::RequestContext;
 use super::telemetry::{get_response_status_code, RequestCounter};
-use super::{showcase, telemetry, TAILCALL_HTTPS_ORIGIN, TAILCALL_HTTP_ORIGIN};
+use super::{showcase, telemetry, GQLFORGE_HTTPS_ORIGIN, GQLFORGE_HTTP_ORIGIN};
 use crate::core::app_context::AppContext;
 use crate::core::async_graphql_hyper::{GraphQLRequestLike, GraphQLResponse};
 use crate::core::blueprint::telemetry::TelemetryExporter;
@@ -161,7 +161,7 @@ fn create_allowed_headers(headers: &HeaderMap, allowed: &BTreeSet<String>) -> He
     new_headers
 }
 
-async fn handle_origin_tailcall<T: DeserializeOwned + GraphQLRequestLike>(
+async fn handle_origin_gqlforge<T: DeserializeOwned + GraphQLRequestLike>(
     req: Request<Body>,
     app_ctx: Arc<AppContext>,
     request_counter: &mut RequestCounter,
@@ -171,7 +171,7 @@ async fn handle_origin_tailcall<T: DeserializeOwned + GraphQLRequestLike>(
         let mut res = Response::new(Body::default());
         res.headers_mut().insert(
             header::ACCESS_CONTROL_ALLOW_ORIGIN,
-            HeaderValue::from_static("https://tailcall.run"),
+            HeaderValue::from_static("https://gqlforge.pages.dev"),
         );
         res.headers_mut().insert(
             header::ACCESS_CONTROL_ALLOW_METHODS,
@@ -186,7 +186,7 @@ async fn handle_origin_tailcall<T: DeserializeOwned + GraphQLRequestLike>(
         let mut res = handle_request_inner::<T>(req, app_ctx, request_counter).await?;
         res.headers_mut().insert(
             header::ACCESS_CONTROL_ALLOW_ORIGIN,
-            HeaderValue::from_static("https://tailcall.run"),
+            HeaderValue::from_static("https://gqlforge.pages.dev"),
         );
 
         Ok(res)
@@ -357,8 +357,8 @@ pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
     let response = if app_ctx.blueprint.server.cors.is_some() {
         handle_request_with_cors::<T>(req, app_ctx, &mut req_counter).await
     } else if let Some(origin) = req.headers().get(&header::ORIGIN) {
-        if origin == TAILCALL_HTTPS_ORIGIN || origin == TAILCALL_HTTP_ORIGIN {
-            handle_origin_tailcall::<T>(req, app_ctx, &mut req_counter).await
+        if origin == GQLFORGE_HTTPS_ORIGIN || origin == GQLFORGE_HTTP_ORIGIN {
+            handle_origin_gqlforge::<T>(req, app_ctx, &mut req_counter).await
         } else {
             handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
         }
@@ -388,7 +388,7 @@ mod test {
 
     #[tokio::test]
     async fn test_health_endpoint() -> anyhow::Result<()> {
-        let sdl = tokio::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER).await?;
+        let sdl = tokio::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER).await?;
         let config = Config::from_sdl(&sdl).to_result()?;
         let mut blueprint = Blueprint::try_from(&ConfigModule::from(config))?;
         blueprint.server.routes = Routes::default().with_status("/health");
@@ -414,7 +414,7 @@ mod test {
 
     #[tokio::test]
     async fn test_graphql_endpoint() -> anyhow::Result<()> {
-        let sdl = tokio::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER).await?;
+        let sdl = tokio::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER).await?;
         let config = Config::from_sdl(&sdl).to_result()?;
         let mut blueprint = Blueprint::try_from(&ConfigModule::from(config))?;
         blueprint.server.routes = Routes::default().with_graphql("/gql");

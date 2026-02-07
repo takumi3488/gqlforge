@@ -1,4 +1,4 @@
-# To run this example first start another tailcall server with basic example
+# To run this example first start another gqlforge server with basic example
 # i.e. `tc start examples/jsonplaceholder.graphql`
 # and then you can run this example and test it on 8001 port
 

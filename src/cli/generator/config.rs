@@ -320,7 +320,7 @@ mod tests {
     #[test]
     fn test_config_codec() {
         let mut headers = BTreeMap::new();
-        headers.insert("user-agent".to_owned(), "tailcall-v1".into());
+        headers.insert("user-agent".to_owned(), "gqlforge-v1".into());
         let config = Config::default().inputs(vec![Input {
             source: Source::Curl {
                 src: location("https://example.com"),
@@ -402,7 +402,7 @@ mod tests {
         let json = r#"
             {"inputs": [{
                 "curl": {
-                    "src": "https://tailcall.run/graphql",
+                    "src": "https://gqlforge.pages.dev/graphql",
                     "headerss": {
                         "content-type": "application/json"
                     }
@@ -416,7 +416,7 @@ mod tests {
         let json = r#"
             {"inputs": [{
                 "curls": {
-                    "src": "https://tailcall.run/graphql",
+                    "src": "https://gqlforge.pages.dev/graphql",
                     "headerss": {
                         "content-type": "application/json"
                     }

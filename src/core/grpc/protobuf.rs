@@ -246,7 +246,7 @@ pub mod tests {
     use anyhow::Result;
     use prost_reflect::Value;
     use serde_json::json;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
 
     use super::*;
     use crate::core::blueprint::GrpcMethod;

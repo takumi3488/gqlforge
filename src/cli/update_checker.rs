@@ -1,6 +1,6 @@
 use colored::Colorize;
 use ctrlc::set_handler;
-use tailcall_version::VERSION;
+use gqlforge_version::VERSION;
 use update_informer::{registry, Check, Version};
 use which::which;
 
@@ -25,12 +25,12 @@ impl InstallationMethod {
             .arg("--global")
             .output()
         {
-            if String::from_utf8_lossy(&output.stdout).contains("@tailcallhq/tailcall") {
+            if String::from_utf8_lossy(&output.stdout).contains("@gqlforge/gqlforge") {
                 return InstallationMethod::Npm;
             }
         }
 
-        if let Ok(result) = which("tailcall") {
+        if let Ok(result) = which("gqlforge") {
             if result.to_str().map_or(false, |s| s.contains("homebrew")) {
                 return InstallationMethod::Brew;
             }
@@ -43,17 +43,17 @@ impl InstallationMethod {
         format!("{} {}", "Please run:".white(), command.yellow())
     }
 
-    /// displays the message to upgrade the tailcall depending on the
+    /// displays the message to upgrade gqlforge depending on the
     /// installation method used.
     pub fn display_message(&self) -> String {
         match self {
             InstallationMethod::Npx => {
-                self.format_upgrade_message("npx @tailcallhq/tailcall@latest")
+                self.format_upgrade_message("npx @gqlforge/gqlforge@latest")
             }
             InstallationMethod::Npm => {
-                self.format_upgrade_message("npm update -g @tailcallhq/tailcall")
+                self.format_upgrade_message("npm update -g @gqlforge/gqlforge")
             }
-            InstallationMethod::Brew => self.format_upgrade_message("brew upgrade tailcall"),
+            InstallationMethod::Brew => self.format_upgrade_message("brew upgrade gqlforge"),
             InstallationMethod::Direct => {
                 "Please update by downloading the latest release from GitHub".to_string()
             }
@@ -65,7 +65,7 @@ fn show_update_message(name: &str, latest_version: Version) {
     let github_release_url = format!("https://github.com/{name}/releases/tag/{latest_version}",);
     tracing::warn!(
         "{} {} {} {}. {}. Release notes: {}",
-        "A new release of tailcall is available:",
+        "A new release of gqlforge is available:",
         VERSION.as_str().cyan(),
         "➜",
         latest_version.to_string().cyan(),
@@ -80,7 +80,7 @@ pub async fn check_for_update() {
         return;
     }
 
-    let name: &str = "tailcallhq/tailcall";
+    let name: &str = "takumi3488/gqlforge";
 
     let informer = update_informer::new(registry::GitHub, name, VERSION.as_str());
 

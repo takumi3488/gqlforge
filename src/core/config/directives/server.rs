@@ -3,7 +3,7 @@ use std::collections::{BTreeMap, BTreeSet};
 use derive_getters::Getters;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use tailcall_macros::DirectiveDefinition;
+use gqlforge_macros::DirectiveDefinition;
 
 use crate::core::config::headers::Headers;
 use crate::core::config::{merge_key_value_vecs, KeyValue};
@@ -27,7 +27,7 @@ use crate::core::macros::MergeRight;
 #[serde(rename_all = "camelCase")]
 /// The `@server` directive, when applied at the schema level, offers a
 /// comprehensive set of server configurations. It dictates how the server
-/// behaves and helps tune tailcall for various use-cases.
+/// behaves and helps tune gqlforge for various use-cases.
 pub struct Server {
     #[deprecated(note = "No longer used, TODO: drop it")]
     #[serde(default, skip_serializing, rename = "enableJIT")]
@@ -66,7 +66,7 @@ pub struct Server {
     /// and operations. @default `true`.
     pub introspection: Option<bool>,
 
-    /// `enableFederation` enables functionality to Tailcall server to act
+    /// `enableFederation` enables functionality to Gqlforge server to act
     /// as a federation subgraph.
     #[serde(default, skip_serializing_if = "is_default")]
     pub enable_federation: Option<bool>,
@@ -77,7 +77,7 @@ pub struct Server {
     pub pipeline_flush: Option<bool>,
 
     #[serde(default, skip_serializing_if = "is_default")]
-    /// `port` sets the Tailcall running port. @default `8000`.
+    /// `port` sets the Gqlforge running port. @default `8000`.
     pub port: Option<u16>,
 
     #[serde(default, skip_serializing_if = "is_default")]
@@ -87,7 +87,7 @@ pub struct Server {
     pub query_validation: Option<bool>,
 
     #[serde(default, skip_serializing_if = "is_default")]
-    /// `responseValidation` Tailcall automatically validates responses from
+    /// `responseValidation` Gqlforge automatically validates responses from
     /// upstream services using inferred schema. @default `false`.
     pub response_validation: Option<bool>,
 

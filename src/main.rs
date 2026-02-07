@@ -3,8 +3,8 @@
 
 use std::cell::Cell;
 
-use tailcall::core::tracing::default_tracing_tailcall;
-use tailcall::core::Errata;
+use gqlforge::core::tracing::default_tracing_gqlforge;
+use gqlforge::core::Errata;
 use tracing::subscriber::DefaultGuard;
 
 thread_local! {
@@ -21,7 +21,7 @@ fn run_blocking() -> anyhow::Result<()> {
             // to use the default tracing configuration for cli output. And
             // since `set_default` works only for current thread incorporate this
             // with tokio runtime
-            let guard = tracing::subscriber::set_default(default_tracing_tailcall());
+            let guard = tracing::subscriber::set_default(default_tracing_gqlforge());
 
             TRACING_GUARD.set(Some(guard));
         })
@@ -30,14 +30,14 @@ fn run_blocking() -> anyhow::Result<()> {
         })
         .enable_all()
         .build()?;
-    rt.block_on(async { tailcall::cli::run().await })
+    rt.block_on(async { gqlforge::cli::run().await })
 }
 
 fn main() -> anyhow::Result<()> {
     // enable tracing subscriber for current thread until this block ends
     // that will show any logs from cli itself to the user
     // despite of @telemetry settings that
-    let _guard = tracing::subscriber::set_default(default_tracing_tailcall());
+    let _guard = tracing::subscriber::set_default(default_tracing_gqlforge());
     let result = run_blocking();
     match result {
         Ok(_) => {}

@@ -11,8 +11,8 @@ jobs:
     steps:
       - name: Build website
         env:
-          TARGET_REPO_OWNER: "tailcallhq" # Replace with the owner of the target repository
-          TARGET_REPO_NAME: "tailcallhq.github.io" # Replace with the name of the target repository
+          TARGET_REPO_OWNER: "takumi3488" # Replace with the owner of the target repository
+          TARGET_REPO_NAME: "takumi3488.github.io" # Replace with the name of the target repository
         run: |
           curl -X POST \
             -H "Authorization: token ${{ secrets.WEBSITE_TOKEN }}" \

@@ -1,6 +1,6 @@
 # Apollo Federation example
 
-1. Start tailcall subgraph examples:
+1. Start gqlforge subgraph examples:
 
 - `cargo run -- start examples/apollo_federation_subgraph_post.graphql`
 - `cargo run -- start examples/apollo_federation_subgraph_user.graphql`

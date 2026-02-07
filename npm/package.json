@@ -1,14 +1,14 @@
 {
-  "name": "tailcall-npm-generator",
+  "name": "gqlforge-npm-generator",
   "type": "module",
   "description": "A high-performance GraphQL proxy, optimized for cloud-native environments, covering edge, middle, and service layers.",
   "private": true,
   "license": "Apache-2.0",
   "repository": {
     "type": "git",
-    "url": "https://github.com/tailcallhq/tailcall"
+    "url": "https://github.com/takumi3488/gqlforge"
   },
-  "homepage": "https://tailcall.run/",
+  "homepage": "https://gqlforge.pages.dev/",
   "keywords": [
     "graphql",
     "proxy",

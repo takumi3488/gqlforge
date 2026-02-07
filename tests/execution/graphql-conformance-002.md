@@ -4,7 +4,7 @@ skip: true
 
 # Test complex nested query.
 
-TODO: Skipped because Tailcall does not send the whole query to the remote server. It sends a shallow version of the query.
+TODO: Skipped because Gqlforge does not send the whole query to the remote server. It sends a shallow version of the query.
 
 ```yaml @config
 server:
@@ -51,7 +51,7 @@ type BirthDay {
       data:
         user:
           id: 4
-          name: Tailcall
+          name: Gqlforge
           city: Globe
           birthday:
             day: 15
@@ -93,7 +93,7 @@ type BirthDay {
       }
 
 # Negative: invalid selection at nested
-# TODO: Tailcall should return error indicating extra field (current: skip unknown fields)
+# TODO: Gqlforge should return error indicating extra field (current: skip unknown fields)
 # - method: POST
 #   url: http://localhost:8080/graphql
 #   body:

@@ -4,7 +4,7 @@ use std::sync::{Arc, Mutex};
 
 use futures_util::future::join_all;
 use futures_util::TryFutureExt;
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 use url::Url;
 
 use crate::core::mustache::PathStringEval;
@@ -37,7 +37,7 @@ pub enum Resource {
 
 impl Resource {
     pub fn calculate_hash(&self) -> u64 {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         self.hash(&mut hasher);
         hasher.finish()
     }
@@ -245,7 +245,7 @@ mod test {
 
     #[test]
     fn test_from_reqwest_request() {
-        let original_url: Url = "https://tailcall.run".parse().unwrap();
+        let original_url: Url = "https://gqlforge.pages.dev".parse().unwrap();
         let original_request = reqwest::Request::new(reqwest::Method::GET, original_url.clone());
         let resource: Resource = original_request.try_clone().unwrap().into();
         let request = resource.as_request().unwrap();
@@ -259,7 +259,7 @@ mod test {
 
     #[test]
     fn test_from_str() {
-        let path = "https://tailcall.run";
+        let path = "https://gqlforge.pages.dev";
         let resource: Resource = path.into();
 
         let actual = resource.as_raw_path().unwrap();

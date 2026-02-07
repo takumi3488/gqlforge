@@ -27,7 +27,7 @@ use super::metrics::init_metrics;
 use crate::core::blueprint::telemetry::{OtlpExporter, Telemetry, TelemetryExporter};
 use crate::core::runtime::TargetRuntime;
 use crate::core::tracing::{
-    default_tracing, default_tracing_tailcall, get_log_level, tailcall_filter_target,
+    default_tracing, default_tracing_gqlforge, get_log_level, gqlforge_filter_target,
 };
 use crate::core::Errata;
 
@@ -35,7 +35,7 @@ static RESOURCE: Lazy<Resource> = Lazy::new(|| {
     Resource::default().merge(&Resource::new(vec![
         KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_NAME,
-            "tailcall",
+            "gqlforge",
         ),
         KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
@@ -205,7 +205,7 @@ pub fn init_opentelemetry(config: Telemetry, runtime: &TargetRuntime) -> anyhow:
                     | global::Error::Metric(MetricsError::Other(_))
                     | global::Error::Log(LogError::Other(_)),
             ) {
-                tracing::subscriber::with_default(default_tracing_tailcall(), || {
+                tracing::subscriber::with_default(default_tracing_gqlforge(), || {
                     let cli = crate::core::Errata::new("Open Telemetry Error")
                         .caused_by(vec![Errata::new(error.to_string().as_str())])
                         .trace(vec!["schema".to_string(), "@telemetry".to_string()]);
@@ -231,7 +231,7 @@ pub fn init_opentelemetry(config: Telemetry, runtime: &TargetRuntime) -> anyhow:
                     context.lookup_current().is_none()
                 })),
             )
-            .with(tailcall_filter_target())
+            .with(gqlforge_filter_target())
             .with(LevelFilter::from_level(
                 get_log_level().unwrap_or(tracing::Level::INFO),
             ));
@@ -240,7 +240,7 @@ pub fn init_opentelemetry(config: Telemetry, runtime: &TargetRuntime) -> anyhow:
 
         set_tracing_subscriber(subscriber);
     } else {
-        set_tracing_subscriber(default_tracing_tailcall());
+        set_tracing_subscriber(default_tracing_gqlforge());
     }
 
     Ok(())

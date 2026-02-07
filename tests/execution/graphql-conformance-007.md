@@ -4,7 +4,7 @@ skip: true
 
 # Test named fragments.
 
-TODO: Skipped because Tailcall does not send the whole query with the **fragments** to the remote server.
+TODO: Skipped because Gqlforge does not send the whole query with the **fragments** to the remote server.
 
 ```yaml @config
 server:

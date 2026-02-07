@@ -5,8 +5,8 @@ use std::str::FromStr;
 use anyhow::anyhow;
 use markdown::mdast::Node;
 use markdown::ParseOptions;
-use tailcall::core::config::Source;
-use tailcall::core::FileIO;
+use gqlforge::core::config::Source;
+use gqlforge::core::FileIO;
 
 use crate::file::NativeFileTest;
 

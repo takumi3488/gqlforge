@@ -1,7 +1,7 @@
 use std::num::NonZeroU64;
 
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, InputDefinition, MergeRight};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition, MergeRight};
 
 #[derive(
     Clone,

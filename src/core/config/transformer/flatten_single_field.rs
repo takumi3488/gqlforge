@@ -88,7 +88,7 @@ impl Transform for FlattenSingleField {
 mod test {
     use std::fs;
 
-    use tailcall_fixtures::configs;
+    use gqlforge_fixtures::configs;
     use tailcall_valid::Validator;
 
     use super::FlattenSingleField;

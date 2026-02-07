@@ -30,10 +30,10 @@ jobs:
       - name: Run Cargo Build
         run: cargo build --release
 
-      - name: Run Tailcall
+      - name: Run Gqlforge
         run: |
-          TAILCALL_LOG_LEVEL=error ./target/release/tailcall start ci-benchmark/nginx-benchmark.graphql > tailcall.log 2>&1 &
-          echo $! > tailcall_pid.txt
+          GQLFORGE_LOG_LEVEL=error ./target/release/gqlforge start ci-benchmark/nginx-benchmark.graphql > gqlforge.log 2>&1 &
+          echo $! > gqlforge_pid.txt
 
       - name: Install Nginx
         run: |
@@ -63,16 +63,16 @@ jobs:
         run: |
           wrk -d 30 -t 4 -c 100 -s wrk.lua http://localhost:8000/graphql | tee wrk-output.txt
 
-      - id: check_tailcall
-        name: Check Tailcall Status
+      - id: check_gqlforge
+        name: Check Gqlforge Status
         run: |
-          tailcall_pid=$(cat tailcall_pid.txt)
-          if ! kill -0 $tailcall_pid > /dev/null 2>&1; then
-            echo "Tailcall process has crashed. Log output:" >&2
-            cat tailcall.log >&2
+          gqlforge_pid=$(cat gqlforge_pid.txt)
+          if ! kill -0 $gqlforge_pid > /dev/null 2>&1; then
+            echo "Gqlforge process has crashed. Log output:" >&2
+            cat gqlforge.log >&2
             exit 1
           else
-            echo "Tailcall process is still running"
+            echo "Gqlforge process is still running"
           fi
 
       - id: convert_wrk_output_markdown

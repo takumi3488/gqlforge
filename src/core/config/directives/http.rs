@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 use crate::core::config::{Encoding, KeyValue, URLQuery};
 use crate::core::http::Method;
@@ -51,7 +51,7 @@ pub struct Http {
     pub encoding: Encoding,
 
     #[serde(rename = "batchKey", default, skip_serializing_if = "is_default")]
-    /// The `batchKey` dictates the path Tailcall will follow to group the returned items from the batch request. For more details please refer out [n + 1 guide](https://tailcall.run/docs/guides/n+1#solving-using-batching).
+    /// The `batchKey` dictates the path Gqlforge will follow to group the returned items from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
     pub batch_key: Vec<String>,
 
     #[serde(default, skip_serializing_if = "is_default")]
@@ -79,7 +79,7 @@ pub struct Http {
     /// This represents the query parameters of your API call. You can pass it
     /// as a static object or use Mustache template for dynamic parameters.
     /// These parameters will be added to the URL.
-    /// NOTE: Query parameter order is critical for batching in Tailcall. The
+    /// NOTE: Query parameter order is critical for batching in Gqlforge. The
     /// first parameter referencing a field in the current value using mustache
     /// syntax is automatically selected as the batching parameter.
     pub query: Vec<URLQuery>,

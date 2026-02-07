@@ -1,10 +1,10 @@
 [package]
-name = "tailcall"
+name = "gqlforge"
 version = "0.1.0"
 edition = "2021"
 
 [[bin]]
-name = "tailcall"
+name = "gqlforge"
 path = "src/main.rs"
 
 [workspace.dependencies]
@@ -28,7 +28,7 @@ derive_more = { version = "1", features = ["from", "debug"] }
 thiserror = "1.0.59"
 url = { version = "2.5.0", features = ["serde"] }
 convert_case = "0.6.0"
-tailcall-valid = "0.1.1"
+tailcall-valid = "=0.1.1"
 
 [dependencies]
 # dependencies specific to CLI must have optional = true and the dep should be added to default feature.
@@ -55,8 +55,8 @@ opentelemetry-otlp = { version = "0.16.0", features = [
     "tls-roots",
 ], optional = true }
 opentelemetry-system-metrics = { version = "0.2.0", optional = true }
-tailcall-http-cache = { path = "tailcall-http-cache", optional = true }
-tailcall-version = { path = "./tailcall-version", optional = true }
+gqlforge-http-cache = { path = "gqlforge-http-cache", optional = true }
+gqlforge-version = { path = "./gqlforge-version", optional = true }
 genai = { git = "https://github.com/laststylebender14/rust-genai.git", rev = "63a542ce20132503c520f4e07108e0d768f243c3", optional = true }
 ctrlc = { version = "3.4.5", optional = true }
 
@@ -157,12 +157,12 @@ async-graphql = { workspace = true, features = [
 dotenvy = "0.15.7"
 convert_case = { workspace = true }
 rand = "0.8.5"
-tailcall-macros = { path = "tailcall-macros" }
-tailcall-tracker = { path = "tailcall-tracker", optional = true }
-tailcall-typedefs-common = { path = "./tailcall-typedefs-common" }
+gqlforge-macros = { path = "gqlforge-macros" }
+gqlforge-tracker = { path = "gqlforge-tracker", optional = true }
+gqlforge-typedefs-common = { path = "./gqlforge-typedefs-common" }
 tonic-types = "0.12.1"
 base64 = "0.22.1"
-tailcall-hasher = { path = "tailcall-hasher" }
+gqlforge-hasher = { path = "gqlforge-hasher" }
 serde_json_borrow = { version = "0.7.1", default-features = false }
 pluralizer = "0.5.0"
 path-clean = "=1.0.1"
@@ -184,7 +184,7 @@ rquickjs = { "version" = "0.7.0", optional = true, features = ["macro", "bindgen
 [dev-dependencies]
 datatest-stable = "0.2.9"
 tokio-test = "0.4.4"
-tailcall-prettier = { path = "tailcall-prettier" }
+gqlforge-prettier = { path = "gqlforge-prettier" }
 criterion = "0.5.1"
 httpmock = "0.7.0"
 pretty_assertions = "1.4.0"
@@ -193,7 +193,7 @@ markdown = "1.0.0-alpha.17"
 insta = { workspace = true }
 tempfile = "3.10.1"
 maplit = "1.0.2"
-tailcall-fixtures = { path = "./tailcall-fixtures" }
+gqlforge-fixtures = { path = "./gqlforge-fixtures" }
 http-cache-semantics = { version = "1.0.1", default-features = false, features = [
     "with_serde",
     "reqwest",
@@ -233,9 +233,9 @@ cli = [
     "opentelemetry_sdk/rt-tokio",
     "dep:opentelemetry-otlp",
     "dep:opentelemetry-system-metrics",
-    "dep:tailcall-tracker",
-    "dep:tailcall-http-cache",
-    "dep:tailcall-version",
+    "dep:gqlforge-tracker",
+    "dep:gqlforge-http-cache",
+    "dep:gqlforge-version",
     "dep:genai",
     "dep:ctrlc",
 ]
@@ -251,19 +251,19 @@ force_jit = []
 [workspace]
 members = [
     ".",
-    "tailcall-typedefs-common",
-    "tailcall-typedefs",
-    "tailcall-aws-lambda",
-    "tailcall-cloudflare",
-    "tailcall-macros",
-    "tailcall-prettier",
-    "tailcall-fixtures",
-    "tailcall-upstream-grpc",
-    "tailcall-tracker",
-    "tailcall-wasm",
-    "tailcall-hasher",
-    "tailcall-http-cache",
-    "tailcall-version",
+    "gqlforge-typedefs-common",
+    "gqlforge-typedefs",
+    "gqlforge-aws-lambda",
+    "gqlforge-cloudflare",
+    "gqlforge-macros",
+    "gqlforge-prettier",
+    "gqlforge-fixtures",
+    "gqlforge-upstream-grpc",
+    "gqlforge-tracker",
+    "gqlforge-wasm",
+    "gqlforge-hasher",
+    "gqlforge-http-cache",
+    "gqlforge-version",
 ]
 
 # Boost execution_spec snapshot diffing performance
@@ -284,13 +284,13 @@ overflow-checks = false
 inherits = "release"
 debug = true
 
-[profile.release.package.tailcall-cloudflare]
+[profile.release.package.gqlforge-cloudflare]
 strip = true
 codegen-units = 1
 opt-level = 'z'
 
 [[bench]]
-name = "tailcall_benches"
+name = "gqlforge_benches"
 harness = false
 
 [[test]]

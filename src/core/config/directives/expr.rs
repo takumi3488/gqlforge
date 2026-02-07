@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 #[derive(
     Serialize,

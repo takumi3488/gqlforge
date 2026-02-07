@@ -9,7 +9,7 @@ use http::{Response, StatusCode};
 use hyper::Body;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 
 use super::jit::{BatchResponse as JITBatchResponse, JITExecutor};
 
@@ -40,7 +40,7 @@ pub trait GraphQLRequestLike: Hash + Send {
     }
 
     fn operation_id(&self, headers: &HeaderMap) -> OperationId {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         let state = &mut hasher;
         for (name, value) in headers.iter() {
             name.hash(state);

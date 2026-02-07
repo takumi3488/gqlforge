@@ -7,12 +7,12 @@ use std::sync::Arc;
 
 use async_graphql::Value;
 use derive_setters::Setters;
-use tailcall::cli::javascript::init_worker_io;
-use tailcall::core::blueprint::Script;
-use tailcall::core::cache::InMemoryCache;
-use tailcall::core::config::RuntimeConfig;
-use tailcall::core::runtime::TargetRuntime;
-use tailcall::core::worker::{Command, Event};
+use gqlforge::cli::javascript::init_worker_io;
+use gqlforge::core::blueprint::Script;
+use gqlforge::core::cache::InMemoryCache;
+use gqlforge::core::config::RuntimeConfig;
+use gqlforge::core::runtime::TargetRuntime;
+use gqlforge::core::worker::{Command, Event};
 
 use super::env::Env;
 use super::file::TestFileIO;

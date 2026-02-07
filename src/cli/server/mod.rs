@@ -11,7 +11,7 @@ use self::server_config::ServerConfig;
 fn log_launch(sc: &ServerConfig) {
     let addr = sc.addr().to_string();
     tracing::info!(
-        "🚀 Tailcall launched at [{}] over {}",
+        "🚀 Gqlforge launched at [{}] over {}",
         addr,
         sc.http_version()
     );

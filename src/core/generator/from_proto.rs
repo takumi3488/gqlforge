@@ -488,7 +488,7 @@ pub fn from_proto(descriptor_sets: &[FileDescriptorSet], query: &str, url: &str)
 mod test {
     use anyhow::Result;
     use prost_reflect::prost_types::FileDescriptorSet;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
 
     use super::from_proto;
     use crate::core::config::ConfigModule;
@@ -558,7 +558,7 @@ mod test {
         // required fields are deprecated in proto3 (https://protobuf.dev/programming-guides/dos-donts/#add-required)
         // this example uses proto2 to test the same.
         // for proto3 it's guaranteed to have a default value (https://protobuf.dev/programming-guides/proto3/#default)
-        // and our implementation (https://github.com/tailcallhq/tailcall/pull/1537) supports default values by default.
+        // and our implementation (https://github.com/takumi3488/gqlforge/pull/1537) supports default values by default.
         // so we do not need to explicitly mark fields as required.
 
         assert_gen!(protobuf::PERSON);

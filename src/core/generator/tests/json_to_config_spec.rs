@@ -4,8 +4,8 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall::core::generator::{Generator, Input};
-use tailcall::core::http::Method;
+use gqlforge::core::generator::{Generator, Input};
+use gqlforge::core::http::Method;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

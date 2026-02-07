@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use strum_macros::Display;
-use tailcall_version::VERSION;
+use gqlforge_version::VERSION;
 
 const ABOUT: &str = r"
    __        _ __           ____
@@ -10,7 +10,7 @@ const ABOUT: &str = r"
 \__/\__,_/_/_/\___/\__,_/_/_/";
 
 #[derive(Parser)]
-#[command(name = "tailcall", author, version = VERSION.as_str(), about, long_about = Some(ABOUT))]
+#[command(name = "gqlforge", author, version = VERSION.as_str(), about, long_about = Some(ABOUT))]
 pub struct Cli {
     #[command(subcommand)]
     pub command: Command,
@@ -61,7 +61,7 @@ pub enum Command {
         folder_path: String,
     },
 
-    /// Generates a Tailcall Configuration from one or more source files.
+    /// Generates a Gqlforge Configuration from one or more source files.
     Gen {
         /// Path of the configuration file
         #[arg(required = true)]

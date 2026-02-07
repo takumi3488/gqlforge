@@ -1,5 +1,5 @@
 use criterion::Criterion;
-use tailcall::core::jit::fixtures::JP;
+use gqlforge::core::jit::fixtures::JP;
 
 pub fn bench_synth_nested(c: &mut Criterion) {
     c.bench_function("synth_nested", |b| {

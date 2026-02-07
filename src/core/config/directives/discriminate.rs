@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, InputDefinition, MergeRight};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition, MergeRight};
 
 use crate::core::is_default;
 
@@ -18,7 +18,7 @@ use crate::core::is_default;
 #[directive_definition(locations = "FieldDefinition")]
 #[serde(deny_unknown_fields)]
 ///
-/// The `@discriminate` directive is used to drive Tailcall discriminator to use
+/// The `@discriminate` directive is used to drive Gqlforge discriminator to use
 /// a field of an object to resolve the type. For example with the directive
 /// applied on a field `@discriminate(field: "object_type")` and the given value
 /// `{"foo": "bar", "object_type": "Buzz"}` the resolved type of the object will

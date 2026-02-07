@@ -5,7 +5,7 @@ use opentelemetry_sdk::runtime::Tokio;
 use opentelemetry_sdk::testing::metrics::InMemoryMetricsExporter;
 use opentelemetry_sdk::testing::trace::InMemorySpanExporter;
 use opentelemetry_sdk::trace::{Tracer, TracerProvider};
-use tailcall::tracing::{default_tracing, filter_target};
+use gqlforge::tracing::{default_tracing, filter_target};
 use tracing::Subscriber;
 use tracing_opentelemetry::OpenTelemetryLayer;
 use tracing_subscriber::layer::SubscriberExt;

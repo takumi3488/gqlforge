@@ -1,6 +1,6 @@
 use anyhow::Result;
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 use tailcall_valid::Validator;
 
 use crate::core::config::{Apollo, ConfigReaderContext, KeyValue};
@@ -84,7 +84,7 @@ pub enum TelemetryExporter {
 #[serde(rename_all = "camelCase")]
 /// The @telemetry directive facilitates seamless integration with
 /// OpenTelemetry, enhancing the observability of your GraphQL services powered
-/// by Tailcall.  By leveraging this directive, developers gain access to
+/// by Gqlforge.  By leveraging this directive, developers gain access to
 /// valuable insights into the performance and behavior of their applications.
 pub struct Telemetry {
     pub export: Option<TelemetryExporter>,

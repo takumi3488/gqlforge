@@ -41,7 +41,7 @@ type BirthDay {
     status: 200
     body:
       id: 4
-      name: Tailcall
+      name: Gqlforge
       city: Globe
       birthday:
         day: 15
@@ -83,7 +83,7 @@ type BirthDay {
       }
 
 # Negative: invalid selection at nested
-# TODO: Tailcall should return error indicating extra field (current: skip unknown fields)
+# TODO: Gqlforge should return error indicating extra field (current: skip unknown fields)
 # - method: POST
 #   url: http://localhost:8080/graphql
 #   body:

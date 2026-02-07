@@ -131,7 +131,7 @@ mod test {
     use std::fs;
 
     use anyhow::Ok;
-    use tailcall_fixtures::configs;
+    use gqlforge_fixtures::configs;
     use tailcall_valid::Validator;
 
     use super::ImproveTypeNames;

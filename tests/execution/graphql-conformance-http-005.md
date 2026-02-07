@@ -34,7 +34,7 @@ type User {
     status: 200
     body:
       id: 4
-      name: Tailcall
+      name: Gqlforge
       dob: "2000-01-01"
 ```
 
@@ -53,7 +53,7 @@ type User {
       }
 
 # Negative: non existent field alias
-# TODO: Tailcall should return error indicating extra field (current: skip unknown fields)
+# TODO: Gqlforge should return error indicating extra field (current: skip unknown fields)
 # - method: POST
 #   url: http://localhost:8080/graphql
 #   body:

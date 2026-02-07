@@ -4,7 +4,7 @@ skip: true
 
 # Test complex aliasing.
 
-TODO: Skipped because Tailcall does not send the alias to the remote server.
+TODO: Skipped because Gqlforge does not send the alias to the remote server.
 
 ```yaml @config
 server:
@@ -44,7 +44,7 @@ type User {
       data:
         user:
           id: 4
-          name: Tailcall
+          name: Gqlforge
           profilePic: invalid
           smallPic: pic_100
           bigPic: pic_1024

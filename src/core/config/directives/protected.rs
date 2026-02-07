@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, MergeRight};
+use gqlforge_macros::{DirectiveDefinition, MergeRight};
 
 /// Specifies the authentication requirements for accessing a field or type.
 ///

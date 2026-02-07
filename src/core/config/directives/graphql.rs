@@ -1,5 +1,5 @@
 use serde::{Deserialize, Serialize};
-use tailcall_macros::{DirectiveDefinition, InputDefinition};
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 use crate::core::config::KeyValue;
 use crate::core::is_default;
@@ -22,7 +22,7 @@ use crate::core::is_default;
 /// data from.
 pub struct GraphQL {
     #[serde(default, skip_serializing_if = "is_default")]
-    /// Named arguments for the requested field. More info [here](https://tailcall.run/docs/guides/operators/#args)
+    /// Named arguments for the requested field. More info [here](https://gqlforge.pages.dev/docs/guides/operators/#args)
     pub args: Option<Vec<KeyValue>>,
 
     /// This refers URL of the API.
@@ -45,7 +45,7 @@ pub struct GraphQL {
 
     /// Specifies the root field on the upstream to request data from. This maps
     /// a field in your schema to a field in the upstream schema. When a query
-    /// is received for this field, Tailcall requests data from the
+    /// is received for this field, Gqlforge requests data from the
     /// corresponding upstream field.
     pub name: String,
     #[serde(default, skip_serializing_if = "is_default")]

@@ -13,14 +13,14 @@ use indexmap::IndexMap;
 use once_cell::sync::Lazy;
 use reqwest::{Client, Request};
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use tailcall::core::blueprint::{Server, Upstream};
-use tailcall::core::cache::InMemoryCache;
-use tailcall::core::http::{RequestContext, Response};
-use tailcall::core::ir::{EvalContext, ResolverContextLike, SelectionField};
-use tailcall::core::path::PathString;
-use tailcall::core::runtime::TargetRuntime;
-use tailcall::core::{EnvIO, FileIO, HttpIO};
-use tailcall_http_cache::HttpCacheManager;
+use gqlforge::core::blueprint::{Server, Upstream};
+use gqlforge::core::cache::InMemoryCache;
+use gqlforge::core::http::{RequestContext, Response};
+use gqlforge::core::ir::{EvalContext, ResolverContextLike, SelectionField};
+use gqlforge::core::path::PathString;
+use gqlforge::core::runtime::TargetRuntime;
+use gqlforge::core::{EnvIO, FileIO, HttpIO};
+use gqlforge_http_cache::HttpCacheManager;
 
 struct Http {
     client: ClientWithMiddleware,
@@ -235,7 +235,7 @@ fn assert_test(eval_ctx: &EvalContext<'_, MockGraphqlContext>) {
 }
 
 fn request_context() -> RequestContext {
-    let config_module = tailcall::core::config::ConfigModule::default();
+    let config_module = gqlforge::core::config::ConfigModule::default();
 
     //TODO: default is used only in tests. Drop default and move it to test.
     let upstream = Upstream::try_from(&config_module).unwrap();

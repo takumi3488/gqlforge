@@ -3,7 +3,7 @@ use std::path::Path;
 
 use anyhow::{anyhow, Result};
 
-use super::helpers::{GRAPHQL_RC, TAILCALL_RC, TAILCALL_RC_SCHEMA};
+use super::helpers::{GQLFORGE_RC, GQLFORGE_RC_SCHEMA, GRAPHQL_RC};
 use crate::cli::runtime::{confirm_and_write, create_directory, select_prompt};
 use crate::core::config::{
     Config, Expr, Field, Link, LinkType, Resolver, RootSchema, RuntimeConfig, Source,
@@ -22,29 +22,29 @@ pub(super) async fn init_command(runtime: TargetRuntime, folder_path: &str) -> R
         vec![Source::Json, Source::Yml],
     )?;
 
-    let tailcallrc = include_str!("../../../generated/.tailcallrc.graphql");
-    let tailcallrc_json: &str = include_str!("../../../generated/.tailcallrc.schema.json");
+    let gqlforgerc = include_str!("../../../generated/.gqlforgerc.graphql");
+    let gqlforgerc_json: &str = include_str!("../../../generated/.gqlforgerc.schema.json");
 
-    let tailcall_rc = Path::new(folder_path).join(TAILCALL_RC);
-    let tailcall_rc_schema = Path::new(folder_path).join(TAILCALL_RC_SCHEMA);
+    let gqlforge_rc = Path::new(folder_path).join(GQLFORGE_RC);
+    let gqlforge_rc_schema = Path::new(folder_path).join(GQLFORGE_RC_SCHEMA);
     let graphql_rc = Path::new(folder_path).join(GRAPHQL_RC);
 
-    // .tailcallrc.graphql
+    // .gqlforgerc.graphql
     confirm_and_write(
         runtime.clone(),
-        &tailcall_rc.display().to_string(),
-        tailcallrc.as_bytes(),
+        &gqlforge_rc.display().to_string(),
+        gqlforgerc.as_bytes(),
     )
     .await?;
 
     // .graphqlrc.yml
     confirm_and_write_yml(runtime.clone(), &graphql_rc).await?;
 
-    // .tailcallrc.schema.json
+    // .gqlforgerc.schema.json
     confirm_and_write(
         runtime.clone(),
-        &tailcall_rc_schema.display().to_string(),
-        tailcallrc_json.as_bytes(),
+        &gqlforge_rc_schema.display().to_string(),
+        gqlforgerc_json.as_bytes(),
     )
     .await?;
 
@@ -56,7 +56,7 @@ pub(super) async fn init_command(runtime: TargetRuntime, folder_path: &str) -> R
 fn default_graphqlrc() -> serde_yaml_ng::Value {
     serde_yaml_ng::Value::Mapping(serde_yaml_ng::mapping::Mapping::from_iter([(
         "schema".into(),
-        serde_yaml_ng::Value::Sequence(vec!["./.tailcallrc.graphql".into(), "./*.graphql".into()]),
+        serde_yaml_ng::Value::Sequence(vec!["./.gqlforgerc.graphql".into(), "./*.graphql".into()]),
     )]))
 }
 

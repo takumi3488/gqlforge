@@ -6,12 +6,12 @@ use crate::core::http::API_URL_PREFIX;
 use crate::core::print_schema;
 use crate::core::rest::{EndpointSet, Unchecked};
 
-pub const TAILCALL_RC: &str = ".tailcallrc.graphql";
+pub const GQLFORGE_RC: &str = ".gqlforgerc.graphql";
 pub const GRAPHQL_RC: &str = ".graphqlrc.yml";
-pub const TAILCALL_RC_SCHEMA: &str = ".tailcallrc.schema.json";
+pub const GQLFORGE_RC_SCHEMA: &str = ".gqlforgerc.schema.json";
 
 lazy_static! {
-    pub static ref TRACKER: tailcall_tracker::Tracker = tailcall_tracker::Tracker::default();
+    pub static ref TRACKER: gqlforge_tracker::Tracker = gqlforge_tracker::Tracker::default();
 }
 
 pub(super) fn log_endpoint_set(endpoint_set: &EndpointSet<Unchecked>) {

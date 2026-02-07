@@ -44,7 +44,7 @@ pub mod worker;
 pub mod worker_hooks;
 pub mod wrapping_type;
 
-// Re-export everything from `tailcall_macros` as `macros`
+// Re-export everything from `gqlforge_macros` as `macros`
 use std::borrow::Cow;
 use std::hash::Hash;
 use std::num::NonZeroU64;
@@ -56,7 +56,7 @@ pub use error::{Error, Result};
 use http::Response;
 use ir::model::IoId;
 pub use mustache::Mustache;
-pub use tailcall_macros as macros;
+pub use gqlforge_macros as macros;
 pub use transform::Transform;
 pub use wrapping_type::Type;
 

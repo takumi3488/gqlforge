@@ -4,11 +4,11 @@ use criterion::{black_box, Criterion};
 use derive_setters::Setters;
 use http::header::HeaderMap;
 use serde_json::json;
-use tailcall::core::endpoint::Endpoint;
-use tailcall::core::has_headers::HasHeaders;
-use tailcall::core::http::RequestTemplate;
-use tailcall::core::json::JsonLike;
-use tailcall::core::path::{PathString, PathValue, ValueString};
+use gqlforge::core::endpoint::Endpoint;
+use gqlforge::core::has_headers::HasHeaders;
+use gqlforge::core::http::RequestTemplate;
+use gqlforge::core::json::JsonLike;
+use gqlforge::core::path::{PathString, PathValue, ValueString};
 
 #[derive(Setters)]
 struct Context {

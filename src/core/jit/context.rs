@@ -121,7 +121,7 @@ mod test {
     use crate::core::jit::{OperationPlan, Request};
 
     fn setup(query: &str) -> anyhow::Result<OperationPlan<ConstValue>> {
-        let sdl = std::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER)?;
+        let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER)?;
         let config = Config::from_sdl(&sdl).to_result()?;
         let blueprint = Blueprint::try_from(&ConfigModule::from(config))?;
         let request = Request::new(query);

@@ -4,7 +4,7 @@ use std::fmt::Debug;
 use lazy_static::lazy_static;
 use schemars::schema::{InstanceType, Schema, SchemaObject};
 use strum::IntoEnumIterator;
-use tailcall_macros::Doc;
+use gqlforge_macros::Doc;
 
 use crate::core::json::JsonLike;
 
@@ -151,7 +151,7 @@ impl Scalar {
     }
     pub fn scalar_definition(&self) -> async_graphql::parser::types::TypeSystemDefinition {
         let schemars = self.schema();
-        tailcall_typedefs_common::scalar_definition::into_scalar_definition(schemars, &self.name())
+        gqlforge_typedefs_common::scalar_definition::into_scalar_definition(schemars, &self.name())
     }
     pub fn schema(&self) -> Schema {
         let type_of = self.ty();

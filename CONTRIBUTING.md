@@ -1,1 +1,1 @@
-Refer: https://tailcall.run/docs/contribution-guidelines/
+Refer: https://gqlforge.pages.dev/docs/contribution-guidelines/

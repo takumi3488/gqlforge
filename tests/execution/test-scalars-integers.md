@@ -27,7 +27,7 @@ type Query {
 ```
 
 ```yml @test
-# TODO: some of the tests do not work properly due to the issue https://github.com/tailcallhq/tailcall/issues/2039
+# TODO: some of the tests do not work properly due to the issue https://github.com/takumi3488/gqlforge/issues/2039
 
 # Valid value tests
 - method: POST

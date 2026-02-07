@@ -13,7 +13,7 @@ use opentelemetry_semantic_conventions::trace::{
 };
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use tailcall_http_cache::HttpCacheManager;
+use gqlforge_http_cache::HttpCacheManager;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use super::HttpIO;

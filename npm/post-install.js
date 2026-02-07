@@ -15,7 +15,7 @@ if (platform === "win32") {
   libc = libcFamily === GLIBC ? "-gnu" : libcFamily === MUSL ? "-musl" : ""
 }
 
-const pkg = `@tailcallhq/core-${platform}-${arch}${libc}`
+const pkg = `@gqlforge/core-${platform}-${arch}${libc}`
 
 try {
   // @ts-ignore

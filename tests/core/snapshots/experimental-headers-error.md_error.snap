@@ -1,7 +1,6 @@
 ---
 source: tests/core/spec.rs
 expression: errors
-snapshot_kind: text
 ---
 [
   {
@@ -25,7 +24,7 @@ snapshot_kind: text
     "description": null
   },
   {
-    "message": "Experimental headers must start with 'x-' or 'X-'. Got: 'non-experimental'",
+    "message": "Experimental headers must start with 'x-' or 'X-'. Got: 'gqlforge'",
     "trace": [
       "schema",
       "@server",
@@ -35,7 +34,7 @@ snapshot_kind: text
     "description": null
   },
   {
-    "message": "Experimental headers must start with 'x-' or 'X-'. Got: 'tailcall'",
+    "message": "Experimental headers must start with 'x-' or 'X-'. Got: 'non-experimental'",
     "trace": [
       "schema",
       "@server",

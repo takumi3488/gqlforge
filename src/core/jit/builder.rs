@@ -465,11 +465,11 @@ mod tests {
             mutation {
               createUser(user: {
                 id: 101,
-                name: "Tailcall",
-                email: "tailcall@tailcall.run",
+                name: "Gqlforge",
+                email: "gqlforge@gqlforge.pages.dev",
                 phone: "2345234234",
-                username: "tailcall",
-                website: "tailcall.run"
+                username: "gqlforge",
+                website: "gqlforge.pages.dev"
               }) {
                 id
                 name
@@ -580,8 +580,8 @@ mod tests {
             mutation {
               createPost(post:{
                 userId:123,
-                title:"tailcall",
-                body:"tailcall test"
+                title:"gqlforge",
+                body:"gqlforge test"
               }) {
                 id
               }

@@ -4,7 +4,7 @@ use std::convert::identity;
 use std::fmt::{Display, Write};
 use std::ops::Deref;
 
-use tailcall_macros::MergeRight;
+use gqlforge_macros::MergeRight;
 use tailcall_valid::{Valid, Validator};
 
 use crate::core::config::directive::to_directive;
@@ -25,7 +25,7 @@ const ENTITIES_ARG_NAME: &str = "representations";
 const ENTITIES_TYPE_NAME: &str = "_Any";
 
 /// Adds compatibility layer for Apollo Federation v2
-/// so tailcall may act as a Federation Subgraph.
+/// so gqlforge may act as a Federation Subgraph.
 /// Followed by [spec](https://www.apollographql.com/docs/federation/subgraph-spec/)
 pub struct Subgraph;
 
@@ -470,7 +470,7 @@ mod tests {
         #[test]
         fn test_non_value_template() {
             let http = Http {
-                url: "http://tailcall.run/users/{{.args.id}}".to_string(),
+                url: "http://gqlforge.pages.dev/users/{{.args.id}}".to_string(),
                 query: vec![URLQuery {
                     key: "{{.env.query.key}}".to_string(),
                     value: "{{.args.query.value}}".to_string(),
@@ -487,7 +487,7 @@ mod tests {
         #[test]
         fn test_extract_http() {
             let http = Http {
-                url: "http://tailcall.run/users/{{.value.id}}".to_string(),
+                url: "http://gqlforge.pages.dev/users/{{.value.id}}".to_string(),
                 body: Some(serde_json::Value::String(
                     r#"{ "obj": "{{.value.obj}}"} "#.to_string(),
                 )),

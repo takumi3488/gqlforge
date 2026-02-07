@@ -4,7 +4,7 @@ use std::path::Path;
 
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use tailcall::core::http::Method;
+use gqlforge::core::http::Method;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
@@ -100,7 +100,7 @@ impl APIBody {
                     &[file, prefix] => match prefix {
                         "grpc/reflection" => {
                             let path =
-                                Path::new(tailcall_fixtures::grpc::reflection::SELF).join(file);
+                                Path::new(gqlforge_fixtures::grpc::reflection::SELF).join(file);
                             std::fs::read(&path).unwrap_or_else(|_| {
                                 core::panic!("Failed to read file by path: {}", path.display())
                             })

@@ -43,7 +43,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./tailcall-aws-lambda
+        working-directory: ./gqlforge-aws-lambda
 
     steps:
       - uses: actions/checkout@v4
@@ -76,7 +76,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./tailcall-wasm
+        working-directory: ./gqlforge-wasm
     steps:
       - uses: actions/checkout@v4
       - name: Install Rust
@@ -102,7 +102,7 @@ jobs:
     runs-on: ubuntu-latest
     defaults:
       run:
-        working-directory: ./tailcall-cloudflare
+        working-directory: ./gqlforge-cloudflare
 
     steps:
       - uses: actions/checkout@v4
@@ -321,21 +321,21 @@ jobs:
         uses: JS-DevTools/npm-publish@main
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          package: npm/@tailcallhq/core-${{matrix.build}}
+          package: npm/@gqlforge/core-${{matrix.build}}
           access: public
 
       - name: Rename Binary with Target Name
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           pwd
-          cp target/${{ matrix.target }}/release/tailcall${{ matrix.ext }} target/${{ matrix.target }}/release/tailcall-${{ matrix.target }}${{ matrix.ext }}
+          cp target/${{ matrix.target }}/release/gqlforge${{ matrix.ext }} target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
 
       - name: Upload ${{ matrix.target }} Binary
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: xresloader/upload-to-github-release@v1
         with:
           release_id: ${{ needs.draft_release.outputs.create_release_id }}
-          file: target/${{ matrix.target }}/release/tailcall-${{ matrix.target }}${{ matrix.ext }}
+          file: target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
           overwrite: true
   release_lambda:
     name: Release (AWS Lambda)
@@ -377,18 +377,18 @@ jobs:
           RUSTFLAGS: -C target-feature=+crt-static -C linker=rust-lld
         run: |
           # Disable sanitizer features in dependencies
-          CARGO_FEATURE_SANITIZE=0 CARGO_FEATURE_SANITIZE_MEMORY=0 cargo lambda build -p tailcall-aws-lambda --release --target x86_64-unknown-linux-musl
+          CARGO_FEATURE_SANITIZE=0 CARGO_FEATURE_SANITIZE_MEMORY=0 cargo lambda build -p gqlforge-aws-lambda --release --target x86_64-unknown-linux-musl
 
       - name: Rename Binary with Target Name
         run: |
           pwd
-          cp target/lambda/tailcall-aws-lambda/bootstrap target/lambda/tailcall-aws-lambda/tailcall-aws-lambda-bootstrap
+          cp target/lambda/gqlforge-aws-lambda/bootstrap target/lambda/gqlforge-aws-lambda/gqlforge-aws-lambda-bootstrap
 
       - name: Upload AWS Lambda Bootstrap Binary
         uses: xresloader/upload-to-github-release@v1
         with:
           release_id: ${{ needs.draft_release.outputs.create_release_id }}
-          file: target/lambda/tailcall-aws-lambda/tailcall-aws-lambda-bootstrap
+          file: target/lambda/gqlforge-aws-lambda/gqlforge-aws-lambda-bootstrap
           overwrite: true
   semantic_release:
     name: Semantic Release
@@ -438,14 +438,14 @@ jobs:
           APP_VERSION: ${{needs.draft_release.outputs.create_release_name }}
         run: |
           cd npm
-          npm run gen-root -- --version ${{ env.APP_VERSION }} --name @tailcallhq/tailcall
+          npm run gen-root -- --version ${{ env.APP_VERSION }} --name @gqlforge/gqlforge
       - name: Setup .npmrc file to publish to npm
         run: echo "//registry.npmjs.org/:_authToken=$NODE_AUTH_TOKEN" > ~/.npmrc
       - name: Publish packages
         uses: JS-DevTools/npm-publish@main
         with:
           token: ${{ secrets.NPM_TOKEN }}
-          package: npm/@tailcallhq/tailcall
+          package: npm/@gqlforge/gqlforge
           access: public
 
         env:
@@ -455,7 +455,7 @@ jobs:
   build-and-push-image:
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/tc-server
+      IMAGE_NAME: ${{ github.repository }}/gf-server
       APP_VERSION: ${{ needs.draft_release.outputs.create_release_name }} # Ensure APP_VERSION is set correctly
     needs: [draft_release, release]
     if: (startsWith(github.event.head_commit.message, 'feat') || startsWith(github.event.head_commit.message, 'fix')) && (github.event_name == 'push' && github.ref == 'refs/heads/main')
@@ -506,7 +506,7 @@ jobs:
     steps:
       - uses: actions/checkout@v4
         with:
-          repository: tailcallhq/homebrew-tailcall
+          repository: takumi3488/homebrew-gqlforge
           ref: main
           token: ${{ secrets.HOMEBREW_ACCESS }}
 

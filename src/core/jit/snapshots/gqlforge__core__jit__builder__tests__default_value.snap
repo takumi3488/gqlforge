@@ -1,0 +1,58 @@
+---
+source: src/core/jit/builder.rs
+expression: plan.selection
+---
+[
+    Field {
+        id: 0,
+        name: "createPost",
+        output_name: "createPost",
+        ir: "Some(..)",
+        type_of: Post,
+        type_condition: Some(
+            "Mutation",
+        ),
+        args: [
+            Arg {
+                id: 0,
+                name: "post",
+                type_of: InputPost!,
+                value: Some(
+                    Object(
+                        {
+                            Name(
+                                "userId",
+                            ): Number(
+                                Number(123),
+                            ),
+                            Name(
+                                "title",
+                            ): String(
+                                "gqlforge",
+                            ),
+                            Name(
+                                "body",
+                            ): String(
+                                "gqlforge test",
+                            ),
+                        },
+                    ),
+                ),
+                default_value: None,
+            },
+        ],
+        selection: [
+            Field {
+                id: 1,
+                name: "id",
+                output_name: "id",
+                type_of: ID!,
+                type_condition: Some(
+                    "Post",
+                ),
+                directives: [],
+            },
+        ],
+        directives: [],
+    },
+]

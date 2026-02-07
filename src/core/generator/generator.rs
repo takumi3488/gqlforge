@@ -192,7 +192,7 @@ pub mod test {
     use crate::core::proto_reader::ProtoMetadata;
 
     fn compile_protobuf(files: &[&str]) -> anyhow::Result<FileDescriptorSet> {
-        Ok(protox::compile(files, [tailcall_fixtures::protobuf::SELF])?)
+        Ok(protox::compile(files, [gqlforge_fixtures::protobuf::SELF])?)
     }
 
     #[derive(Deserialize)]
@@ -262,14 +262,14 @@ pub mod test {
 
     #[test]
     fn should_generate_config_from_proto() -> anyhow::Result<()> {
-        let news_proto = tailcall_fixtures::protobuf::NEWS;
+        let news_proto = gqlforge_fixtures::protobuf::NEWS;
         let set = compile_protobuf(&[news_proto])?;
 
         let cfg_module = Generator::default()
             .inputs(vec![Input::Proto {
                 metadata: ProtoMetadata {
                     descriptor_set: set,
-                    path: "../../../tailcall-fixtures/fixtures/protobuf/news.proto".to_string(),
+                    path: "../../../gqlforge-fixtures/fixtures/protobuf/news.proto".to_string(),
                 },
                 url: "http://localhost:50051".to_string(),
                 connect_rpc: None,
@@ -284,7 +284,7 @@ pub mod test {
     fn should_generate_config_from_configs() -> anyhow::Result<()> {
         let cfg_module = Generator::default()
             .inputs(vec![Input::Config {
-                schema: std::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER)?,
+                schema: std::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER)?,
                 source: crate::core::config::Source::GraphQL,
             }])
             .generate(true)?;
@@ -318,12 +318,12 @@ pub mod test {
     #[tokio::test]
     async fn should_generate_combined_config() -> anyhow::Result<()> {
         // Proto input
-        let news_proto = tailcall_fixtures::protobuf::NEWS;
+        let news_proto = gqlforge_fixtures::protobuf::NEWS;
         let proto_set = compile_protobuf(&[news_proto])?;
         let proto_input = Input::Proto {
             metadata: ProtoMetadata {
                 descriptor_set: proto_set,
-                path: "../../../tailcall-fixtures/fixtures/protobuf/news.proto".to_string(),
+                path: "../../../gqlforge-fixtures/fixtures/protobuf/news.proto".to_string(),
             },
             url: "http://localhost:50051".to_string(),
             connect_rpc: None,
@@ -331,7 +331,7 @@ pub mod test {
 
         // Config input
         let config_input = Input::Config {
-            schema: std::fs::read_to_string(tailcall_fixtures::configs::JSONPLACEHOLDER)?,
+            schema: std::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER)?,
             source: crate::core::config::Source::GraphQL,
         };
 

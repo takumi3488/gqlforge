@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 
 use derive_setters::Setters;
 use http::header::{HeaderMap, HeaderValue};
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 use url::Url;
 
 use super::query_encoder::QueryEncoder;
@@ -253,7 +253,7 @@ impl TryFrom<Endpoint> for RequestTemplate {
 
 impl<Ctx: PathString + HasHeaders + PathValue> CacheKey<Ctx> for RequestTemplate {
     fn cache_key(&self, ctx: &Ctx) -> Option<IoId> {
-        let mut hasher = TailcallHasher::default();
+        let mut hasher = GqlforgeHasher::default();
         let state = &mut hasher;
 
         self.method.hash(state);

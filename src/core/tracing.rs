@@ -71,8 +71,8 @@ where
     }
 }
 
-pub fn default_tracing_tailcall() -> impl Subscriber {
-    default_tracing_for_name("tailcall")
+pub fn default_tracing_gqlforge() -> impl Subscriber {
+    default_tracing_for_name("gqlforge")
 }
 
 pub fn default_tracing_for_name(name: &'static str) -> impl Subscriber {
@@ -80,8 +80,8 @@ pub fn default_tracing_for_name(name: &'static str) -> impl Subscriber {
 }
 
 pub fn get_log_level() -> Option<Level> {
-    const LONG_ENV_FILTER_VAR_NAME: &str = "TAILCALL_LOG_LEVEL";
-    const SHORT_ENV_FILTER_VAR_NAME: &str = "TC_LOG_LEVEL";
+    const LONG_ENV_FILTER_VAR_NAME: &str = "GQLFORGE_LOG_LEVEL";
+    const SHORT_ENV_FILTER_VAR_NAME: &str = "GF_LOG_LEVEL";
 
     env::var(LONG_ENV_FILTER_VAR_NAME)
         .or(env::var(SHORT_ENV_FILTER_VAR_NAME))
@@ -103,8 +103,8 @@ where
         ))
 }
 
-pub fn tailcall_filter_target() -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {
-    filter_target("tailcall")
+pub fn gqlforge_filter_target() -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {
+    filter_target("gqlforge")
 }
 
 pub fn filter_target(name: &'static str) -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {

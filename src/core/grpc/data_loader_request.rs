@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::hash::{Hash, Hasher};
 
 use anyhow::Result;
-use tailcall_hasher::TailcallHasher;
+use gqlforge_hasher::GqlforgeHasher;
 
 use super::request_template::RenderedRequestTemplate;
 
@@ -28,11 +28,11 @@ impl Hash for DataLoaderRequest {
 
 impl PartialEq for DataLoaderRequest {
     fn eq(&self, other: &Self) -> bool {
-        let mut hasher_self = TailcallHasher::default();
+        let mut hasher_self = GqlforgeHasher::default();
         self.hash(&mut hasher_self);
         let hash_self = hasher_self.finish();
 
-        let mut hasher_other = TailcallHasher::default();
+        let mut hasher_other = GqlforgeHasher::default();
         other.hash(&mut hasher_other);
         let hash_other = hasher_other.finish();
 
@@ -56,7 +56,7 @@ mod tests {
 
     use http::header::{HeaderMap, HeaderName, HeaderValue};
     use pretty_assertions::assert_eq;
-    use tailcall_fixtures::protobuf;
+    use gqlforge_fixtures::protobuf;
     use url::Url;
 
     use super::DataLoaderRequest;

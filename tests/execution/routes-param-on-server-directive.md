@@ -4,7 +4,7 @@
 server:
   port: 8000
   routes:
-    graphQL: "/tailcall-gql"
+    graphQL: "/gqlforge-gql"
     status: "/health"
 ```
 
@@ -35,7 +35,7 @@ type Query {
 
 ```yml @test
 - method: POST
-  url: http://localhost:8080/tailcall-gql
+  url: http://localhost:8080/gqlforge-gql
   body:
     query: query { users { name } }
 

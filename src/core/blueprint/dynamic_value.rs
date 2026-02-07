@@ -21,7 +21,7 @@ impl<A: Default> Default for DynamicValue<A> {
 impl<A> DynamicValue<A> {
     /// This function is used to prepend a string to every Mustache Expression.
     /// This is useful when we want to hide a Mustache data argument from the
-    /// user and make the use of Tailcall easier
+    /// user and make the use of Gqlforge easier
     pub fn prepend(self, name: &str) -> Self {
         match self {
             DynamicValue::Value(value) => DynamicValue::Value(value),

@@ -346,7 +346,7 @@ fn print_directive_type_def(directive: &DirectiveDefinition) -> String {
     let locations = directive
         .locations
         .iter()
-        .map(|d| tailcall_typedefs_common::directive_definition::from_directive_location(d.node))
+        .map(|d| gqlforge_typedefs_common::directive_definition::from_directive_location(d.node))
         .collect::<Vec<_>>();
     let repeatable = if directive.is_repeatable {
         " repeatable"

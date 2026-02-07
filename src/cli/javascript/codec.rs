@@ -29,7 +29,7 @@ impl<'js> FromJs<'js> for Command {
         } else {
             Err(rquickjs::Error::FromJs {
                 from: "object",
-                to: "tailcall::cli::javascript::request_filter::Command",
+                to: "gqlforge::cli::javascript::request_filter::Command",
                 message: Some("object must contain either request or response".to_string()),
             })
         }
@@ -127,7 +127,7 @@ impl<'js> FromJs<'js> for Scheme {
         } else {
             Err(rquickjs::Error::FromJs {
                 from: "string",
-                to: "tailcall::cli::javascript::js_request::Scheme",
+                to: "gqlforge::cli::javascript::js_request::Scheme",
                 message: Some("scheme must be `http` or `https`".to_string()),
             })
         }

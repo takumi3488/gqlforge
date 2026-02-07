@@ -37,20 +37,20 @@ async function genPlatformPackage() {
     repository: repository!,
     homepage: homepage!,
     keywords: keywords!,
-    name: `@tailcallhq/core-${build}`,
+    name: `@gqlforge/core-${build}`,
     version,
-    bin: {tailcall: ext ? `./bin/tailcall${ext}` : `./bin/tailcall`},
+    bin: {gqlforge: ext ? `./bin/gqlforge${ext}` : `./bin/gqlforge`},
     os: [os],
     cpu: [cpu],
   }
 
   if (libc) platformPackage.libc = [libc]
 
-  const packagePath = `@tailcallhq/core-${build}`
+  const packagePath = `@gqlforge/core-${build}`
   const binPath = `${packagePath}/bin`
 
-  const targetPath = ext ? `../target/${target}/release/tailcall${ext}` : `../target/${target}/release/tailcall`
-  const tcPath = ext ? `${binPath}/tailcall${ext}` : `${binPath}/tailcall`
+  const targetPath = ext ? `../target/${target}/release/gqlforge${ext}` : `../target/${target}/release/gqlforge`
+  const tcPath = ext ? `${binPath}/gqlforge${ext}` : `${binPath}/gqlforge`
   const packageJsonPath = `${packagePath}/package.json`
   const readmePath = "../README.md"
 

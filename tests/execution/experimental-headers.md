@@ -4,7 +4,7 @@
 server:
   headers:
     experimental:
-      - "x-tailcall"
+      - "x-gqlforge"
       - "X-experimental"
 ```
 
@@ -30,7 +30,7 @@ type User {
   response:
     status: 200
     headers:
-      X-tailcall: "tailcall-header"
+      X-gqlforge: "gqlforge-header"
       x-experimental: "experimental-header"
       x-not-allowed: "not-allowed-header"
     body:
