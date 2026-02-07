@@ -151,9 +151,9 @@ impl Transform for AmbiguousType {
 
 #[cfg(test)]
 mod tests {
+    use gqlforge_fixtures::protobuf;
     use insta::assert_snapshot;
     use prost_reflect::prost_types::FileDescriptorSet;
-    use gqlforge_fixtures::protobuf;
     use tailcall_valid::Validator;
 
     use crate::core::config::transformer::AmbiguousType;

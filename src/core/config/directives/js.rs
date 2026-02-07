@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use gqlforge_macros::{DirectiveDefinition, InputDefinition};
+use serde::{Deserialize, Serialize};
 
 #[derive(
     Serialize,

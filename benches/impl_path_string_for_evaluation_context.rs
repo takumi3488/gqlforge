@@ -6,13 +6,6 @@ use std::time::Duration;
 use async_graphql::{Name, Value};
 use async_trait::async_trait;
 use criterion::{BenchmarkId, Criterion};
-use http::header::{HeaderMap, HeaderValue};
-use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-use hyper::body::Bytes;
-use indexmap::IndexMap;
-use once_cell::sync::Lazy;
-use reqwest::{Client, Request};
-use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use gqlforge::core::blueprint::{Server, Upstream};
 use gqlforge::core::cache::InMemoryCache;
 use gqlforge::core::http::{RequestContext, Response};
@@ -21,6 +14,13 @@ use gqlforge::core::path::PathString;
 use gqlforge::core::runtime::TargetRuntime;
 use gqlforge::core::{EnvIO, FileIO, HttpIO};
 use gqlforge_http_cache::HttpCacheManager;
+use http::header::{HeaderMap, HeaderValue};
+use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
+use hyper::body::Bytes;
+use indexmap::IndexMap;
+use once_cell::sync::Lazy;
+use reqwest::{Client, Request};
+use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 
 struct Http {
     client: ClientWithMiddleware,

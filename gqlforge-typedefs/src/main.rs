@@ -7,12 +7,12 @@ use std::process::exit;
 use std::sync::Arc;
 
 use anyhow::{anyhow, Result};
-use schemars::schema::RootSchema;
-use serde_json::{json, Value};
 use gqlforge::cli;
 use gqlforge::core::config::RuntimeConfig;
 use gqlforge::core::tracing::default_tracing_for_name;
 use gqlforge::core::FileIO;
+use schemars::schema::RootSchema;
+use serde_json::{json, Value};
 
 static JSON_SCHEMA_FILE: &str = "generated/.gqlforgerc.schema.json";
 static GRAPHQL_SCHEMA_FILE: &str = "generated/.gqlforgerc.graphql";

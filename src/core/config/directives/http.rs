@@ -1,6 +1,6 @@
+use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 
 use crate::core::config::{Encoding, KeyValue, URLQuery};
 use crate::core::http::Method;

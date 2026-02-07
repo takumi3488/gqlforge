@@ -327,9 +327,9 @@ mod tests {
     use std::collections::{BTreeMap, BTreeSet};
 
     use async_graphql::Name;
+    use gqlforge_fixtures::protobuf;
     use indexmap::IndexMap;
     use pretty_assertions::assert_eq;
-    use gqlforge_fixtures::protobuf;
     use tailcall_valid::{Valid, Validator};
 
     use crate::core::blueprint::GrpcMethod;

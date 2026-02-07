@@ -6,11 +6,11 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
 use anyhow::anyhow;
-use http::header::{HeaderName, HeaderValue};
-use hyper::body::Bytes;
 use gqlforge::core::http::Response;
 use gqlforge::core::ir::Error;
 use gqlforge::core::HttpIO;
+use http::header::{HeaderName, HeaderValue};
+use hyper::body::Bytes;
 
 use super::runtime::{ExecutionMock, ExecutionSpec};
 

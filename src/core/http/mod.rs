@@ -22,5 +22,7 @@ pub mod showcase;
 mod telemetry;
 mod transformations;
 
-pub static GQLFORGE_HTTPS_ORIGIN: HeaderValue = HeaderValue::from_static("https://gqlforge.pages.dev");
-pub static GQLFORGE_HTTP_ORIGIN: HeaderValue = HeaderValue::from_static("http://gqlforge.pages.dev");
+pub static GQLFORGE_HTTPS_ORIGIN: HeaderValue =
+    HeaderValue::from_static("https://gqlforge.pages.dev");
+pub static GQLFORGE_HTTP_ORIGIN: HeaderValue =
+    HeaderValue::from_static("http://gqlforge.pages.dev");

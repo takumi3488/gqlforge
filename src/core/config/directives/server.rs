@@ -1,9 +1,9 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use derive_getters::Getters;
+use gqlforge_macros::DirectiveDefinition;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use gqlforge_macros::DirectiveDefinition;
 
 use crate::core::config::headers::Headers;
 use crate::core::config::{merge_key_value_vecs, KeyValue};

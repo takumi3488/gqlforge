@@ -2,10 +2,10 @@ use std::path::Path;
 
 use anyhow::Result;
 use criterion::{black_box, Criterion};
-use rand::{thread_rng, Fill};
-use serde_json::{json, Value};
 use gqlforge::core::blueprint::GrpcMethod;
 use gqlforge::core::grpc::protobuf::ProtobufSet;
+use rand::{thread_rng, Fill};
+use serde_json::{json, Value};
 
 const PROTO_DIR: &str = "benches/grpc";
 const PROTO_FILE: &str = "dummy.proto";

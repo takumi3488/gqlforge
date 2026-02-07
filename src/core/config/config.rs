@@ -4,13 +4,13 @@ use std::fmt::{self, Display};
 use anyhow::{anyhow, Result};
 use async_graphql::parser::types::ServiceDocument;
 use derive_setters::Setters;
+use gqlforge_typedefs_common::directive_definition::DirectiveDefinition;
+use gqlforge_typedefs_common::input_definition::InputDefinition;
+use gqlforge_typedefs_common::ServiceDocumentBuilder;
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum::IntoEnumIterator;
-use gqlforge_typedefs_common::directive_definition::DirectiveDefinition;
-use gqlforge_typedefs_common::input_definition::InputDefinition;
-use gqlforge_typedefs_common::ServiceDocumentBuilder;
 use tailcall_valid::{Valid, Validator};
 
 use super::directive::Directive;

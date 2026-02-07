@@ -4,12 +4,12 @@ use std::hash::{Hash, Hasher};
 use anyhow::Result;
 use async_graphql::parser::types::{ExecutableDocument, OperationType};
 use async_graphql::{BatchResponse, Executor, Value};
+use gqlforge_hasher::GqlforgeHasher;
 use http::header::{HeaderMap, HeaderValue, CACHE_CONTROL, CONTENT_TYPE};
 use http::{Response, StatusCode};
 use hyper::Body;
 use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
-use gqlforge_hasher::GqlforgeHasher;
 
 use super::jit::{BatchResponse as JITBatchResponse, JITExecutor};
 

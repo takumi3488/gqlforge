@@ -487,8 +487,8 @@ pub fn from_proto(descriptor_sets: &[FileDescriptorSet], query: &str, url: &str)
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use prost_reflect::prost_types::FileDescriptorSet;
     use gqlforge_fixtures::protobuf;
+    use prost_reflect::prost_types::FileDescriptorSet;
 
     use super::from_proto;
     use crate::core::config::ConfigModule;

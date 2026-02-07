@@ -3,10 +3,10 @@ use std::path::Path;
 use std::str::FromStr;
 
 use anyhow::anyhow;
-use markdown::mdast::Node;
-use markdown::ParseOptions;
 use gqlforge::core::config::Source;
 use gqlforge::core::FileIO;
+use markdown::mdast::Node;
+use markdown::ParseOptions;
 
 use crate::file::NativeFileTest;
 

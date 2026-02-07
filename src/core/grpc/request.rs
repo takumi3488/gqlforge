@@ -45,12 +45,12 @@ mod tests {
 
     use anyhow::Result;
     use async_trait::async_trait;
+    use gqlforge_fixtures::protobuf;
     use http::header::HeaderMap;
     use http::{Method, StatusCode};
     use hyper::body::Bytes;
     use reqwest::Request;
     use serde_json::json;
-    use gqlforge_fixtures::protobuf;
     use tonic::{Code, Status};
 
     use crate::core::blueprint::GrpcMethod;

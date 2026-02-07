@@ -53,10 +53,10 @@ use async_graphql::{Pos, Positioned};
 use async_graphql_value::ConstValue;
 pub use errata::Errata;
 pub use error::{Error, Result};
+pub use gqlforge_macros as macros;
 use http::Response;
 use ir::model::IoId;
 pub use mustache::Mustache;
-pub use gqlforge_macros as macros;
 pub use transform::Transform;
 pub use wrapping_type::Type;
 

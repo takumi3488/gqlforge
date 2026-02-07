@@ -4,8 +4,8 @@ use std::borrow::Cow;
 use std::hash::{Hash, Hasher};
 
 use derive_setters::Setters;
-use http::header::{HeaderMap, HeaderValue};
 use gqlforge_hasher::GqlforgeHasher;
+use http::header::{HeaderMap, HeaderValue};
 use tracing::info;
 
 use crate::core::config::{GraphQLOperationType, KeyValue};

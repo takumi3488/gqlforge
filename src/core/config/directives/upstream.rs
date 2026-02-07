@@ -1,8 +1,8 @@
 use std::collections::BTreeSet;
 
 use derive_setters::Setters;
-use serde::{Deserialize, Serialize};
 use gqlforge_macros::{DirectiveDefinition, InputDefinition};
+use serde::{Deserialize, Serialize};
 
 use crate::core::macros::MergeRight;
 use crate::core::{default_verify_ssl, is_default, verify_ssl_is_default};

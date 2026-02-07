@@ -11,10 +11,6 @@
 npm/@gqlforge
 node_modules/
 
-# cloudflare
-.wrangler/
-gqlforge-/cloudflare/build
-
 *.snap.new
 flamegraph.svg
 perf.data

@@ -7,10 +7,6 @@ pub mod test {
 
     use anyhow::{anyhow, Result};
     use async_graphql::Value;
-    use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
-    use hyper::body::Bytes;
-    use reqwest::Client;
-    use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
     use gqlforge::cli::javascript::init_worker_io;
     use gqlforge::core::blueprint::{Script, Upstream};
     use gqlforge::core::cache::InMemoryCache;
@@ -19,6 +15,10 @@ pub mod test {
     use gqlforge::core::worker::{Command, Event};
     use gqlforge::core::{EnvIO, FileIO, HttpIO};
     use gqlforge_http_cache::HttpCacheManager;
+    use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
+    use hyper::body::Bytes;
+    use reqwest::Client;
+    use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
     use tokio::io::{AsyncReadExt, AsyncWriteExt};
 
     #[derive(Clone)]
@@ -159,10 +159,10 @@ pub mod test {
 
 #[cfg(test)]
 mod server_spec {
-    use reqwest::Client;
-    use serde_json::json;
     use gqlforge::cli::server::Server;
     use gqlforge::core::config::reader::ConfigReader;
+    use reqwest::Client;
+    use serde_json::json;
 
     async fn test_server(configs: &[&str], url: &str) {
         let runtime = crate::test::init(None);

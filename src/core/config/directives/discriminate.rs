@@ -1,5 +1,5 @@
-use serde::{Deserialize, Serialize};
 use gqlforge_macros::{DirectiveDefinition, InputDefinition, MergeRight};
+use serde::{Deserialize, Serialize};
 
 use crate::core::is_default;
 

@@ -10,13 +10,13 @@ mod tests {
     #![allow(dead_code)]
     use std::collections::HashSet;
 
-    use schemars::schema::Schema;
-    use schemars::JsonSchema;
     use gqlforge_typedefs_common::directive_definition::{
         into_directive_definition, Attrs, DirectiveDefinition,
     };
     use gqlforge_typedefs_common::scalar_definition::{into_scalar_definition, ScalarDefinition};
     use gqlforge_typedefs_common::{into_schemars, ServiceDocumentBuilder};
+    use schemars::schema::Schema;
+    use schemars::JsonSchema;
 
     #[derive(JsonSchema)]
     struct FooScalar(String);

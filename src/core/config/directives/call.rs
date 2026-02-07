@@ -1,8 +1,8 @@
 use std::collections::BTreeMap;
 
+use gqlforge_macros::DirectiveDefinition;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use gqlforge_macros::DirectiveDefinition;
 
 use crate::core::is_default;
 

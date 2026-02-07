@@ -244,9 +244,9 @@ pub mod tests {
     use std::path::Path;
 
     use anyhow::Result;
+    use gqlforge_fixtures::protobuf;
     use prost_reflect::Value;
     use serde_json::json;
-    use gqlforge_fixtures::protobuf;
 
     use super::*;
     use crate::core::blueprint::GrpcMethod;

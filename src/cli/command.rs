@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
-use strum_macros::Display;
 use gqlforge_version::VERSION;
+use strum_macros::Display;
 
 const ABOUT: &str = r"
    __        _ __           ____

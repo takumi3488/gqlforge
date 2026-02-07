@@ -1,6 +1,6 @@
 use anyhow::Result;
-use serde::{Deserialize, Serialize};
 use gqlforge_macros::{DirectiveDefinition, InputDefinition};
+use serde::{Deserialize, Serialize};
 use tailcall_valid::Validator;
 
 use crate::core::config::{Apollo, ConfigReaderContext, KeyValue};

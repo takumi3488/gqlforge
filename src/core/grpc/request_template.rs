@@ -2,8 +2,8 @@ use std::hash::{Hash, Hasher};
 
 use anyhow::Result;
 use derive_setters::Setters;
-use http::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use gqlforge_hasher::GqlforgeHasher;
+use http::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
 use url::Url;
 
 use super::request::create_grpc_request;
@@ -132,10 +132,10 @@ mod tests {
     use std::collections::HashSet;
 
     use derive_setters::Setters;
+    use gqlforge_fixtures::protobuf;
     use http::header::{HeaderMap, HeaderName, HeaderValue};
     use http::Method;
     use pretty_assertions::assert_eq;
-    use gqlforge_fixtures::protobuf;
 
     use super::{RequestBody, RequestTemplate};
     use crate::core::blueprint::GrpcMethod;

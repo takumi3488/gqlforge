@@ -37,92 +37,6 @@ jobs:
     outputs:
       check_if_build: ${{ steps.check.outputs.check_if_build }}
 
-  test_aws_build:
-    name: Test AWS Lambda Build
-    if: github.event_name == 'pull_request'
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./gqlforge-aws-lambda
-
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install musl-tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y musl-tools
-
-      - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: x86_64-unknown-linux-musl
-          rustflags: -C target-feature=+crt-static -C linker=rust-lld
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-
-      - name: Install cargo-lambda
-        run: pip install cargo-lambda
-
-      - name: Build
-        env:
-          RUSTFLAGS: -C target-feature=+crt-static -C linker=rust-lld
-        run: |
-          # Disable sanitizer features in dependencies
-          CARGO_FEATURE_SANITIZE=0 CARGO_FEATURE_SANITIZE_MEMORY=0 cargo lambda build --release --target x86_64-unknown-linux-musl
-  test_wasm:
-    name: Run Tests (WASM)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./gqlforge-wasm
-    steps:
-      - uses: actions/checkout@v4
-      - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: wasm32-unknown-unknown
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.20.0"
-
-      - name: Install Wasm Pack
-        run: cargo install wasm-bindgen-cli --vers "0.2.106"
-
-      - name: Test WASM
-        run: |
-          cargo install wasm-pack
-          wasm-pack test --node
-
-  test_cf:
-    name: Run Tests (Cloudflare)
-    runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./gqlforge-cloudflare
-
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Install Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: wasm32-unknown-unknown
-
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.20.0"
-
-      - name: Package Install
-        run: npm install
-
-      - name: Test CF
-        run: npm test
-
   test:
     name: Run Tests on ${{ matrix.build }}
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -252,7 +166,7 @@ jobs:
   # TODO: move to separate file to separate responsibilities
   release:
     name: Release
-    needs: [setup_build_matrix, test, draft_release, check_if_build, test_cf, test_wasm]
+    needs: [setup_build_matrix, test, draft_release, check_if_build]
     # TODO: put a condition to separate job that other will depend on to remove duplication?
     if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.check_if_build.outputs.check_if_build == 'true')
     runs-on: ${{ matrix.os || 'ubuntu-latest' }}
@@ -330,63 +244,10 @@ jobs:
           release_id: ${{ needs.draft_release.outputs.create_release_id }}
           file: target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
           overwrite: true
-  release_lambda:
-    name: Release (AWS Lambda)
-    needs: [test, draft_release, check_if_build, test_cf]
-    if: github.event_name == 'push' && github.ref == 'refs/heads/main' && (needs.check_if_build.outputs.check_if_build == 'true')
-    runs-on: ubuntu-latest
-    permissions:
-      contents: write
-      pull-requests: write
-    env:
-      GITHUB_TOKEN: ${{secrets.GITHUBTOKEN}}
-      APP_VERSION: ${{ needs.draft_release.outputs.create_release_name }}
-
-    steps:
-      - name: Checkout Current Branch (Fast)
-        uses: actions/checkout@v4
-      - name: Install musl-tools
-        run: |
-          sudo apt-get update && sudo apt-get install -y musl-tools
-
-      - name: Install Correct Toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: x86_64-unknown-linux-musl
-          rustflags: -C target-feature=+crt-static -C linker=rust-lld
-
-      - name: Install Python
-        uses: actions/setup-python@v5
-        with:
-          python-version: "3.14"
-
-      - name: Install cargo-lambda
-        run: pip install cargo-lambda
-
-      - name: Build
-        env:
-          APP_VERSION: ${{ needs.draft_release.outputs.create_release_name }}
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-          RUSTFLAGS: -C target-feature=+crt-static -C linker=rust-lld
-        run: |
-          # Disable sanitizer features in dependencies
-          CARGO_FEATURE_SANITIZE=0 CARGO_FEATURE_SANITIZE_MEMORY=0 cargo lambda build -p gqlforge-aws-lambda --release --target x86_64-unknown-linux-musl
-
-      - name: Rename Binary with Target Name
-        run: |
-          pwd
-          cp target/lambda/gqlforge-aws-lambda/bootstrap target/lambda/gqlforge-aws-lambda/gqlforge-aws-lambda-bootstrap
-
-      - name: Upload AWS Lambda Bootstrap Binary
-        uses: xresloader/upload-to-github-release@v1
-        with:
-          release_id: ${{ needs.draft_release.outputs.create_release_id }}
-          file: target/lambda/gqlforge-aws-lambda/gqlforge-aws-lambda-bootstrap
-          overwrite: true
   semantic_release:
     name: Semantic Release
     if: (startsWith(github.event.head_commit.message, 'feat') || startsWith(github.event.head_commit.message, 'fix')) && (github.event_name == 'push' && github.ref == 'refs/heads/main')
-    needs: [draft_release, release, release_lambda]
+    needs: [draft_release, release]
     runs-on: ubuntu-latest
     permissions:
       contents: write
@@ -418,8 +279,6 @@ jobs:
           registry-url: https://registry.npmjs.org
       - name: Install Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: wasm32-unknown-unknown
       - name: Setup .npmrc file to publish to npm
         run: echo "//registry.npmjs.org/:_authToken=${{ secrets.NPM_TOKEN }}" > ~/.npmrc
       - name: Install dependencies

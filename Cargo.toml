@@ -1,7 +1,7 @@
 [package]
+edition = "2021"
 name = "gqlforge"
 version = "0.1.0"
-edition = "2021"
 
 [[bin]]
 name = "gqlforge"
@@ -10,204 +10,207 @@ path = "src/main.rs"
 [workspace.dependencies]
 anyhow = "1.0.82"
 async-graphql = { version = "7.0.9" }
+convert_case = "0.6.0"
+derive_more = { version = "1", features = ["from", "debug"] }
 futures-util = { version = "0.3.30" }
-indexmap = "2.2.6"
 headers = "0.3.9" # previous version until hyper is updated to 1+
 http = "0.2.12" # previous version until hyper is updated to 1+
+indexmap = "2.2.6"
 insta = { version = "1.38.0", features = ["json"] }
-tokio = { version = "1.37.0", features = ["rt", "time"] }
-reqwest = { version = "0.11", features = [
-    "json",
-    "rustls-tls",
-], default-features = false }
-tracing = "0.1.40"
 lazy_static = "1.4.0"
-serde_json = { version = "1.0.116", features = ["preserve_order"] }
+reqwest = { version = "0.11", features = [
+  "json",
+  "rustls-tls",
+], default-features = false }
 serde = { version = "1.0.200", features = ["derive"] }
-derive_more = { version = "1", features = ["from", "debug"] }
-thiserror = "1.0.59"
-url = { version = "2.5.0", features = ["serde"] }
-convert_case = "0.6.0"
+serde_json = { version = "1.0.116", features = ["preserve_order"] }
 tailcall-valid = "=0.1.1"
+thiserror = "1.0.59"
+tokio = { version = "1.37.0", features = ["rt", "time"] }
+tracing = "0.1.40"
+url = { version = "2.5.0", features = ["serde"] }
 
 [dependencies]
 # dependencies specific to CLI must have optional = true and the dep should be added to default feature.
 # one needs to add default feature tag if it is something IO related or might conflict with WASM
 
-mimalloc = { version = "0.1.41", default-features = false, optional = true }
-http-cache-reqwest = { version = "0.13.0", features = [
-    "manager-moka",
-], default-features = false, optional = true }
-moka = { version = "0.12.7", default-features = false, features = [
-    "future",
-], optional = true }
-hyper-rustls = { version = "0.25.0", optional = true }
-rustls = { version = "0.23.5", optional = true, features = [
-    "std",
-], default-features = false }
-rustls-pki-types = "1.5.0"
-inquire = { version = "0.9.0", optional = true }
-opentelemetry-otlp = { version = "0.16.0", features = [
-    "trace",
-    "logs",
-    "metrics",
-    # required to make grpc requests
-    "tls-roots",
-], optional = true }
-opentelemetry-system-metrics = { version = "0.2.0", optional = true }
+ctrlc = { version = "3.4.5", optional = true }
+genai = { git = "https://github.com/laststylebender14/rust-genai.git", rev = "63a542ce20132503c520f4e07108e0d768f243c3", optional = true }
 gqlforge-http-cache = { path = "gqlforge-http-cache", optional = true }
 gqlforge-version = { path = "./gqlforge-version", optional = true }
-genai = { git = "https://github.com/laststylebender14/rust-genai.git", rev = "63a542ce20132503c520f4e07108e0d768f243c3", optional = true }
-ctrlc = { version = "3.4.5", optional = true }
+http-cache-reqwest = { version = "0.13.0", features = [
+  "manager-moka",
+], default-features = false, optional = true }
+hyper-rustls = { version = "0.25.0", optional = true }
+inquire = { version = "0.9.0", optional = true }
+mimalloc = { version = "0.1.41", default-features = false, optional = true }
+moka = { version = "0.12.7", default-features = false, features = [
+  "future",
+], optional = true }
+opentelemetry-otlp = { version = "0.16.0", features = [
+  "trace",
+  "logs",
+  "metrics",
+  # required to make grpc requests
+  "tls-roots",
+], optional = true }
+opentelemetry-system-metrics = { version = "0.2.0", optional = true }
+rustls = { version = "0.23.5", optional = true, features = [
+  "std",
+], default-features = false }
+rustls-pki-types = "1.5.0"
 
 # dependencies safe for wasm:
 
-rustls-pemfile = { version = "1.0.4" }
-schemars = { version = "0.8.17", features = ["derive"] }
-hyper = { version = "0.14.28", features = ["server"], default-features = false }
-tokio = { workspace = true }
 anyhow = { workspace = true }
-reqwest = { workspace = true }
-derive_setters = "0.1.6"
-derive-getters = "0.5.0"
-thiserror = { workspace = true }
-serde_json = { workspace = true }
-serde = { workspace = true }
-serde_qs = "0.13"
-serde_yaml_ng = "0.10.0"
-serde_urlencoded = "0.7.1"
-url = { workspace = true }
-indexmap = { workspace = true }
-once_cell = "1.19.0"
+async-recursion = "1.1.1"
+async-std = { version = "1.12.0", features = [
+  "wasm-bindgen-futures",
+  "unstable",
+] }
+async-trait = "0.1.80"
+cache_control = "0.2.0"
 clap = { version = "4.5.4", features = ["derive"] }
 colored = "2.1.0"
-regex = "1.10.4"
-reqwest-middleware = "0.2.5"
-async-trait = "0.1.80"
-serde_path_to_error = "0.1.16"
-cache_control = "0.2.0"
-nom = "7.1.3"
+derive-getters = "0.5.0"
+derive_setters = "0.1.6"
 exitcode = "1.1.2"
-resource = "0.5.0"
-num_cpus = "1.16.0"
 fnv = "1.0.7"
 futures-channel = { version = "0.3.30" }
 futures-timer = { version = "3.0.3", features = ["wasm-bindgen"] }
 futures-util = { workspace = true }
+hyper = { version = "0.14.28", features = ["server"], default-features = false }
+indexmap = { workspace = true }
+lazy_static = { workspace = true }
 lru = { version = "0.12.3" }
-async-std = { version = "1.12.0", features = [
-    "wasm-bindgen-futures",
-    "unstable",
-] }
-ttl_cache = "0.5.1"
+nom = "7.1.3"
+num_cpus = "1.16.0"
+once_cell = "1.19.0"
+prost = "0.13.1"
+prost-reflect = { version = "0.14.0", features = ["serde"] }
 protox = "0.7.0"
 protox-parse = "0.7.0"
-prost-reflect = { version = "0.14.0", features = ["serde"] }
-prost = "0.13.1"
-update-informer = { version = "1.1.0", default-features = false, features = [
-    "github",
-    "reqwest",
-], optional = true }
-lazy_static = { workspace = true }
-which = { version = "7.0.0", optional = true }
-async-recursion = "1.1.1"
+regex = "1.10.4"
+reqwest = { workspace = true }
+reqwest-middleware = "0.2.5"
+resource = "0.5.0"
 rquickjs = { "version" = "0.7.0", optional = true, features = ["macro"] }
+rustls-pemfile = { version = "1.0.4" }
+schemars = { version = "0.8.17", features = ["derive"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_path_to_error = "0.1.16"
+serde_qs = "0.13"
+serde_urlencoded = "0.7.1"
+serde_yaml_ng = "0.10.0"
 strum_macros = "0.26.4"
+thiserror = { workspace = true }
+tokio = { workspace = true }
+ttl_cache = "0.5.1"
+update-informer = { version = "1.1.0", default-features = false, features = [
+  "github",
+  "reqwest",
+], optional = true }
+url = { workspace = true }
+which = { version = "7.0.0", optional = true }
 # TODO: disable some levels with features?
-tracing = { workspace = true }
-tracing-subscriber = { version = "0.3.18", features = [
-    "default",
-    "fmt",
-    "env-filter",
-] }
-tracing-opentelemetry = "0.24.0"
-getrandom = { version = "0.2.14", features = ["js"] }
-prometheus = "0.13.4"
-tonic = { version = "0.11.0", default-features = false }
-opentelemetry-semantic-conventions = "0.15.0"
-opentelemetry = { version = "0.23.0", features = ["trace", "logs", "metrics"] }
-opentelemetry_sdk = { version = "0.23.0", features = [
-    "trace",
-    "logs",
-    "metrics",
-] }
-opentelemetry-http = "0.12.0"
-opentelemetry-stdout = { version = "0.4.0", features = [
-    "trace",
-    "logs",
-    "metrics",
-] }
-opentelemetry-appender-tracing = { version = "0.4.0" }
-opentelemetry-prometheus = "0.16.0"
-phonenumber = "0.3.4"
-chrono = "0.4.38"
-async-graphql-extension-apollo-tracing = { version = "3.2.15", git = "https://github.com/tailcallhq/async_graphql_apollo_studio_extension.git", rev = "b467f87da67d2ce7fb423132083a9139c8e47d81" }
-headers = { workspace = true }
-http = { workspace = true }
-mime = "0.3.17"
-htpasswd-verify = { version = "0.3.0", git = "https://github.com/twistedfall/htpasswd-verify", rev = "ff14703083cbd639f7d05622b398926f3e718d61" } # fork version that is wasm compatible
-jsonwebtoken = "9.3.0"
-async-graphql-value = "7.0.9"
 async-graphql = { workspace = true, features = [
-    "dynamic-schema",
-    "dataloader",
-    "apollo_tracing",
-    "opentelemetry",
+  "dynamic-schema",
+  "dataloader",
+  "apollo_tracing",
+  "opentelemetry",
 ] }
-dotenvy = "0.15.7"
+async-graphql-extension-apollo-tracing = { version = "3.2.15", git = "https://github.com/tailcallhq/async_graphql_apollo_studio_extension.git", rev = "b467f87da67d2ce7fb423132083a9139c8e47d81" }
+async-graphql-value = "7.0.9"
+base64 = "0.22.1"
+chrono = "0.4.38"
 convert_case = { workspace = true }
-rand = "0.8.5"
+dashmap = "6.1.0"
+derive_more = { workspace = true }
+dotenvy = "0.15.7"
+getrandom = { version = "0.2.14", features = ["js"] }
+gqlforge-hasher = { path = "gqlforge-hasher" }
 gqlforge-macros = { path = "gqlforge-macros" }
 gqlforge-tracker = { path = "gqlforge-tracker", optional = true }
 gqlforge-typedefs-common = { path = "./gqlforge-typedefs-common" }
-tonic-types = "0.12.1"
-base64 = "0.22.1"
-gqlforge-hasher = { path = "gqlforge-hasher" }
-serde_json_borrow = { version = "0.7.1", default-features = false }
-pluralizer = "0.5.0"
+headers = { workspace = true }
+htpasswd-verify = { version = "0.3.0", git = "https://github.com/twistedfall/htpasswd-verify", rev = "ff14703083cbd639f7d05622b398926f3e718d61" } # fork version that is wasm compatible
+http = { workspace = true }
+indenter = "0.3.3"
+jsonwebtoken = "9.3.0"
+mime = "0.3.17"
+num = "0.4.3"
+opentelemetry = { version = "0.23.0", features = ["trace", "logs", "metrics"] }
+opentelemetry-appender-tracing = { version = "0.4.0" }
+opentelemetry-http = "0.12.0"
+opentelemetry-prometheus = "0.16.0"
+opentelemetry-semantic-conventions = "0.15.0"
+opentelemetry-stdout = { version = "0.4.0", features = [
+  "trace",
+  "logs",
+  "metrics",
+] }
+opentelemetry_sdk = { version = "0.23.0", features = [
+  "trace",
+  "logs",
+  "metrics",
+] }
 path-clean = "=1.0.1"
 pathdiff = "0.2.1"
-num = "0.4.3"
-indenter = "0.3.3"
-derive_more = { workspace = true }
+phonenumber = "0.3.4"
+pluralizer = "0.5.0"
+prometheus = "0.13.4"
+rand = "0.8.5"
+serde_json_borrow = { version = "0.7.1", default-features = false }
 strum = "0.26.2"
-tailcall-valid = { workspace = true }
-dashmap = "6.1.0"
-urlencoding = "2.1.3"
 tailcall-chunk = "0.3.0"
+tailcall-valid = { workspace = true }
+tonic = { version = "0.11.0", default-features = false }
+tonic-types = "0.12.1"
+tracing = { workspace = true }
+tracing-opentelemetry = "0.24.0"
+tracing-subscriber = { version = "0.3.18", features = [
+  "default",
+  "fmt",
+  "env-filter",
+] }
 unicode-segmentation = "1.12.0"
+urlencoding = "2.1.3"
 
 # to build rquickjs bindings on systems without builtin bindings
 [target.'cfg(all(target_os = "windows", target_arch = "x86"))'.dependencies]
-rquickjs = { "version" = "0.7.0", optional = true, features = ["macro", "bindgen"] }
+rquickjs = { "version" = "0.7.0", optional = true, features = [
+  "macro",
+  "bindgen",
+] }
 
 [dev-dependencies]
-datatest-stable = "0.2.9"
-tokio-test = "0.4.4"
-gqlforge-formatter = { path = "gqlforge-formatter" }
+bincode = "1.3.3"
+cacache = { version = "13.0.0", default-features = false, features = [
+  "tokio-runtime",
+  "mmap",
+] }
 criterion = "0.5.1"
+datatest-stable = "0.2.9"
+flate2 = "1.0.30"
+gqlforge-fixtures = { path = "./gqlforge-fixtures" }
+gqlforge-formatter = { path = "gqlforge-formatter" }
+http-cache-semantics = { version = "1.0.1", default-features = false, features = [
+  "with_serde",
+  "reqwest",
+] }
 httpmock = "0.7.0"
+insta = { workspace = true }
+maplit = "1.0.2"
+markdown = "1.0.0-alpha.17"
 pretty_assertions = "1.4.0"
 stripmargin = "0.1.1"
-markdown = "1.0.0-alpha.17"
-insta = { workspace = true }
 tempfile = "3.10.1"
-maplit = "1.0.2"
-gqlforge-fixtures = { path = "./gqlforge-fixtures" }
-http-cache-semantics = { version = "1.0.1", default-features = false, features = [
-    "with_serde",
-    "reqwest",
-] }
-cacache = { version = "13.0.0", default-features = false, features = [
-    "tokio-runtime",
-    "mmap",
-] }
 test-log = { version = "0.2.16", default-features = false, features = [
-    "color",
-    "trace",
+  "color",
+  "trace",
 ] }
-flate2 = "1.0.30"
-bincode = "1.3.3"
+tokio-test = "0.4.4"
 
 [features]
 
@@ -219,25 +222,25 @@ js = ["dep:rquickjs"]
 # This is created to control what we expose for WASM.
 # Will be deprecated once we move CLI to it's own crate and WASM builds won't depend on it.
 cli = [
-    "tokio/fs",
-    "tokio/rt-multi-thread",
-    "dep:mimalloc",
-    "dep:http-cache-reqwest",
-    "dep:moka",
-    "dep:hyper-rustls",
-    "dep:rustls",
-    "dep:inquire",
-    "dep:which",
-    "dep:update-informer",
-    "opentelemetry_sdk/testing",
-    "opentelemetry_sdk/rt-tokio",
-    "dep:opentelemetry-otlp",
-    "dep:opentelemetry-system-metrics",
-    "dep:gqlforge-tracker",
-    "dep:gqlforge-http-cache",
-    "dep:gqlforge-version",
-    "dep:genai",
-    "dep:ctrlc",
+  "tokio/fs",
+  "tokio/rt-multi-thread",
+  "dep:mimalloc",
+  "dep:http-cache-reqwest",
+  "dep:moka",
+  "dep:hyper-rustls",
+  "dep:rustls",
+  "dep:inquire",
+  "dep:which",
+  "dep:update-informer",
+  "opentelemetry_sdk/testing",
+  "opentelemetry_sdk/rt-tokio",
+  "dep:opentelemetry-otlp",
+  "dep:opentelemetry-system-metrics",
+  "dep:gqlforge-tracker",
+  "dep:gqlforge-http-cache",
+  "dep:gqlforge-version",
+  "dep:genai",
+  "dep:ctrlc",
 ]
 
 # Feature flag to enable all default features.
@@ -250,20 +253,17 @@ force_jit = []
 
 [workspace]
 members = [
-    ".",
-    "gqlforge-typedefs-common",
-    "gqlforge-typedefs",
-    "gqlforge-aws-lambda",
-    "gqlforge-cloudflare",
-    "gqlforge-macros",
-    "gqlforge-formatter",
-    "gqlforge-fixtures",
-    "gqlforge-upstream-grpc",
-    "gqlforge-tracker",
-    "gqlforge-wasm",
-    "gqlforge-hasher",
-    "gqlforge-http-cache",
-    "gqlforge-version",
+  ".",
+  "gqlforge-typedefs-common",
+  "gqlforge-typedefs",
+  "gqlforge-macros",
+  "gqlforge-formatter",
+  "gqlforge-fixtures",
+  "gqlforge-upstream-grpc",
+  "gqlforge-tracker",
+  "gqlforge-hasher",
+  "gqlforge-http-cache",
+  "gqlforge-version",
 ]
 
 # Boost execution_spec snapshot diffing performance
@@ -272,37 +272,32 @@ insta.opt-level = 3
 similar.opt-level = 3
 
 [profile.release]
-opt-level = 3
 codegen-units = 1
-panic = 'abort'
-lto = 'fat'
 debug = false
 incremental = false
+lto = 'fat'
+opt-level = 3
 overflow-checks = false
+panic = 'abort'
 
 [profile.benchmark]
-inherits = "release"
 debug = true
-
-[profile.release.package.gqlforge-cloudflare]
-strip = true
-codegen-units = 1
-opt-level = 'z'
+inherits = "release"
 
 [[bench]]
+harness = false
 name = "gqlforge_benches"
-harness = false
 
 [[test]]
+harness = false
 name = "execution_spec"
-harness = false
 
 [[test]]
+harness = false
 name = "cli_spec"
 path = "tests/cli/gen.rs"
-harness = false
 
 [[test]]
+harness = false
 name = "json_to_config_spec"
 path = "src/core/generator/tests/json_to_config_spec.rs"
-harness = false

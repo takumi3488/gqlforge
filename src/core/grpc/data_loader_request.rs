@@ -54,9 +54,9 @@ impl DataLoaderRequest {
 mod tests {
     use std::collections::BTreeSet;
 
+    use gqlforge_fixtures::protobuf;
     use http::header::{HeaderMap, HeaderName, HeaderValue};
     use pretty_assertions::assert_eq;
-    use gqlforge_fixtures::protobuf;
     use url::Url;
 
     use super::DataLoaderRequest;

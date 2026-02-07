@@ -2,10 +2,10 @@ use std::collections::BTreeMap;
 use std::fs;
 use std::path::Path;
 
-use serde::{Deserialize, Serialize};
-use serde_json::Value;
 use gqlforge::core::generator::{Generator, Input};
 use gqlforge::core::http::Method;
+use serde::{Deserialize, Serialize};
+use serde_json::Value;
 use url::Url;
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]

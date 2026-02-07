@@ -100,12 +100,12 @@ pub mod file {
 
 pub mod http {
     use anyhow::Result;
+    use gqlforge::core::http::Response;
+    use gqlforge::core::HttpIO;
     use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
     use hyper::body::Bytes;
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-    use gqlforge::core::http::Response;
-    use gqlforge::core::HttpIO;
 
     use super::cacache_manager::CaCacheManager;
 
@@ -230,12 +230,12 @@ pub mod test {
 
     mod http {
         use anyhow::Result;
+        use gqlforge::core::http::Response;
+        use gqlforge::core::HttpIO;
         use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
         use hyper::body::Bytes;
         use reqwest::Client;
         use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-        use gqlforge::core::http::Response;
-        use gqlforge::core::HttpIO;
 
         use super::cacache_manager::CaCacheManager;
 

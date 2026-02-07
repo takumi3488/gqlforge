@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use serde::{Deserialize, Serialize};
 use gqlforge_macros::MergeRight;
+use serde::{Deserialize, Serialize};
 
 use crate::core::config::Resolver;
 

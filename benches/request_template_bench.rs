@@ -2,13 +2,13 @@ use std::borrow::Cow;
 
 use criterion::{black_box, Criterion};
 use derive_setters::Setters;
-use http::header::HeaderMap;
-use serde_json::json;
 use gqlforge::core::endpoint::Endpoint;
 use gqlforge::core::has_headers::HasHeaders;
 use gqlforge::core::http::RequestTemplate;
 use gqlforge::core::json::JsonLike;
 use gqlforge::core::path::{PathString, PathValue, ValueString};
+use http::header::HeaderMap;
+use serde_json::json;
 
 #[derive(Setters)]
 struct Context {

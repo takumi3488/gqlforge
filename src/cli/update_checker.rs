@@ -31,7 +31,7 @@ impl InstallationMethod {
         }
 
         if let Ok(result) = which("gqlforge") {
-            if result.to_str().map_or(false, |s| s.contains("homebrew")) {
+            if result.to_str().is_some_and(|s| s.contains("homebrew")) {
                 return InstallationMethod::Brew;
             }
         }
@@ -47,9 +47,7 @@ impl InstallationMethod {
     /// installation method used.
     pub fn display_message(&self) -> String {
         match self {
-            InstallationMethod::Npx => {
-                self.format_upgrade_message("npx @gqlforge/gqlforge@latest")
-            }
+            InstallationMethod::Npx => self.format_upgrade_message("npx @gqlforge/gqlforge@latest"),
             InstallationMethod::Npm => {
                 self.format_upgrade_message("npm update -g @gqlforge/gqlforge")
             }

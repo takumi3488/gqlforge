@@ -1,10 +1,10 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
 
+use gqlforge_macros::Doc;
 use lazy_static::lazy_static;
 use schemars::schema::{InstanceType, Schema, SchemaObject};
 use strum::IntoEnumIterator;
-use gqlforge_macros::Doc;
 
 use crate::core::json::JsonLike;
 

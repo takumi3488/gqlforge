@@ -1,12 +1,12 @@
 use std::sync::Arc;
 
 use criterion::Criterion;
-use http::Request;
 use gqlforge::cli::server::server_config::ServerConfig;
 use gqlforge::core::async_graphql_hyper::GraphQLRequest;
 use gqlforge::core::blueprint::Blueprint;
 use gqlforge::core::config::{Config, ConfigModule};
 use gqlforge::core::http::handle_request;
+use http::Request;
 use tailcall_valid::Validator;
 
 static QUERY: &str = r#"{"query":"query{posts{title}}"}"#;

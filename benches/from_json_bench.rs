@@ -1,10 +1,10 @@
 use criterion::Criterion;
-use http::Method;
-use serde_json::Value;
 use gqlforge::cli::runtime::NativeHttp;
 use gqlforge::core::generator::{Generator, Input};
 use gqlforge::core::http::Method as HTTPMethod;
 use gqlforge::core::HttpIO;
+use http::Method;
+use serde_json::Value;
 
 pub fn benchmark_from_json_method(c: &mut Criterion) {
     let tokio_runtime = tokio::runtime::Runtime::new().unwrap();

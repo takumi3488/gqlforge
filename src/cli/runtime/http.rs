@@ -1,6 +1,7 @@
 use std::time::Duration;
 
 use anyhow::Result;
+use gqlforge_http_cache::HttpCacheManager;
 use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
 use hyper::body::Bytes;
 use once_cell::sync::Lazy;
@@ -13,7 +14,6 @@ use opentelemetry_semantic_conventions::trace::{
 };
 use reqwest::Client;
 use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
-use gqlforge_http_cache::HttpCacheManager;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use super::HttpIO;

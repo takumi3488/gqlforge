@@ -1,6 +1,6 @@
 mod error;
-mod parser;
 mod formatter;
+mod parser;
 pub use error::{Error, Result};
 pub use parser::Parser;
 

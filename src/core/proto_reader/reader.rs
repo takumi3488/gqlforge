@@ -228,8 +228,8 @@ mod test_proto_config {
     use std::path::{Path, PathBuf};
 
     use anyhow::Result;
-    use pretty_assertions::assert_eq;
     use gqlforge_fixtures::protobuf;
+    use pretty_assertions::assert_eq;
 
     use crate::core::proto_reader::ProtoReader;
     use crate::core::resource_reader::{Cached, ResourceReader};
