@@ -157,9 +157,6 @@ pub enum BlueprintError {
     #[error("Experimental headers must start with 'x-' or 'X-'. Got: '{0}'")]
     ExperimentalHeaderInvalidFormat(String),
 
-    #[error("`graph_ref` should be in the format <graph_id>@<variant> where `graph_id` and `variant` can only contain letters, numbers, '-' and '_'. Found {0}")]
-    InvalidGraphRef(String),
-
     #[error("Invalid CORS configuration: Cannot combine `Access-Control-Allow-Credentials: true` with `{0}: *`")]
     InvalidCORSConfiguration(String),
 

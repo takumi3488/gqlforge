@@ -3,7 +3,7 @@ use gqlforge_macros::{DirectiveDefinition, InputDefinition};
 use serde::{Deserialize, Serialize};
 use tailcall_valid::Validator;
 
-use crate::core::config::{Apollo, ConfigReaderContext, KeyValue};
+use crate::core::config::{ConfigReaderContext, KeyValue};
 use crate::core::helpers::headers::to_mustache_headers;
 use crate::core::is_default;
 use crate::core::macros::MergeRight;
@@ -64,7 +64,6 @@ pub enum TelemetryExporter {
     Stdout(StdoutExporter),
     Otlp(OtlpExporter),
     Prometheus(PrometheusExporter),
-    Apollo(Apollo),
 }
 
 #[derive(
@@ -122,7 +121,6 @@ impl Telemetry {
                     .map(|(key, value)| KeyValue { key, value })
                     .collect();
             }
-            Some(TelemetryExporter::Apollo(apollo)) => apollo.render_mustache(reader_ctx)?,
             _ => {}
         }
 

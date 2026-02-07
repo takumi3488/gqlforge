@@ -5,9 +5,7 @@ use tailcall_valid::{Valid, Validator};
 use url::Url;
 
 use super::{BlueprintError, TryFoldConfig};
-use crate::core::config::{
-    self, Apollo, ConfigModule, KeyValue, PrometheusExporter, StdoutExporter,
-};
+use crate::core::config::{self, ConfigModule, KeyValue, PrometheusExporter, StdoutExporter};
 use crate::core::directive::DirectiveCodec;
 use crate::core::try_fold::TryFold;
 
@@ -22,7 +20,6 @@ pub enum TelemetryExporter {
     Stdout(StdoutExporter),
     Otlp(OtlpExporter),
     Prometheus(PrometheusExporter),
-    Apollo(Apollo),
 }
 
 #[derive(Debug, Default, Clone)]
@@ -72,8 +69,6 @@ pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintE
                 config::TelemetryExporter::Prometheus(config) => {
                     Valid::succeed(TelemetryExporter::Prometheus(config.clone()))
                 }
-                config::TelemetryExporter::Apollo(apollo) => validate_apollo(apollo.clone())
-                    .and_then(|apollo| Valid::succeed(TelemetryExporter::Apollo(apollo))),
             };
 
             export
@@ -88,49 +83,3 @@ pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintE
     })
 }
 
-fn validate_apollo(apollo: Apollo) -> Valid<Apollo, BlueprintError> {
-    validate_graph_ref(&apollo.graph_ref)
-        .map(|_| apollo)
-        .trace("apollo.graph_ref")
-}
-
-fn validate_graph_ref(graph_ref: &str) -> Valid<(), BlueprintError> {
-    let is_valid = regex::Regex::new(r"^[A-Za-z0-9-_]+@[A-Za-z0-9-_]+$")
-        .unwrap()
-        .is_match(graph_ref);
-    if is_valid {
-        Valid::succeed(())
-    } else {
-        Valid::fail(BlueprintError::InvalidGraphRef(graph_ref.to_string()))
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use tailcall_valid::Valid;
-
-    use super::validate_graph_ref;
-    use crate::core::blueprint::BlueprintError;
-
-    #[test]
-    fn test_validate_graph_ref() {
-        let success = || Valid::succeed(());
-        let failure =
-            |graph_ref: &str| Valid::fail(BlueprintError::InvalidGraphRef(graph_ref.to_string()));
-
-        assert_eq!(validate_graph_ref("graph_id@variant"), success());
-        assert_eq!(
-            validate_graph_ref("gr@ph_id@variant"),
-            failure("gr@ph_id@variant")
-        );
-        assert_eq!(validate_graph_ref("graph-Id@variant"), success());
-        assert_eq!(
-            validate_graph_ref("graph$id@variant1"),
-            failure("graph$id@variant1")
-        );
-        assert_eq!(
-            validate_graph_ref("gr@ph_id@variant"),
-            failure("gr@ph_id@variant")
-        );
-    }
-}

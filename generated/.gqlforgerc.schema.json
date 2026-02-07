@@ -36,44 +36,6 @@
     }
   },
   "definitions": {
-    "Apollo": {
-      "type": "object",
-      "required": [
-        "apiKey",
-        "graphRef"
-      ],
-      "properties": {
-        "apiKey": {
-          "description": "Setting `apiKey` for Apollo.",
-          "type": "string"
-        },
-        "graphRef": {
-          "description": "Setting `graphRef` for Apollo in the format <graphId>@<variant>.",
-          "type": "string"
-        },
-        "platform": {
-          "description": "Setting `platform` for Apollo.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "userVersion": {
-          "description": "Setting `userVersion` for Apollo.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "version": {
-          "description": "Setting `version` for Apollo.",
-          "type": [
-            "string",
-            "null"
-          ]
-        }
-      }
-    },
     "Batch": {
       "type": "object",
       "properties": {
@@ -292,7 +254,7 @@
     "LinkType": {
       "oneOf": [
         {
-          "description": "Points to another Tailcall Configuration file. The imported configuration will be merged into the importing configuration.",
+          "description": "Points to another Gqlforge Configuration file. The imported configuration will be merged into the importing configuration.",
           "type": "string",
           "enum": [
             "Config"
@@ -465,7 +427,7 @@
           ]
         },
         "enableFederation": {
-          "description": "`enableFederation` enables functionality to Tailcall server to act as a federation subgraph.",
+          "description": "`enableFederation` enables functionality to Gqlforge server to act as a federation subgraph.",
           "type": [
             "boolean",
             "null"
@@ -512,7 +474,7 @@
           ]
         },
         "port": {
-          "description": "`port` sets the Tailcall running port. @default `8000`.",
+          "description": "`port` sets the Gqlforge running port. @default `8000`.",
           "type": [
             "integer",
             "null"
@@ -528,7 +490,7 @@
           ]
         },
         "responseValidation": {
-          "description": "`responseValidation` Tailcall automatically validates responses from upstream services using inferred schema. @default `false`.",
+          "description": "`responseValidation` Gqlforge automatically validates responses from upstream services using inferred schema. @default `false`.",
           "type": [
             "boolean",
             "null"
@@ -604,7 +566,7 @@
       }
     },
     "Telemetry": {
-      "description": "The @telemetry directive facilitates seamless integration with OpenTelemetry, enhancing the observability of your GraphQL services powered by Tailcall.  By leveraging this directive, developers gain access to valuable insights into the performance and behavior of their applications.",
+      "description": "The @telemetry directive facilitates seamless integration with OpenTelemetry, enhancing the observability of your GraphQL services powered by Gqlforge.  By leveraging this directive, developers gain access to valuable insights into the performance and behavior of their applications.",
       "type": "object",
       "properties": {
         "export": {
@@ -664,18 +626,6 @@
             }
           },
           "additionalProperties": false
-        },
-        {
-          "type": "object",
-          "required": [
-            "apollo"
-          ],
-          "properties": {
-            "apollo": {
-              "$ref": "#/definitions/Apollo"
-            }
-          },
-          "additionalProperties": false
         }
       ]
     },
@@ -722,7 +672,7 @@
           ]
         },
         "httpCache": {
-          "description": "Providing httpCache size enables Tailcall's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.",
+          "description": "Providing httpCache size enables Gqlforge's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.",
           "type": [
             "integer",
             "null"
@@ -810,7 +760,7 @@
           "minimum": 0.0
         },
         "userAgent": {
-          "description": "The User-Agent header value to be used in HTTP requests. @default `Tailcall/1.0`",
+          "description": "The User-Agent header value to be used in HTTP requests. @default `Gqlforge/1.0`",
           "type": [
             "string",
             "null"

@@ -88,7 +88,7 @@ directive @graphQL(
   """
   Specifies the root field on the upstream to request data from. This maps a field 
   in your schema to a field in the upstream schema. When a query is received for this 
-  field, Tailcall requests data from the corresponding upstream field.
+  field, Gqlforge requests data from the corresponding upstream field.
   """
   name: String!
   """
@@ -108,7 +108,7 @@ specified when the `users` field is queried.
 """
 directive @grpc(
   """
-  The `batchKey` dictates the path Tailcall will follow to group the returned items 
+  The `batchKey` dictates the path Gqlforge will follow to group the returned items 
   from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
   """
   batchKey: [String!]
@@ -167,7 +167,7 @@ is queried.
 """
 directive @http(
   """
-  The `batchKey` dictates the path Tailcall will follow to group the returned items 
+  The `batchKey` dictates the path Gqlforge will follow to group the returned items 
   from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
   """
   batchKey: [String!]
@@ -222,7 +222,7 @@ directive @http(
   """
   This represents the query parameters of your API call. You can pass it as a static 
   object or use Mustache template for dynamic parameters. These parameters will be 
-  added to the URL. NOTE: Query parameter order is critical for batching in Tailcall. 
+  added to the URL. NOTE: Query parameter order is critical for batching in Gqlforge. 
   The first parameter referencing a field in the current value using mustache syntax 
   is automatically selected as the batching parameter.
   """
@@ -275,7 +275,7 @@ directive @protected(
 ) on OBJECT | FIELD_DEFINITION
 
 """
-The `@discriminate` directive is used to drive Tailcall discriminator to use a field 
+The `@discriminate` directive is used to drive Gqlforge discriminator to use a field 
 of an object to resolve the type. For example with the directive applied on a field 
 `@discriminate(field: "object_type")` and the given value `{"foo": "bar", "object_type": 
 "Buzz"}` the resolved type of the object will be `Buzz`. If `field` is not applied 
@@ -460,7 +460,7 @@ input GraphQL {
   """
   Specifies the root field on the upstream to request data from. This maps a field 
   in your schema to a field in the upstream schema. When a query is received for this 
-  field, Tailcall requests data from the corresponding upstream field.
+  field, Gqlforge requests data from the corresponding upstream field.
   """
   name: String!
   """
@@ -480,7 +480,7 @@ specified when the `users` field is queried.
 """
 input Grpc {
   """
-  The `batchKey` dictates the path Tailcall will follow to group the returned items 
+  The `batchKey` dictates the path Gqlforge will follow to group the returned items 
   from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
   """
   batchKey: [String!]
@@ -539,7 +539,7 @@ is queried.
 """
 input Http {
   """
-  The `batchKey` dictates the path Tailcall will follow to group the returned items 
+  The `batchKey` dictates the path Gqlforge will follow to group the returned items 
   from the batch request. For more details please refer out [n + 1 guide](https://gqlforge.pages.dev/docs/guides/n+1#solving-using-batching).
   """
   batchKey: [String!]
@@ -594,7 +594,7 @@ input Http {
   """
   This represents the query parameters of your API call. You can pass it as a static 
   object or use Mustache template for dynamic parameters. These parameters will be 
-  added to the URL. NOTE: Query parameter order is critical for batching in Tailcall. 
+  added to the URL. NOTE: Query parameter order is critical for batching in Gqlforge. 
   The first parameter referencing a field in the current value using mustache syntax 
   is automatically selected as the batching parameter.
   """

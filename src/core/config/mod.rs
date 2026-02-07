@@ -1,4 +1,3 @@
-pub use apollo::*;
 pub use config::*;
 pub use config_module::*;
 pub use directive::Directive;
@@ -9,7 +8,6 @@ pub use reader_context::*;
 pub use resolver::*;
 pub use source::*;
 pub use url_query::*;
-mod apollo;
 mod config;
 mod config_module;
 pub mod cors;

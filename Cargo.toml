@@ -120,7 +120,6 @@ async-graphql = { workspace = true, features = [
   "apollo_tracing",
   "opentelemetry",
 ] }
-async-graphql-extension-apollo-tracing = { version = "3.2.15", git = "https://github.com/tailcallhq/async_graphql_apollo_studio_extension.git", rev = "b467f87da67d2ce7fb423132083a9139c8e47d81" }
 async-graphql-value = "7.0.9"
 base64 = "0.22.1"
 chrono = "0.4.38"
