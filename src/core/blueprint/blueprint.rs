@@ -233,6 +233,16 @@ impl Blueprint {
             schema = schema.disable_introspection();
         }
 
+        if server.limit_complexity > 0 {
+            schema = schema.limit_complexity(server.limit_complexity);
+        }
+        if server.limit_depth > 0 {
+            schema = schema.limit_depth(server.limit_depth);
+        }
+        if server.limit_directives > 0 {
+            schema = schema.limit_directives(server.limit_directives);
+        }
+
         for extension in schema_modifiers.extensions.iter().cloned() {
             schema = schema.extension(extension);
         }

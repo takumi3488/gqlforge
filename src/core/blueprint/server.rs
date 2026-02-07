@@ -34,6 +34,9 @@ pub struct Server {
     pub cors: Option<Cors>,
     pub experimental_headers: HashSet<HeaderName>,
     pub routes: Routes,
+    pub limit_complexity: usize,
+    pub limit_depth: usize,
+    pub limit_directives: usize,
 }
 
 /// Mimic of mini_v8::Script that's wasm compatible
@@ -143,10 +146,34 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
                     script,
                     cors,
                     routes: config_server.get_routes(),
+                    limit_complexity: resolve_limit(
+                        config_server.limit_complexity,
+                        "GQLFORGE_LIMIT_COMPLEXITY",
+                        1000,
+                    ),
+                    limit_depth: resolve_limit(
+                        config_server.limit_depth,
+                        "GQLFORGE_LIMIT_DEPTH",
+                        15,
+                    ),
+                    limit_directives: resolve_limit(
+                        config_server.limit_directives,
+                        "GQLFORGE_LIMIT_DIRECTIVES",
+                        50,
+                    ),
                 },
             )
             .to_result()
     }
+}
+
+fn resolve_limit(config_val: Option<usize>, env_key: &str, default: usize) -> usize {
+    config_val.unwrap_or_else(|| {
+        std::env::var(env_key)
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(default)
+    })
 }
 
 fn to_script(

@@ -124,6 +124,24 @@ pub struct Server {
     /// - graphQL: "/graphql" If not specified, these default values will be
     ///   used.
     pub routes: Option<Routes>,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    /// `limitComplexity` sets the maximum allowed query complexity.
+    /// Queries exceeding this limit are rejected during validation.
+    /// @default `1000`. Set to `0` to disable.
+    pub limit_complexity: Option<usize>,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    /// `limitDepth` sets the maximum allowed query nesting depth.
+    /// Queries exceeding this limit are rejected during validation.
+    /// @default `15`. Set to `0` to disable.
+    pub limit_depth: Option<usize>,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    /// `limitDirectives` sets the maximum number of directives allowed.
+    /// Queries exceeding this limit are rejected during validation.
+    /// @default `50`. Set to `0` to disable.
+    pub limit_directives: Option<usize>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, MergeRight, JsonSchema, Getters)]
@@ -267,6 +285,18 @@ impl Server {
 
     pub fn get_enable_federation(&self) -> bool {
         self.enable_federation.unwrap_or(false)
+    }
+
+    pub fn get_limit_complexity(&self) -> usize {
+        self.limit_complexity.unwrap_or(1000)
+    }
+
+    pub fn get_limit_depth(&self) -> usize {
+        self.limit_depth.unwrap_or(15)
+    }
+
+    pub fn get_limit_directives(&self) -> usize {
+        self.limit_directives.unwrap_or(50)
     }
 }
 
