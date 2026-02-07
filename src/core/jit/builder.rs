@@ -185,7 +185,8 @@ impl<'a> Builder<'a> {
                     // Check if the field is present in the schema index
                     if let Some(field_def) = self.index.get_field(type_condition, field_name) {
                         let mut args = Vec::with_capacity(request_args.len());
-                        if let QueryField::Field((_, schema_args)) = field_def {
+                        if let QueryField::Field(inner) = field_def {
+                            let schema_args = &inner.1;
                             for (arg_name, arg_value) in schema_args {
                                 let type_of = arg_value.of_type.clone();
                                 let id = ArgId::new(self.arg_id.next());
@@ -205,7 +206,7 @@ impl<'a> Builder<'a> {
                         }
 
                         let type_of = match field_def {
-                            QueryField::Field((field_def, _)) => field_def.of_type.clone(),
+                            QueryField::Field(inner) => inner.0.of_type.clone(),
                             QueryField::InputField(field_def) => field_def.of_type.clone(),
                         };
 
@@ -220,7 +221,7 @@ impl<'a> Builder<'a> {
                         );
 
                         let ir = match field_def {
-                            QueryField::Field((field_def, _)) => field_def.resolver.clone(),
+                            QueryField::Field(inner) => inner.0.resolver.clone(),
                             _ => None,
                         };
 

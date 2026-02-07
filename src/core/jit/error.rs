@@ -47,7 +47,7 @@ pub enum Error {
     #[error("ParseError: {0}")]
     ParseError(#[from] async_graphql::parser::Error),
     #[error(transparent)]
-    IR(#[from] crate::core::ir::Error),
+    IR(Box<crate::core::ir::Error>),
     #[error(transparent)]
     Validation(#[from] ValidationError),
     #[error("{0}")]
@@ -56,12 +56,18 @@ pub enum Error {
     Unknown,
 }
 
+impl From<crate::core::ir::Error> for Error {
+    fn from(e: crate::core::ir::Error) -> Self {
+        Error::IR(Box::new(e))
+    }
+}
+
 impl ErrorExtensions for Error {
     fn extend(&self) -> super::graphql_error::Error {
         match self {
             Error::BuildError(error) => error.extend(),
             Error::ParseError(error) => error.extend(),
-            Error::IR(error) => error.extend(),
+            Error::IR(error) => error.as_ref().extend(),
             Error::Validation(error) => error.extend(),
             Error::ServerError(error) => error.extend(),
             Error::Unknown => super::graphql_error::Error::new(self.to_string()),

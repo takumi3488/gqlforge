@@ -106,41 +106,42 @@ impl<'a> MustachePartsValidator<'a> {
             IR::Merge(resolvers) => {
                 Valid::from_iter(resolvers, |resolver| self.validate_resolver(resolver)).unit()
             }
-            IR::IO(IO::Http { req_template, .. }) => {
-                Valid::from_iter(req_template.root_url.expression_segments(), |parts| {
-                    self.validate(parts, false).trace("path")
-                })
-                .and(Valid::from_iter(req_template.query.clone(), |query| {
-                    let mustache = &query.value;
+            IR::IO(io) => match io.as_ref() {
+                IO::Http { req_template, .. } => {
+                    Valid::from_iter(req_template.root_url.expression_segments(), |parts| {
+                        self.validate(parts, false).trace("path")
+                    })
+                    .and(Valid::from_iter(req_template.query.clone(), |query| {
+                        let mustache = &query.value;
 
-                    Valid::from_iter(mustache.expression_segments(), |parts| {
-                        self.validate(parts, true).trace("query")
-                    })
-                }))
-                .unit()
-                .trace(config::Http::trace_name().as_str())
-            }
-            IR::IO(IO::GraphQL { req_template, .. }) => {
-                Valid::from_iter(req_template.headers.clone(), |(_, mustache)| {
-                    Valid::from_iter(mustache.expression_segments(), |parts| {
-                        self.validate(parts, true).trace("headers")
-                    })
-                })
-                .and_then(|_| {
-                    if let Some(args) = &req_template.operation_arguments {
-                        Valid::from_iter(args, |(_, mustache)| {
-                            Valid::from_iter(mustache.expression_segments(), |parts| {
-                                self.validate(parts, true).trace("args")
-                            })
+                        Valid::from_iter(mustache.expression_segments(), |parts| {
+                            self.validate(parts, true).trace("query")
                         })
-                    } else {
-                        Valid::succeed(Default::default())
-                    }
-                })
-                .unit()
-                .trace(config::GraphQL::trace_name().as_str())
-            }
-            IR::IO(IO::Grpc { req_template, .. }) => {
+                    }))
+                    .unit()
+                    .trace(config::Http::trace_name().as_str())
+                }
+                IO::GraphQL { req_template, .. } => {
+                    Valid::from_iter(req_template.headers.clone(), |(_, mustache)| {
+                        Valid::from_iter(mustache.expression_segments(), |parts| {
+                            self.validate(parts, true).trace("headers")
+                        })
+                    })
+                    .and_then(|_| {
+                        if let Some(args) = &req_template.operation_arguments {
+                            Valid::from_iter(args, |(_, mustache)| {
+                                Valid::from_iter(mustache.expression_segments(), |parts| {
+                                    self.validate(parts, true).trace("args")
+                                })
+                            })
+                        } else {
+                            Valid::succeed(Default::default())
+                        }
+                    })
+                    .unit()
+                    .trace(config::GraphQL::trace_name().as_str())
+                }
+                IO::Grpc { req_template, .. } => {
                 Valid::from_iter(req_template.url.expression_segments(), |parts| {
                     self.validate(parts, false).trace("path")
                 })
@@ -168,6 +169,8 @@ impl<'a> MustachePartsValidator<'a> {
                 })
                 .unit()
                 .trace(config::Grpc::trace_name().as_str())
+                }
+                _ => Valid::succeed(()),
             }
             // TODO: add validation for @expr
             _ => Valid::succeed(()),

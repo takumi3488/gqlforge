@@ -45,7 +45,7 @@ where
     where
         Output: JsonLike<'a> + Default,
     {
-        let mut response = Response::new(synth.synthesize());
+        let mut response = Response::new(synth.synthesize().map_err(|e| *e));
         response.add_errors(self.ctx.errors().clone());
         response
     }

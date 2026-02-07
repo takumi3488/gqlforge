@@ -34,7 +34,7 @@ where
     }
 
     #[inline(always)]
-    pub fn synthesize<Output>(&'a self) -> Result<Output, Positioned<Error>>
+    pub fn synthesize<Output>(&'a self) -> Result<Output, Box<Positioned<Error>>>
     where
         Output: JsonLike<'a>,
     {
@@ -64,7 +64,7 @@ where
         data_path: &DataPath,
         path: &mut Vec<PathSegment<'a>>,
         root_name: Option<&'a str>,
-    ) -> Result<Output, Positioned<Error>>
+    ) -> Result<Output, Box<Positioned<Error>>>
     where
         Output: JsonLike<'a>,
     {
@@ -72,7 +72,7 @@ where
 
         let result = match self.store.get(&node.id) {
             Some(value) => {
-                let mut value = value.as_ref().map_err(Clone::clone)?;
+                let mut value = value.as_ref().map_err(|e| Box::new(e.clone()))?;
 
                 for index in data_path.as_slice() {
                     if let Some(arr) = value.as_array() {
@@ -104,7 +104,7 @@ where
         node: &'a Field<Value>,
         path: &[PathSegment],
         root_name: Option<&'a str>,
-    ) -> Result<Output, Positioned<Error>>
+    ) -> Result<Output, Box<Positioned<Error>>>
     where
         Output: JsonLike<'a>,
     {
@@ -130,7 +130,7 @@ where
         value: &'a Value,
         data_path: &DataPath,
         path: &mut Vec<PathSegment<'a>>,
-    ) -> Result<Output, Positioned<Error>>
+    ) -> Result<Output, Box<Positioned<Error>>>
     where
         Output: JsonLike<'a>,
     {
@@ -233,8 +233,8 @@ where
         error: Error,
         node: &'a Field<Value>,
         path: &[PathSegment],
-    ) -> Positioned<Error> {
-        Positioned::new(error, node.pos).with_path(
+    ) -> Box<Positioned<Error>> {
+        Box::new(Positioned::new(error, node.pos).with_path(
             path.iter()
                 .map(|x| match x {
                     PathSegment::Field(cow) => {
@@ -243,7 +243,7 @@ where
                     PathSegment::Index(i) => PathSegment::Index(*i),
                 })
                 .collect(),
-        )
+        ))
     }
 }
 
