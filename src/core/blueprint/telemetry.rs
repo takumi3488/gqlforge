@@ -82,4 +82,3 @@ pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintE
         }
     })
 }
-
