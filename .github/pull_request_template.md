@@ -14,6 +14,5 @@ Fixes #... _(Replace "..." with the issue number)_
 - [ ] I have added relevant unit & integration tests.
 - [ ] I have updated the [documentation] accordingly.
 - [ ] I have performed a self-review of my code.
-- [ ] PR follows the naming convention of `<type>(<optional scope>): <title>`
 
 [documentation]: https://github.com/takumi3488/gqlforge/tree/develop/docs
