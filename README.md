@@ -2,9 +2,6 @@
 
 Gqlforge is an open-source solution for building [high-performance] GraphQL backends.
 
-Please support us by giving the repository a star
-![image](./assets/star-our-repo.gif)
-
 [high-performance]: https://github.com/takumi3488/graphql-benchmarks
 
 [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=for-the-badge&logo=x&color=black&labelColor=black)](https://twitter.com/intent/tweet?text=%40takumi3488%20is%20building%20a%20high-performance%20API%20Orchestration%20solution%20over%20%23GraphQL.%0A%0ACheck%20it%20out%20at%3A%0A%F0%9F%94%97%20https%3A%2F%2Fgqlforge.pages.dev%20%0A%F0%9F%94%97%20https%3A%2F%2Fgithub.com%2Ftakumi3488%2Fgqlforge%20%0A%0A&hashtags=api,http,rest,grpc,graphql,nocode,microservice,opensource)
