@@ -9,6 +9,5 @@ export const pageLinks = {
   privacyPolicy: "/privacy/",
   // enterprise: "/enterprise",
   releases: "/releases",
-  blog: "/blog",
   about: "/about",
 }
