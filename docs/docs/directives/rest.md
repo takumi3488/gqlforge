@@ -1,53 +1,43 @@
 ---
-title: "@rest"
-description: The @rest directive maps fields to REST API endpoints, allowing GraphQL to serve as a layer over RESTful services.
-slug: ../rest-directive
+title: "@rest Directive"
+description: "Expose GraphQL queries as REST API endpoints."
+sidebar_label: "@rest"
 ---
 
-The `@rest` directive is defined as follows:
+# @rest Directive
 
-```graphql title="Directive Definition" showLineNumbers
-directive @rest(
-  """
-  HTTP method for the REST endpoint
-  """
-  method: Method!
+The `@rest` directive exposes a GraphQL query or mutation as a traditional REST endpoint. This allows non-GraphQL clients to consume your API over standard HTTP methods and URL paths.
 
-  """
-  Path for the REST endpoint, supports dynamic values
-  """
-  path: String!
+## How It Works
 
-  """
-  Query parameters as key-value pairs
-  """
-  query: [InputKeyValue!]
-) on OPERATION_DEFINITION
-```
+When you annotate a field with `@rest`, GQLForge registers an HTTP route that maps to the underlying GraphQL operation. Path parameters are extracted from the URL and passed as field arguments.
 
-API orchestration is essential, yet not all can adopt GraphQL despite its benefits. The GQLForge DSL feature leverages GraphQL at compile time to generate REST endpoints, aligning with traditional API infrastructure like CDNs and Gateways.
+## Fields
 
-## Usage
-
-- **method**: Specifies the HTTP method (GET, POST, etc.).
-- **path**: Sets the endpoint URL, with support for dynamic values from query arguments.
-- **query**: Defines the query parameters as key-value pairs.
+| Field | Type | Description |
+|-------|------|-------------|
+| `path` | String | The URL path pattern (e.g. `/users/:id`). Path segments prefixed with `:` become arguments. |
+| `method` | Method | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`. Defaults to `GET` for queries. |
 
 ## Example
 
-Define GraphQL types and queries, using the `@rest` directive to map fields to REST API endpoints.
-
-`schema.graphql`
-
 ```graphql
-schema
-  @link(type: Operation, src: "user-operation.graphql") {
+schema @server(port: 8000) {
   query: Query
 }
 
 type Query {
+  users: [User]
+    @http(url: "https://jsonplaceholder.typicode.com/users")
+    @rest(path: "/api/users", method: GET)
+
   user(id: Int!): User
-    @rest(method: "GET", path: "/users/{{.args.id}}")
+    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
+    @rest(path: "/api/users/:id", method: GET)
+
+  userPosts(userId: Int!): [Post]
+    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.userId}}/posts")
+    @rest(path: "/api/users/:userId/posts", method: GET)
 }
 
 type User {
@@ -55,19 +45,18 @@ type User {
   name: String!
   email: String!
 }
-```
 
-`user-operation.graphql`
-
-```graphql
-query ($id: Int!) @rest(method: GET, path: "/user/$id") {
-  user(id: $id) {
-    id
-    name
-  }
+type Post {
+  id: Int!
+  title: String!
+  body: String!
 }
 ```
 
-![REST Demo](/images/docs/rest-user.png)
+With this configuration:
 
-This example demonstrates how to define a simple query to fetch user data from a REST endpoint using the `@rest` directive. By leveraging `@rest`, GraphQL can serve as a layer over RESTful services, combining REST's simplicity with GraphQL's flexibility.
+- `GET /api/users` returns all users.
+- `GET /api/users/1` returns the user with id 1.
+- `GET /api/users/1/posts` returns posts for user 1.
+
+Each REST endpoint executes the corresponding GraphQL resolver internally.

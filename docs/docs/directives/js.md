@@ -1,90 +1,69 @@
 ---
-title: "@js"
-description: The @js directive allows you to use JavaScript functions to resolve fields in your GraphQL schema.
-slug: ../js-directive
+title: "@js Directive"
+description: "Resolve fields using custom JavaScript functions."
+sidebar_label: "@js"
 ---
 
-The `@js` directive is defined as follows:
+# @js Directive
 
-```graphql title="Directive Definition" showLineNumbers
-directive @js(
-  """
-  Name of the JavaScript function to be used as resolver
-  """
-  name: String!
-) on FIELD_DEFINITION
-```
+The `@js` directive resolves a field by executing a JavaScript function from a linked script file. This provides full programmatic control over the response.
 
-The `@js` directive allows you to use JavaScript functions to resolve fields in your GraphQL schema. This can be useful for custom data transformations or complex field resolutions.
+## Fields
 
-## Usage
+| Field | Type | Description |
+|-------|------|-------------|
+| `name` | String | The name of the JavaScript function to invoke. |
 
-The `@js` directive is used to specify a JavaScript function that will resolve the value of a field. The directive takes
-a single argument, `name`, which is the name of the JavaScript function to be used.
+## Prerequisites
 
-## Syntax
+You must link a JavaScript file using the `@link` directive with `type_of: Script`.
 
-```graphql showLineNumbers
-fieldName: FieldType @js(name: "functionName")
-```
+## Function Signature
+
+The function receives a context object with:
+
+- `args` -- the field arguments
+- `value` -- the parent object
+- `env` -- environment variables
+
+It should return the resolved value.
 
 ## Example
 
-Let's consider a `foo.js` file which contains a `resolve` function:
+### Schema
 
-```js
-function resolve(val) {
-  let json = JSON.parse(val)
-  return JSON.stringify(json.id)
-}
-```
-
-Here is an example of how the `@js` directive is used within a GraphQL schema:
-
-```gql showLineNumbers
+```graphql
 schema
-  @link(type: Script, src: "./scripts/foo.js")
-  @server(port: 8000)
-  @upstream(httpCache: true) {
+  @link(src: "./resolvers.js", type_of: Script)
+  @server(port: 8000) {
   query: Query
 }
 
 type Query {
-  posts: [Post]
-    @http(url: "https://jsonplaceholder.typicode.com/posts")
+  greeting(name: String!): String @js(name: "greet")
+  users: [User]
+    @http(url: "https://jsonplaceholder.typicode.com/users")
 }
 
-type Post {
+type User {
   id: Int!
-  idx: Int! @js(name: "resolve")
-  userId: Int!
-  title: String!
-  body: String!
+  name: String!
+  email: String!
+  initials: String @js(name: "getInitials")
 }
 ```
 
-## Error Handling
-
-When using the `@js` directive, it is important to handle errors within your JavaScript functions. For example, you can use try-catch blocks to catch and handle any errors that occur during the resolution process.
+### resolvers.js
 
 ```javascript
-function resolve(val) {
-  try {
-    let json = JSON.parse(val)
-    return JSON.stringify(json.id)
-  } catch (error) {
-    console.error("Error resolving value:", error)
-    throw new Error("Failed to resolve value")
-  }
+function greet({args}) {
+  return `Hello, ${args.name}!`;
+}
+
+function getInitials({value}) {
+  return value.name
+    .split(" ")
+    .map((part) => part[0])
+    .join("");
 }
 ```
-
-## Performance Considerations
-
-When using the `@js` directive, keep in mind that JavaScript functions can introduce performance overhead, especially if they perform complex operations or are called frequently. To minimize performance impact, ensure that your functions are optimized and avoid unnecessary computations.
-
-## Combining Directives
-
-The `@js` directive can be used in combination with other [resolvable directives](../directives.md#resolvable-directives), with results merged deeply. This allows for powerful and flexible resolver configurations.
-
-For more details, see [Directives Documentation](../directives.md).

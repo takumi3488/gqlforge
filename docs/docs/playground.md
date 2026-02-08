@@ -1,43 +1,86 @@
 ---
-title: GraphQL Playground
-description: "Explore and test server configurations with the @server directive's showcase feature in a controlled environment. Ideal for quick experimentation and learning with dynamic GraphQL schema configurations. Not recommended for production due to performance and security considerations."
-slug: graphql-playground-guide
-sidebar_label: GraphQL Playground
+title: "GraphQL Playground"
+description: "Use the built-in GraphQL Playground to explore and test your API."
+sidebar_label: "Playground"
 ---
 
-The `@server` directive's `showcase` option allows for hands-on experimentation with server configurations in a controlled environment. This feature simplifies the process of exploring and testing different settings. This enables experimenting with random configurations hosted, without the need to restart the server or affect existing setups.
+## Overview
 
-#### Example Usage
+GQLForge includes a built-in GraphQL Playground that launches automatically when you start the server. It provides an interactive environment for writing queries, exploring your schema, and inspecting responses.
 
-```graphql showLineNumbers
-schema @server(showcase: true) {
-  query: Query
-}
+## Accessing the Playground
 
-type User {
-  notId: Int
-  notName: String
-}
+After starting the server with `gqlforge start`, open your browser and navigate to the server address:
 
-type Query {
-  notUser: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/1"
-    )
+```
+http://localhost:8000
+```
+
+The Playground loads at the root URL by default. The port depends on your `@server` configuration.
+
+## Features
+
+### Query Editor
+
+Write and execute GraphQL queries, mutations, and subscriptions directly in the browser. The editor includes syntax highlighting and auto-completion based on your schema.
+
+```graphql
+{
+  posts {
+    id
+    title
+    user {
+      name
+      email
+    }
+  }
 }
 ```
 
-To test it out, append `/showcase/graphql?config=YOUR_CONFIG_URL` to your GraphQL base URL when querying the data.
+### Schema Explorer
 
-![Showcase](/images/docs/showcase.png)
+Browse the full schema documentation generated from your configuration. View all types, fields, arguments, and their descriptions without leaving the Playground.
 
-The above example shows loading a schema file from GQLForge's Github repository [examples](https://github.com/takumi3488/gqlforge/tree/main/examples) and querying it.
+### Request Headers
 
-## Performance and Security
+Add custom HTTP headers to your requests using the headers panel at the bottom of the editor. This is useful for testing authenticated endpoints:
 
-- **Performance Impact**: The `showcase` feature prioritizes flexibility and ease of testing over speed, leading to slower response times due to the overhead of dynamically applied configurations.
-- **Security Risk**: There's a potential security risk as it may allow unauthorized access to files and environment variables.
+```json
+{
+  "Authorization": "Bearer your-token-here"
+}
+```
 
-:::important
-Due to these concerns, this mode is **not recommended** for production environments.
-:::
+### Query Variables
+
+Pass variables to your queries through the variables panel:
+
+```json
+{
+  "userId": 1
+}
+```
+
+With a corresponding query:
+
+```graphql
+query GetUser($userId: Int!) {
+  user(id: $userId) {
+    name
+    email
+  }
+}
+```
+
+## Configuration
+
+The Playground is enabled by default in the `@server` directive. You can disable it for production deployments if needed by adjusting the server configuration.
+
+## Usage in Development
+
+The Playground is particularly useful during development for:
+
+- Verifying that resolvers return the expected data
+- Testing field arguments and input types
+- Inspecting the composed schema after merging multiple config files
+- Debugging query execution by examining response payloads

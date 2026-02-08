@@ -1,172 +1,76 @@
 ---
-title: Sequencing & Parallelism
-description: "GQLForge revolutionizes data access layer development by automating API call orchestration, ensuring optimal execution strategies through advanced sequencing and parallelism techniques."
-slug: graphql-data-access-parallel-vs-sequence
-sidebar_label: Sequence vs Parallel
+title: "Execution Strategy"
+description: "How GQLForge optimizes query execution with its JIT engine."
+sidebar_label: "Execution Strategy"
 ---
 
-Building data access layers often involves meticulous orchestration of API calls, but GQLForge simplifies this process. By analyzing your defined schema, it automatically determines the optimal execution strategy, deciding when to sequence calls and when to run them in parallel. This allows you to focus on your core application logic, while GQLForge handles the optimization seamlessly. Now, let's get into some real-world examples to illustrate its functionality.
+## Overview
 
-## Examples
+GQLForge uses an ahead-of-time optimization approach to minimize runtime overhead when executing GraphQL queries. Rather than interpreting the schema and resolvers on every request, the engine analyzes the entire configuration at startup and produces an optimized execution plan.
 
-### Example 1: Fetching a Specific User and Their Posts
+## Ahead-of-Time Analysis
 
-Imagine you're building a blog and want to display a specific user's profile page containing their information and all their posts.
+When the server starts, GQLForge performs a full analysis of your schema and resolver configurations. This phase includes:
 
-**Schema:**
+- **Dependency graph construction**: Determines the relationships between types, fields, and their resolvers.
+- **Resolver ordering**: Identifies which resolvers depend on parent values and which can run independently.
+- **N+1 detection**: Flags potential N+1 query patterns where a field resolver inside a list would trigger one request per item.
 
-```graphql
-type Query {
-  # Retrieve a specific user by ID
-  user(id: Int!): User
-    @http(
-      url: "https://jsonplaceholder.typicode.com/users/{{.value.id}}"
-    )
-}
+This upfront analysis means the server avoids repeated work during request handling.
 
-type User {
-  id: Int!
-  name: String!
-  username: String!
-  email: String!
+## JIT Execution Engine
 
-  # Access user's posts using their ID in the url
-  posts: [Post]
-    @http(
-      url: "https://jsonplaceholder.typicode.com/users/{{.value.id}}/posts"
-    )
-}
+GQLForge compiles resolver chains into an internal execution plan at startup rather than interpreting them dynamically. This JIT-style approach provides several benefits:
 
-type Post {
-  id: Int!
-  title: String!
-  body: String!
-}
-```
+- **Reduced per-request overhead**: No schema introspection or resolver lookup happens at query time.
+- **Predictable performance**: Execution paths are determined before the first request arrives.
+- **Early error detection**: Configuration issues are caught at startup, not at runtime.
 
-**GraphQL Query:**
+## Parallel Execution
+
+Independent resolvers within a query are executed concurrently. When the execution plan identifies fields that have no data dependencies on each other, their resolvers run in parallel.
+
+For example, given this query:
 
 ```graphql
-query getUserAndPosts($userId: Int!) {
-  # Fetch the user by ID
-  user(id: $userId) {
-    id
-    name
-    username
-    email
-    # Sequentially retrieve all posts for the fetched user
-    posts {
-      id
-      title
-      body
-    }
-  }
-}
-```
-
-GQLForge understands that retrieving the user's posts depends on knowing the user's ID, which is obtained in the first step. Therefore, it automatically fetches the user first and then uses their ID to retrieve all their posts in a sequential manner.
-
-### Example 2: Searching Multiple Posts and Users by ID
-
-Suppose you're building a social media platform and want to display profiles of specific users and their recent posts.
-
-**Schema:**
-
-```graphql
-type Query {
-  # Retrieve users from the "/users" endpoint
-  users: [User]
-    @http(url: "https://jsonplaceholder.typicode.com/users")
-}
-
-type User {
-  id: Int!
-  name: String!
-  username: String!
-  email: String!
-
-  # Access user's posts using their ID in the url
-  posts: [Post]
-    @http(
-      url: "https://jsonplaceholder.typicode.com/users/{{.value.id}}/posts"
-    )
-}
-
-type Post {
-  id: Int!
-  title: String!
-  body: String!
-}
-```
-
-**GraphQL Query:**
-
-```graphql
-query getUsersWithLatestPosts {
-  # Retrieve all users
+{
   users {
-    id
     name
-    username
-    email
-    # Access user's posts through the nested field
-    posts {
-      id
-      title
-      body
-    }
+  }
+  posts {
+    title
   }
 }
 ```
 
-This query retrieves details of multiple users and their most recent posts based on the provided user IDs. GQLForge recognizes that fetching user details and their individual posts are independent tasks. As a result, it can execute these requests concurrently for each user.
+The resolvers for `users` and `posts` execute simultaneously since neither depends on the other's result.
 
-### Example 3: Fetching Posts with Users
+## Data Loader Batching
 
-Imagine you're building a social media platform and want to display a list of posts with each post's author. Traditionally, you might write a query that retrieves all posts and then, for each post, make a separate request to fetch its corresponding user. This approach leads to the N+1 problem, where N represents the number of posts, and 1 represents the additional request per post to retrieve its user.
+When a resolver appears inside a list type, GQLForge automatically batches the requests. Instead of sending one HTTP call per list item, the engine collects all required IDs and issues a single batched request where possible.
 
-**Schema:**
+Consider this schema:
 
 ```graphql
-type Query {
-  posts: [Post]
-    @http(url: "https://jsonplaceholder.typicode.com/posts")
-}
-
 type Post {
   id: Int!
   userId: Int!
-  title: String!
-  body: String!
-  user: User
-    @http(
-      url: "https://jsonplaceholder.typicode.com/users/{{.value.userId}}"
-    )
-}
-
-type User {
-  id: Int!
-  name: String!
+  user: User @http(path: "/users/{{.value.userId}}")
 }
 ```
 
-**GraphQL Query:**
+When resolving `user` for a list of 10 posts, GQLForge groups the lookups and reduces the number of outbound HTTP calls. This eliminates the classic N+1 problem without requiring manual batching logic in your configuration.
 
-```graphql
-query getPostsWithUsers {
-  posts {
-    id
-    userId
-    title
-    body
-    user {
-      id
-      name
-    }
-  }
-}
-```
+## Request Deduplication
 
-GQLForge analyzes the schema and recognizes that fetching user details for each post is independent. It can potentially execute these requests to `/users/{{.value.userId}}` concurrently, fetching user data for multiple posts simultaneously.
+If multiple fields within the same query resolve to the same upstream URL with identical parameters, GQLForge deduplicates those calls. Only one HTTP request is sent, and the result is shared across all fields that need it.
 
-In summary, GQLForge automates the management of sequence and parallelism in API calls. It analyzes the defined schema to optimize execution, freeing developers from manual intervention.
+## Summary
+
+| Optimization | Description |
+|---|---|
+| Ahead-of-time analysis | Schema and resolvers are analyzed once at startup |
+| JIT execution plan | Resolver chains are compiled into optimized execution paths |
+| Parallel execution | Independent resolvers run concurrently |
+| Data loader batching | List-nested resolvers are batched into fewer upstream calls |
+| Request deduplication | Identical upstream requests are merged into one |

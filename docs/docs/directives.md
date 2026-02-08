@@ -1,68 +1,42 @@
 ---
-title: Getting Started with GQLForge Directives
-description: Enhance your GraphQL API with GQLForge custom directives. These directives offer powerful compile-time guarantees, ensuring robust and optimized API composition. GQLForge automates the generation of resolver logic for improved performance.
-slug: gqlforge-dsl-graphql-custom-directives
-sidebar_label: Getting Started
-sidebar_position: 5
+title: "Directives Overview"
+description: "Overview of all available GQLForge directives."
+sidebar_label: "Overview"
 ---
 
-GQLForge DSL builds on your existing GraphQL knowledge by allowing the addition of some custom directives. These directives provide powerful compile time guarantees to ensure your API composition is tight and robust. Behind the scenes, GQLForge automatically generates highly optimized resolver logic for your types using the information in the directives.
+# Directives Overview
 
-Here is a list of all the custom directives supported by GQLForge:
+GQLForge uses GraphQL schema directives to declaratively configure data fetching, transformation, and access control. Below is a summary of every available directive.
 
-<!-- SORT OPERATOR BY NAME -->
+## Data Source Directives
 
-| Operator                                        | Description                                                                                                  |
-| ----------------------------------------------- | ------------------------------------------------------------------------------------------------------------ |
-| [`@addField`](./directives/addField.md)         | Simplifies data structures and queries by adding, inlining, or flattening fields or nodes within the schema. |
-| [`@cache`](./directives/cache.md)               | Enables caching for the query, field or type applied to.                                                     |
-| [`@call`](./directives/call.md)                 | Invokes a query or mutation from another query or mutation field.                                            |
-| [`@discriminate`](./directives/discriminate.md) | Allows to customize the discriminator while working with union types.                                        |
-| [`@expr`](./directives/expr.md)                 | Allows embedding of a constant response within the schema.                                                   |
-| [`@graphQL`](./directives/graphQL.md)           | Resolves a field or node by a GraphQL API.                                                                   |
-| [`@grpc`](./directives/grpc.md)                 | Resolves a field or node by a gRPC API.                                                                      |
-| [`@http`](./directives/http.md)                 | Resolves a field or node by a REST API.                                                                      |
-| [`@modify`](./directives/modify.md)             | Enables changes to attributes of fields or nodes in the schema.                                              |
-| [`@omit`](./directives/omit.md)                 | Excludes fields or nodes from the generated schema, making them inaccessible through the GraphQL API.        |
-| [`@protected`](./directives/protected.md)       | Adds authentication and authorization controls to fields or nodes in the schema.                             |
-| [`@rest`](./directives/rest.md)                 | Allows exposing REST endpoints on top of GraphQL.                                                            |
+| Directive | Description |
+|-----------|-------------|
+| [@http](./directives/http.md) | Resolve a field by calling a REST/HTTP endpoint. |
+| [@grpc](./directives/grpc.md) | Resolve a field by calling a gRPC service method. |
+| [@graphQL](./directives/graphQL.md) | Resolve a field by proxying to another GraphQL server. |
+| [@call](./directives/call.md) | Compose multiple resolver steps into a single field resolution. |
+| [@expr](./directives/expr.md) | Return a static value or a computed expression. |
+| [@js](./directives/js.md) | Resolve a field using a custom JavaScript function. |
 
-### Resolvable Directives
+## Schema Transformation Directives
 
-Resolvable directives are used to fetch actual data from external sources. These include the following directives: `@call`, `@expr`, `@graphQL`, `@grpc`, and `@http`.
+| Directive | Description |
+|-----------|-------------|
+| [@addField](./directives/addField.md) | Add a derived field to a type. |
+| [@modify](./directives/modify.md) | Rename a field or mark it as omitted in the public schema. |
+| [@omit](./directives/omit.md) | Exclude a field from the public-facing schema entirely. |
+| [@discriminate](./directives/discriminate.md) | Set the discriminator field for union type resolution. |
 
-### Combining Resolvable Directives on Fields
+## Performance and Security Directives
 
-When multiple resolvable directives (such as `@call`, `@expr`, `@graphQL`, `@grpc`, or `@http`) are applied to a field, the **order in which they are defined in the schema is important**. Each directive contributes a part of the final result, and the outputs are combined by performing a deep merge of all partial results.
+| Directive | Description |
+|-----------|-------------|
+| [@cache](./directives/cache.md) | Cache a field's resolved value for a specified duration. |
+| [@protected](./directives/protected.md) | Restrict field access to authenticated users. |
 
-#### Example: Combining Resolvable Directives
+## Endpoint Directives
 
-```graphql
-type Query {
-  data: Data
-    # This request resolves the `{ "foo": "..." }` part of the response
-    @http(url: "http://api.com/foo")
-    # This request resolves the `{ "bar": "..." }` part of the response
-    # After executing both requests, the results are merged into a single `Data` object
-    @http(url: "http://api.com/bar")
-
-  dataList: [Data]
-    # This request resolves 3 entries of data: `[.., .., ..]`
-    @http(url: "http://api.com/list/foo")
-    # This request resolves 2 entries of data: `[.., ..]`
-    # After executing both requests, the results are merged into a single list
-    # containing 5 entries
-    @http(url: "http://api.com/list/bar")
-}
-
-type Data {
-  foo: String
-  bar: String
-}
-```
-
-### Key Points
-
-1. **Order Matters**: The schema's order of directives determines how partial results are combined.
-2. **Deep Merge**: Partial outputs from each directive are deep-merged to produce the final result.
-3. **Versatility**: Resolvable directives can fetch data from various sources, making them powerful tools for flexible schema design.
+| Directive | Description |
+|-----------|-------------|
+| [@rest](./directives/rest.md) | Expose a GraphQL query as a REST endpoint. |

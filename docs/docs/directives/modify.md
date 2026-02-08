@@ -1,51 +1,53 @@
 ---
-title: "@modify"
-description: The @modify directive allows altering attributes of a field or node within your GraphQL schema.
-slug: ../modify-directive
+title: "@modify Directive"
+description: "Rename or omit fields in the public GraphQL schema."
+sidebar_label: "@modify"
 ---
 
-The `@modify` directive is defined as follows:
+# @modify Directive
 
-```graphql title="Directive Definition" showLineNumbers
-directive @modify(
-  """
-  New name for the field or node
-  """
-  name: String
+The `@modify` directive renames a field in the public schema or marks it as omitted. This is useful for adapting upstream API field names to your preferred GraphQL conventions.
 
-  """
-  Whether to exclude the field or node from the schema
-  """
-  omit: Boolean
-) repeatable on FIELD_DEFINITION | OBJECT
-```
+## Fields
 
-The `@modify` directive in GraphQL provides the flexibility to alter the attributes of a field or a node within your GraphQL schema. Here's how you can use this directive:
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `name` | String | `null` | The new public name for the field. |
+| `omit` | Boolean | `false` | If `true`, the field is hidden from the public schema but still available internally. |
 
-## name
+## Examples
 
-You can rename a field or a node in your GraphQL schema using the `name` argument in the `@modify` directive. This can be helpful when the field name in your underlying data source doesn't match the desired field name in your schema. For instance:
+### Renaming a field
 
-```graphql showLineNumbers
+```graphql
+schema @server(port: 8000) {
+  query: Query
+}
+
+type Query {
+  users: [User] @http(url: "https://jsonplaceholder.typicode.com/users")
+}
+
 type User {
-  id: Int! @modify(name: "userId")
+  id: Int!
+  name: String!
+  username: String! @modify(name: "handle")
+  email: String!
+  phone: String!
 }
 ```
 
-`@modify(name: "userId")` informs GraphQL to present the field known as `id` in the underlying data source as `userId` in your schema.
+Clients query `handle` instead of `username`, while the upstream API still returns `username`.
 
-## omit
+### Omitting a field
 
-You can exclude a field or a node from your GraphQL schema using the `omit` argument in the `@modify` directive. This can be useful if you want to keep certain data hidden from the client. For instance:
-
-```graphql showLineNumbers
+```graphql
 type User {
-  id: Int! @modify(omit: true)
+  id: Int!
+  name: String!
+  email: String!
+  internalCode: String @modify(omit: true)
 }
 ```
 
-`@modify(omit: true)` instructs GraphQL to exclude the `id` field from the schema, making it inaccessible to the client.
-
-:::tip
-`@omit` is a standalone directive and is an alias/shorthand for `modify(omit: true)` checkout [documentation](./omit.md)
-:::
+The `internalCode` field is available to other resolvers but not visible in the public schema or introspection.

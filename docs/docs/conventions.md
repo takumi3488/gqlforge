@@ -1,147 +1,126 @@
 ---
-title: GraphQL Best Practices
-description: "Enhance your understanding of naming and casing conventions for GraphQL schema to ensure clarity and consistency in your schema design using GQLForge. Learn best practices for naming to maintain a well-structured and readable GraphQL schema."
-slug: graphql-best-practices-gqlforge
-sidebar_label: Best Practices
+title: "Configuration Conventions"
+description: "Conventions for writing GQLForge configuration files."
+sidebar_label: "Conventions"
 ---
 
-## General Naming Principles
+## File Format
 
-1. **Consistency is Key:** Ensure that naming conventions are uniform across your entire schema to maintain clarity and consistency.
-2. **Descriptive Over Generic:** Opt for descriptive, specific names rather than broad, generic ones to avoid ambiguity.
-3. **Avoid Abbreviations:** Avoid the use of acronyms, initialism, and abbreviations to keep your schema intuitive and understandable.
+GQLForge uses **GraphQL SDL (Schema Definition Language)** as its primary configuration format. Configuration files typically use the `.graphql` extension.
 
-## Detailed Naming Cases
+```graphql
+schema
+  @server(port: 8000)
+  @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
+  query: Query
+}
+```
 
-### Fields, Arguments, and Directives
+## Schema Structure
 
-**Adopt `camelCase`:** Utilize `camelCase` for field names, argument names, and directive names to achieve a clear, consistent structure.
+A GQLForge configuration file follows a consistent structure:
+
+### 1. Schema Definition
+
+The file begins with a `schema` block that declares the root operation types and applies global directives:
+
+```graphql
+schema
+  @server(port: 8000, hostname: "0.0.0.0")
+  @upstream(baseURL: "https://api.example.com") {
+  query: Query
+  mutation: Mutation
+}
+```
+
+- `@server` controls the runtime behavior (port, hostname, workers).
+- `@upstream` sets defaults for outbound HTTP connections.
+- `@link` imports external files or definitions.
+
+### 2. Type Definitions
+
+After the schema block, define your GraphQL types with resolver directives:
 
 ```graphql
 type Query {
-  postTitle(userId: Int): String
+  users: [User] @http(path: "/users")
+  user(id: Int!): User @http(path: "/users/{{.args.id}}")
 }
 
-directive @includeIf on FIELD
-```
-
-### Types
-
-**Prefer `PascalCase`:** Use `PascalCase` for defining types, enabling easy identification and differentiation.
-
-```graphql
-type Post { ... }
-enum StatusEnum { ... }
-interface UserInterface { ... }
-union SearchResult = ...
-scalar Date
-```
-
-**Enum Values in `SCREAMING_SNAKE_CASE`:** Distinguish enum values by using `SCREAMING_SNAKE_CASE`.
-
-```graphql
-enum StatusEnum {
-  PUBLISHED
-  DRAFT
-}
-```
-
-## Field Naming Best Practices
-
-### Queries
-
-**Avoid `get` or `list` Prefixes:** Refrain from using prefixes like `get` or `list` in your query names to ensure predictability and consistency.
-
-```graphql
-type Query {
-  # 👎 Avoid
-  getPosts: [Post]
-
-  # 👍 Prefer
-  posts: [Post]
-}
-```
-
-Maintain consistency between root and nested fields:
-
-```graphql
-# 👎 Avoid
-query PostQuery {
-  getPosts {
-    id
-    getUser {
-      name
-    }
-  }
+type User {
+  id: Int!
+  name: String!
+  email: String!
+  posts: [Post] @http(path: "/users/{{.value.id}}/posts")
 }
 
-# 👍 Prefer
-query PostQuery {
-  posts {
-    id
-    user {
-      name
-    }
-  }
-}
-```
-
-### Mutations
-
-**Verb Prefixes for Mutations:** Begin mutation field names with a verb to indicate the action being performed, improving schema readability.
-
-```graphql
-type Mutation {
-  # 👎 Avoid
-  postAdd(input: AddPostInput): AddPostPayload!
-
-  # 👍 Prefer
-  addPost(input: AddPostInput): AddPostPayload!
-}
-```
-
-## Type Naming Conventions
-
-### Input Types
-
-**`Input` Suffix:** Denote input types by appending `Input` to their names, specifying their use case.
-
-```graphql
-input AddPostInput {
+type Post {
+  id: Int!
   title: String!
   body: String!
-  userId: Int!
 }
 ```
 
-### Output Types
+### 3. Input Types and Enums
 
-**`Response` or `Payload` Suffix:** Use a consistent suffix like `Response` or `Payload` for the output types resulting from mutations.
+Define input types for mutations and enums as needed:
 
 ```graphql
-type Mutation {
-  addPost(input: AddPostInput!): AddPostResponse!
+input CreateUserInput {
+  name: String!
+  email: String!
 }
 
-type AddPostResponse {
-  success: Boolean!
-  post: Post
+enum UserRole {
+  ADMIN
+  MEMBER
+  GUEST
 }
 ```
 
-## Advanced Naming Strategies
+## Naming Conventions
 
-### Resolving Namespace Conflicts
+- **Types**: Use PascalCase (`User`, `BlogPost`, `CreateUserInput`).
+- **Fields**: Use camelCase (`firstName`, `createdAt`, `userId`).
+- **Enums**: Use SCREAMING_SNAKE_CASE for values (`ADMIN`, `IN_PROGRESS`).
+- **Files**: Use lowercase with hyphens or simple names (`app.graphql`, `user-schema.graphql`).
 
-For addressing naming conflicts across different domains within your schema:
+## Multi-File Configurations
 
-**Use `PascalCase` Prefix:** Distinguish similar types from distinct domains for clear separation without resorting to underscores. This method ensures a cleaner, more professional look while maintaining the integrity and readability of your schema.
+You can split your configuration across multiple files and pass them all to the CLI:
+
+```bash
+gqlforge start ./schema.graphql ./users.graphql ./posts.graphql
+```
+
+Alternatively, use the `@link` directive to import files from a primary configuration:
 
 ```graphql
-type BlogPost { ... }
-type ForumPost { ... }
+schema
+  @server(port: 8000)
+  @link(type: Config, src: "./users.graphql")
+  @link(type: Config, src: "./posts.graphql") {
+  query: Query
+}
 ```
 
-## Conclusion
+## Directive Placement
 
-Implementing a consistent, descriptive, and intuitive naming convention is crucial for developing an understandable and maintainable GraphQL schema. By following the best practices outlined you can improve the clarity and effectiveness of your schema.
+- **Global directives** (`@server`, `@upstream`, `@link`) are applied to the `schema` definition.
+- **Resolver directives** (`@http`, `@grpc`, `@graphQL`, `@call`, `@expr`, `@js`) are applied to individual fields.
+- **Schema directives** (`@addField`, `@modify`, `@omit`, `@cache`, `@protected`) are applied to types or fields as appropriate.
+
+## Comments
+
+Standard GraphQL comments (lines starting with `#`) and description strings (triple-quoted blocks) are supported:
+
+```graphql
+"""
+Represents a registered user in the system.
+"""
+type User {
+  # Unique identifier
+  id: Int!
+  name: String!
+}
+```

@@ -1,43 +1,47 @@
 ---
-title: "@omit"
-description: The @omit directive excludes fields or nodes from the generated GraphQL schema.
-slug: ../omit-directive
+title: "@omit Directive"
+description: "Exclude fields from the public-facing GraphQL schema."
+sidebar_label: "@omit"
 ---
 
-The `@omit` directive is defined as follows:
+# @omit Directive
 
-```graphql title="Directive Definition" showLineNumbers
-directive @omit repeatable on FIELD_DEFINITION | OBJECT
-```
+The `@omit` directive removes a field from the public GraphQL schema entirely. Unlike `@modify(omit: true)`, a field marked with `@omit` is fully excluded from introspection and client queries.
 
-Within a GraphQL schema, the `@omit` directive excludes fields or nodes from the generated schema, making them inaccessible through the GraphQL API. This directive is useful for hiding sensitive information or simplifying your API by removing unnecessary fields.
+## Fields
 
-## How it works
+This directive has no fields. Apply it directly to a field definition.
 
-When applied to a field or node, the `@omit` directive instructs the GQLForge not to include that field or node in the schema. This means that clients cannot query or mutate data in those fields.
+## Use Cases
+
+- Hide internal implementation fields that should never be queried by clients.
+- Remove upstream fields that are irrelevant to your API consumers.
+- Strip sensitive data fields from the public schema.
 
 ## Example
 
-Consider a scenario where you have a `User` type with an embedded `Address` type. If you want to exclude the `Address` type from the schema to simplify the API, you can use the `@omit` directive:
+```graphql
+schema @server(port: 8000) {
+  query: Query
+}
 
-```graphql showLineNumbers
-type Address {
-  city: String
-  street: String
+type Query {
+  users: [User] @http(url: "https://jsonplaceholder.typicode.com/users")
 }
 
 type User {
-  name: String
+  id: Int!
+  name: String!
+  email: String!
+  phone: String!
+  website: String @omit
   address: Address @omit
+}
+
+type Address {
+  street: String
+  city: String
 }
 ```
 
-In this example, the `address` field will not be accessible or visible through the GraphQL API.
-
-## Comparison with `modify`
-
-The `@omit` directive and `@modify(omit: true)` essentially serve the same purpose in excluding fields from the schema, but they differ in syntax and flexibility. In fact, one can consider `@omit` as a shorthand or alias for the more verbose `@modify(omit: true)`.
-
-- `@omit` offers a concise way to directly exclude a field or node without additional arguments.
-
-- `@modify(omit: true)`, as part of the broader [`@modify`](./omit.md) directive, provides more options, such as field renaming through the `name` argument. This makes it a more flexible choice when you need more than field exclusion.
+In this example, `website` and `address` are fetched from the upstream API but are not exposed to GraphQL clients.

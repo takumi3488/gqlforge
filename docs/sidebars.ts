@@ -1,53 +1,47 @@
-/**
- * Creating a sidebar enables you to:
- - create an ordered group of docs
- - render a sidebar for each doc of that group
- - provide next/previous navigation
-
- The sidebars can be generated from the filesystem, or explicitly defined here.
-
- Create as many sidebars as you want.
- */
-
 import {SidebarsConfig} from "@docusaurus/plugin-content-docs"
 
 const sidebars: SidebarsConfig = {
-  // By default, Docusaurus generates a sidebar from the docs folder structure
   docs: [
     {
       type: "category",
-      label: "Usage",
+      label: "Getting Started",
       collapsed: false,
-      items: ["getting-started", "cli", "context", "playground", "conventions", "execution-strategy", "watch-mode"],
+      items: ["getting-started", "cli", "conventions", "playground"],
     },
     {
       type: "category",
-      label: "Runtime configuration",
+      label: "Configuration",
       collapsed: false,
-      items: ["runtime-config", "config/links", "config/server", "config/telemetry", "config/upstream"],
+      items: ["runtime-config", "config/server", "config/upstream", "config/links", "config/telemetry"],
     },
     {
       type: "category",
-      label: "Directives",
+      label: "Resolver Directives",
       collapsed: false,
       items: [
         "directives",
-        "directives/addField",
-        "directives/cache",
+        "directives/http",
+        "directives/grpc",
+        "directives/graphQL",
         "directives/call",
         "directives/expr",
-        "directives/graphQL",
-        "directives/grpc",
-        "directives/http",
         "directives/js",
+      ],
+    },
+    {
+      type: "category",
+      label: "Schema Directives",
+      collapsed: false,
+      items: [
+        "directives/addField",
         "directives/modify",
         "directives/omit",
-        "directives/protected",
-        "directives/rest",
         "directives/discriminate",
-      ].sort(),
+        "directives/rest",
+        "directives/cache",
+        "directives/protected",
+      ],
     },
-
     {
       type: "category",
       label: "Features",
@@ -55,16 +49,19 @@ const sidebars: SidebarsConfig = {
       items: [
         "N+1",
         "auth",
+        "http-cache",
+        "http2",
+        "logging",
+        "telemetry",
+        "scalar",
+        "config-generation",
+        "watch-mode",
+        "execution-strategy",
+        "context",
+        "environment-variables",
         "grpc",
         "scripting",
-        "http2",
-        "telemetry",
-        "http-cache",
-        "logging",
         "rest",
-        "scalar",
-        "environment-variables",
-        "config-generation",
         "apollo-federation-subgraph",
       ],
     },
@@ -76,20 +73,18 @@ const sidebars: SidebarsConfig = {
     },
     {
       type: "category",
-      label: "Production",
+      label: "Deployment",
       collapsed: false,
-      items: ["gh-action", "gqlforge-on-fly", "gqlforge-on-aws", "client-tuning"],
+      items: ["gqlforge-on-fly", "gqlforge-on-aws", "gh-action", "client-tuning"],
     },
     {
       type: "category",
-      label: "Contributors",
+      label: "Contributing",
       collapsed: false,
       items: [
         "contributors/guidelines",
-        "contributors/bounty",
         "contributors/testing",
         "contributors/integration-testing",
-        "contributors/mutability",
         "contributors/telemetry",
         "contributors/micro-benchmark",
         "contributors/wrk-benchmark",

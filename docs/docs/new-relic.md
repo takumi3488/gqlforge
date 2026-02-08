@@ -1,40 +1,65 @@
 ---
-title: New Relic Telemetry Integration
-description: "Discover how to enhance application performance with our guide on enabling and analyzing telemetry data in GQLForge. Learn to configure observability support using OpenTelemetry for insights into logs, metrics, and traces, with practical integration examples for platforms like Honeycomb.io, New Relic, and Datadog."
-slug: graphql-newrelic-guide-telemetry
-sidebar_label: New Relic
+title: "New Relic"
+description: "Export GQLForge telemetry to New Relic."
+sidebar_label: "New Relic"
 ---
 
-The guide is based on [official doc](https://docs.newrelic.com/docs/more-integrations/open-source-telemetry-integrations/opentelemetry/get-started/opentelemetry-set-up-your-app/)
+# New Relic Integration
 
-1. Go to [newrelic.com](https://newrelic.com)
-2. Login to your account
-3. Go to `<your user name> -> Api Keys` and copy license value for key with access to write data
-4. Go to GraphQL configuration and update it with:
-   ```graphql
-   schema
-     @telemetry(
-       export: {
-         otlp: {
-           url: "https://otlp.nr-data.net:4317"
-           headers: [
-             {
-               key: "api-key"
-               value: "{{.env.NEWRELIC_API_KEY}}"
-             }
-           ]
-         }
-       }
-     ) {
-     query: Query
-   }
-   ```
-5. Set the api key you've copied before to the environment variable named `NEWRELIC_API_KEY` and start gqlforge with updated config
+GQLForge can export telemetry data directly to New Relic using their OTLP ingestion endpoint.
 
-Now make some requests to running service and wait a little bit until New Relic proceeds the data. After that you can go to `Traces` locate `request` trace, click on it, then pick one of the available traces and click on it. You should see something like the screenshot below:
+## Configuration
 
-![newrelic-trace](../static/images/telemetry/newrelic-trace.png)
+New Relic accepts OTLP data over HTTP. Configure the exporter with your license key:
 
-To see metrics now go to `APM & Services -> Metrics Explorer` and choose the metrics you want to see like on example below.
+```graphql
+schema
+  @server(port: 8000)
+  @telemetry(
+    export: {
+      otlp: {
+        url: "https://otlp.nr-data.net:4317"
+        headers: [
+          { key: "api-key", value: "{{.env.NEW_RELIC_LICENSE_KEY}}" }
+        ]
+      }
+    }
+  ) {
+  query: Query
+}
+```
 
-![newrelic-metrics](../static/images/telemetry/newrelic-metrics.png)
+## Environment Variables
+
+Set your New Relic license key before starting the server:
+
+```bash
+export NEW_RELIC_LICENSE_KEY="your-license-key-here"
+```
+
+## Viewing Data in New Relic
+
+After configuration, telemetry data appears in:
+
+- **Distributed Tracing**: View end-to-end traces for GraphQL operations.
+- **APM**: Monitor service health, throughput, and error rates.
+- **Metrics**: Query custom metrics via NRQL.
+
+## EU Region
+
+If your New Relic account is in the EU datacenter, use the EU endpoint:
+
+```graphql
+@telemetry(
+  export: {
+    otlp: {
+      url: "https://otlp.eu01.nr-data.net:4317"
+      headers: [
+        { key: "api-key", value: "{{.env.NEW_RELIC_LICENSE_KEY}}" }
+      ]
+    }
+  }
+)
+```
+
+Refer to the [Telemetry](./telemetry.md) page for additional exporter options.

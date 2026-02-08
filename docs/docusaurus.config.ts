@@ -2,7 +2,6 @@ import {themes as prismThemes} from "prism-react-renderer"
 import type * as Preset from "@docusaurus/preset-classic"
 import prismTheme from "./src/theme/CodeBlock/theme"
 import type {Config} from "@docusaurus/types"
-import {getNavDropdownItemHtml} from "./src/utils"
 
 const title = "GQLForge"
 const organization = "gqlforge"
@@ -36,9 +35,6 @@ export default {
   organizationName: organization,
   projectName: project,
 
-  // Even if you don't use internalization, you can use this field to set useful
-  // metadata like html lang. For example, if your site is Chinese, you may want
-  // to replace "en" with "zh-Hans".
   i18n: {
     defaultLocale: "en",
     locales: ["en"],
@@ -49,20 +45,16 @@ export default {
     },
   },
   future: {
-    experimental_faster: false, // Required for faster production builds. For reference: https://docusaurus.io/blog/releases/3.6#adoption-strategy
+    experimental_faster: false,
   },
   presets: [
     [
       "classic",
-      /** @type {import("@docusaurus/preset-classic").Options} */
       {
         docs: {
-          // docRootComponent: require.resolve("./src/components/docs/Layout.tsx"),
           sidebarPath: require.resolve("./sidebars.ts"),
           showLastUpdateTime: true,
           sidebarCollapsible: true,
-          // Please change this to your repo.
-          // Remove this to remove the "edit this page" links.
           editUrl: `https://github.com/${organization}/${project}/tree/main/docs`,
         },
         blog: false,
@@ -72,14 +64,12 @@ export default {
         sitemap: {
           changefreq: "weekly",
           priority: 0.5,
-          ignorePatterns: ["/blogs/**"],
         },
-      },
+      } satisfies Preset.Options,
     ],
   ],
 
   themeConfig: {
-    // Replace with your project's social card
     image: "icons/companies/gqlforge.svg",
     navbar: {
       hideOnScroll: true,
@@ -89,21 +79,12 @@ export default {
       },
       items: [
         {to: "/", label: "Home", position: "left", activeBaseRegex: "^/$"},
-        // {to: "/about", label: "About", position: "left"},
-        // {to: "/enterprise", label: "Enterprise", position: "left"},
+        {to: "/docs/getting-started", label: "Docs", position: "left"},
+        {to: "/playground", label: "Playground", position: "left"},
         {
-          label: "Developers",
-          position: "left",
-          items: [
-            {
-              to: "/docs",
-              html: getNavDropdownItemHtml("/images/home/book.svg", "Docs Icon", "Docs"),
-            },
-            {
-              to: "/graphql",
-              html: getNavDropdownItemHtml("/images/home/archive.svg", "Learn Icon", "Learn"),
-            },
-          ],
+          href: `https://github.com/${organization}/${project}`,
+          label: "GitHub",
+          position: "right",
         },
       ],
     },
@@ -120,16 +101,6 @@ export default {
     tableOfContents: {},
   } satisfies Preset.ThemeConfig,
   plugins: [
-    [
-      "@docusaurus/plugin-content-docs",
-      {
-        id: "graphql",
-        path: "graphql",
-        routeBasePath: "graphql",
-        showLastUpdateTime: true,
-        sidebarPath: require.resolve("./graphql/sidebar.ts"),
-      },
-    ],
     async function tailwindPlugin() {
       return {
         name: "docusaurus-tailwindcss",

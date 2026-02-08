@@ -1,55 +1,68 @@
 ---
-title: Using HTTP Cache
-description: A comprehensive guide to leverage HTTP cache for REST APIs using GQLForge.
-slug: graphql-http-cache-guide-gqlforge
-sidebar_label: HTTP Cache
+title: "HTTP Caching"
+description: "Enable HTTP response caching in GQLForge."
+sidebar_label: "HTTP Cache"
 ---
 
-HTTP Caching in GQLForge is designed to enhance performance and minimize the frequency of requests to upstream services by caching HTTP responses. This guide explains the concept, benefits, and how to effectively implement HTTP caching within GQLForge.
+# HTTP Caching
 
-### Understanding HTTP Caching
+GQLForge provides two layers of caching: upstream HTTP response caching and field-level caching.
 
-HTTP Caching involves saving copies of HTTP responses to serve identical future requests directly from the cache, bypassing the need for new API calls. This reduces latency, conserves bandwidth, and alleviates the load on upstream services by utilizing a cache keyed by request URLs and headers.
+## Upstream HTTP Cache
 
-By default, HTTP caching is turned off in GQLForge. Enabling it requires setting the `httpCache` parameter to integer value which is greater than 0 in the `@upstream` configuration. GQLForge employs a in-memory _Least_Recently_Used_ (LRU) cache mechanism to manage stored responses, adhering to upstream-provided caching directives like `Cache-Control` to optimize the caching process and minimize redundant upstream API requests.
-
-### Enabling HTTP Caching
-
-To activate HTTP caching, adjust the upstream configuration in GQLForge by setting `httpCache` to appropriate cache size, as shown in the following example:
+Enable caching of upstream HTTP responses using the `@upstream` directive:
 
 ```graphql
 schema
-  @server(port: 4000)
-  @upstream(
-    # highlight-start
-    httpCache: 42
-    # highlight-end
-  ) {
+  @upstream(http_cache: true) {
   query: Query
 }
 ```
 
-This configuration instructs GQLForge to cache responses from the designated upstream API.
+When enabled, GQLForge respects standard HTTP cache headers (`Cache-Control`, `ETag`, `Expires`) from upstream responses. Subsequent requests for the same resource are served from the cache until the entry expires or is invalidated.
 
-### Cache-Control headers in responses
+## Field-Level Caching with @cache
 
-Enabling the `cacheControl` setting in GQLForge ensures that [Cache-Control] headers are included in the responses returned to clients. When activated, GQLForge dynamically sets the `max-age` directive in the `Cache-Control` header to the minimum `max-age` value encountered in any of the responses from upstream services. This approach guarantees that the caching duration for the composite response is conservative, aligning with the shortest cache validity period provided by the upstream services. By default, this feature is disabled (`false`), meaning GQLForge will not modify or add `Cache-Control` headers unless explicitly instructed to do so. This setting is distinct from the general HTTP cache setting, which controls whether responses are cached internally by GQLForge; `cacheControl` specifically controls the caching instructions sent to clients.
-
-Here is how you can enable the `cacheControl` setting within your GQLForge schema to apply these caching instructions:
+For more granular control, apply the `@cache` directive to individual fields:
 
 ```graphql
-schema @server(headers: {cacheControl: true}) {
-  query: Query
-  mutation: Mutation
+type Query {
+  popularPosts: [Post]
+    @http(url: "https://api.example.com/posts/popular")
+    @cache(max_age: 300)
 }
 ```
 
-[cache-control]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
+### @cache Arguments
 
-### Best Practices for Enhancing REST API Performance on GraphQL
+| Argument | Type | Description |
+|----------|------|-------------|
+| `max_age` | Int | Time in seconds before the cached value expires |
 
-The combination of `httpCache` and `cacheControl` provides a comprehensive caching solution. While `httpCache` focuses on internal caching to reduce the impact of high latency and frequent requests, `cacheControl` manages client-side caching policies, ensuring an optimal balance between performance, data freshness, and efficient resource use.
+## Combining Both Layers
 
-These caching primitives are beneficial for REST APIs that are latency-sensitive, have a high rate of request repetition, or come with explicit caching headers indicating cacheable responses. Together, they tackle the common challenges of optimizing REST API performance by minimizing unnecessary network traffic and server load while ensuring response accuracy.
+You can use upstream HTTP caching and field-level caching together:
 
-To further enhance the performance of any API with GQLForge, integrating the [`@cache`](./directives/cache.md) directive offers protocol agnostic control over caching at the field level within a GraphQL schema.
+```graphql
+schema
+  @server(port: 8000)
+  @upstream(http_cache: true, base_url: "https://api.example.com") {
+  query: Query
+}
+
+type Query {
+  settings: Settings @http(url: "/settings") @cache(max_age: 600)
+  feed: [Post] @http(url: "/feed")
+}
+```
+
+In this setup:
+
+- The `settings` field is cached for 10 minutes at the field level.
+- All upstream responses benefit from HTTP-level caching when the server sends appropriate cache headers.
+- The `feed` field relies only on upstream HTTP cache headers.
+
+## When to Use Each Approach
+
+- **Upstream HTTP cache**: Use when your APIs return proper cache headers and you want transparent caching.
+- **@cache directive**: Use when you need explicit control over TTL regardless of what the upstream returns.

@@ -1,44 +1,66 @@
 ---
-title: Honeycomb Telemetry Integration
-description: "Enhance your application's performance with our guide on enabling and analyzing telemetry data in GQLForge. Learn how to configure observability support using OpenTelemetry for comprehensive insights into logs, metrics, and traces. This guide includes practical integration examples for platforms such as Honeycomb.io, New Relic, and Datadog."
-slug: graphql-honeycomb-telemetry-gqlforge
-sidebar_label: Honeycomb
+title: "Honeycomb"
+description: "Export GQLForge telemetry to Honeycomb."
+sidebar_label: "Honeycomb"
 ---
 
-1. Go to [honeycomb.io](https://www.honeycomb.io)
-2. Login to your account
-3. Go to `Account -> Team Settings -> Environments and API Keys -> Configuration` and create new or copy existing api key
-4. Go to your GraphQL configuration and update settings:
-   ```graphql
-   schema
-     @telemetry(
-       export: {
-         otlp: {
-           url: "https://api.honeycomb.io:443"
-           headers: [
-             {
-               key: "x-honeycomb-team"
-               value: "{{.env.HONEYCOMB_API_KEY}}"
-             }
-             {
-               key: "x-honeycomb-dataset"
-               value: "<your-dataset>"
-             }
-           ]
-         }
-       }
-     ) {
-     query: Query
-   }
-   ```
-5. Set the api key you've copied before to the environment variable named `HONEYCOMB_API_KEY` and start gqlforge with updated config
+# Honeycomb Integration
 
-Now make some requests to running service and wait a little bit until honeycomb proceeds the data. After that you can go to `Home -> Total traces` and click on the trace with name `request`. Now choose `Traces` in the bottom and click on the first trace from the list. You should see the picture similar to this:
+GQLForge can send traces and metrics to Honeycomb through the OTLP exporter.
 
-![trace view](../static/images/telemetry/honeycomb-trace.png)
+## Configuration
 
-Here you can see data about the request that was made to the GraphQL server and what actions were made to handle this request.
+Honeycomb natively supports OTLP ingestion. Configure the exporter with your API key and dataset:
 
-To see metrics now go `Query` and run a query to fetch the data about metrics. You can use following screenshot as an example:
+```graphql
+schema
+  @server(port: 8000)
+  @telemetry(
+    export: {
+      otlp: {
+        url: "https://api.honeycomb.io:443"
+        headers: [
+          { key: "x-honeycomb-team", value: "{{.env.HONEYCOMB_API_KEY}}" }
+          { key: "x-honeycomb-dataset", value: "gqlforge-production" }
+        ]
+      }
+    }
+  ) {
+  query: Query
+}
+```
 
-![metrics view](../static/images/telemetry/honeycomb-metrics.png)
+## Environment Variables
+
+Set your Honeycomb API key before starting the server:
+
+```bash
+export HONEYCOMB_API_KEY="your-api-key-here"
+```
+
+## Viewing Data in Honeycomb
+
+Once telemetry is flowing, you can:
+
+- **Query traces**: Filter and explore individual GraphQL operation traces.
+- **Build dashboards**: Create visualizations for latency percentiles, error rates, and throughput.
+- **Set triggers**: Configure alerts based on trace patterns or metric thresholds.
+
+## Honeycomb Environments
+
+If you use Honeycomb Environments, the dataset header may not be required. In that case, traces are routed based on your API key's environment:
+
+```graphql
+@telemetry(
+  export: {
+    otlp: {
+      url: "https://api.honeycomb.io:443"
+      headers: [
+        { key: "x-honeycomb-team", value: "{{.env.HONEYCOMB_API_KEY}}" }
+      ]
+    }
+  }
+)
+```
+
+Refer to the [Telemetry](./telemetry.md) page for additional configuration options.

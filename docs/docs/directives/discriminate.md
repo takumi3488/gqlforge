@@ -1,93 +1,55 @@
 ---
-title: "@discriminate"
-description: The `@discriminate` directive is used to customize decoding of union types.
-slug: ../discriminate
+title: "@discriminate Directive"
+description: "Set the discriminator field for union type resolution."
+sidebar_label: "@discriminate"
 ---
 
-The `@discriminate` directive is defined as follows:
+# @discriminate Directive
 
-```graphql showLineNumbers title="Directive Definition"
-directive @discriminate(
-  """
-  Name of the field that contains the type discriminator
-  """
-  name: String = "type"
-) on FIELD_DEFINITION
-```
+The `@discriminate` directive tells GQLForge which field in the response data identifies the concrete type of a union member. This is essential for resolving union and interface types from REST APIs that return a type indicator field.
 
-By default a union type expects an object with a wrapper key representing the value type. For example say we have the following GraphQL schema:
+## Fields
 
-```graphql showLineNumbers
+| Field | Type | Default | Description |
+|-------|------|---------|-------------|
+| `field` | String | `"type"` | The name of the JSON field used to determine the concrete type. |
+
+## How It Works
+
+When a union type is resolved from an HTTP response, GQLForge inspects the value of the discriminator field to decide which union member the object belongs to. The value must match the name of a type in the union.
+
+## Example
+
+```graphql
+schema @server(port: 8000) {
+  query: Query
+}
+
 type Query {
-  fooBar: [FooBar]
-    @http(url: "https://api.example.com/foobar")
+  feed: [FeedItem]
+    @http(url: "https://api.example.com/feed")
 }
 
-union FooBar = Foo | Bar
+union FeedItem @discriminate(field: "kind") = Post | Comment | Image
 
-type Foo {
-  foo: String!
+type Post {
+  kind: String!
+  id: Int!
+  title: String!
+  body: String!
 }
 
-type Bar {
-  bar: String!
+type Comment {
+  kind: String!
+  id: Int!
+  text: String!
 }
-```
 
-The API is expected to respond with an object that is wrapped with a key representing the type of the value. For example for `Foo` the response should look like:
-
-```json
-[
-  // API Response
-  {"Foo": {"foo": "Hello"}},
-  {"Bar": {"bar": "World"}}
-]
-```
-
-:::note
-The **key** is always case sensitive and should match the type name.
-:::
-
-This allows GQLForge to correctly decode the response and resolve with the exact variant of the union type. However its also a common practice to have a special field to specify the type. For example:
-
-```json
-[
-  {"type": "Foo", "foo": "Hello"},
-  {"type": "Boo", "bar": "World"}
-]
-```
-
-This can be achieved by modifying the schema to leverage the `@discriminate` directive:
-
-```graphql {4}
-type Query {
-  fooBar: FooBar
-    @http(url: "https://api.example.com/foobar")
-    @discriminate
+type Image {
+  kind: String!
+  id: Int!
+  url: String!
 }
 ```
 
-The `@discriminate` directive is used to indicate explicitly that the union type should be resolved using a discriminator field.
-
-The directive can be further customized by providing the discriminator field `name`:
-
-```graphql {4}
-type Query {
-  fooBar: FooBar
-    @http(url: "https://api.example.com/foobar")
-    @discriminate(name: "ty")
-}
-```
-
-In this case the API is expected to respond with an object that has a key `ty` representing the type of the value. For example for `Foo` the response should look like:
-
-```json
-{"ty": "Foo","foo": "Hello"}
-{"ty": "Bar","bar": "World"}
-```
-
-:::note
-The value of the discriminator field should match the type name in a case sensitive manner.
-:::
-
-Great! Congratulations on learning how to use the `@discriminate` directive to customize decoding of union types. Now you can confidently work with union types in your GraphQL schema. 🎉
+Each object in the upstream response must include a `kind` field whose value is `"Post"`, `"Comment"`, or `"Image"`.

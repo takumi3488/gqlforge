@@ -1,40 +1,37 @@
 import React from "react"
-import Heading from "@theme/Heading"
-
-import LinkButton from "../shared/LinkButton"
-import HeroImage from "@site/static/images/home/hero.svg"
-import {Theme} from "@site/src/constants"
-import {pageLinks} from "@site/src/constants/routes"
 import Link from "@docusaurus/Link"
 import Section from "../shared/Section"
 
 const Banner = (): JSX.Element => {
   return (
     <main className="grid justify-center">
-      <Section className="flex flex-col sm:items-center sm:text-center w-full !pb-0">
+      <Section className="flex flex-col sm:items-center sm:text-center w-full !pb-0 pt-16 lg:pt-24">
         <div className="h-full 2xl:min-h-0">
-          <Heading
-            as="h1"
-            className="hero-banner-title text-title-large max-w-xs sm:text-display-small lg:text-display-large sm:max-w-5xl"
-          >
-            The modern <br />
-            <span className="bg-gqlForge-yellow rounded-md sm:rounded-2xl px-SPACE_02">GraphQL</span> platform
-          </Heading>
-          <p className="hero-banner-sub-title sm:max-w-2xl sm:m-auto text-content-small sm:text-content-medium lg:text-content-large font-normal max-w-md sm:mt-SPACE_04 mb-0">
-            Leverage AI to design and ship best-practice GraphQL backends atop existing data sources and APIs.
+          <h1 className="text-title-large max-w-xs sm:text-display-small lg:text-display-large sm:max-w-5xl font-space-grotesk">
+            Build GraphQL APIs
+            <br />
+            <span className="bg-gqlForge-yellow rounded-md sm:rounded-2xl px-SPACE_02">without writing resolvers</span>
+          </h1>
+          <p className="sm:max-w-2xl sm:m-auto text-content-small sm:text-content-medium lg:text-content-large font-normal max-w-md sm:mt-SPACE_04 mb-0">
+            GQLForge is a high-performance GraphQL runtime built in Rust. Compose REST, gRPC, and GraphQL services into a
+            unified API layer using a declarative configuration.
           </p>
-          <div className="hidden sm:flex justify-center mt-SPACE_06 sm:mt-SPACE_10 space-x-SPACE_04 sm:space-x-SPACE_06">
-            <LinkButton title="Learn More" href={pageLinks.introduction} theme={Theme.Dark} width="small" />
-            <LinkButton title="Get Started" href={pageLinks.docs} theme={Theme.Light} width="small" />
-          </div>
-
-          <div className="sm:hidden flex justify-between md:justify-center mt-SPACE_06 sm:mt-SPACE_10 space-x-SPACE_04 sm:space-x-SPACE_06">
-            <LinkButton title="Learn More" href={pageLinks.introduction} theme={Theme.Dark} width="full" />
-            <LinkButton title="Get Started" href={pageLinks.docs} theme={Theme.Light} width="full" />
+          <div className="flex flex-col sm:flex-row justify-center mt-SPACE_06 sm:mt-SPACE_10 gap-SPACE_04 sm:gap-SPACE_06">
+            <Link
+              to="/docs/getting-started"
+              className="flex items-center justify-center bg-gqlForge-dark-500 text-white hover:text-white hover:no-underline font-bold px-8 py-3 rounded-xl text-title-small h-12 sm:h-16"
+            >
+              Get Started
+            </Link>
+            <Link
+              to="https://github.com/takumi3488/gqlforge"
+              className="flex items-center justify-center border-2 border-gqlForge-dark-500 text-gqlForge-dark-500 hover:text-gqlForge-dark-500 hover:no-underline font-bold px-8 py-3 rounded-xl text-title-small h-12 sm:h-16"
+            >
+              View on GitHub
+            </Link>
           </div>
         </div>
       </Section>
-      <HeroImage className="object-contain h-full sm:h-full w-full mt-8 max-w-7xl" />
     </main>
   )
 }

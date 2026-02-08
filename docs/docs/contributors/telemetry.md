@@ -1,16 +1,61 @@
 ---
-title: Telemetry
-description: "Discover how to elevate application observability with GQLForge's comprehensive guide on implementing telemetry using the OpenTelemetry specification. This guide provides a detailed overview of using Rust crates such as rust-opentelemetry, tracing, and tracing-opentelemetry for effective data collection and export. It includes specific examples and best practices for tracing significant operations, naming spans accurately, and adhering to semantic conventions. Perfect for developers seeking to enhance monitoring and debugging capabilities in their applications, this resource is your go-to for integrating advanced observability features efficiently. Learn more about how to optimize your development process by visiting GQLForge's contributor guidelines."
+title: "Telemetry Development"
+description: "Working on telemetry features in GQLForge."
+sidebar_label: "Telemetry Dev"
 ---
 
-At GQLForge, we adhere to high observability standards in line with the [OpenTelemetry](https://opentelemetry.io) specification. Our implementation utilizes several key Rust crates:
+# Telemetry Development
 
-- [rust-opentelemetry](https://docs.rs/opentelemetry/latest/opentelemetry/index.html) and associated crates are used to support the collection and export of telemetry data.
-- [tracing](https://docs.rs/tracing/latest/tracing/index.html) and [tracing-opentelemetry](https://docs.rs/tracing-opentelemetry/latest/tracing_opentelemetry/index.html) facilitate the definition of logs and traces. Integration with OpenTelemetry allows for the automatic transfer of this data to the OpenTelemetry system. This layered approach ensures that the `tracing` library, which is effective across various scenarios, can also function as a standalone telemetry system for logging when OpenTelemetry integration is not required.
+This guide covers developing and testing telemetry features within the GQLForge codebase.
 
-When developing any features that necessitate observability, consider the following guidelines:
+## Architecture
 
-- Implement traces for tasks that represent a significant operation. This practice aids in the efficient diagnosis of issues and performance bottlenecks.
-- Name spans clearly and specifically, adhering to the guidelines outlined in the [OpenTelemetry specifications](https://github.com/open-telemetry/opentelemetry-specification/blob/main/specification/trace/api.md#span). Avoid names that introduce a high cardinality of potential values.
-- Due to the constraints of tracing libraries, span names must be static strings. This limitation can be overcome by adding an extra field named `otel.name` to provide more dynamic descriptions (see the [tracing-opentelemetry](https://github.com/tokio-rs/tracing-opentelemetry) documentation for more details).
-- Attribute naming should follow OpenTelemetry's [semantic conventions](https://opentelemetry.io/docs/concepts/semantic-conventions/). Utilize constants available in the [opentelemetry_semantic_conventions](https://docs.rs/opentelemetry-semantic-conventions/latest/opentelemetry_semantic_conventions/index.html) crate for standardized attribute names.
+GQLForge's telemetry system is built on the OpenTelemetry SDK for Rust. The main components are:
+
+- **Trace provider**: Creates spans for incoming requests and outgoing upstream calls.
+- **Metrics provider**: Records counters and histograms for request throughput and latency.
+- **Exporters**: Send collected data to configured backends (OTLP, Prometheus, stdout).
+
+## Local Development Setup
+
+Use the stdout exporter during development to see telemetry output in your terminal:
+
+```graphql
+schema
+  @telemetry(export: { stdout: { pretty: true } }) {
+  query: Query
+}
+```
+
+This prints formatted trace and metric data to standard output without needing an external collector.
+
+## Testing with a Local Collector
+
+For testing OTLP export, run the OpenTelemetry Collector locally:
+
+```bash
+docker run -p 4317:4317 otel/opentelemetry-collector:latest
+```
+
+Then point GQLForge at it:
+
+```graphql
+@telemetry(export: { otlp: { url: "http://localhost:4317" } })
+```
+
+## Running Telemetry Tests
+
+Telemetry-related tests can be run with:
+
+```bash
+cargo test telemetry
+```
+
+These tests verify that spans are created correctly, attributes are attached, and exporters receive expected data.
+
+## Adding a New Metric
+
+1. Define the metric instrument (counter, histogram, etc.) in the telemetry module.
+2. Record values at the appropriate points in the request lifecycle.
+3. Write tests to verify the metric is emitted with correct labels.
+4. Update the telemetry documentation if the metric is user-facing.

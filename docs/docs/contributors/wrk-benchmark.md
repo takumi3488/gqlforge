@@ -1,75 +1,87 @@
 ---
-title: Macro Benchmarks
-description: "Learn how to benchmark a GQLForge server using `wrk` with this comprehensive guide. Discover the steps for building your project in release mode, starting the server with controlled log output, and using `wrk` with a custom Lua script for precise benchmarking. This tutorial also covers how to verify server responsiveness with `curl` and how to interpret benchmark results to assess server performance under load. Perfect for developers looking to optimize their Rust applications."
+title: "Load Testing with wrk"
+description: "Running load tests against GQLForge."
+sidebar_label: "wrk Benchmarks"
 ---
 
-This document outlines the steps to benchmark a GQLForge server using `wrk`, a modern HTTP benchmarking tool. It covers building your Rust project in release mode, starting the server, and performing the benchmark.
+# Load Testing with wrk
+
+Use [wrk](https://github.com/wg/wrk) to measure GQLForge throughput and latency under load.
 
 ## Prerequisites
 
-- Rust and Cargo ([https://rustup.rs/](https://rustup.rs/))
-- `wrk` benchmarking tool (Installation instructions: [https://github.com/wg/wrk](https://github.com/wg/wrk))
-
-## Step 1: Build GQLForge
-
-Ensure you are on the desired branch you want to benchmark, and then build GQLForge in release mode to optimize performance:
+Install wrk:
 
 ```bash
-cargo build --release
+# macOS
+brew install wrk
+
+# Ubuntu/Debian
+sudo apt-get install wrk
 ```
 
-## Step 2: Start the Server
+## Basic Usage
 
-Start the GQLForge server by setting the appropriate environment variable to control log output and using the release binary:
+Start your GQLForge server:
 
 ```bash
-export GQLFORGE_LOG_LEVEL=error
-cargo run --release -- start ./jsonplaceholder.graphql
+gqlforge start config.graphql
 ```
 
-This command sets the log level to `error` to minimize logging output, which can affect performance during benchmarks.
-
-## Step 3: Verify Server is Running
-
-Before running `wrk`, verify that the server is responsive. Use `curl` to send a request:
+In another terminal, run wrk against the GraphQL endpoint:
 
 ```bash
-curl -X POST -H "Content-Type: application/json" \
-  -d '{"operationName":null,"variables":{},"query":"{posts{title}}"}' \
-  http://127.0.0.1:8000/graphql
+wrk -t4 -c100 -d30s -s query.lua http://localhost:8000/graphql
 ```
 
-Repeat this a couple of times to ensure the server is handling requests correctly.
+| Flag | Description |
+|------|-------------|
+| `-t4` | Use 4 threads |
+| `-c100` | Maintain 100 open connections |
+| `-d30s` | Run for 30 seconds |
+| `-s` | Lua script for custom requests |
 
-## Step 4: Customize WRK Setup with Lua Script
+## Lua Script for GraphQL
 
-To customize the `wrk` setup, create a Lua script named `wrk_script.lua` and paste the following content:
+Create a `query.lua` file to send POST requests with a GraphQL query:
 
 ```lua
 wrk.method = "POST"
-wrk.body = '{"operationName":null,"variables":{},"query":"{posts{title}}"}'
-wrk.headers["Connection"] = "keep-alive"
 wrk.headers["Content-Type"] = "application/json"
+wrk.body = '{"query":"{ users { id name email } }"}'
 ```
 
-This script configures `wrk` to send POST requests with a specific JSON body and headers.
+## Interpreting Results
 
-## Step 5: Run the Benchmark
+wrk outputs a summary like:
 
-Open another terminal window and execute `wrk` to start the benchmark. Here is a basic example:
+```
+Requests/sec:  12345.67
+Transfer/sec:      5.43MB
+Latency (avg):     8.12ms
+```
+
+Key metrics to watch:
+
+- **Requests/sec**: Overall throughput. Higher is better.
+- **Latency**: Average and percentile response times. Lower is better.
+- **Errors**: Non-2xx responses indicate issues under load.
+
+## Testing Different Scenarios
+
+Test with varying levels of concurrency to find your server's limits:
 
 ```bash
-wrk -t12 -c400 -d30s -s wrk_script.lua http://127.0.0.1:8000/graphql
+# Light load
+wrk -t2 -c10 -d15s -s query.lua http://localhost:8000/graphql
+
+# Heavy load
+wrk -t8 -c500 -d30s -s query.lua http://localhost:8000/graphql
 ```
 
-This command uses 12 threads and maintains 400 open HTTP connections over a duration of 30 seconds, targeting the server running on localhost port 8000.
+## Tips
 
-## Step 6: Interpreting Results
-
-`wrk` will output statistics about the tests, which include:
-
-- Total number of requests completed
-- Throughput, measured in requests per second
-- Latency distribution
-
-These metrics help assess the performance capabilities and robustness of your server under high load conditions.
+- Run the server in release mode (`cargo build --release`) for accurate production-like numbers.
+- Close other resource-intensive applications during the test.
+- Run multiple iterations to ensure consistent results.
+- Test with realistic query complexity that matches your production workload.

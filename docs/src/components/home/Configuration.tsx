@@ -1,77 +1,79 @@
 import React from "react"
-import Heading from "@theme/Heading"
 import CodeBlock from "@theme/CodeBlock"
-import Tabs from "@theme/Tabs"
-import TabItem from "@theme/TabItem"
-import Link from "@docusaurus/Link"
 import Section from "../shared/Section"
+import SectionTitle from "../shared/SectionTitle"
 
-const Configuration = (): JSX.Element => {
-  return (
-    <Section className="flex flex-col lg:flex-row justify-center gap-10" innerClassName="xl:flex md:gap-10">
-      <div className="max-w-2xl">
-        <Heading as="h2" className="text-title-large sm:text-display-tiny lg:text-display-small mb-SPACE_04">
-          Get <span className="rounded-lg px-SPACE_02 bg-gqlForge-yellow">Started</span>
-        </Heading>
-        <p className="text-content-small sm:text-content-medium mb-SPACE_11">
-          Setup the GQLForge instantly via npm and unlock the power of high-performance API orchestration.
-        </p>
-        <div>
-          <h5>More</h5>
-          <p className="text-content-small sm:text-content-medium mb-SPACE_11">
-            To dive deeper into GQLForge checkout our <Link href="/docs">docs</Link> for detailed tutorials. Ideal for
-            devs at any level, it's packed with advanced tips, powerful operators and best practices.
-          </p>
-        </div>
-      </div>
-      <div>
-        <CodeBlock language="bash">npm i -g @takumi3488/gqlforge</CodeBlock>
-        {CodeTabItem({code: GRAPHQL_CONFIG, language: "graphql"})}
-      </div>
-    </Section>
-  )
-}
-
-const CodeTabItem = ({code, language}: {code: string; language: "json" | "yaml" | "graphql"}) => (
-  <TabItem value={language} label={language}>
-    <CodeBlock
-      language={language}
-      showLineNumbers={true}
-      className="overflow-y-auto h-96 md:min-w-[45rem] min-w-[100%]"
-    >
-      {code}
-    </CodeBlock>
-    <CodeBlock language="bash">gqlforge start ./app.{language}</CodeBlock>
-  </TabItem>
-)
-
-export default Configuration
-
-const GRAPHQL_CONFIG = `schema
-  @server(port: 8000) {
+const exampleConfig = `schema
+  @server(port: 8000)
+  @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
   query: Query
 }
 
 type Query {
-  users: [User] @http(url: "http://jsonplaceholder.typicode.com/users")
-  posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts")
+  users: [User] @http(path: "/users")
+  user(id: Int!): User @http(path: "/users/{{.args.id}}")
 }
 
 type User {
   id: Int!
   name: String!
-  username: String!
   email: String!
+  posts: [Post] @http(path: "/users/{{.value.id}}/posts")
 }
-
 
 type Post {
   id: Int!
   title: String!
   body: String!
-  userId: Int!
+}`
 
-  # Expand a post with user information
-  user: User @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
+const Configuration = (): JSX.Element => {
+  return (
+    <Section className="bg-gqlForge-light-200">
+      <div className="flex flex-col gap-8">
+        <SectionTitle title="Quick Start" />
+        <h2 className="text-title-large sm:text-display-tiny font-space-grotesk mb-0">
+          Define your schema, GQLForge does the rest
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-8 items-start">
+          <div className="flex flex-col gap-4">
+            <p className="text-content-small sm:text-content-medium text-gqlForge-dark-100">
+              Write a GraphQL schema with directives that describe how to fetch data. GQLForge compiles it into an
+              optimized runtime that handles batching, caching, and protocol translation automatically.
+            </p>
+            <div className="flex flex-col gap-3">
+              <div className="flex items-start gap-3">
+                <span className="font-bold text-title-tiny font-space-grotesk shrink-0">1.</span>
+                <div>
+                  <p className="font-bold text-content-small mb-1">Install GQLForge</p>
+                  <code className="text-content-tiny">npm i -g @gqlforge/gqlforge</code>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-bold text-title-tiny font-space-grotesk shrink-0">2.</span>
+                <div>
+                  <p className="font-bold text-content-small mb-1">Create a config file</p>
+                  <code className="text-content-tiny">Save the schema as app.graphql</code>
+                </div>
+              </div>
+              <div className="flex items-start gap-3">
+                <span className="font-bold text-title-tiny font-space-grotesk shrink-0">3.</span>
+                <div>
+                  <p className="font-bold text-content-small mb-1">Start the server</p>
+                  <code className="text-content-tiny">gqlforge start app.graphql</code>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div>
+            <CodeBlock language="graphql" title="app.graphql">
+              {exampleConfig}
+            </CodeBlock>
+          </div>
+        </div>
+      </div>
+    </Section>
+  )
 }
-`
+
+export default Configuration

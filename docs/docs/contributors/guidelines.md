@@ -1,52 +1,90 @@
 ---
-title: "Guidelines"
-description: "Explore how to contribute to the GQLForge project with this SEO-optimized guide. Learn the best practices for collaborating effectively, from forking and setting up your environment with tools like Rust and Prettier, to making incremental changes and engaging in community discussions. This document outlines key steps like creating new branches, submitting pull requests, and ensuring high code quality. Whether you're discussing on Discord or pushing changes, these guidelines ensure a smooth process. Perfect for developers looking to contribute to a thriving, respectful, and inclusive community. Join and enhance the GQLForge project today!"
-slug: "/contribution-guidelines"
+title: "Contributing Guidelines"
+description: "How to contribute to the GQLForge project."
+sidebar_label: "Guidelines"
 ---
 
-Welcome to the **GQLForge** project! If you haven't stared us yet, make sure you do by clicking [here](https://github.com/takumi3488/gqlforge).
-This document provides an overview of the best practices for contributing effectively. Follow these guidelines to ensure a smooth collaboration process.
+# Contributing Guidelines
 
-## The Basics
+Thank you for your interest in contributing to GQLForge. This page describes the workflow for submitting changes.
 
-1. **Fork and Clone:** Fork the repository on GitHub and clone your fork locally.
+## Prerequisites
 
-   ```bash
-   git clone https://github.com/yourusername/gqlforge.git
-   ```
+- Rust toolchain (stable, latest version recommended)
+- Git
 
-2. **Set Up Your Environment:**
-   - **Install Rust:** Use [rustup](https://rustup.rs/) to install Rust and the `nightly` toolchain.
-   - **Install Prettier:** Required for linting, install [Prettier](https://prettier.io/).
-   - **Build the Application:** Navigate to the project directory and execute `cargo build`.
-   - **Start the Server:** Run `cargo run -- start ./examples/jsonplaceholder.graphql` to start the server and access the GraphiQL interface at [https://gqlforge.pages.dev/playground](https://gqlforge.pages.dev/playground).
+Install Rust via rustup if you have not already:
 
-## Making and Discussing Changes
+```bash
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
-1. **Create a New Branch:** Always work on a new branch created from the latest main branch.
+## Workflow
 
-   ```bash
-   git checkout -b feature/your-feature-name
-   ```
+1. **Fork** the repository on GitHub.
 
-2. **Develop Incrementally:** Use small, [stacked PRs](https://benjamincongdon.me/blog/2022/07/17/In-Praise-of-Stacked-PRs/) for complex features. Break down large tasks into smaller, manageable pieces, each with its own PR. If you are working on a large bounty item add the bounty on your main PR and create stacked PRs wrt to your main PR.
+2. **Clone** your fork locally:
 
-3. **Discuss on Discord:** For real-time discussions, use the `#contributors` channel on Discord. Create a thread for each PR to facilitate focused discussions.
+```bash
+git clone https://github.com/your-username/gqlforge.git
+cd gqlforge
+```
 
-## Pull Requests and Code Quality
+3. **Create a branch** for your change:
 
-1. **Keep PRs Small:** Focus each PR on a single topic to simplify review and potential reverts. Describe your changes clearly in the PR description, explaining the solution and linking to any relevant discussions or issues.
+```bash
+git checkout -b feature/my-improvement
+```
 
-2. **Commit Clearly:** Write concise, descriptive commit messages. Each commit should represent a self-contained change.
+4. **Make your changes** and ensure they compile:
 
-3. **Submit PRs:** Push your branch to GitHub and open a PR against the main branch. In the PR description, detail the purpose of your changes and any additional context needed.
+```bash
+cargo build
+```
 
-4. **Code Review:** Engage with reviewers on GitHub and address feedback promptly. Use discussions on Discord to resolve complex issues or debates efficiently.
+5. **Run linting**:
 
-## Community Engagement
+```bash
+cargo clippy -p gqlforge
+```
 
-- **Star and Share:** Star the repository if you find it helpful and share your contributions on social media using `#gqlforge` and tagging [@takumi3488](https://twitter.com/takumi3488).
+Fix any warnings before submitting.
 
-## Final Notes
+6. **Run the test suite**:
 
-GQLForge thrives through your contributions. We aim to maintain a respectful and inclusive community. Thank you for helping to enhance GQLForge for everyone!
+```bash
+cargo test
+```
+
+7. **Commit** with a clear message describing what and why:
+
+```bash
+git commit -m "feat: add support for custom headers in @http directive"
+```
+
+8. **Push** and open a pull request against the `main` branch.
+
+## Commit Message Format
+
+Use conventional commit prefixes:
+
+- `feat:` for new features
+- `fix:` for bug fixes
+- `refactor:` for code restructuring
+- `docs:` for documentation changes
+- `test:` for test additions or modifications
+- `chore:` for maintenance tasks
+
+## Code Style
+
+- Follow standard Rust formatting (`cargo fmt`).
+- All public APIs should have doc comments.
+- Avoid introducing new clippy warnings.
+
+## Pull Request Checklist
+
+- [ ] Code compiles without warnings
+- [ ] All existing tests pass
+- [ ] New tests added for new functionality
+- [ ] Clippy reports no new warnings
+- [ ] Commit messages follow the conventional format

@@ -1,19 +1,17 @@
 import React from "react"
 
 import Banner from "./Banner"
-import Graph from "./Graph"
-import Benefits from "./Benefits"
 import Configuration from "./Configuration"
-import Announcement from "../shared/Announcement"
-import IntroductionVideo from "./IntroductionVideo"
+import Features from "./Features"
+import Benefits from "./Benefits"
+
 const HomePage = (): JSX.Element => {
   return (
-    <div className="">
+    <div>
       <Banner />
       <Configuration />
-      <IntroductionVideo />
+      <Features />
       <Benefits />
-      <Graph />
     </div>
   )
 }

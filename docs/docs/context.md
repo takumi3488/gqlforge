@@ -1,112 +1,96 @@
 ---
-title: GraphQL Resolver Context
-description: "Explore GQLForge's dynamic Context mechanism for schema field resolution, enabling access to arguments, values, and environment variables for efficient GraphQL queries. Enhance your query handling with GQLForge's advanced Context features for optimized schema field resolution."
-slug: graphql-resolver-context-gqlforge
-sidebar_label: Resolver Context
+title: "Context Object"
+description: "Understanding the request context available in GQLForge templates."
+sidebar_label: "Context"
 ---
 
-Within GQLForge, `Context` is a pivotal component that allows for dynamic retrieval of values during the resolution of fields for a given type within the schema.
+## Overview
 
-## Schema Definition
+GQLForge uses Mustache-style templates to inject dynamic values into resolver configurations. These templates are enclosed in double curly braces (`{{...}}`) and provide access to the request context at resolution time.
 
-```typescript
-type Context = {
-  args: Map<string, JSON>
-  value: JSON
-  env: Map<string, string>
-  vars: Map<string, string>
-  headers: Map<string, string>
-}
-```
+## Context Variables
 
-`Context` operates by storing values as key-value pairs, which can be accessed through mustache template syntax.
+### `.value`
 
-### args
+References the value of the parent object. This is used to access fields from the enclosing type when resolving nested fields.
 
-This property facilitates access to query arguments. Consider the example:
-
-```graphql showLineNumbers
-type Query {
-  user(id: ID!): User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}"
-    )
-}
-```
-
-Here, `args.id` is utilized to retrieve the `id` argument provided to the `user` query.
-
-### value
-
-This enables access to the fields of the specified type.
-
-```graphql showlineNumbers
+```graphql
 type Post {
-  id: ID!
-  title: String!
-  body: String!
-  comments: [Comment]
+  id: Int!
+  userId: Int!
+  user: User @http(path: "/users/{{.value.userId}}")
+}
+```
+
+In this example, `{{.value.userId}}` resolves to the `userId` field of the current `Post` object.
+
+### `.args`
+
+Provides access to the arguments passed to the current field.
+
+```graphql
+type Query {
+  user(id: Int!): User @http(path: "/users/{{.args.id}}")
+  posts(limit: Int): [Post] @http(path: "/posts?_limit={{.args.limit}}")
+}
+```
+
+Each argument declared in the field signature is available under `.args`.
+
+### `.headers`
+
+Accesses HTTP headers from the incoming GraphQL request. Header names are case-insensitive.
+
+```graphql
+type Query {
+  me: User
     @http(
-      url: "http://jsonplaceholder.typicode.com/posts/{{.value.id}}/comments"
+      path: "/users/me"
+      headers: [{ key: "Authorization", value: "{{.headers.authorization}}" }]
     )
 }
 ```
 
-In this case, `value.id` accesses the `id` field of the `Post` type.
+This forwards the client's `Authorization` header to the upstream service.
 
-### env
+### `.vars`
 
-Environment variables, set at server startup, allow directives to dynamically adapt behavior based on external configurations without altering the server configuration itself.
+Reads environment variables defined in the server's runtime environment.
 
-Example:
-
-```graphql showLineNumbers
+```graphql
 type Query {
-  users: [User]! @http(url: "{{.env.API_ENDPOINT}}/users")
-}
-```
-
-`env.API_ENDPOINT` references an environment variable named `API_ENDPOINT`, which specifies the base URL for HTTP requests.
-
-### vars
-
-`vars` offers a mechanism for defining reusable variables within the configuration. Unlike `env`, these are embedded and can be universally applied across configurations.
-
-```graphql showLineNumbers
-schema
-  @server(
-    vars: {key: "apiKey", value: "{{.env.AUTH_TOKEN}}"}
-  ) {
-  query: Query
-}
-
-type Query {
-  user(id: ID!): [User]
+  config: Config
     @http(
-      url: "/users"
-      headers: [
-        {
-          key: "Authorization"
-          value: "Bearer {{.vars.apiKey}}"
-        }
-      ]
+      path: "/config"
+      headers: [{ key: "X-Api-Key", value: "{{.vars.API_KEY}}" }]
     )
 }
 ```
 
-Here, the variable `apiKey` is set using an environment variable and subsequently utilized in the `Authorization` header for HTTP requests.
+See [Environment Variables](./environment-variables.md) for more on using environment variables in your configuration.
 
-### headers
+## Template Usage in Directives
 
-Headers originate from the request made to the GraphQL server.
+Context templates can be used in several places within resolver directives:
 
-```graphql showLineNumbers
+- **URL paths**: `@http(path: "/users/{{.args.id}}")`
+- **Query parameters**: `@http(path: "/posts?author={{.value.authorId}}")`
+- **Request headers**: `headers: [{ key: "X-Token", value: "{{.headers.x-token}}" }]`
+- **Request body fields**: Within body templates for POST/PUT requests
+
+## Nested Access
+
+You can traverse nested structures using dot notation:
+
+```graphql
 type Query {
-  commentsForUser: [Comment]
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.headers.x-user-id}}/comments"
-    )
+  search(filter: SearchInput!): [Result]
+    @http(path: "/search?q={{.args.filter.query}}&page={{.args.filter.page}}")
 }
 ```
 
-In this example, `headers.x-user-id` extracts the value of the `x-user-id` header present in the request, dynamically constructing the request path.
+## Notes
+
+- If a referenced value is `null` or missing, the template renders as an empty string.
+- Template expressions are evaluated at query execution time, not at server startup.
+- Context variables are read-only and cannot be modified within templates.

@@ -1,6 +1,6 @@
 export const pageLinks = {
   home: "/",
-  docs: "/docs",
-  introduction: "/graphql/",
-  contributors: "/docs/contribution-guidelines",
+  docs: "/docs/getting-started",
+  playground: "/playground",
+  github: "https://github.com/takumi3488/gqlforge",
 }

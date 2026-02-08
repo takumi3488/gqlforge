@@ -1,4 +1,4 @@
-const tagline = "The modern GraphQL runtime"
+const tagline = "GraphQL platform engineered for scale"
 
 export const PageTitle = {
   HOME: tagline,
@@ -6,7 +6,7 @@ export const PageTitle = {
 }
 
 export const PageDescription = {
-  HOME: "GQLForge gives you instant GraphQL on new and existing REST, Grpc and GraphQL APIs. Connect GQLForge to your API & get GraphQL in under a minute.",
+  HOME: "GQLForge is a high-performance GraphQL runtime built in Rust. Define your GraphQL schema with declarative directives to orchestrate REST, gRPC, and GraphQL APIs.",
   PLAYGROUND:
-    "Play around with GQLForge's GraphQL playground to see how you can build and deploy GraphQL APIs in minutes.",
+    "Try GQLForge's GraphQL Playground to explore and test your GraphQL APIs interactively.",
 }

@@ -1,80 +1,56 @@
 ---
-title: Logging Levels Configuration
-description: Learn how to configure log levels in GQLForge to obtain insights into code execution and address software development challenges. Discover the available log levels, set verbosity via environment variables, and understand the hierarchy of log levels for effective logging.
-slug: graphql-logging-levels-gqlforge
-sidebar_label: Log Levels
+title: "Logging"
+description: "Configure logging output in GQLForge."
+sidebar_label: "Logging"
 ---
 
-Logging acts as an essential tool for obtaining insights into code execution and addressing software development challenges. You can configure the verbosity of logs via log levels. Use `GQLFORGE_LOG_LEVEL` or `GF_LOG_LEVEL` environment variables to set the application's log level. The available log levels include:
+# Logging
 
-### error
+GQLForge uses a structured logging system built on Rust's tracing framework. You can control log verbosity and output format to suit your environment.
 
-This is the highest severity level. It indicates a critical issue that may lead to the failure of the program or a part of it.
+## Log Levels
 
-```bash
-GQLFORGE_LOG_LEVEL=error gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=error gqlforge <COMMAND>
-```
-
-### warn
-
-This log level signifies potential issues or warnings that do not necessarily result in immediate failure but may require attention.
+Set the log level using the `RUST_LOG` environment variable:
 
 ```bash
-GQLFORGE_LOG_LEVEL=warn gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=warn gqlforge <COMMAND>
+RUST_LOG=info gqlforge start config.graphql
 ```
 
-### info
+Available levels from most to least verbose:
 
-This level offers general information about the program's execution, providing insights into its state and activities.
+| Level | Description |
+|-------|-------------|
+| `trace` | Very detailed internal events, useful for deep debugging |
+| `debug` | Diagnostic information for development |
+| `info` | General operational messages (default) |
+| `warn` | Potential issues that do not prevent operation |
+| `error` | Failures that affect request handling |
+
+## Filtering by Module
+
+You can set different levels for different modules:
 
 ```bash
-GQLFORGE_LOG_LEVEL=info gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=info gqlforge <COMMAND>
+RUST_LOG="gqlforge=debug,hyper=warn" gqlforge start config.graphql
 ```
 
-### debug
+This sets GQLForge's own logs to `debug` while keeping the HTTP library logs at `warn`.
 
-The `debug` log level is useful for developers during the debugging process, providing detailed information about the program's internal workings.
+## Production Recommendations
+
+- Use `info` level in production to balance visibility and performance.
+- Use `debug` or `trace` only during development or when investigating specific issues.
+- Combine with the telemetry system for structured observability in production environments.
+
+## Example
 
 ```bash
-GQLFORGE_LOG_LEVEL=debug gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=debug gqlforge <COMMAND>
+# Development: verbose output
+RUST_LOG=debug gqlforge start config.graphql
+
+# Production: standard output
+RUST_LOG=info gqlforge start config.graphql
+
+# Troubleshooting upstream calls
+RUST_LOG="gqlforge=trace" gqlforge start config.graphql
 ```
-
-### trace
-
-The `trace` log level is the most detailed logging level, used for fine-grained debugging. This level provides exhaustive details about the program's execution flow.
-
-```bash
-GQLFORGE_LOG_LEVEL=trace gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=trace gqlforge <COMMAND>
-```
-
-### off
-
-This level serves as a special indicator for generating no logs, allowing the option to disable logging entirely.
-
-```bash
-GQLFORGE_LOG_LEVEL=off gqlforge <COMMAND>
-# or
-GF_LOG_LEVEL=off gqlforge <COMMAND>
-```
-
-:::info
-The default log level is `info`.
-:::
-
-Log levels are hierarchical, meaning if you set the log level to a specific level, it includes all the levels above it. For example, setting the log level to `info` will include logs at the `info`, `warn`, and `error` levels, but exclude `debug` and `trace` logs.
-
-![Hierarchy of Log Levels](../static/images/logging.png)
-
-:::info
-You can specify log levels in either uppercase or lowercase; both yield the same result. For example, `GQLFORGE_LOG_LEVEL=DEBUG` and `GQLFORGE_LOG_LEVEL=debug` are same.
-:::

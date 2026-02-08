@@ -1,87 +1,77 @@
 ---
-title: Github Action for Deploying GraphQL
-sidebar_label: Deployments
-description: "Deploy GraphQL servers effortlessly with GitHub Actions."
-slug: deploy-graphql-github-actions
+title: "GitHub Actions"
+description: "Use GQLForge in GitHub Actions CI/CD."
+sidebar_label: "GitHub Actions"
 ---
 
-The Github Action [takumi3488/gh-action](https://github.com/takumi3488/gh-action) can be used to easily deploy a `gqlforge` server to any supported cloud provider. Currently, AWS Lambda and Fly are supported.
+# GitHub Actions
 
-## Deploying to Fly
+Validate your GQLForge configuration in CI to catch errors before deployment.
 
-Below is an example of how to deploy a `gqlforge` server to Fly using the `takumi3488/gh-action` action.
+## Workflow Example
 
-```yaml
-on: [push]
-
-jobs:
-  deploy_gqlforge:
-    runs-on: ubuntu-latest
-    name: Deploy GQLForge
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Deploy GQLForge
-        id: deploy-gqlforge
-        uses: takumi3488/gh-action@<version> # Replace <version> with the desired version
-        with:
-          provider: "fly" # Specifies the cloud provider as 'fly'
-          fly-api-token: ${{ secrets.FLY_API_TOKEN }}
-          fly-app-name: "gqlforge"
-          fly-region: "lax"
-          gqlforge-config: "config.graphql"
-```
-
-### Inputs for `takumi3488/gh-action`
-
-Following are the inputs for the `takumi3488/gh-action` action when deploying to Fly:
-
-| Input              | Description                                                                                                                      |
-| ------------------ | -------------------------------------------------------------------------------------------------------------------------------- |
-| `provider`         | When deploying to Fly, this should be set to `fly`.                                                                              |
-| `gqlforge-config`  | The path of the `gqlforge` configuration file.                                                                                   |
-| `gqlforge-version` | Specifies the version of `gqlforge` to use for deployment. If not provided, the Action defaults to the latest available version. |
-| `fly-api-token`    | The Fly API token required for authentication. Ensure this value is stored securely, such as in GitHub Secrets.                  |
-| `fly-app-name`     | The name of the Fly app being deployed. Defaults to `<orgname>-<reponame>` if not specified.                                     |
-| `fly-region`       | The region where the Fly app will be deployed. Defaults to `ord` if not specified.                                               |
-
-## Deploying to AWS Lambda
+Create `.github/workflows/gqlforge-check.yml`:
 
 ```yaml
-on: [push]
+name: GQLForge Check
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
 
 jobs:
-  deploy_gqlforge:
+  check:
     runs-on: ubuntu-latest
-    name: Deploy GQLForge
     steps:
-      - name: Checkout repository
-        uses: actions/checkout@v2
-      - name: Deploy GQLForge
-        id: deploy-gqlforge
-        uses: takumi3488/gh-action@<version> # Replace <version> with the desired version
-        with:
-          provider: "aws"
-          aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
-          aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
-          aws-region: "us-east-1"
-          aws-iam-role: "iam_for_gqlforge"
-          terraform-api-token: ${{ secrets.TERRAFORM_API_TOKEN }}
-          gqlforge-config: "config.graphql"
+      - uses: actions/checkout@v4
+
+      - name: Install GQLForge
+        run: |
+          curl -sSL https://github.com/gqlforge/gqlforge/releases/latest/download/gqlforge-linux-amd64 -o gqlforge
+          chmod +x gqlforge
+          sudo mv gqlforge /usr/local/bin/
+
+      - name: Validate configuration
+        run: gqlforge check config.graphql
+
+      - name: Check for N+1 queries
+        run: gqlforge check --n-plus-one-queries config.graphql
 ```
 
-### Inputs for `takumi3488/gh-action`
+## What Gets Checked
 
-Following are the inputs for the `takumi3488/gh-action` action when deploying to AWS Lambda:
+The `gqlforge check` command validates:
 
-| Input                      | Description                                                                                                                      |
-| -------------------------- | -------------------------------------------------------------------------------------------------------------------------------- |
-| `provider`                 | When deploying to AWS Lambda, this should be set to `aws`.                                                                       |
-| `gqlforge-config`          | The path to the `gqlforge` configuration file used for deployment.                                                               |
-| `gqlforge-version`         | Specifies the version of `gqlforge` to use for deployment. If not provided, the Action defaults to the latest available version. |
-| `aws-access-key-id`        | The AWS access key ID required for authentication. Ensure this value is stored securely, such as in GitHub Secrets.              |
-| `aws-secret-access-key`    | The AWS secret access key required for authentication. Store this securely, such as in GitHub Secrets.                           |
-| `aws-region`               | The AWS region where the Lambda function will be deployed (e.g., `us-east-1`).                                                   |
-| `aws-iam-role`             | The IAM role name to be created and used for the deployment. If not specified, defaults to `iam_for_gqlforge`.                   |
-| `aws-lambda-function-name` | The name assigned to the created Lambda function. Defaults to `gqlforge` if not specified.                                       |
-| `terraform-api-token`      | The Terraform Cloud API token required for authentication. Ensure this value is stored securely, such as in GitHub Secrets.      |
+- Schema syntax and type correctness
+- Directive arguments and usage
+- Upstream URL reachability (optional)
+- Linked file references (proto files, scripts, htpasswd)
+
+Adding `--n-plus-one-queries` additionally reports any query paths that could trigger N+1 request patterns.
+
+## Caching the Binary
+
+Speed up subsequent runs by caching the GQLForge binary:
+
+```yaml
+- name: Cache GQLForge binary
+  uses: actions/cache@v4
+  with:
+    path: /usr/local/bin/gqlforge
+    key: gqlforge-${{ runner.os }}-latest
+```
+
+## Using with Multiple Config Files
+
+If your project has several configuration files, validate them all:
+
+```yaml
+- name: Validate all configs
+  run: |
+    for file in configs/*.graphql; do
+      echo "Checking $file"
+      gqlforge check "$file"
+    done
+```

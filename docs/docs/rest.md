@@ -1,101 +1,84 @@
 ---
-title: Exposing GraphQL as REST APIs
-description: Exposing REST endpoints on top of GraphQL via the @rest directive.
-slug: graphql-rest-integration
-sidebar_label: REST on GraphQL
+title: "REST Endpoints"
+description: "Expose REST endpoints from your GraphQL schema."
+sidebar_label: "REST Endpoints"
 ---
 
-In order to handle complicated business problems, modern systems frequently need to work with hundreds or even thousands of APIs. Because of its powerful API composition capabilities, GraphQL has been adopted by numerous organisations. But switching to GraphQL can be difficult. It involves a lot of team training as well as major adjustments to frontend and backend architectures.
+# REST Endpoints
 
-That's why GQLForge has developed a directive called `@rest` to streamline this transition and take advantage of GraphQL's power without requiring a complete overhaul. With the help of this directive, GQLForge GraphQL queries and mutations may be made available as REST endpoints.
+GQLForge can expose traditional REST API endpoints alongside your GraphQL API using the `@rest` directive.
 
-## How it works
+## The @rest Directive
 
-This guide show you how to expose REST endpoints for your GraphQL operations by using the @rest directive like follows:
-
-There are three main steps to this process:
-
-1. Define your GQLForge GraphQL configuration file.
-2. Define an operation using `@rest` directive in a separate file.
-3. Link the operation to the main config file.
-
-## Example
-
-### Step 1: Define your GraphQL configuration
+Apply `@rest` to a Query or Mutation field to make it available as a REST endpoint:
 
 ```graphql
-schema {
-  query: Query
-}
-
 type Query {
-  post(id: Int!): Post
-    @http(
-      url: "https://jsonplaceholder.typicode.com/posts/{{.args.id}}"
-    )
-}
-
-type Post {
-  userId: Int!
-  id: Int
-  title: String
-  body: String
-  user: User
-    @http(
-      url: "https://jsonplaceholder.typicode.com/users/{{.value.userId}}"
-    )
-}
-
-type User {
-  id: Int!
-  name: String!
-  username: String!
-  email: String!
-  phone: String
-  website: String
+  user(id: Int!): User
+    @rest(path: "/api/users/:id", method: GET)
+    @http(url: "https://api.example.com/users/{{.args.id}}")
 }
 ```
 
-for more information on how to define your GQLForge GraphQL configuration file, please refer to the [GQLForge GraphQL Configuration](getting-started.mdx#writing-a-graphql-configuration).
+A GET request to `/api/users/42` now returns the same data as querying the `user` field in GraphQL.
 
-### Step 2: Define an operation using `@rest` directive
+### Directive Arguments
 
-We will define an operation and use the `@rest` directive to define a REST endpoint for the operation. We will create a new file and add the following content to it. Save the file with the
-filename: `user-operation.graphql`. You can name the file anything you want, but make sure to link it to the main config file in the next step.
+| Argument | Description |
+|----------|-------------|
+| `path` | The URL path pattern. Use `:param` for path parameters. |
+| `method` | HTTP method: `GET`, `POST`, `PUT`, `DELETE` |
+
+## Path Parameters
+
+Path parameters defined with `:param` syntax are mapped to the corresponding GraphQL field arguments:
 
 ```graphql
-query ($id: Int!) @rest(method: GET, path: "/post/$id") {
-  post(id: $id) {
-    id
-    title
-    body
-    user {
-      id
-      name
-    }
-  }
+type Query {
+  post(userId: Int!, postId: Int!): Post
+    @rest(path: "/api/users/:userId/posts/:postId", method: GET)
+    @http(url: "https://api.example.com/users/{{.args.userId}}/posts/{{.args.postId}}")
 }
 ```
 
-to know more about the `@rest` directive, please refer to the [GQLForge GraphQL Directives](./directives/rest.md).
+## Mutations as REST Endpoints
 
-### Step 3: Link the operation to the main config file
+You can expose mutations as POST, PUT, or DELETE endpoints:
 
-checkout the `@link` directive in the config snippet below to link the operation file. This step is crucial to make the REST endpoint available.
+```graphql
+type Mutation {
+  createUser(input: CreateUserInput!): User
+    @rest(path: "/api/users", method: POST)
+    @http(
+      url: "https://api.example.com/users"
+      method: POST
+      body: "{{.args.input}}"
+    )
+}
+```
+
+The request body is automatically parsed and passed to the field arguments.
+
+## Full Example
 
 ```graphql
 schema
-  #highlight-start
-  @link(type: Operation, src: "user-operation.graphql") {
-  #highlight-end
+  @server(port: 8000)
+  @upstream(base_url: "https://api.example.com") {
   query: Query
+  mutation: Mutation
+}
+
+type Query {
+  users: [User] @rest(path: "/api/users", method: GET) @http(url: "/users")
+  user(id: Int!): User @rest(path: "/api/users/:id", method: GET) @http(url: "/users/{{.args.id}}")
+}
+
+type Mutation {
+  deleteUser(id: Int!): Boolean
+    @rest(path: "/api/users/:id", method: DELETE)
+    @http(url: "/users/{{.args.id}}", method: DELETE)
 }
 ```
 
-To know more about the `links` configuration, please refer [it's documentation](./config/links.md).
-
-#### Response
-
-![REST Demo](/images/docs/rest.png)
-
-In summary, by utilizing the `@rest` directive, we've seamlessly exposed RESTful services over GQLForge's GraphQL, enhancing the traditional posts API to offer richer functionality without additional code. This approach combines the simplicity and ubiquity of REST with the modularity and flexibility of GraphQL, allowing for easy consumption from any HTTP client while leveraging GraphQL's powerful data querying capabilities.
+This gives you both a GraphQL endpoint and a set of REST endpoints from the same schema definition.

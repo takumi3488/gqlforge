@@ -1,84 +1,66 @@
 ---
-title: "@expr"
-description: The @expr directive allows you to embed data directly into your schema.
-slug: ../expr-directive
+title: "@expr Directive"
+description: "Return static values or computed expressions from a field."
+sidebar_label: "@expr"
 ---
 
-The `@expr` directive is defined as follows:
+# @expr Directive
 
-```graphql title="Directive Definition" showLineNumbers
-directive @expr(body: JSON) on FIELD_DEFINITION | OBJECT
-```
+The `@expr` directive resolves a field to a static value or a dynamically computed expression using mustache templates. No external service call is made.
 
-The `@expr` directive in GraphQL is a powerful tool for embedding data directly into your schema, offering two primary functionalities:
+## Fields
 
-## Static
+| Field | Type | Description |
+|-------|------|-------------|
+| `body` | JSON | The value to return. Can be a literal, object, array, or mustache template. |
 
-This feature allows for the inclusion of a constant response within the schema definition itself. It is useful for scenarios where the response is unchanging. e.g:
+## Template Variables
+
+Inside `body`, you can reference:
+
+- `{{.value}}` -- the parent object
+- `{{.args.name}}` -- field arguments
+- `{{.value.fieldName}}` -- a specific field from the parent
+- `{{.env.VAR_NAME}}` -- environment variables
+
+## Examples
+
+### Static value
 
 ```graphql
-schema {
-  query: Query
-}
-
 type Query {
-  user: User @expr(body: {name: "John", age: 12})
+  version: String @expr(body: "1.0.0")
+}
+```
+
+### Computed from parent
+
+```graphql
+type Query {
+  user(id: Int!): User
+    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
 type User {
-  name: String
-  age: Int
+  id: Int!
+  name: String!
+  email: String!
+  displayName: String
+    @expr(body: "User #{{.value.id}}: {{.value.name}}")
 }
 ```
 
-The `@expr` directive also checks the provided value at compile time to ensure it matches the field's schema. If not, the console displays a descriptive error message.
-
-## Dynamic
-
-Beyond static data embedding, the `@expr` directive extends its utility to support dynamic data injection through Mustache template syntax. This feature enables the use of placeholders within the constant data, which are then dynamically replaced with actual values at runtime. It supports both scalar values and complex objects, including lists and nested objects, offering flexibility in tailoring responses to specific needs. e.g:
+### Constructing an object
 
 ```graphql
-schema {
-  query: Query
-}
-
 type Query {
-  user: User
-    @expr(
-      body: {
-        name: "John"
-        workEmail: "john@xyz.com"
-        personalEmail: "john@xyz.com"
-      }
-    )
+  config: AppConfig
+    @expr(body: {name: "GQLForge", debug: false, maxRetries: 3})
 }
 
-type User {
-  name: String
-  age: Int
-  personalEmail: String
-  workEmail: String
-  emails: Emails
-    @expr(
-      body: {
-        emails: {
-          workEmail: "{{.value.workEmail}}"
-          personalEmail: "{{.value.personalEmail}}"
-        }
-      }
-    )
-}
-
-type Emails {
-  workEmail: String
-  personalEmail: String
+type AppConfig {
+  name: String!
+  debug: Boolean!
+  maxRetries: Int!
 }
 ```
-
-In this example, the `@expr` directive dynamically generates an `Emails` object based on the provided template data. The placeholders within the template (`{{.value.workEmail}}` and `{{.value.personalEmail}}`) get replaced with the actual values specified in the `User` type, allowing for dynamic content generation while still adhering to the schema's structure.
-
-## Combining Multiple Directives
-
-The `@expr` directive can be used in combination with other [resolvable directives](../directives.md#resolvable-directives), with results merged deeply. This allows for powerful and flexible resolver configurations.
-
-For more details, see [Directives Documentation](../directives.md).

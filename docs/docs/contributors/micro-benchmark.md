@@ -1,47 +1,61 @@
 ---
-title: Micro Benchmarks
-description: "Explore GQLForge's comprehensive guide to benchmarking for continuous integration (CI) systems. Learn how to seamlessly integrate and run performance tests on every commit to the main branch using Criterion. The guide covers installation of essential tools like cargo-criterion and rust-script, provides step-by-step instructions for executing benchmarks, and details procedures for comparing benchmark results across different code branches. Ensure code efficiency and detect performance degradations early with GQLForge's benchmarking strategies, essential for developers seeking to maintain and improve software performance consistently. Visit the complete guide to start optimizing your CI pipeline today."
+title: "Micro Benchmarks"
+description: "Running micro benchmarks for GQLForge."
+sidebar_label: "Micro Benchmarks"
 ---
 
-Benchmarking infrastructure is crucial for GQLForge. We run a suite of benchmarks on our continuous integration (CI) system for every commit made to the `main` branch using [Criterion](https://bheisler.github.io/criterion.rs/book/).
+# Micro Benchmarks
+
+GQLForge includes micro benchmarks to measure the performance of critical code paths.
 
 ## Running Benchmarks
 
-1. Install [cargo-criterion](https://crates.io/crates/cargo-criterion) and [rust-script](https://crates.io/crates/rust-script):
-   ```bash
-   cargo install cargo-criterion rust-script
-   ```
-2. Execute the benchmarks:
-
-   ```bash
-   cargo bench
-   ```
-
-   This command will run all benchmarks and display the results. To run a specific benchmark you could modify the command and pass a pattern to the command:
-
-   ```bash
-   cargo bench -- 'foo.*bar'
-   ```
-
-## Comparing Benchmarks
-
-To facilitate benchmark comparison, we have developed a Rust script capable of contrasting the outcomes of two benchmarks.
+Execute all benchmarks:
 
 ```bash
-# Checkout the base branch
-git checkout main
-
-# Run the benchmarks for the main branch and store the result in a file
-cargo bench --message-format=json > main.json
-
-# Checkout the feature branch
-git checkout feature
-
-# Run the benchmarks again in your feature branch
-cargo bench --message-format=json > feature.json
-
-# Perform a comparison check between the two branches
-./scripts/criterion_compare.rs main.json feature.json table
+cargo bench
 ```
 
-If the benchmarks indicate a degradation exceeding **10%**, the script will terminate with an error. You can refer to the automatically generated `benches/benchmark.md` file to identify which benchmarks underperformed and investigate the corresponding code changes before submitting a pull request.
+Run a specific benchmark by name:
+
+```bash
+cargo bench -- benchmark_name
+```
+
+## What Gets Benchmarked
+
+Micro benchmarks cover areas such as:
+
+- **Query parsing**: Time to parse GraphQL query strings into an AST.
+- **Schema validation**: Time to validate a configuration and resolve types.
+- **Response serialization**: Time to serialize resolved data into JSON.
+- **Template rendering**: Time to render Mustache templates for upstream URLs.
+
+## Interpreting Results
+
+Cargo bench outputs timing statistics for each benchmark:
+
+```
+test parse_query ... bench:     1,234 ns/iter (+/- 56)
+```
+
+The value shows the average time per iteration and the variance. Lower is better.
+
+## Comparing Before and After
+
+To measure the impact of a change:
+
+1. Run benchmarks on the `main` branch and save the output.
+2. Switch to your feature branch and run benchmarks again.
+3. Compare the numbers to check for regressions or improvements.
+
+For automated comparison, consider using [critcmp](https://github.com/BurntSushi/critcmp) which formats benchmark diffs clearly.
+
+## Writing New Benchmarks
+
+When adding a new performance-sensitive feature:
+
+1. Create a benchmark in the `benches/` directory.
+2. Use `criterion` or the built-in `#[bench]` attribute.
+3. Focus on isolating the specific operation you want to measure.
+4. Avoid I/O or network calls within the benchmark loop.

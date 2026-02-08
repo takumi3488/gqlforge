@@ -2,14 +2,12 @@ import React, {type ReactNode} from "react"
 import {useThemeConfig, ErrorCauseBoundary} from "@docusaurus/theme-common"
 import {splitNavbarItems, useNavbarMobileSidebar} from "@docusaurus/theme-common/internal"
 import NavbarItem, {type Props as NavbarItemConfig} from "@theme/NavbarItem"
-
 import NavbarColorModeToggle from "@theme/Navbar/ColorModeToggle"
 import NavbarMobileSidebarToggle from "@theme/Navbar/MobileSidebar/Toggle"
 import NavbarLogo from "@theme/Navbar/Logo"
 import styles from "./styles.module.css"
 
 const useNavbarItems = () => {
-  // TODO temporary casting until ThemeConfig type is improved (added by docusaurus)
   return useThemeConfig().navbar.items as NavbarItemConfig[]
 }
 
@@ -45,15 +43,12 @@ const NavbarContentLayout = ({left, right}: {left: ReactNode; right: ReactNode})
 
 const NavbarContent = (): JSX.Element => {
   const mobileSidebar = useNavbarMobileSidebar()
-
   const items = useNavbarItems()
   const [leftItems, rightItems] = splitNavbarItems(items)
 
   return (
     <NavbarContentLayout
       left={
-        // TODO stop hardcoding items? (added by docusaurus)
-        // Render left navbar items
         <>
           {!mobileSidebar.disabled && <NavbarMobileSidebarToggle />}
           <NavbarLogo />
@@ -61,8 +56,6 @@ const NavbarContent = (): JSX.Element => {
         </>
       }
       right={
-        // TODO stop hardcoding items? (added by docusaurus)
-        // Render right navbar items
         <>
           <NavbarItems items={rightItems} />
           <NavbarColorModeToggle className={styles.colorModeToggle} />
