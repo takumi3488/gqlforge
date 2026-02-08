@@ -103,10 +103,6 @@ export default {
               to: "/graphql",
               html: getNavDropdownItemHtml("/images/home/archive.svg", "Learn Icon", "Learn"),
             },
-            {
-              to: "/releases",
-              html: getNavDropdownItemHtml("/images/home/git-merge.svg", "Releases Icon", "Releases"),
-            },
           ],
         },
       ],
@@ -127,35 +123,11 @@ export default {
     [
       "@docusaurus/plugin-content-docs",
       {
-        id: "privacy",
-        path: "privacy",
-        routeBasePath: "privacy",
-        showLastUpdateTime: true,
-        sidebarPath: require.resolve("./privacy/sidebar.ts"),
-      },
-    ],
-
-    [
-      "@docusaurus/plugin-content-docs",
-      {
         id: "graphql",
         path: "graphql",
         routeBasePath: "graphql",
         showLastUpdateTime: true,
         sidebarPath: require.resolve("./graphql/sidebar.ts"),
-      },
-    ],
-    [
-      "@docusaurus/plugin-content-docs",
-      {
-        id: "releases",
-        path: "releases",
-        routeBasePath: "releases",
-        showLastUpdateTime: true,
-        async sidebarItemsGenerator({defaultSidebarItemsGenerator, ...args}: any) {
-          const sidebarItems = await defaultSidebarItemsGenerator(args)
-          return sidebarItems.reverse()
-        },
       },
     ],
     async function tailwindPlugin() {

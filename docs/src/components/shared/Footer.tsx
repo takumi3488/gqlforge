@@ -2,10 +2,8 @@ import React from "react"
 import Link from "@docusaurus/Link"
 import {footerItems, socials} from "@site/src/constants"
 import GQLForgeLogo from "@site/static/icons/companies/gqlforge-white.svg"
-import {useCookieConsentManager} from "./CookieConsentProvider"
 
 const Footer = (): JSX.Element => {
-  const {openCookieConsentModal} = useCookieConsentManager()
   const year = new Date().getFullYear()
   return (
     <footer className="flex flex-col relative w-full relative px-4 py-8 lg:px-40 lg:pt-20 lg:pb-0 bg-gqlForge-dark-700 grid-dark gap-4 lg:gap-8">
@@ -33,14 +31,8 @@ const Footer = (): JSX.Element => {
         })}
       </div>
       <div className="flex flex-col lg:flex-row items-center lg:justify-between w-[100%] lg:w-full z-10 py-2 lg:py-6 gap-2 lg:gap-0">
-        <p
-          className="text-content-mini lg:text-content-tiny text-gqlForge-light-700 font-space-mono font-normal cursor-pointer mb-0"
-          onClick={openCookieConsentModal}
-        >
-          Cookie Settings
-        </p>
         <p className="text-content-mini lg:text-content-tiny text-gqlForge-light-700 font-space-mono font-normal mb-0">
-          Copyright © {year} GQLForge, Inc.
+          Copyright © {year} GQLForge
         </p>
         <div className="space-x-SPACE_04">
           {socials.map((social) => (

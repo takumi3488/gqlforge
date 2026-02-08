@@ -3,8 +3,7 @@ import Heading from "@theme/Heading"
 
 import LinkButton from "../shared/LinkButton"
 import HeroImage from "@site/static/images/home/hero.svg"
-import {analyticsHandler} from "@site/src/utils"
-import {Theme, codeSandboxUrl} from "@site/src/constants"
+import {Theme} from "@site/src/constants"
 import {pageLinks} from "@site/src/constants/routes"
 import Link from "@docusaurus/Link"
 import Section from "../shared/Section"
@@ -25,37 +24,13 @@ const Banner = (): JSX.Element => {
             Leverage AI to design and ship best-practice GraphQL backends atop existing data sources and APIs.
           </p>
           <div className="hidden sm:flex justify-center mt-SPACE_06 sm:mt-SPACE_10 space-x-SPACE_04 sm:space-x-SPACE_06">
-            <LinkButton
-              title="Learn More"
-              href={pageLinks.introduction}
-              theme={Theme.Dark}
-              width="small"
-              onClick={() => analyticsHandler("Home Page", "Click", "Playground")}
-            />
-            <LinkButton
-              title="Get Started"
-              href={pageLinks.docs}
-              theme={Theme.Light}
-              width="small"
-              onClick={() => analyticsHandler("Home Page", "Click", "Get Started")}
-            />
+            <LinkButton title="Learn More" href={pageLinks.introduction} theme={Theme.Dark} width="small" />
+            <LinkButton title="Get Started" href={pageLinks.docs} theme={Theme.Light} width="small" />
           </div>
 
           <div className="sm:hidden flex justify-between md:justify-center mt-SPACE_06 sm:mt-SPACE_10 space-x-SPACE_04 sm:space-x-SPACE_06">
-            <LinkButton
-              title="Learn More"
-              href={pageLinks.introduction}
-              theme={Theme.Dark}
-              onClick={() => analyticsHandler("Home Page", "Click", "Playground")}
-              width="full"
-            />
-            <LinkButton
-              title="Get Started"
-              href={pageLinks.docs}
-              theme={Theme.Light}
-              onClick={() => analyticsHandler("Home Page", "Click", "Get Started")}
-              width="full"
-            />
+            <LinkButton title="Learn More" href={pageLinks.introduction} theme={Theme.Dark} width="full" />
+            <LinkButton title="Get Started" href={pageLinks.docs} theme={Theme.Light} width="full" />
           </div>
         </div>
       </Section>

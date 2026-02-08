@@ -11,8 +11,6 @@ import LayoutProvider from "@theme/Layout/Provider"
 import ErrorPageContent from "@theme/ErrorPageContent"
 import type {Props} from "@theme/Layout"
 import styles from "./styles.module.css"
-import GlobalLayout from "@site/src/components/shared/GlobalLayout"
-import Announcement from "@site/src/components/shared/Announcement"
 
 export default function Layout(props: Props): JSX.Element {
   const {
@@ -25,25 +23,13 @@ export default function Layout(props: Props): JSX.Element {
   } = props
 
   useKeyboardNavigation()
-  const targetDate = new Date("2024-11-25T20:00:00-08:00") // Nov 25, 6:00 PM - 8:00 PM PST
-  const currentDate = new Date()
   return (
     <LayoutProvider>
-      <GlobalLayout />
-
       <PageMetadata title={title} description={description} />
 
       <SkipToContent />
 
       <AnnouncementBar />
-
-      {currentDate < targetDate && (
-        <Announcement
-          text={"🚀 Scaling APIs: Rest, gRPC, or GraphQL? Let’s Break It Down!"}
-          refLink={"https://lu.ma/8sqfoc81"}
-          refText={"Register here"}
-        />
-      )}
 
       <Navbar />
 

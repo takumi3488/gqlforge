@@ -1,23 +1,5 @@
-import ReactGA from "react-ga4"
-
-// Function to handle analytics events
-export const analyticsHandler = (category: string, action: string, label: string): void => {
-  // Sending event to Google Analytics
-  ReactGA.event({
-    category: category,
-    action: action,
-    label: label,
-  })
-}
-
-export const sendConversionEvent = (conversionId: string, eventCallback?: Function) => {
-  if (typeof window !== "undefined" && window.gtag) {
-    window.gtag("event", "conversion", {
-      send_to: conversionId,
-      event_callback: eventCallback,
-    })
-  }
-}
+// No-op analytics handler (tracking removed)
+export const analyticsHandler = (_category: string, _action: string, _label: string): void => {}
 
 // Function to set overflow on body
 export const setBodyOverflow = (value: "initial" | "hidden") => {
@@ -46,8 +28,6 @@ export const isValidURL = (url: string) => {
 export const isBlogPost = () => {
   const url = new URL(location.pathname, window.location.origin)
   const pathSegments = url.pathname.split("/").filter(Boolean)
-
-  // Check if it's a blog post: starts with 'blog', has more segments, and isn't a pagination page
   const isBlogPost = pathSegments[0] === "blog" && pathSegments.length > 1 && pathSegments[1] !== "page"
   return isBlogPost
 }

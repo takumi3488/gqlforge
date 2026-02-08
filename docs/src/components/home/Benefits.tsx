@@ -1,7 +1,6 @@
 import React from "react"
 import Heading from "@theme/Heading"
 import SectionTitle from "../shared/SectionTitle"
-import Partners from "./Partners"
 import BenefitsCard from "./BenefitsCard"
 import Section from "../shared/Section"
 
@@ -22,7 +21,6 @@ const Benefits = (): JSX.Element => {
         </div>
         <BenefitsCard />
       </Section>
-      <Partners />
     </div>
   )
 }
