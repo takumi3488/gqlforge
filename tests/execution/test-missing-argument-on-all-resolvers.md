@@ -69,19 +69,19 @@ type NewsData {
 
 type Query {
   postGraphQLArgs: Post
-    @graphQL(url: "http://jsonplaceholder.typicode.com", name: "post", args: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://jsonplaceholder.typicode.com", name: "post", args: [{ key: "id", value: "{{.args.id}}" }])
   postGraphQLHeaders: Post
-    @graphQL(url: "http://jsonplaceholder.typicode.com", name: "post", headers: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://jsonplaceholder.typicode.com", name: "post", headers: [{ key: "id", value: "{{.args.id}}" }])
   postHttp: Post @http(url: "http://jsonplaceholder.typicode.com/posts/{{.args.id}}")
   newsGrpcHeaders: NewsData!
-    @grpc(
-      url: "http://jsonplaceholder.typicode.com"
-      method: "news.NewsService.GetAllNews"
-      headers: [{key: "id", value: "{{.args.id}}"}]
-    )
+  @grpc(
+    url: "http://jsonplaceholder.typicode.com"
+    method: "news.NewsService.GetAllNews"
+    headers: [{ key: "id", value: "{{.args.id}}" }]
+  )
   newsGrpcUrl: NewsData! @grpc(method: "news.NewsService.GetAllNews", url: "{{.args.url}}")
   newsGrpcBody: NewsData!
-    @grpc(url: "http://jsonplaceholder.typicode.com", method: "news.NewsService.GetAllNews", body: "{{.args.id}}")
+  @grpc(url: "http://jsonplaceholder.typicode.com", method: "news.NewsService.GetAllNews", body: "{{.args.id}}")
 }
 
 type User {

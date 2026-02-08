@@ -12,8 +12,7 @@ GQLForge can act as a subgraph in an Apollo Federation architecture, allowing yo
 Set `enable_federation` to `true` in the `@server` directive:
 
 ```graphql
-schema
-  @server(port: 8000, enable_federation: true) {
+schema @server(port: 8000, enable_federation: true) {
   query: Query
 }
 ```
@@ -42,8 +41,7 @@ When the Apollo Router needs to resolve a `User` by its key, GQLForge calls the 
 type User @key(fields: "id") {
   id: Int!
   name: String!
-  email: Email
-    @http(url: "https://api.example.com/users/{{.value.id}}")
+  email: Email @http(url: "https://api.example.com/users/{{.value.id}}")
 }
 ```
 
@@ -52,9 +50,7 @@ GQLForge uses the `id` received from the router to fetch the full user data from
 ## Full Example
 
 ```graphql
-schema
-  @server(port: 8001, enable_federation: true)
-  @upstream(base_url: "https://api.example.com") {
+schema @server(port: 8001, enable_federation: true) @upstream(base_url: "https://api.example.com") {
   query: Query
 }
 

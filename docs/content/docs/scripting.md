@@ -12,8 +12,7 @@ GQLForge allows you to write custom resolver logic in JavaScript using the `@js`
 First, register your JavaScript file with the schema:
 
 ```graphql
-schema
-  @link(type: Script, src: "./transforms.js") {
+schema @link(type: Script, src: "./transforms.js") {
   query: Query
 }
 ```
@@ -24,8 +23,7 @@ Apply `@js` to a field and specify the function name to call:
 
 ```graphql
 type Query {
-  formattedDate(timestamp: Int!): String
-    @js(name: "formatDate")
+  formattedDate(timestamp: Int!): String @js(name: "formatDate")
 }
 ```
 
@@ -50,10 +48,10 @@ function fullName({ value }) {
 
 Each function receives a context object with these properties:
 
-| Property | Description |
-|----------|-------------|
-| `args` | The GraphQL field arguments |
-| `value` | The parent object's resolved value |
+| Property  | Description                             |
+| --------- | --------------------------------------- |
+| `args`    | The GraphQL field arguments             |
+| `value`   | The parent object's resolved value      |
 | `headers` | Request headers from the incoming query |
 
 ## Chaining with Other Directives
@@ -66,8 +64,7 @@ type User {
 }
 
 type Query {
-  user(id: Int!): User
-    @http(url: "https://api.example.com/users/{{.args.id}}")
+  user(id: Int!): User @http(url: "https://api.example.com/users/{{.args.id}}")
 }
 ```
 

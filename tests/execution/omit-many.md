@@ -21,8 +21,8 @@ type Query {
 }
 
 type User
-  @addField(name: "zipcode", path: ["address", "zipcode"])
-  @addField(name: "complements", path: ["address", "complements"]) {
+@addField(name: "zipcode", path: ["address", "zipcode"])
+@addField(name: "complements", path: ["address", "complements"]) {
   address: Address @omit
   name: String
 }

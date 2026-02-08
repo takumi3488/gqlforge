@@ -22,7 +22,7 @@ schema {
 
 type Query {
   profiles(handles: [ID!]!): [Profile!]!
-    @http(url: "http://upstream/profiles", query: [{key: "handles", value: "{{.args.handles}}"}])
+  @http(url: "http://upstream/profiles", query: [{ key: "handles", value: "{{.args.handles}}" }])
 }
 
 interface Profile {

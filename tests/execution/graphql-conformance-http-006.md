@@ -15,24 +15,24 @@ schema {
 }
 
 type Query {
-  user(id: ID!): User! @http(url: "http://upstream/user", query: [{key: "id", value: "{{.args.id}}"}])
+  user(id: ID!): User! @http(url: "http://upstream/user", query: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {
   id: ID!
   name: String!
   profilePic(size: Int, width: Int, height: Int): String!
-    @expr(body: "{{.value.id}}_{{.args.size}}_{{.args.width}}_{{.args.height}}")
+  @expr(body: "{{.value.id}}_{{.args.size}}_{{.args.width}}_{{.args.height}}")
   friends(first: Int): [User!]!
-    @http(
-      url: "http://upstream/friends"
-      query: [{key: "id", value: "{{.value.id}}"}, {key: "first", value: "{{.args.first}}"}]
-    )
+  @http(
+    url: "http://upstream/friends"
+    query: [{ key: "id", value: "{{.value.id}}" }, { key: "first", value: "{{.args.first}}" }]
+  )
   mutualFriends(first: Int): [User!]!
-    @http(
-      url: "http://upstream/mutual-friends"
-      query: [{key: "id", value: "{{.value.id}}"}, {key: "first", value: "{{.args.first}}"}]
-    )
+  @http(
+    url: "http://upstream/mutual-friends"
+    query: [{ key: "id", value: "{{.value.id}}" }, { key: "first", value: "{{.args.first}}" }]
+  )
 }
 ```
 

@@ -11,7 +11,7 @@ schema {
 }
 
 type Query {
-  f1(q: [Int!]!): T1 @http(url: "http://localhost:3000/api", query: [{key: "q", value: "{{.args.q}}"}])
+  f1(q: [Int!]!): T1 @http(url: "http://localhost:3000/api", query: [{ key: "q", value: "{{.args.q}}" }])
 }
 
 type T1 {

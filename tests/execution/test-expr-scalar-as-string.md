@@ -6,7 +6,7 @@ schema {
 }
 
 type Query {
-  entry: Entry @expr(body: {num: "0", arr: "[1, 2, 3]", str: "test", obj: "{e: 1}", bool: "true"})
+  entry: Entry @expr(body: { num: "0", arr: "[1, 2, 3]", str: "test", obj: "{e: 1}", bool: "true" })
 }
 
 type Entry {
@@ -16,15 +16,15 @@ type Entry {
   obj: String
   bool: String
   nested: Nested
-    @expr(
-      body: {
-        num: "\"{{.value.num}}\""
-        arr: "{{.value.arr}}"
-        str: "{{.value.str}}"
-        obj: "{{.value.obj}}"
-        bool: "{{.value.bool}}"
-      }
-    )
+  @expr(
+    body: {
+      num: "\"{{.value.num}}\""
+      arr: "{{.value.arr}}"
+      str: "{{.value.str}}"
+      obj: "{{.value.obj}}"
+      bool: "{{.value.bool}}"
+    }
+  )
 }
 
 type Nested {

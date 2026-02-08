@@ -20,8 +20,7 @@ GQLForge's telemetry system is built on the OpenTelemetry SDK for Rust. The main
 Use the stdout exporter during development to see telemetry output in your terminal:
 
 ```graphql
-schema
-  @telemetry(export: { stdout: { pretty: true } }) {
+schema @telemetry(export: { stdout: { pretty: true } }) {
   query: Query
 }
 ```

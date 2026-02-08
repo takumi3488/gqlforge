@@ -5,7 +5,7 @@ schema {
 type Query {
   posts: [UserPost] @http(url: "http://jsonplaceholder.typicode.com/posts")
   addComment(postId: Int!, comment: CommentInput!, premium: Boolean): Boolean
-    @http(url: "http://jsonplaceholder.typicode.com/add-comment", method: POST)
+  @http(url: "http://jsonplaceholder.typicode.com/add-comment", method: POST)
   searchComments(type: CommentSearch): [Comment] @http(url: "http://jsonplaceholder.typicode.com/comment")
 }
 

@@ -18,8 +18,8 @@ schema {
 type Query {
   scalar: String! @expr(body: "data from public scalar")
   protectedScalar: String! @protected @expr(body: "data from protected scalar")
-  nested: Nested! @expr(body: {name: "nested name", protected: "protected nested"})
-  protectedType: ProtectedType @expr(body: {name: "protected type name", nested: "protected type nested"})
+  nested: Nested! @expr(body: { name: "nested name", protected: "protected nested" })
+  protectedType: ProtectedType @expr(body: { name: "protected type name", nested: "protected type nested" })
 }
 
 type Mutation {

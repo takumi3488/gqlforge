@@ -1,14 +1,14 @@
 schema
-  @server(port: 8000, hostname: "0.0.0.0")
-  @upstream(httpCache: 42, onRequest: "onRequest")
-  @link(type: Script, src: "scripts/echo.js") {
+@server(port: 8000, hostname: "0.0.0.0")
+@upstream(httpCache: 42, onRequest: "onRequest")
+@link(type: Script, src: "scripts/echo.js") {
   query: Query
 }
 
 type Query {
   posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts", onResponseBody: "onResponse")
   user(id: Int!): User
-    @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}", onResponseBody: "onResponse")
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}", onResponseBody: "onResponse")
 }
 
 type User {

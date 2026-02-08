@@ -15,7 +15,7 @@ schema {
 }
 
 type Query {
-  user(id: ID!): User! @http(url: "http://upstream/user", query: [{key: "id", value: "{{.args.id}}"}])
+  user(id: ID!): User! @http(url: "http://upstream/user", query: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {

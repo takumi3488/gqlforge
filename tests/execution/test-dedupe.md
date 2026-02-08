@@ -23,12 +23,12 @@ type Post {
   body: String
   userId: Int!
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.value.userId}}"}]
-      batchKey: ["id"]
-      dedupe: true
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.value.userId}}" }]
+    batchKey: ["id"]
+    dedupe: true
+  )
 }
 
 type User {

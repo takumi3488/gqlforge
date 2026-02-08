@@ -51,7 +51,7 @@ type Query {
   photos: [Photo] @http(url: "https://jsonplaceholder.typicode.com/photos")
   post(GEN__1: Int!): Post @http(url: "https://jsonplaceholder.typicode.com/posts/{{.args.GEN__1}}")
   postComments(postId: Int): [Comment]
-    @http(url: "https://jsonplaceholder.typicode.com/comments", query: [{key: "postId", value: "{{.args.postId}}"}])
+  @http(url: "https://jsonplaceholder.typicode.com/comments", query: [{ key: "postId", value: "{{.args.postId}}" }])
   posts: [Post] @http(url: "https://jsonplaceholder.typicode.com/posts")
   todo(GEN__1: Int!): Todo @http(url: "https://jsonplaceholder.typicode.com/todos/{{.args.GEN__1}}")
   todos: [Todo] @http(url: "https://jsonplaceholder.typicode.com/todos")

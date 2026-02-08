@@ -4,9 +4,9 @@ schema @server(port: 8030) {
 
 type Query {
   version: Int! @expr(body: 1)
-  foo: [Foo!]! @expr(body: [{fizz: "buzz"}])
-  bar: [Foo!]! @expr(body: [{fizz: "buzz"}])
-  buzz: [Foo!]! @expr(body: [{fizz: "buzz"}])
+  foo: [Foo!]! @expr(body: [{ fizz: "buzz" }])
+  bar: [Foo!]! @expr(body: [{ fizz: "buzz" }])
+  buzz: [Foo!]! @expr(body: [{ fizz: "buzz" }])
 }
 
 type Foo {
@@ -17,5 +17,5 @@ type Foo {
 type Foo {
   fizz: String!
   c: Int
-  spam: [String!]! @http(url: "https://example.com/spam", query: [{key: "id", value: "{{.value.fizz}}"}])
+  spam: [String!]! @http(url: "https://example.com/spam", query: [{ key: "id", value: "{{.value.fizz}}" }])
 }

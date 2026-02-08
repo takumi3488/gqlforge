@@ -47,7 +47,7 @@ A typical development cycle with watch mode:
    ```graphql
    type Query {
      posts: [Post] @http(path: "/posts")
-     users: [User] @http(path: "/users")  # newly added
+     users: [User] @http(path: "/users") # newly added
    }
    ```
 
@@ -60,9 +60,7 @@ A typical development cycle with watch mode:
 If your configuration uses the `@link` directive to import other files, changes to those linked files also trigger a reload:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @link(type: Config, src: "./users.graphql") {
+schema @server(port: 8000) @link(type: Config, src: "./users.graphql") {
   query: Query
 }
 ```

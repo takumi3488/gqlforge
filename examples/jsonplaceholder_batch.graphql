@@ -1,4 +1,4 @@
-schema @server(port: 8000) @upstream(httpCache: 42, batch: {delay: 1, maxSize: 1000}) {
+schema @server(port: 8000) @upstream(httpCache: 42, batch: { delay: 1, maxSize: 1000 }) {
   query: Query
 }
 
@@ -21,9 +21,9 @@ type Post {
   title: String!
   body: String!
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.value.userId}}"}]
-      batchKey: ["id"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.value.userId}}" }]
+    batchKey: ["id"]
+  )
 }

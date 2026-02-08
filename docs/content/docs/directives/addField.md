@@ -9,9 +9,9 @@ The `@addField` directive adds a new derived field to a type. The field's value 
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `name` | String | The name of the new field to add. |
+| Field  | Type     | Description                                                              |
+| ------ | -------- | ------------------------------------------------------------------------ |
+| `name` | String   | The name of the new field to add.                                        |
 | `path` | [String] | A dot-path through the existing type structure to derive the value from. |
 
 ## Usage
@@ -26,13 +26,10 @@ schema @server(port: 8000) {
 }
 
 type Query {
-  user(id: Int!): User
-    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
+  user(id: Int!): User @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
-type User
-  @addField(name: "city", path: ["address", "city"])
-  @addField(name: "companyName", path: ["company", "name"]) {
+type User @addField(name: "city", path: ["address", "city"]) @addField(name: "companyName", path: ["company", "name"]) {
   id: Int!
   name: String!
   email: String!

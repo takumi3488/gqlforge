@@ -35,9 +35,7 @@ gqlforge --version
 Create a file called `app.graphql` with the following content:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
+schema @server(port: 8000) @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
   query: Query
 }
 

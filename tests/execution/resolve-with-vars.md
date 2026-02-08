@@ -2,7 +2,7 @@
 
 ```yaml @config
 server:
-  vars: [{key: "id", value: "1"}]
+  vars: [{ key: "id", value: "1" }]
 ```
 
 ```graphql @schema
@@ -16,7 +16,7 @@ type User {
 }
 
 type Query {
-  user: [User] @http(url: "http://jsonplaceholder.typicode.com/users", query: [{key: "id", value: "{{.vars.id}}"}])
+  user: [User] @http(url: "http://jsonplaceholder.typicode.com/users", query: [{ key: "id", value: "{{.vars.id}}" }])
 }
 ```
 

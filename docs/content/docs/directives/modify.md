@@ -9,9 +9,9 @@ The `@modify` directive renames a field in the public schema or marks it as omit
 
 ## Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `name` | String | `null` | The new public name for the field. |
+| Field  | Type    | Default | Description                                                                           |
+| ------ | ------- | ------- | ------------------------------------------------------------------------------------- |
+| `name` | String  | `null`  | The new public name for the field.                                                    |
 | `omit` | Boolean | `false` | If `true`, the field is hidden from the public schema but still available internally. |
 
 ## Examples

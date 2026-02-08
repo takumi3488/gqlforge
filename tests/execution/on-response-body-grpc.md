@@ -49,12 +49,12 @@ schema {
 
 type Query {
   newsById: News!
-    @grpc(
-      method: "news.NewsService.GetNews"
-      body: {id: 2}
-      onResponseBody: "onResponse"
-      url: "http://localhost:50051"
-    )
+  @grpc(
+    method: "news.NewsService.GetNews"
+    body: { id: 2 }
+    onResponseBody: "onResponse"
+    url: "http://localhost:50051"
+  )
 }
 
 type News {

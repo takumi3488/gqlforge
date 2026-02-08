@@ -16,11 +16,11 @@ schema {
 
 type Query {
   user(id: Int!): User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.args.id}}"}]
-      batchKey: ["id"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.args.id}}" }]
+    batchKey: ["id"]
+  )
 }
 
 type User {

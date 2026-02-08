@@ -15,7 +15,7 @@ schema @server(port: 8001, queryValidation: false, hostname: "0.0.0.0") @upstrea
 }
 
 type Query {
-  user(id: ID!): User! @http(url: "http://upstream/user", query: [{key: "id", value: "{{.args.id}}"}])
+  user(id: ID!): User! @http(url: "http://upstream/user", query: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {

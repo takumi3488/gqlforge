@@ -30,7 +30,7 @@ type Post {
   id: Int!
   userId: Int!
   title: String!
-  user: User @call(steps: [{query: "user", args: {id: "{{.value.userId}}"}}])
+  user: User @call(steps: [{ query: "user", args: { id: "{{.value.userId}}" } }])
 }
 ```
 

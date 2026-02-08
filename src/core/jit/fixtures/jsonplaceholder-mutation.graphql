@@ -1,6 +1,6 @@
 schema
-  @server(port: 8000, headers: {cors: {allowOrigins: ["*"], allowHeaders: ["*"], allowMethods: [POST, GET, OPTIONS]}})
-  @upstream(httpCache: 42, batch: {delay: 100}) {
+@server(port: 8000, headers: { cors: { allowOrigins: ["*"], allowHeaders: ["*"], allowMethods: [POST, GET, OPTIONS] } })
+@upstream(httpCache: 42, batch: { delay: 100 }) {
   query: Query
   mutation: Mutation
 }
@@ -25,9 +25,9 @@ union UserIdOrEmail = UserId | UserEmail
 
 type Mutation {
   createUser(user: InputUser!): User
-    @http(method: POST, url: "http://jsonplaceholder.typicode.com/users", body: "{{args.user}}")
+  @http(method: POST, url: "http://jsonplaceholder.typicode.com/users", body: "{{args.user}}")
   createPost(post: InputPost!): Post
-    @http(method: POST, url: "http://jsonplaceholder.typicode.com/posts", body: "{{args.post}}")
+  @http(method: POST, url: "http://jsonplaceholder.typicode.com/posts", body: "{{args.post}}")
 }
 
 input InputPost {
@@ -76,5 +76,5 @@ type Post {
   userId: ID!
   title: String!
   body: String!
-  user: User @call(steps: [{query: "user", args: {id: "{{.value.userId}}"}}])
+  user: User @call(steps: [{ query: "user", args: { id: "{{.value.userId}}" } }])
 }

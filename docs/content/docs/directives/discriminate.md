@@ -9,8 +9,8 @@ The `@discriminate` directive tells GQLForge which field in the response data id
 
 ## Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
+| Field   | Type   | Default  | Description                                                     |
+| ------- | ------ | -------- | --------------------------------------------------------------- |
 | `field` | String | `"type"` | The name of the JSON field used to determine the concrete type. |
 
 ## How It Works
@@ -25,8 +25,7 @@ schema @server(port: 8000) {
 }
 
 type Query {
-  feed: [FeedItem]
-    @http(url: "https://api.example.com/feed")
+  feed: [FeedItem] @http(url: "https://api.example.com/feed")
 }
 
 union FeedItem @discriminate(field: "kind") = Post | Comment | Image

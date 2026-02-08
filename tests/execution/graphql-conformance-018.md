@@ -16,7 +16,7 @@ schema {
 
 type Query {
   user(id: ID!): User!
-    @graphQL(url: "http://upstream/graphql", name: "user", args: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "user", args: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {

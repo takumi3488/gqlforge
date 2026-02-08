@@ -9,8 +9,8 @@ The `@js` directive resolves a field by executing a JavaScript function from a l
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field  | Type   | Description                                    |
+| ------ | ------ | ---------------------------------------------- |
 | `name` | String | The name of the JavaScript function to invoke. |
 
 ## Prerequisites
@@ -32,16 +32,13 @@ It should return the resolved value.
 ### Schema
 
 ```graphql
-schema
-  @link(src: "./resolvers.js", type_of: Script)
-  @server(port: 8000) {
+schema @link(src: "./resolvers.js", type_of: Script) @server(port: 8000) {
   query: Query
 }
 
 type Query {
   greeting(name: String!): String @js(name: "greet")
-  users: [User]
-    @http(url: "https://jsonplaceholder.typicode.com/users")
+  users: [User] @http(url: "https://jsonplaceholder.typicode.com/users")
 }
 
 type User {

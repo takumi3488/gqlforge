@@ -25,7 +25,7 @@ type Foo {
   a: Int
   b: Int
   bar: Bar
-    @http(url: "http://jsonplaceholder.typicode.com/bar", method: POST, body: {id: "{{.value.a}}"}, batchKey: ["a"])
+  @http(url: "http://jsonplaceholder.typicode.com/bar", method: POST, body: { id: "{{.value.a}}" }, batchKey: ["a"])
 }
 
 type Bar {
@@ -38,12 +38,12 @@ type User {
   name: String!
   email: String!
   post: Post
-    @http(
-      url: "http://jsonplaceholder.typicode.com/posts"
-      method: POST
-      body: {userId: "{{.value.id}}", title: "title", body: "body"}
-      batchKey: ["userId"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/posts"
+    method: POST
+    body: { userId: "{{.value.id}}", title: "title", body: "body" }
+    batchKey: ["userId"]
+  )
 }
 
 type Post {
@@ -52,12 +52,12 @@ type Post {
   title: String!
   body: String!
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      method: POST
-      body: {key: "id", value: "{{.value.userId}}"}
-      batchKey: ["id"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    method: POST
+    body: { key: "id", value: "{{.value.userId}}" }
+    batchKey: ["id"]
+  )
 }
 ```
 
@@ -77,7 +77,7 @@ type Post {
 - request:
     method: POST
     url: http://jsonplaceholder.typicode.com/posts
-    body: [{"userId": "1", "title": "title", "body": "body"}, {"userId": "2", "title": "title", "body": "body"}]
+    body: [{ "userId": "1", "title": "title", "body": "body" }, { "userId": "2", "title": "title", "body": "body" }]
   response:
     status: 200
     body:
@@ -108,7 +108,7 @@ type Post {
 - request:
     method: POST
     url: http://jsonplaceholder.typicode.com/users
-    body: [{"key": "id", "value": "1"}, {"key": "id", "value": "2"}]
+    body: [{ "key": "id", "value": "1" }, { "key": "id", "value": "2" }]
   response:
     status: 200
     body:
@@ -135,7 +135,7 @@ type Post {
 - request:
     method: POST
     url: http://jsonplaceholder.typicode.com/bar
-    body: [{"id": "11"}, {"id": "21"}]
+    body: [{ "id": "11" }, { "id": "21" }]
   response:
     status: 200
     body:

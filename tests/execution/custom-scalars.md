@@ -18,7 +18,7 @@ type Query {
   qEmail: Email @expr(body: "funny@not.com")
   qUrl: Url @expr(body: "http://example.com")
   qPhoneNumber: PhoneNumber @expr(body: "+1234567890")
-  qJSON: JSON @expr(body: {a: 1, b: 2})
+  qJSON: JSON @expr(body: { a: 1, b: 2 })
   qBytes: Bytes @expr(body: "1")
   qUInt128: UInt128 @expr(body: "2")
   qUInt16: UInt16 @expr(body: 3)

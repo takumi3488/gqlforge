@@ -22,8 +22,8 @@ type A {
   id: Int!
   bid: Int!
   cid: Int!
-  b: B @graphQL(url: "http://upstream/graphql", name: "b", args: [{key: "id", value: "{{.value.bid}}"}])
-  c: C @graphQL(url: "http://upstream/graphql", name: "c", args: [{key: "id", value: "{{.value.cid}}"}])
+  b: B @graphQL(url: "http://upstream/graphql", name: "b", args: [{ key: "id", value: "{{.value.bid}}" }])
+  c: C @graphQL(url: "http://upstream/graphql", name: "c", args: [{ key: "id", value: "{{.value.cid}}" }])
 }
 
 type B {

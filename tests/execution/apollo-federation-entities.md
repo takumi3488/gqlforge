@@ -21,14 +21,14 @@ type Query {
   user(id: Int!): User @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
-type User @call(steps: [{query: "user", args: {id: "{{.value.id}}"}}]) {
+type User @call(steps: [{ query: "user", args: { id: "{{.value.id}}" } }]) {
   id: Int!
   name: String!
 }
 ```
 
 ```graphql @file:posts.graphql
-type Post @expr(body: {id: "{{.value.id}}", title: "post-title-{{.value.id}}"}) {
+type Post @expr(body: { id: "{{.value.id}}", title: "post-title-{{.value.id}}" }) {
   id: Int!
   title: String!
 }

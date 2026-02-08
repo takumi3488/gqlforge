@@ -14,8 +14,8 @@ Apply `@rest` to a Query or Mutation field to make it available as a REST endpoi
 ```graphql
 type Query {
   user(id: Int!): User
-    @rest(path: "/api/users/:id", method: GET)
-    @http(url: "https://api.example.com/users/{{.args.id}}")
+  @rest(path: "/api/users/:id", method: GET)
+  @http(url: "https://api.example.com/users/{{.args.id}}")
 }
 ```
 
@@ -23,10 +23,10 @@ A GET request to `/api/users/42` now returns the same data as querying the `user
 
 ### Directive Arguments
 
-| Argument | Description |
-|----------|-------------|
-| `path` | The URL path pattern. Use `:param` for path parameters. |
-| `method` | HTTP method: `GET`, `POST`, `PUT`, `DELETE` |
+| Argument | Description                                             |
+| -------- | ------------------------------------------------------- |
+| `path`   | The URL path pattern. Use `:param` for path parameters. |
+| `method` | HTTP method: `GET`, `POST`, `PUT`, `DELETE`             |
 
 ## Path Parameters
 
@@ -35,8 +35,8 @@ Path parameters defined with `:param` syntax are mapped to the corresponding Gra
 ```graphql
 type Query {
   post(userId: Int!, postId: Int!): Post
-    @rest(path: "/api/users/:userId/posts/:postId", method: GET)
-    @http(url: "https://api.example.com/users/{{.args.userId}}/posts/{{.args.postId}}")
+  @rest(path: "/api/users/:userId/posts/:postId", method: GET)
+  @http(url: "https://api.example.com/users/{{.args.userId}}/posts/{{.args.postId}}")
 }
 ```
 
@@ -47,12 +47,12 @@ You can expose mutations as POST, PUT, or DELETE endpoints:
 ```graphql
 type Mutation {
   createUser(input: CreateUserInput!): User
-    @rest(path: "/api/users", method: POST)
-    @http(
-      url: "https://api.example.com/users"
-      method: POST
-      body: "{{.args.input}}"
-    )
+  @rest(path: "/api/users", method: POST)
+  @http(
+    url: "https://api.example.com/users"
+    method: POST
+    body: "{{.args.input}}"
+  )
 }
 ```
 
@@ -61,9 +61,7 @@ The request body is automatically parsed and passed to the field arguments.
 ## Full Example
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(base_url: "https://api.example.com") {
+schema @server(port: 8000) @upstream(base_url: "https://api.example.com") {
   query: Query
   mutation: Mutation
 }
@@ -75,8 +73,8 @@ type Query {
 
 type Mutation {
   deleteUser(id: Int!): Boolean
-    @rest(path: "/api/users/:id", method: DELETE)
-    @http(url: "/users/{{.args.id}}", method: DELETE)
+  @rest(path: "/api/users/:id", method: DELETE)
+  @http(url: "/users/{{.args.id}}", method: DELETE)
 }
 ```
 

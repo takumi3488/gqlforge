@@ -12,8 +12,7 @@ GQLForge can expose gRPC services through your GraphQL API using the `@grpc` dir
 Register your `.proto` files with `@link` so GQLForge understands the service definitions:
 
 ```graphql
-schema
-  @link(type: Protobuf, src: "./protos/greeter.proto") {
+schema @link(type: Protobuf, src: "./protos/greeter.proto") {
   query: Query
 }
 ```
@@ -22,11 +21,11 @@ If your proto files import from other directories, use `proto_paths` to specify 
 
 ```graphql
 schema
-  @link(
-    type: Protobuf
-    src: "./protos/greeter.proto"
-    proto_paths: ["./protos", "./third_party"]
-  ) {
+@link(
+  type: Protobuf
+  src: "./protos/greeter.proto"
+  proto_paths: ["./protos", "./third_party"]
+) {
   query: Query
 }
 ```
@@ -38,12 +37,12 @@ Use `@grpc` on fields to map them to gRPC method calls:
 ```graphql
 type Query {
   greeting(name: String!): GreetingResponse
-    @grpc(
-      service: "greeter.GreeterService"
-      method: "SayHello"
-      body: "{ name: {{.args.name}} }"
-      url: "https://grpc.example.com:50051"
-    )
+  @grpc(
+    service: "greeter.GreeterService"
+    method: "SayHello"
+    body: "{ name: {{.args.name}} }"
+    url: "https://grpc.example.com:50051"
+  )
 }
 
 type GreetingResponse {
@@ -53,13 +52,13 @@ type GreetingResponse {
 
 ### Directive Arguments
 
-| Argument | Description |
-|----------|-------------|
-| `service` | Fully qualified protobuf service name |
-| `method` | RPC method to invoke |
-| `url` | Address of the gRPC server |
-| `body` | Request message template using Mustache syntax |
-| `batch_key` | Fields to batch on for N+1 prevention |
+| Argument    | Description                                    |
+| ----------- | ---------------------------------------------- |
+| `service`   | Fully qualified protobuf service name          |
+| `method`    | RPC method to invoke                           |
+| `url`       | Address of the gRPC server                     |
+| `body`      | Request message template using Mustache syntax |
+| `batch_key` | Fields to batch on for N+1 prevention          |
 
 ## Type Mapping
 
@@ -74,20 +73,18 @@ GQLForge automatically generates GraphQL types from your protobuf messages. Prot
 ## Example: Full Schema
 
 ```graphql
-schema
-  @server(port: 8000)
-  @link(type: Protobuf, src: "./user.proto") {
+schema @server(port: 8000) @link(type: Protobuf, src: "./user.proto") {
   query: Query
 }
 
 type Query {
   user(id: Int!): User
-    @grpc(
-      service: "users.UserService"
-      method: "GetUser"
-      url: "https://localhost:50051"
-      body: "{ id: {{.args.id}} }"
-    )
+  @grpc(
+    service: "users.UserService"
+    method: "GetUser"
+    url: "https://localhost:50051"
+    body: "{ id: {{.args.id}} }"
+  )
 }
 ```
 

@@ -1,8 +1,5 @@
 #!/bin/bash
 
-# Configuration for file types to be tested via prettier
-FILE_TYPES="{graphql,yml,json,md,ts,js}"
-
 run_cargo_fmt() {
     MODE=$1
     if [ "$MODE" == "check" ]; then
@@ -24,12 +21,12 @@ run_cargo_clippy() {
     return $?
 }
 
-run_prettier() {
+run_dprint() {
     MODE=$1
     if [ "$MODE" == "check" ]; then
-        npx prettier -c .prettierrc --check "**/*.$FILE_TYPES"
+        dprint check
     else
-        npx prettier -c .prettierrc --write "**/*.$FILE_TYPES"
+        dprint fmt
     fi
     return $?
 }
@@ -54,8 +51,8 @@ case $MODE in
         run_autogen_schema $MODE
         AUTOGEN_SCHEMA_EXIT_CODE=$?
 
-        run_prettier $MODE
-        PRETTIER_EXIT_CODE=$?
+        run_dprint $MODE
+        DPRINT_EXIT_CODE=$?
 
         # Commands that uses nightly toolchains are run from `.nightly` directory
         # to read the nightly version from `rust-toolchain.toml` file
@@ -73,6 +70,6 @@ case $MODE in
 esac
 
 # If any command failed, exit with a non-zero status code
-if [ $FMT_EXIT_CODE -ne 0 ] || [ $CLIPPY_EXIT_CODE -ne 0 ] || [ $PRETTIER_EXIT_CODE -ne 0 ] || [ $AUTOGEN_SCHEMA_EXIT_CODE -ne 0 ]; then
+if [ $FMT_EXIT_CODE -ne 0 ] || [ $CLIPPY_EXIT_CODE -ne 0 ] || [ $DPRINT_EXIT_CODE -ne 0 ] || [ $AUTOGEN_SCHEMA_EXIT_CODE -ne 0 ]; then
     exit 1
 fi

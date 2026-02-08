@@ -20,8 +20,8 @@ type Geo {
 }
 
 type Query
-  @addField(name: "lat", path: ["user", "address", "geo", "lat"])
-  @addField(name: "lng", path: ["user", "address", "geo", "lng"]) {
+@addField(name: "lat", path: ["user", "address", "geo", "lat"])
+@addField(name: "lng", path: ["user", "address", "geo", "lng"]) {
   user: User @http(url: "http://jsonplaceholder.typicode.com/users/1")
 }
 ```

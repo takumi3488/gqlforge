@@ -14,9 +14,7 @@ GQLForge supports referencing environment variables within your configuration fi
 Use `{{.env.VAR_NAME}}` to reference an environment variable:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(baseURL: "{{.env.API_BASE_URL}}") {
+schema @server(port: 8000) @upstream(baseURL: "{{.env.API_BASE_URL}}") {
   query: Query
 }
 ```
@@ -32,10 +30,10 @@ Pass authentication credentials to upstream services without hardcoding them:
 ```graphql
 type Query {
   users: [User]
-    @http(
-      path: "/users"
-      headers: [{ key: "Authorization", value: "Bearer {{.env.API_TOKEN}}" }]
-    )
+  @http(
+    path: "/users"
+    headers: [{ key: "Authorization", value: "Bearer {{.env.API_TOKEN}}" }]
+  )
 }
 ```
 
@@ -50,8 +48,7 @@ API_TOKEN=your-secret-token gqlforge start ./app.graphql
 Use different upstream URLs for development, staging, and production:
 
 ```graphql
-schema
-  @upstream(baseURL: "{{.env.UPSTREAM_URL}}") {
+schema @upstream(baseURL: "{{.env.UPSTREAM_URL}}") {
   query: Query
 }
 ```
@@ -69,9 +66,7 @@ UPSTREAM_URL=https://api.example.com gqlforge start ./app.graphql
 Reference connection parameters for data sources:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @link(type: Config, src: "{{.env.CONFIG_PATH}}") {
+schema @server(port: 8000) @link(type: Config, src: "{{.env.CONFIG_PATH}}") {
   query: Query
 }
 ```
@@ -83,13 +78,13 @@ Inject environment-specific headers into upstream requests:
 ```graphql
 type Query {
   data: Data
-    @http(
-      path: "/data"
-      headers: [
-        { key: "X-Api-Key", value: "{{.env.DATA_API_KEY}}" }
-        { key: "X-Environment", value: "{{.env.DEPLOY_ENV}}" }
-      ]
-    )
+  @http(
+    path: "/data"
+    headers: [
+      { key: "X-Api-Key", value: "{{.env.DATA_API_KEY}}" }
+      { key: "X-Environment", value: "{{.env.DEPLOY_ENV}}" }
+    ]
+  )
 }
 ```
 

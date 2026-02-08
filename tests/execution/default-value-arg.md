@@ -6,7 +6,7 @@ schema {
 }
 
 type Query {
-  bar(input: Input = {id: 1}): Int @http(url: "http://abc.com/bar/{{.args.input.id}}")
+  bar(input: Input = { id: 1 }): Int @http(url: "http://abc.com/bar/{{.args.input.id}}")
 }
 
 input Input {

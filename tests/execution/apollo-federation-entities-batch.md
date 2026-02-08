@@ -21,17 +21,17 @@ type Query {
 }
 
 type User
-  @http(
-    url: "http://jsonplaceholder.typicode.com/users"
-    query: [{key: "id", value: "{{.value.id}}"}]
-    batchKey: ["id"]
-  ) {
+@http(
+  url: "http://jsonplaceholder.typicode.com/users"
+  query: [{ key: "id", value: "{{.value.id}}" }]
+  batchKey: ["id"]
+) {
   id: Int!
   name: String!
 }
 
 type Post
-  @graphQL(url: "http://upstream/graphql", batch: true, name: "post", args: [{key: "id", value: "{{.value.id}}"}]) {
+@graphQL(url: "http://upstream/graphql", batch: true, name: "post", args: [{ key: "id", value: "{{.value.id}}" }]) {
   id: Int!
   title: String!
 }

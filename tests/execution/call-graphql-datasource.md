@@ -16,7 +16,7 @@ schema {
 type Query {
   posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts")
   user(id: Int!): User
-    @graphQL(url: "http://upstream/graphql", name: "user", args: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "user", args: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {
@@ -33,7 +33,7 @@ type Post {
   userId: Int!
   title: String!
   body: String!
-  user: User @call(steps: [{query: "user", args: {id: "{{.value.userId}}"}}])
+  user: User @call(steps: [{ query: "user", args: { id: "{{.value.userId}}" } }])
 }
 ```
 

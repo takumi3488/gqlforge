@@ -13,5 +13,5 @@ type Foo {
 
 type Query {
   bars(filter: Bar): String
-    @graphQL(url: "http://localhost", args: [{key: "baz", value: "{{.args.baz}}"}], name: "bars")
+  @graphQL(url: "http://localhost", args: [{ key: "baz", value: "{{.args.baz}}" }], name: "bars")
 }

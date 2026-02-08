@@ -7,7 +7,7 @@ schema @server {
 
 type Query {
   node: Node @expr(body: null)
-  nodes: [Node]! @expr(body: [{User: {id: 1, username: "user"}}, null, {Page: {id: 2, slug: "page"}}])
+  nodes: [Node]! @expr(body: [{ User: { id: 1, username: "user" } }, null, { Page: { id: 2, slug: "page" } }])
 }
 
 union Node = User | Page

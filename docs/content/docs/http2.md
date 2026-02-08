@@ -12,8 +12,7 @@ GQLForge can use HTTP/2 for connections to upstream services, enabling multiplex
 Set `http2_only` to `true` in the `@upstream` directive:
 
 ```graphql
-schema
-  @upstream(http2_only: true) {
+schema @upstream(http2_only: true) {
   query: Query
 }
 ```
@@ -38,9 +37,7 @@ Keep `http2_only` disabled (the default) when:
 ## Example
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(http2_only: true, base_url: "https://api.example.com") {
+schema @server(port: 8000) @upstream(http2_only: true, base_url: "https://api.example.com") {
   query: Query
 }
 

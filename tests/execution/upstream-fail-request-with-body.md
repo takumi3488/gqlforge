@@ -22,7 +22,7 @@ type Query {
   response:
     status: 429
     body:
-      {code: "UM0018", message: "change limit exceeded", cause: "exceeded the maximum allowed number of name changes"}
+      { code: "UM0018", message: "change limit exceeded", cause: "exceeded the maximum allowed number of name changes" }
 ```
 
 ```yml @test

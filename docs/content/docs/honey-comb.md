@@ -13,18 +13,18 @@ Honeycomb natively supports OTLP ingestion. Configure the exporter with your API
 
 ```graphql
 schema
-  @server(port: 8000)
-  @telemetry(
-    export: {
-      otlp: {
-        url: "https://api.honeycomb.io:443"
-        headers: [
-          { key: "x-honeycomb-team", value: "{{.env.HONEYCOMB_API_KEY}}" }
-          { key: "x-honeycomb-dataset", value: "gqlforge-production" }
-        ]
-      }
+@server(port: 8000)
+@telemetry(
+  export: {
+    otlp: {
+      url: "https://api.honeycomb.io:443"
+      headers: [
+        { key: "x-honeycomb-team", value: "{{.env.HONEYCOMB_API_KEY}}" }
+        { key: "x-honeycomb-dataset", value: "gqlforge-production" }
+      ]
     }
-  ) {
+  }
+) {
   query: Query
 }
 ```

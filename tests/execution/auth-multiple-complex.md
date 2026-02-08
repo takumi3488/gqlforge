@@ -19,7 +19,7 @@ schema {
 }
 
 type Query {
-  animals: [Animal!]! @expr(body: [{Dog: {bark: "woof"}}, {Cat: {meow: "meow"}}, {Bird: {tweet: "tweet"}}])
+  animals: [Animal!]! @expr(body: [{ Dog: { bark: "woof" } }, { Cat: { meow: "meow" } }, { Bird: { tweet: "tweet" } }])
 }
 
 union Animal = Dog | Cat | Bird

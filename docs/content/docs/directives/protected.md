@@ -9,9 +9,9 @@ The `@protected` directive restricts access to a field so that only authenticate
 
 ## Fields
 
-| Field | Type | Default | Description |
-|-------|------|---------|-------------|
-| `id` | String | `null` | The authentication provider ID to validate against. References a JWKS or Htpasswd linked via `@link`. |
+| Field | Type   | Default | Description                                                                                           |
+| ----- | ------ | ------- | ----------------------------------------------------------------------------------------------------- |
+| `id`  | String | `null`  | The authentication provider ID to validate against. References a JWKS or Htpasswd linked via `@link`. |
 
 ## Prerequisites
 
@@ -20,19 +20,14 @@ You must configure at least one authentication provider using the `@link` direct
 ## Example
 
 ```graphql
-schema
-  @link(id: "auth", src: "https://example.com/.well-known/jwks.json", type_of: Jwks)
-  @server(port: 8000) {
+schema @link(id: "auth", src: "https://example.com/.well-known/jwks.json", type_of: Jwks) @server(port: 8000) {
   query: Query
 }
 
 type Query {
-  publicPosts: [Post]
-    @http(url: "https://jsonplaceholder.typicode.com/posts")
+  publicPosts: [Post] @http(url: "https://jsonplaceholder.typicode.com/posts")
 
-  myProfile: User
-    @http(url: "https://jsonplaceholder.typicode.com/users/1")
-    @protected(id: "auth")
+  myProfile: User @http(url: "https://jsonplaceholder.typicode.com/users/1") @protected(id: "auth")
 }
 
 type Post {

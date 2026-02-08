@@ -13,10 +13,10 @@ When you annotate a field with `@rest`, GQLForge registers an HTTP route that ma
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `path` | String | The URL path pattern (e.g. `/users/:id`). Path segments prefixed with `:` become arguments. |
-| `method` | Method | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`. Defaults to `GET` for queries. |
+| Field    | Type   | Description                                                                                 |
+| -------- | ------ | ------------------------------------------------------------------------------------------- |
+| `path`   | String | The URL path pattern (e.g. `/users/:id`). Path segments prefixed with `:` become arguments. |
+| `method` | Method | HTTP method: `GET`, `POST`, `PUT`, `PATCH`, `DELETE`. Defaults to `GET` for queries.        |
 
 ## Example
 
@@ -26,17 +26,15 @@ schema @server(port: 8000) {
 }
 
 type Query {
-  users: [User]
-    @http(url: "https://jsonplaceholder.typicode.com/users")
-    @rest(path: "/api/users", method: GET)
+  users: [User] @http(url: "https://jsonplaceholder.typicode.com/users") @rest(path: "/api/users", method: GET)
 
   user(id: Int!): User
-    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
-    @rest(path: "/api/users/:id", method: GET)
+  @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
+  @rest(path: "/api/users/:id", method: GET)
 
   userPosts(userId: Int!): [Post]
-    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.userId}}/posts")
-    @rest(path: "/api/users/:userId/posts", method: GET)
+  @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.userId}}/posts")
+  @rest(path: "/api/users/:userId/posts", method: GET)
 }
 
 type User {

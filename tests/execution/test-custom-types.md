@@ -18,7 +18,7 @@ input PostInput {
 
 type Mut {
   insertPost(input: PostInput): Post
-    @http(url: "http://jsonplaceholder.typicode.com/posts", body: "{{.args.input}}", method: "POST")
+  @http(url: "http://jsonplaceholder.typicode.com/posts", body: "{{.args.input}}", method: "POST")
 }
 
 type Post {
@@ -29,6 +29,6 @@ type Post {
 }
 
 type Que {
-  posts: [Post] @expr(body: [{id: 1}])
+  posts: [Post] @expr(body: [{ id: 1 }])
 }
 ```

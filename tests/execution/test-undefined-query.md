@@ -11,19 +11,20 @@ schema @server {
 
 type Post {
   id: Int
-  user: User! @http(url: "http://jsonplaceholder.typicode.com/users", query: [{key: "id", value: "{{.value.test.id}}"}])
+  user: User!
+  @http(url: "http://jsonplaceholder.typicode.com/users", query: [{ key: "id", value: "{{.value.test.id}}" }])
   nested: User!
-    @http(url: "http://jsonplaceholder.typicode.com/users", query: [{key: "id", value: "{{.value.user.nested.test}}"}])
+  @http(url: "http://jsonplaceholder.typicode.com/users", query: [{ key: "id", value: "{{.value.user.nested.test}}" }])
   innerNested: User!
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.value.user.nested.inner.test.id}}"}]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.value.user.nested.inner.test.id}}" }]
+  )
   innerIdNested: User!
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.value.user.nested.inner.id.test}}"}]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.value.user.nested.inner.id.test}}" }]
+  )
 }
 
 type Query {

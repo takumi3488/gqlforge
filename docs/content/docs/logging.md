@@ -17,13 +17,13 @@ RUST_LOG=info gqlforge start config.graphql
 
 Available levels from most to least verbose:
 
-| Level | Description |
-|-------|-------------|
+| Level   | Description                                              |
+| ------- | -------------------------------------------------------- |
 | `trace` | Very detailed internal events, useful for deep debugging |
-| `debug` | Diagnostic information for development |
-| `info` | General operational messages (default) |
-| `warn` | Potential issues that do not prevent operation |
-| `error` | Failures that affect request handling |
+| `debug` | Diagnostic information for development                   |
+| `info`  | General operational messages (default)                   |
+| `warn`  | Potential issues that do not prevent operation           |
+| `error` | Failures that affect request handling                    |
 
 ## Filtering by Module
 
