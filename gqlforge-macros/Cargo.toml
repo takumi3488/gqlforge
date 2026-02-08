@@ -2,6 +2,8 @@
 name = "gqlforge-macros"
 version = "0.1.0"
 edition = "2021"
+description = "Procedural macros for gqlforge"
+license = "Apache-2.0"
 
 [lib]
 proc-macro = true

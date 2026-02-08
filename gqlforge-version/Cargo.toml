@@ -2,5 +2,7 @@
 name = "gqlforge-version"
 version = "0.1.0"
 edition = "2021"
+description = "Version information for gqlforge"
+license = "Apache-2.0"
 
 [dependencies]

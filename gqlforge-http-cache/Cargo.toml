@@ -2,7 +2,8 @@
 name = "gqlforge-http-cache"
 version = "0.1.0"
 edition = "2021"
-publish = false
+description = "HTTP caching layer for gqlforge"
+license = "Apache-2.0"
 
 [dependencies]
 http-cache-reqwest = { version = "1.0.0-alpha.4", default-features = false, features = ["manager-moka", "url-standard"] }
