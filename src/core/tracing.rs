@@ -79,14 +79,14 @@ pub fn default_tracing_for_name(name: &'static str) -> impl Subscriber {
     registry().with(default_tracing().with_filter(filter_target(name)))
 }
 
-pub fn get_log_level() -> Option<Level> {
+pub fn get_log_level() -> Option<LevelFilter> {
     const LONG_ENV_FILTER_VAR_NAME: &str = "GQLFORGE_LOG_LEVEL";
     const SHORT_ENV_FILTER_VAR_NAME: &str = "GF_LOG_LEVEL";
 
     env::var(LONG_ENV_FILTER_VAR_NAME)
         .or(env::var(SHORT_ENV_FILTER_VAR_NAME))
         .ok()
-        .and_then(|v| Level::from_str(&v).ok())
+        .and_then(|v| LevelFilter::from_str(&v).ok())
 }
 
 pub fn default_tracing<S>() -> impl Layer<S>
@@ -98,9 +98,7 @@ where
         .without_time()
         .with_target(false)
         .event_format(CliFmt)
-        .with_filter(LevelFilter::from_level(
-            get_log_level().unwrap_or(Level::INFO),
-        ))
+        .with_filter(get_log_level().unwrap_or(LevelFilter::INFO))
 }
 
 pub fn gqlforge_filter_target() -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {

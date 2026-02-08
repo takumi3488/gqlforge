@@ -189,9 +189,7 @@ pub async fn init_opentelemetry(config: Telemetry, runtime: &TargetRuntime) -> a
                 })),
             )
             .with(gqlforge_filter_target())
-            .with(LevelFilter::from_level(
-                get_log_level().unwrap_or(tracing::Level::INFO),
-            ));
+            .with(get_log_level().unwrap_or(LevelFilter::INFO));
 
         init_metrics(runtime).await?;
 

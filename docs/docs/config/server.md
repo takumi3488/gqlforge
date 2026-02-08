@@ -345,6 +345,10 @@ server:
 Setting a complexity limit helps protect your server from resource-intensive queries that could degrade performance or be used in denial-of-service attacks.
 :::
 
+:::tip
+This value can be overridden at runtime by setting the `GQLFORGE_LIMIT_COMPLEXITY` environment variable (e.g., `GQLFORGE_LIMIT_COMPLEXITY=2000`).
+:::
+
 ## limitDepth
 
 Sets the maximum allowed query nesting depth. Queries exceeding this limit are rejected during validation. If not specified, the default value is `15`. Set to `0` to disable.
@@ -358,6 +362,10 @@ server:
 Limiting query depth prevents deeply nested queries that could cause excessive resource consumption.
 :::
 
+:::tip
+This value can be overridden at runtime by setting the `GQLFORGE_LIMIT_DEPTH` environment variable (e.g., `GQLFORGE_LIMIT_DEPTH=10`).
+:::
+
 ## limitDirectives
 
 Sets the maximum number of directives allowed in a query. Queries exceeding this limit are rejected during validation. If not specified, the default value is `50`. Set to `0` to disable.
@@ -366,3 +374,7 @@ Sets the maximum number of directives allowed in a query. Queries exceeding this
 server:
   limitDirectives: 100
 ```
+
+:::tip
+This value can be overridden at runtime by setting the `GQLFORGE_LIMIT_DIRECTIVES` environment variable (e.g., `GQLFORGE_LIMIT_DIRECTIVES=100`).
+:::
