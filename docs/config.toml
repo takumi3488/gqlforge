@@ -86,7 +86,6 @@ items = [
 [[extra.sidebar]]
 label = "Integrations"
 items = [
-  { path = "apollo-studio", title = "Apollo Studio" },
   { path = "data-dog", title = "Datadog" },
   { path = "new-relic", title = "New Relic" },
   { path = "honey-comb", title = "Honeycomb" },
