@@ -1,7 +1,6 @@
 btreemap
 datatest
 entr
-genai
 Hasher
 Htpasswd
 httpmock

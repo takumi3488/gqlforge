@@ -5,18 +5,17 @@ use anyhow::anyhow;
 use http::header::{HeaderMap, HeaderName, HeaderValue};
 use inquire::Confirm;
 use pathdiff::diff_paths;
-use tailcall_valid::{ValidateInto, Validator};
+use gqlforge_valid::{ValidateInto, Validator};
 
-use super::config::{Config, LLMConfig, Resolved, Source};
+use super::config::{Config, Resolved, Source};
 use super::source::ConfigSource;
-use crate::cli::llm::InferTypeName;
-use crate::core::config::transformer::{Preset, RenameTypes};
+use crate::core::config::transformer::Preset;
 use crate::core::config::{self, ConfigModule, ConfigReaderContext};
 use crate::core::generator::{Generator as ConfigGenerator, Input};
 use crate::core::proto_reader::ProtoReader;
 use crate::core::resource_reader::{Resource, ResourceReader};
 use crate::core::runtime::TargetRuntime;
-use crate::core::{Mustache, Transform};
+use crate::core::Mustache;
 
 /// CLI that reads the the config file and generates the required gqlforge
 /// configuration.
@@ -164,11 +163,9 @@ impl Generator {
         let query_type = config.schema.query.clone();
         let mutation_type_name = config.schema.mutation.clone();
 
-        let llm = config.llm.clone();
         let preset = config.preset.clone().unwrap_or_default();
         let preset: Preset = preset.validate_into().to_result()?;
         let input_samples = self.resolve_io(config).await?;
-        let infer_type_names = preset.infer_type_names;
         let mut config_gen = ConfigGenerator::default()
             .inputs(input_samples)
             .transformers(vec![Box::new(preset)]);
@@ -177,19 +174,7 @@ impl Generator {
             config_gen = config_gen.query(query_name);
         }
 
-        let mut config = config_gen.mutation(mutation_type_name).generate(true)?;
-
-        if infer_type_names {
-            if let Some(LLMConfig { model: Some(model), secret }) = llm {
-                let mut llm_gen = InferTypeName::new(model, secret.map(|s| s.to_string()));
-                let suggested_names = llm_gen.generate(config.config()).await?;
-                let cfg = RenameTypes::new(suggested_names.iter())
-                    .transform(config.config().to_owned())
-                    .to_result()?;
-
-                config = ConfigModule::from(cfg);
-            }
-        }
+        let config = config_gen.mutation(mutation_type_name).generate(true)?;
 
         self.write(&config, &path).await?;
         Ok(config)

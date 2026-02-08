@@ -7,7 +7,7 @@ use derive_setters::Setters;
 use path_clean::PathClean;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use tailcall_valid::{Valid, ValidateFrom, Validator};
+use gqlforge_valid::{Valid, ValidateFrom, Validator};
 use url::Url;
 
 use crate::core::config::transformer::Preset;
@@ -23,18 +23,6 @@ pub struct Config<Status = UnResolved> {
     #[serde(skip_serializing_if = "Option::is_none")]
     pub preset: Option<PresetConfig>,
     pub schema: Schema,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub llm: Option<LLMConfig>,
-}
-
-#[derive(Deserialize, Serialize, Debug, Default, PartialEq, Clone)]
-#[serde(rename_all = "camelCase")]
-#[serde(deny_unknown_fields)]
-pub struct LLMConfig {
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub model: Option<String>,
-    #[serde(skip_serializing_if = "Option::is_none")]
-    pub secret: Option<String>,
 }
 
 #[derive(Clone, Deserialize, Serialize, Debug, Default)]
@@ -259,17 +247,12 @@ impl Config {
             .collect::<anyhow::Result<Vec<Input<Resolved>>>>()?;
 
         let output = self.output.resolve(parent_dir)?;
-        let llm = self.llm.map(|llm| {
-            let secret = llm.secret;
-            LLMConfig { model: llm.model, secret }
-        });
 
         Ok(Config {
             inputs,
             output,
             schema: self.schema,
             preset: self.preset,
-            llm,
         })
     }
 }
@@ -279,7 +262,7 @@ mod tests {
     use std::collections::HashMap;
 
     use pretty_assertions::assert_eq;
-    use tailcall_valid::{ValidateInto, ValidationError, Validator};
+    use gqlforge_valid::{ValidateInto, ValidationError, Validator};
 
     use super::*;
 
@@ -393,7 +376,7 @@ mod tests {
     fn test_raise_error_unknown_field_at_root_level() {
         let json = r#"{"input": "value"}"#;
         let expected_error =
-            "unknown field `input`, expected one of `inputs`, `output`, `preset`, `schema`, `llm` at line 1 column 8";
+            "unknown field `input`, expected one of `inputs`, `output`, `preset`, `schema` at line 1 column 8";
         assert_deserialization_error(json, expected_error);
     }
 
@@ -463,22 +446,4 @@ mod tests {
         assert_deserialization_error(json, expected_error);
     }
 
-    #[test]
-    fn test_llm_config() {
-        let token = "eyJhbGciOiJIUzI1NiIsInR5";
-
-        let config = Config::default().llm(Some(LLMConfig {
-            model: Some("gpt-3.5-turbo".to_string()),
-            secret: Some(token.to_string()),
-        }));
-        let resolved_config = config.into_resolved("").unwrap();
-
-        let actual = resolved_config.llm;
-        let expected = Some(LLMConfig {
-            model: Some("gpt-3.5-turbo".to_string()),
-            secret: Some(token.to_string()),
-        });
-
-        assert_eq!(actual, expected);
-    }
 }
