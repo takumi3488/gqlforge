@@ -19,29 +19,10 @@ Please support us by giving the repository a star
 
 ## Installation
 
-### NPM
+### Cargo
 
 ```bash
-npm i -g @gqlforge/gqlforge
-```
-
-### Yarn
-
-```bash
-yarn global add @gqlforge/gqlforge
-```
-
-### Home Brew
-
-```bash
-brew tap takumi3488/gqlforge
-brew install gqlforge
-```
-
-### Curl
-
-```bash
-curl -sSL https://raw.githubusercontent.com/takumi3488/gqlforge/master/install.sh | bash
+cargo install --git https://github.com/takumi3488/gqlforge
 ```
 
 ### Docker
