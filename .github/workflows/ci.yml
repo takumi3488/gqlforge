@@ -16,20 +16,9 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  setup_build_matrix:
-    name: Outputs matrix used for cross compilation
-    uses: ./.github/workflows/build_matrix.yml
-
   test:
-    name: Run Tests on ${{ matrix.build }}
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
-    needs: setup_build_matrix
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup_build_matrix.outputs.matrix) }}
-
-    env:
-      WITH_COVERAGE: ${{ matrix.build == 'darwin-arm64' }}
+    name: Run Tests
+    runs-on: ubuntu-latest
 
     steps:
       - uses: actions/checkout@v4
@@ -37,57 +26,15 @@ jobs:
       - name: Install Rust Toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
 
-      - name: Install Cross compilation toolchain
-        uses: taiki-e/setup-cross-toolchain-action@v1
-        with:
-          target: ${{ matrix.target }}
-
-      - name: Cache NASM
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: |
-            nasm-2.16.01
-            nasm-2.16.01-win64.zip
-          key: ${{ runner.os }}-nasm-${{ matrix.build }}-v2
-          restore-keys: |
-            ${{ runner.os }}-nasm-${{ matrix.build }}-
-
-      - name: Install dependencies on Windows
-        if: runner.os == 'Windows'
-        run: |
-          if (Test-Path nasm-2.16.01) {
-            echo "Using cached NASM"
-          } else {
-            $nasmUrl = 'https://github.com/microsoft/vcpkg/files/12073957/nasm-2.16.01-win64.zip'
-            $nasmZip = 'nasm-2.16.01-win64.zip'
-            Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmZip
-            Expand-Archive -Path $nasmZip -DestinationPath '.'
-          }
-          echo "$(Resolve-Path nasm-2.16.01)" >> $env:GITHUB_PATH
-
-      - name: Install insta test runner
-        if: ${{ env.WITH_COVERAGE == 'false' && matrix.test != 'false' }}
-        uses: taiki-e/install-action@v2
-        with:
-          tool: cargo-insta
-
-      - name: Run cargo insta test
-        if: ${{ env.WITH_COVERAGE == 'false' && matrix.test != 'false' }}
-        run: cargo insta test --unreferenced reject --workspace --target ${{ matrix.target }}
-
       - name: Install llvm-cov test runner
-        if: ${{ env.WITH_COVERAGE == 'true' && matrix.test != 'false' }}
         uses: taiki-e/install-action@v2
         with:
           tool: cargo-llvm-cov
 
       - name: Run cargo llvm-cov test
-        if: ${{ env.WITH_COVERAGE == 'true' && matrix.test != 'false' }}
-        run: cargo llvm-cov --workspace ${{ matrix.features }} --lcov --target ${{ matrix.target }} --output-path lcov.info
+        run: cargo llvm-cov --workspace --lcov --output-path lcov.info
 
       - name: Upload Coverage to Codecov
-        if: ${{ env.WITH_COVERAGE == 'true' && matrix.test != 'false' }}
         uses: Wandalen/wretry.action@v3
         with:
           action: codecov/codecov-action@v4

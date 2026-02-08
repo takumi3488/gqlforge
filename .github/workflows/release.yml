@@ -10,72 +10,21 @@ permissions:
   packages: write
 
 jobs:
-  setup_build_matrix:
-    name: Outputs matrix used for cross compilation
-    uses: ./.github/workflows/build_matrix.yml
-
-  release:
-    name: Release ${{ matrix.build }}
-    needs: [setup_build_matrix]
-    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
-    strategy:
-      fail-fast: false
-      matrix: ${{ fromJson(needs.setup_build_matrix.outputs.matrix) }}
-    env:
-      APP_VERSION: ${{ github.ref_name }}
-
+  create-release:
+    name: Create GitHub Release
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v4
 
-      - name: Install Rust Toolchain
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          target: ${{ matrix.target }}
-
-      - name: Cache NASM
-        if: runner.os == 'Windows'
-        uses: actions/cache@v4
-        with:
-          path: |
-            nasm-2.16.01
-            nasm-2.16.01-win64.zip
-          key: ${{ runner.os }}-nasm-${{ matrix.build }}-v2
-          restore-keys: |
-            ${{ runner.os }}-nasm-${{ matrix.build }}-
-
-      - name: Install dependencies on Windows
-        if: runner.os == 'Windows'
-        run: |
-          if (Test-Path nasm-2.16.01) {
-            echo "Using cached NASM"
-          } else {
-            $nasmUrl = 'https://github.com/microsoft/vcpkg/files/12073957/nasm-2.16.01-win64.zip'
-            $nasmZip = 'nasm-2.16.01-win64.zip'
-            Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmZip
-            Expand-Archive -Path $nasmZip -DestinationPath '.'
-          }
-          echo "$(Resolve-Path nasm-2.16.01)" >> $env:GITHUB_PATH
-
-      - name: Build
-        uses: ClementTsang/cargo-action@v0.0.6
-        with:
-          use-cross: ${{ matrix.cross }}
-          command: build
-          args: ${{ matrix.features }} --release --target ${{ matrix.target }}
-
-      - name: Rename Binary with Target Name
-        run: |
-          cp target/${{ matrix.target }}/release/gqlforge${{ matrix.ext }} target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
-
-      - name: Upload Binary to Release
+      - name: Create Release
         uses: softprops/action-gh-release@v2
         with:
-          files: target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
+          generate_release_notes: true
 
   build-and-push-image:
     name: Build and Push Docker Image
-    needs: [release]
+    needs: [create-release]
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
