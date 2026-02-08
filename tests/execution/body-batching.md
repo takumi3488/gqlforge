@@ -31,19 +31,19 @@ type User {
   id: Int!
   name: String!
   posts: [Post]
-    @http(
-      url: "https://jsonplaceholder.typicode.com/posts"
-      method: POST
-      body: {userId: "{{.value.id}}", title: "foo", body: "bar"}
-      batchKey: ["userId"]
-    )
+  @http(
+    url: "https://jsonplaceholder.typicode.com/posts"
+    method: POST
+    body: { userId: "{{.value.id}}", title: "foo", body: "bar" }
+    batchKey: ["userId"]
+  )
   comments: [Comment]
-    @http(
-      url: "https://jsonplaceholder.typicode.com/comments"
-      method: POST
-      body: {title: "foo", body: "bar", meta: {information: {userId: "{{.value.id}}"}}}
-      batchKey: ["userId"]
-    )
+  @http(
+    url: "https://jsonplaceholder.typicode.com/comments"
+    method: POST
+    body: { title: "foo", body: "bar", meta: { information: { userId: "{{.value.id}}" } } }
+    batchKey: ["userId"]
+  )
 }
 
 type Comment {
@@ -70,9 +70,9 @@ type Comment {
     url: https://jsonplaceholder.typicode.com/posts
     body:
       [
-        {"userId": "1", "title": "foo", "body": "bar"},
-        {"userId": "2", "title": "foo", "body": "bar"},
-        {"userId": "3", "title": "foo", "body": "bar"},
+        { "userId": "1", "title": "foo", "body": "bar" },
+        { "userId": "2", "title": "foo", "body": "bar" },
+        { "userId": "3", "title": "foo", "body": "bar" },
       ]
   response:
     status: 200
@@ -95,9 +95,9 @@ type Comment {
     url: https://jsonplaceholder.typicode.com/comments
     body:
       [
-        {"title": "foo", "body": "bar", "meta": {"information": {"userId": "1"}}},
-        {"title": "foo", "body": "bar", "meta": {"information": {"userId": "2"}}},
-        {"title": "foo", "body": "bar", "meta": {"information": {"userId": "3"}}},
+        { "title": "foo", "body": "bar", "meta": { "information": { "userId": "1" } } },
+        { "title": "foo", "body": "bar", "meta": { "information": { "userId": "2" } } },
+        { "title": "foo", "body": "bar", "meta": { "information": { "userId": "3" } } },
       ]
   response:
     status: 200

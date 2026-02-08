@@ -13,9 +13,9 @@ Add the `@telemetry` directive to your schema:
 
 ```graphql
 schema
-  @telemetry(
-    export: { otlp: { url: "http://localhost:4317" } }
-  ) {
+@telemetry(
+  export: { otlp: { url: "http://localhost:4317" } }
+) {
   query: Query
 }
 ```
@@ -81,14 +81,14 @@ GQLForge emits telemetry data for:
 
 ```graphql
 schema
-  @server(port: 8000)
-  @telemetry(
-    export: {
-      otlp: { url: "http://localhost:4317" }
-      prometheus: { path: "/metrics" }
-    }
-    request_headers: ["x-request-id"]
-  ) {
+@server(port: 8000)
+@telemetry(
+  export: {
+    otlp: { url: "http://localhost:4317" }
+    prometheus: { path: "/metrics" }
+  }
+  request_headers: ["x-request-id"]
+) {
   query: Query
 }
 ```

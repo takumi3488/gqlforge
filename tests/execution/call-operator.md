@@ -58,21 +58,21 @@ type Query {
   posts: [Post] @http(url: "http://jsonplaceholder.typicode.com/posts")
   user(id: Int!): User @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
   userPosts(id: ID!): [Post]
-    @http(url: "http://jsonplaceholder.typicode.com/posts", query: [{key: "userId", value: "{{.args.id}}"}])
+  @http(url: "http://jsonplaceholder.typicode.com/posts", query: [{ key: "userId", value: "{{.args.id}}" }])
   user1: User @http(url: "http://jsonplaceholder.typicode.com/users/1")
   userFromValue: User @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
   userHttpHeaders(id: ID!): User
-    @http(url: "http://jsonplaceholder.typicode.com/users", headers: [{key: "id", value: "{{.args.id}}"}])
+  @http(url: "http://jsonplaceholder.typicode.com/users", headers: [{ key: "id", value: "{{.args.id}}" }])
   userHttpQuery(id: ID!): User
-    @http(url: "http://jsonplaceholder.typicode.com/users", query: [{key: "id", value: "{{.args.id}}"}])
+  @http(url: "http://jsonplaceholder.typicode.com/users", query: [{ key: "id", value: "{{.args.id}}" }])
   userGraphQL(id: Int): User
-    @graphQL(url: "http://upstream/graphql", name: "user", args: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "user", args: [{ key: "id", value: "{{.args.id}}" }])
   userGraphQLHeaders(id: Int!): User
-    @graphQL(url: "http://upstream/graphql", name: "user", headers: [{key: "id", value: "{{.args.id}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "user", headers: [{ key: "id", value: "{{.args.id}}" }])
   userWithPosts: UserWithPosts @http(url: "http://jsonplaceholder.typicode.com/users/1")
   news: NewsData! @grpc(method: "news.NewsService.GetAllNews", url: "http://localhost:50051")
   newsWithPortArg(port: Int!): NewsData!
-    @grpc(method: "news.NewsService.GetAllNews", url: "http://localhost:{{.args.port}}")
+  @grpc(method: "news.NewsService.GetAllNews", url: "http://localhost:{{.args.port}}")
 }
 
 type NewsData {
@@ -89,7 +89,7 @@ type News {
 type UserWithPosts {
   id: Int!
   name: String!
-  posts: [Post] @call(steps: [{query: "userPosts", args: {id: "{{.value.id}}"}}])
+  posts: [Post] @call(steps: [{ query: "userPosts", args: { id: "{{.value.id}}" } }])
 }
 
 type User {
@@ -106,15 +106,15 @@ type Post {
   userId: Int!
   title: String
   body: String
-  user1: User @call(steps: [{query: "user1"}])
-  userFromValue: User @call(steps: [{query: "userFromValue"}])
-  user: User @call(steps: [{query: "user", args: {id: "{{.value.userId}}"}}])
-  userHttpHeaders: User @call(steps: [{query: "userHttpHeaders", args: {id: "{{.value.userId}}"}}])
-  userHttpQuery: User @call(steps: [{query: "userHttpQuery", args: {id: "{{.value.userId}}"}}])
-  userGraphQL: User @call(steps: [{query: "userGraphQL", args: {id: "{{.value.userId}}"}}])
-  userGraphQLHeaders: User @call(steps: [{query: "userGraphQLHeaders", args: {id: "{{.value.userId}}"}}])
-  news: NewsData! @call(steps: [{query: "news"}])
-  newsWithPortArg: NewsData! @call(steps: [{query: "news", args: {port: 50051}}])
+  user1: User @call(steps: [{ query: "user1" }])
+  userFromValue: User @call(steps: [{ query: "userFromValue" }])
+  user: User @call(steps: [{ query: "user", args: { id: "{{.value.userId}}" } }])
+  userHttpHeaders: User @call(steps: [{ query: "userHttpHeaders", args: { id: "{{.value.userId}}" } }])
+  userHttpQuery: User @call(steps: [{ query: "userHttpQuery", args: { id: "{{.value.userId}}" } }])
+  userGraphQL: User @call(steps: [{ query: "userGraphQL", args: { id: "{{.value.userId}}" } }])
+  userGraphQLHeaders: User @call(steps: [{ query: "userGraphQLHeaders", args: { id: "{{.value.userId}}" } }])
+  news: NewsData! @call(steps: [{ query: "news" }])
+  newsWithPortArg: NewsData! @call(steps: [{ query: "news", args: { port: 50051 } }])
 }
 ```
 

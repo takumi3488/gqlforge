@@ -14,8 +14,7 @@ Use the `@link` directive to register an authentication provider.
 ### HTTP Basic (Htpasswd)
 
 ```graphql
-schema
-  @link(type: Htpasswd, src: "./htpasswd") {
+schema @link(type: Htpasswd, src: "./htpasswd") {
   query: Query
 }
 ```
@@ -30,8 +29,7 @@ viewer:$apr1$abc$anotherpassword
 ### JSON Web Keys (JWKS)
 
 ```graphql
-schema
-  @link(type: Jwks, src: "https://auth.example.com/.well-known/jwks.json") {
+schema @link(type: Jwks, src: "https://auth.example.com/.well-known/jwks.json") {
   query: Query
 }
 ```
@@ -77,8 +75,8 @@ You can link multiple providers in the same schema. GQLForge attempts validation
 
 ```graphql
 schema
-  @link(type: Jwks, src: "https://auth.example.com/.well-known/jwks.json")
-  @link(type: Htpasswd, src: "./htpasswd") {
+@link(type: Jwks, src: "https://auth.example.com/.well-known/jwks.json")
+@link(type: Htpasswd, src: "./htpasswd") {
   query: Query
 }
 ```

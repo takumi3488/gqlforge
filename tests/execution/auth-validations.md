@@ -18,7 +18,7 @@ schema {
 
 type Query {
   default: String @expr(body: "data") @protected(id: ["a", "b", "c"])
-  foo: Foo @expr(body: {bar: "baz"})
+  foo: Foo @expr(body: { bar: "baz" })
 }
 
 type Foo @protected(id: ["x"]) {

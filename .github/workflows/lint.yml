@@ -25,16 +25,14 @@ jobs:
       LINT_MODE: "${{ contains(github.event.pull_request.labels.*.name, 'ci: lint') && 'fix' || 'check' }}"
     steps:
       - uses: actions/checkout@v4
-      - name: Install Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: "20.20.0"
-      - name: Install Prettier
-        run: npm install --global prettier && npm install prettier-plugin-sh
+      - name: Install dprint
+        run: curl -fsSL https://dprint.dev/install.sh | sh
       - name: Install Stable Toolchain
         uses: actions-rust-lang/setup-rust-toolchain@v1
       - name: Run Lint Script
-        run: ./lint.sh --mode=$LINT_MODE
+        run: |
+          export PATH="$HOME/.dprint/bin:$PATH"
+          ./lint.sh --mode=$LINT_MODE
       - name: Commit and push if changed
         if: env.LINT_MODE == 'fix'
         uses: autofix-ci/action@ff86a557419858bb967097bfc916833f5647fa8c

@@ -22,7 +22,7 @@ schema {
 
 type Query {
   nearby(location: Location): Point
-    @graphQL(url: "http://upstream/graphql", name: "nearby", args: [{key: "location", value: "{{.args.location}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "nearby", args: [{ key: "location", value: "{{.args.location}}" }])
 }
 
 type Location {

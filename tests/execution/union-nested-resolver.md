@@ -12,16 +12,16 @@ schema {
 
 type Query {
   data: [Foo!]!
-    @discriminate(field: "object_type")
-    @expr(
-      body: [
-        {id: 1, object_type: "Fizz"}
-        {uuid: "hazz-1", object_type: "Hazz"}
-        {uuid: "buzz-1", object_type: "Buzz", spam: {identifier: 1}}
-        {uuid: "buzz-2", object_type: "Buzz", spam: {identifier: 2}}
-        {uuid: "buzz-3", object_type: "Buzz", spam: {identifier: 3}}
-      ]
-    )
+  @discriminate(field: "object_type")
+  @expr(
+    body: [
+      { id: 1, object_type: "Fizz" }
+      { uuid: "hazz-1", object_type: "Hazz" }
+      { uuid: "buzz-1", object_type: "Buzz", spam: { identifier: 1 } }
+      { uuid: "buzz-2", object_type: "Buzz", spam: { identifier: 2 } }
+      { uuid: "buzz-3", object_type: "Buzz", spam: { identifier: 3 } }
+    ]
+  )
 }
 
 union Foo = Fizz | Buzz | Hazz
@@ -41,7 +41,7 @@ type Buzz {
 
 type Spam {
   identifier: Int!
-  value: String! @http(url: "https://example.com/spam", query: [{key: "identifier", value: "{{.value.identifier}}"}])
+  value: String! @http(url: "https://example.com/spam", query: [{ key: "identifier", value: "{{.value.identifier}}" }])
 }
 ```
 

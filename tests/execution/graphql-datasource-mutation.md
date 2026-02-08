@@ -17,7 +17,7 @@ type Query {
 
 type Mutation {
   createUser(user: UserInput!): User
-    @graphQL(url: "http://upstream/graphql", name: "createUser", args: [{key: "user", value: "{{.args.user}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "createUser", args: [{ key: "user", value: "{{.args.user}}" }])
 }
 
 type UserInput {
@@ -31,7 +31,7 @@ type UserInput {
 - request:
     method: POST
     url: http://upstream/graphql
-    textBody: {"query": 'mutation { createUser(user: {name: "Test Name", email: "test@email"}) { name } }'}
+    textBody: { "query": 'mutation { createUser(user: {name: "Test Name", email: "test@email"}) { name } }' }
   response:
     status: 200
     body:

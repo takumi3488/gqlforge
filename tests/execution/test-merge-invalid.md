@@ -10,7 +10,7 @@ schema @server {
 }
 
 type Query {
-  hi: Foo @expr(body: {a: "world"})
+  hi: Foo @expr(body: { a: "world" })
 }
 
 type Foo {
@@ -24,7 +24,7 @@ schema @server {
 }
 
 type Query {
-  hi: Foo @expr(body: {a: "world"})
+  hi: Foo @expr(body: { a: "world" })
 }
 
 type Foo {

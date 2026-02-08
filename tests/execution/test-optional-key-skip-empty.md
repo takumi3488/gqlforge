@@ -18,14 +18,14 @@ type Foo {
   id: Int!
   tag: String
   bar: Bar
-    @http(
-      url: "http://example.com/bar"
-      query: [
-        # Ignores this query param
-        {key: "tagEmpty", value: "{{.value.tag}}", skipEmpty: true}
-        {key: "tag", value: "{{.value.tag}}"}
-      ]
-    )
+  @http(
+    url: "http://example.com/bar"
+    query: [
+      # Ignores this query param
+      { key: "tagEmpty", value: "{{.value.tag}}", skipEmpty: true }
+      { key: "tag", value: "{{.value.tag}}" }
+    ]
+  )
 }
 
 type Bar {

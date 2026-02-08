@@ -7,7 +7,7 @@ error: true
 ```yaml @config
 server:
   headers:
-    custom: [{key: "🤣", value: "a"}]
+    custom: [{ key: "🤣", value: "a" }]
 ```
 
 ```graphql @schema
@@ -21,6 +21,6 @@ type User {
 }
 
 type Query {
-  user: User @expr(body: {name: "John"})
+  user: User @expr(body: { name: "John" })
 }
 ```

@@ -59,6 +59,6 @@ type NewsData {
 
 type Query {
   newsById(news: NewsInput!): News!
-    @grpc(url: "http://localhost:50051", body: "{{.args.news}}", method: "news.NewsService.GetNews")
+  @grpc(url: "http://localhost:50051", body: "{{.args.news}}", method: "news.NewsService.GetNews")
 }
 ```

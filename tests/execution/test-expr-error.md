@@ -15,6 +15,6 @@ type User {
 }
 
 type Query {
-  user: User @expr(body: {name: "John"})
+  user: User @expr(body: { name: "John" })
 }
 ```

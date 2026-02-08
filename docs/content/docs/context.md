@@ -45,10 +45,10 @@ Accesses HTTP headers from the incoming GraphQL request. Header names are case-i
 ```graphql
 type Query {
   me: User
-    @http(
-      path: "/users/me"
-      headers: [{ key: "Authorization", value: "{{.headers.authorization}}" }]
-    )
+  @http(
+    path: "/users/me"
+    headers: [{ key: "Authorization", value: "{{.headers.authorization}}" }]
+  )
 }
 ```
 
@@ -61,10 +61,10 @@ Reads environment variables defined in the server's runtime environment.
 ```graphql
 type Query {
   config: Config
-    @http(
-      path: "/config"
-      headers: [{ key: "X-Api-Key", value: "{{.vars.API_KEY}}" }]
-    )
+  @http(
+    path: "/config"
+    headers: [{ key: "X-Api-Key", value: "{{.vars.API_KEY}}" }]
+  )
 }
 ```
 
@@ -85,8 +85,7 @@ You can traverse nested structures using dot notation:
 
 ```graphql
 type Query {
-  search(filter: SearchInput!): [Result]
-    @http(path: "/search?q={{.args.filter.query}}&page={{.args.filter.page}}")
+  search(filter: SearchInput!): [Result] @http(path: "/search?q={{.args.filter.query}}&page={{.args.filter.page}}")
 }
 ```
 

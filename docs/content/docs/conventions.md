@@ -10,9 +10,7 @@ description = "Conventions for writing GQLForge configuration files."
 GQLForge uses **GraphQL SDL (Schema Definition Language)** as its primary configuration format. Configuration files typically use the `.graphql` extension.
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
+schema @server(port: 8000) @upstream(baseURL: "https://jsonplaceholder.typicode.com") {
   query: Query
 }
 ```
@@ -26,9 +24,7 @@ A GQLForge configuration file follows a consistent structure:
 The file begins with a `schema` block that declares the root operation types and applies global directives:
 
 ```graphql
-schema
-  @server(port: 8000, hostname: "0.0.0.0")
-  @upstream(baseURL: "https://api.example.com") {
+schema @server(port: 8000, hostname: "0.0.0.0") @upstream(baseURL: "https://api.example.com") {
   query: Query
   mutation: Mutation
 }
@@ -97,10 +93,7 @@ gqlforge start ./schema.graphql ./users.graphql ./posts.graphql
 Alternatively, use the `@link` directive to import files from a primary configuration:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @link(type: Config, src: "./users.graphql")
-  @link(type: Config, src: "./posts.graphql") {
+schema @server(port: 8000) @link(type: Config, src: "./users.graphql") @link(type: Config, src: "./posts.graphql") {
   query: Query
 }
 ```

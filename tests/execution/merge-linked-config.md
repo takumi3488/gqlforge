@@ -25,7 +25,7 @@ type Post {
   id: Int!
   userId: Int!
   user: User
-    @graphQL(url: "http://jsonplaceholder.typicode.com", args: [{key: "id", value: "{{.value.userId}}"}], name: "user")
+  @graphQL(url: "http://jsonplaceholder.typicode.com", args: [{ key: "id", value: "{{.value.userId}}" }], name: "user")
 }
 
 type Query {

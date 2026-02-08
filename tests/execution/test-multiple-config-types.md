@@ -13,7 +13,7 @@ schema {
 }
 
 type Query {
-  bar(input: Input): Output @expr(body: {id: "{{.args.input.id}}", name: "{{.args.input.name}}"})
+  bar(input: Input): Output @expr(body: { id: "{{.args.input.id}}", name: "{{.args.input.name}}" })
 }
 ```
 

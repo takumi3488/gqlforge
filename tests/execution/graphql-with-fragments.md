@@ -28,7 +28,7 @@ interface NodeC {
 - request:
     method: POST
     url: http://upstream/graphql
-    textBody: {"query": "query { nodeC { name __typename ...on NodeA { nodeA_id } ...on NodeB { nodeB_id } } }"}
+    textBody: { "query": "query { nodeC { name __typename ...on NodeA { nodeA_id } ...on NodeB { nodeB_id } } }" }
   expectedHits: 1
   response:
     status: 200

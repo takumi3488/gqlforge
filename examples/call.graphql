@@ -11,12 +11,12 @@ type Post {
 
 type Query {
   user(id: Int!): User @http(url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}")
-  firstUser: User @call(steps: [{query: "user", args: {id: 1}}])
+  firstUser: User @call(steps: [{ query: "user", args: { id: 1 } }])
   postFromUser(userId: Int!): [Post] @http(url: "http://jsonplaceholder.typicode.com/posts?userId={{.args.userId}}")
 }
 
 type User {
   id: Int
   name: String
-  posts: [Post] @call(steps: [{query: "postFromUser", args: {userId: "{{.value.id}}"}}])
+  posts: [Post] @call(steps: [{ query: "postFromUser", args: { userId: "{{.value.id}}" } }])
 }

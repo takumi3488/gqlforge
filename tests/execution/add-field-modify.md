@@ -6,9 +6,9 @@ schema {
 }
 
 type User
-  @addField(name: "street", path: ["address", "street"])
-  @addField(name: "city", path: ["address", "city"])
-  @addField(name: "zipcode", path: ["address", "zipcode"]) {
+@addField(name: "street", path: ["address", "street"])
+@addField(name: "city", path: ["address", "city"])
+@addField(name: "zipcode", path: ["address", "zipcode"]) {
   name: String
   address: Address
 }

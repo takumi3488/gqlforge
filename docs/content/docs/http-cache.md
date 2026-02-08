@@ -12,8 +12,7 @@ GQLForge provides two layers of caching: upstream HTTP response caching and fiel
 Enable caching of upstream HTTP responses using the `@upstream` directive:
 
 ```graphql
-schema
-  @upstream(http_cache: true) {
+schema @upstream(http_cache: true) {
   query: Query
 }
 ```
@@ -26,26 +25,22 @@ For more granular control, apply the `@cache` directive to individual fields:
 
 ```graphql
 type Query {
-  popularPosts: [Post]
-    @http(url: "https://api.example.com/posts/popular")
-    @cache(max_age: 300)
+  popularPosts: [Post] @http(url: "https://api.example.com/posts/popular") @cache(max_age: 300)
 }
 ```
 
 ### @cache Arguments
 
-| Argument | Type | Description |
-|----------|------|-------------|
-| `max_age` | Int | Time in seconds before the cached value expires |
+| Argument  | Type | Description                                     |
+| --------- | ---- | ----------------------------------------------- |
+| `max_age` | Int  | Time in seconds before the cached value expires |
 
 ## Combining Both Layers
 
 You can use upstream HTTP caching and field-level caching together:
 
 ```graphql
-schema
-  @server(port: 8000)
-  @upstream(http_cache: true, base_url: "https://api.example.com") {
+schema @server(port: 8000) @upstream(http_cache: true, base_url: "https://api.example.com") {
   query: Query
 }
 

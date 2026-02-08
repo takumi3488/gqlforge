@@ -68,10 +68,10 @@ If multiple fields within the same query resolve to the same upstream URL with i
 
 ## Summary
 
-| Optimization | Description |
-|---|---|
-| Ahead-of-time analysis | Schema and resolvers are analyzed once at startup |
-| JIT execution plan | Resolver chains are compiled into optimized execution paths |
-| Parallel execution | Independent resolvers run concurrently |
-| Data loader batching | List-nested resolvers are batched into fewer upstream calls |
-| Request deduplication | Identical upstream requests are merged into one |
+| Optimization           | Description                                                 |
+| ---------------------- | ----------------------------------------------------------- |
+| Ahead-of-time analysis | Schema and resolvers are analyzed once at startup           |
+| JIT execution plan     | Resolver chains are compiled into optimized execution paths |
+| Parallel execution     | Independent resolvers run concurrently                      |
+| Data loader batching   | List-nested resolvers are batched into fewer upstream calls |
+| Request deduplication  | Identical upstream requests are merged into one             |

@@ -9,8 +9,8 @@ The `@expr` directive resolves a field to a static value or a dynamically comput
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
+| Field  | Type | Description                                                                 |
+| ------ | ---- | --------------------------------------------------------------------------- |
 | `body` | JSON | The value to return. Can be a literal, object, array, or mustache template. |
 
 ## Template Variables
@@ -36,16 +36,14 @@ type Query {
 
 ```graphql
 type Query {
-  user(id: Int!): User
-    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
+  user(id: Int!): User @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
 }
 
 type User {
   id: Int!
   name: String!
   email: String!
-  displayName: String
-    @expr(body: "User #{{.value.id}}: {{.value.name}}")
+  displayName: String @expr(body: "User #{{.value.id}}: {{.value.name}}")
 }
 ```
 
@@ -53,8 +51,7 @@ type User {
 
 ```graphql
 type Query {
-  config: AppConfig
-    @expr(body: {name: "GQLForge", debug: false, maxRetries: 3})
+  config: AppConfig @expr(body: { name: "GQLForge", debug: false, maxRetries: 3 })
 }
 
 type AppConfig {

@@ -13,17 +13,17 @@ New Relic accepts OTLP data over HTTP. Configure the exporter with your license 
 
 ```graphql
 schema
-  @server(port: 8000)
-  @telemetry(
-    export: {
-      otlp: {
-        url: "https://otlp.nr-data.net:4317"
-        headers: [
-          { key: "api-key", value: "{{.env.NEW_RELIC_LICENSE_KEY}}" }
-        ]
-      }
+@server(port: 8000)
+@telemetry(
+  export: {
+    otlp: {
+      url: "https://otlp.nr-data.net:4317"
+      headers: [
+        { key: "api-key", value: "{{.env.NEW_RELIC_LICENSE_KEY}}" }
+      ]
     }
-  ) {
+  }
+) {
   query: Query
 }
 ```

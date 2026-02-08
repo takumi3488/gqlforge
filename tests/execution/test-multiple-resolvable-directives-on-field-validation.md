@@ -22,13 +22,13 @@ type Address {
 
 type Query {
   user1: User
-    @expr(body: {name: "{{.value.test}}"})
-    @http(url: "http://jsonplaceholder.typicode.com/", query: [{key: "id", value: "{{.value.id}}"}])
+  @expr(body: { name: "{{.value.test}}" })
+  @http(url: "http://jsonplaceholder.typicode.com/", query: [{ key: "id", value: "{{.value.id}}" }])
   user2: User
-    @http(url: "http://jsonplaceholder.typicode.com/", query: [{key: "name", value: "{{.value.name}}"}])
-    @expr(body: {name: "{{.args.expr}}"})
+  @http(url: "http://jsonplaceholder.typicode.com/", query: [{ key: "name", value: "{{.value.name}}" }])
+  @expr(body: { name: "{{.args.expr}}" })
   user3: User
-    @http(url: "http://jsonplaceholder.typicode.com/", query: [{key: "id", value: "{{.value.address}}"}])
-    @graphQL(args: [{key: "id", value: "{{.args.id}}"}], url: "http://upstream/graphql", name: "user")
+  @http(url: "http://jsonplaceholder.typicode.com/", query: [{ key: "id", value: "{{.value.address}}" }])
+  @graphQL(args: [{ key: "id", value: "{{.args.id}}" }], url: "http://upstream/graphql", name: "user")
 }
 ```

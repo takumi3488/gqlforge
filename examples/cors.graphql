@@ -1,9 +1,9 @@
 schema
-  @server(
-    port: 8000
-    hostname: "0.0.0.0"
-    headers: {cors: {allowOrigins: ["*"], allowHeaders: ["*"], allowMethods: [POST, GET, OPTIONS]}}
-  ) {
+@server(
+  port: 8000
+  hostname: "0.0.0.0"
+  headers: { cors: { allowOrigins: ["*"], allowHeaders: ["*"], allowMethods: [POST, GET, OPTIONS] } }
+) {
   query: Query
 }
 

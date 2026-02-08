@@ -17,7 +17,7 @@ schema {
 type Query {
   userGroups: [[User!]!]! @http(url: "http://upstream/users")
   addUsers(userNames: [[String!]!]!): Boolean
-    @http(url: "http://upstream/users", method: POST, body: "{{.args.userNames}}")
+  @http(url: "http://upstream/users", method: POST, body: "{{.args.userNames}}")
 }
 
 type User {

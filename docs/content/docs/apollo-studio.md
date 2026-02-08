@@ -13,17 +13,17 @@ Apollo Studio accepts telemetry via its OTLP-compatible ingestion endpoint. Conf
 
 ```graphql
 schema
-  @server(port: 8000)
-  @telemetry(
-    export: {
-      otlp: {
-        url: "https://usage-reporting.api.apollographql.com"
-        headers: [
-          { key: "x-api-key", value: "{{.env.APOLLO_KEY}}" }
-        ]
-      }
+@server(port: 8000)
+@telemetry(
+  export: {
+    otlp: {
+      url: "https://usage-reporting.api.apollographql.com"
+      headers: [
+        { key: "x-api-key", value: "{{.env.APOLLO_KEY}}" }
+      ]
     }
-  ) {
+  }
+) {
   query: Query
 }
 ```

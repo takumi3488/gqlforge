@@ -22,7 +22,7 @@ enum Department {
 }
 
 type Query {
-  color: DTA @expr(body: {departments: ["ENGINEERING", "MARKETING", "HR"]})
+  color: DTA @expr(body: { departments: ["ENGINEERING", "MARKETING", "HR"] })
 }
 
 type DTA {

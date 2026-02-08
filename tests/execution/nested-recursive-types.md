@@ -27,7 +27,7 @@ type Query {
 
 type Mutation {
   createUser(user: User): User
-    @http(url: "http://jsonplaceholder.typicode.com/user", method: "POST", body: "{{.args.user}}")
+  @http(url: "http://jsonplaceholder.typicode.com/user", method: "POST", body: "{{.args.user}}")
 }
 ```
 

@@ -7,10 +7,10 @@ schema @server {
 
 type Query {
   user(id: Int!, test: Test): User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}"
-      query: [{key: "enum", value: "{{.args.test}}"}]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users/{{.args.id}}"
+    query: [{ key: "enum", value: "{{.args.test}}" }]
+  )
 }
 
 enum Test {

@@ -16,10 +16,10 @@ schema {
 
 type Query {
   nearby(location: Location): Point
-    @http(
-      url: "http://upstream/nearby"
-      query: [{key: "lon", value: "{{.args.location.lon}}"}, {key: "lat", value: "{{.args.location.lat}}"}]
-    )
+  @http(
+    url: "http://upstream/nearby"
+    query: [{ key: "lon", value: "{{.args.location.lon}}" }, { key: "lat", value: "{{.args.location.lat}}" }]
+  )
 }
 
 type Location {

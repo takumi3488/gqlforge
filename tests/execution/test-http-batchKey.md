@@ -27,15 +27,15 @@ type Foo {
   fooName: String!
   barId: String!
   bars: [Bar!]!
-    @http(
-      url: "http://jsonplaceholder.typicode.com/bar"
-      query: [
-        #
-        {key: "baz", value: "static_value"}
-        {key: "barId[]", value: "{{.value.barId}}"}
-      ]
-      batchKey: ["bars", "id"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/bar"
+    query: [
+      #
+      { key: "baz", value: "static_value" }
+      { key: "barId[]", value: "{{.value.barId}}" }
+    ]
+    batchKey: ["bars", "id"]
+  )
 }
 
 type Bar {
@@ -52,14 +52,19 @@ type Bar {
     status: 200
     body:
       {
-        "foos":
-          [
-            {"id": "foo_1", "fooName": "foo_name_1", "barId": "bar_1"},
-            {"id": "foo_2", "fooName": "foo_name_2", "barId": "bar_1"},
-            {"id": "foo_3", "fooName": "foo_name_3", "barId": "bar_2"},
-          ],
-        "meta":
-          {"current_page": 1, "next_page": 1, "prev_page": null, "total_pages": 1, "total_count": 3, "per_page": 3},
+        "foos": [
+          { "id": "foo_1", "fooName": "foo_name_1", "barId": "bar_1" },
+          { "id": "foo_2", "fooName": "foo_name_2", "barId": "bar_1" },
+          { "id": "foo_3", "fooName": "foo_name_3", "barId": "bar_2" },
+        ],
+        "meta": {
+          "current_page": 1,
+          "next_page": 1,
+          "prev_page": null,
+          "total_pages": 1,
+          "total_count": 3,
+          "per_page": 3,
+        },
       }
 - request:
     method: GET
@@ -68,14 +73,19 @@ type Bar {
     status: 200
     body:
       {
-        "bars":
-          [
-            {"id": "bar_1", "barName": "bar_name_1"},
-            {"id": "bar_1", "barName": "bar_name_1"},
-            {"id": "bar_2", "barName": "bar_name_2"},
-          ],
-        "meta":
-          {"current_page": 1, "next_page": 1, "prev_page": null, "total_pages": 1, "total_count": 3, "per_page": 3},
+        "bars": [
+          { "id": "bar_1", "barName": "bar_name_1" },
+          { "id": "bar_1", "barName": "bar_name_1" },
+          { "id": "bar_2", "barName": "bar_name_2" },
+        ],
+        "meta": {
+          "current_page": 1,
+          "next_page": 1,
+          "prev_page": null,
+          "total_pages": 1,
+          "total_count": 3,
+          "per_page": 3,
+        },
       }
 ```
 

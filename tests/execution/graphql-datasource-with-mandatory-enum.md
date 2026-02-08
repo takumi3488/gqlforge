@@ -19,7 +19,7 @@ type Post {
 }
 
 type Query {
-  post: Post @expr(body: {severity: {type: null}})
+  post: Post @expr(body: { severity: { type: null } })
 }
 ```
 

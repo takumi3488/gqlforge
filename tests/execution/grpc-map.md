@@ -28,7 +28,6 @@ message MapResponse {
 service MapService {
   rpc GetMap (MapRequest) returns (MapResponse) {}
 }
-
 ```
 
 ```graphql @schema
@@ -42,7 +41,7 @@ input map__MapRequest {
 
 type Query {
   map__MapService__GetMap(mapRequest: map__MapRequest!): map__MapResponse!
-    @grpc(url: "http://localhost:50051", body: "{{.args.mapRequest}}", method: "map.MapService.GetMap")
+  @grpc(url: "http://localhost:50051", body: "{{.args.mapRequest}}", method: "map.MapService.GetMap")
 }
 
 type map__MapResponse {

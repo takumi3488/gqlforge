@@ -26,11 +26,11 @@ type Post {
   body: String
   userId: Int
   user: User
-    @http(
-      url: "http://jsonplaceholder.typicode.com/users"
-      query: [{key: "id", value: "{{.value.userId}}"}, {key: "foo", value: "bar"}]
-      batchKey: ["id"]
-    )
+  @http(
+    url: "http://jsonplaceholder.typicode.com/users"
+    query: [{ key: "id", value: "{{.value.userId}}" }, { key: "foo", value: "bar" }]
+    batchKey: ["id"]
+  )
 }
 
 type User {

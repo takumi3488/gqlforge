@@ -33,12 +33,12 @@ In another terminal, run wrk against the GraphQL endpoint:
 wrk -t4 -c100 -d30s -s query.lua http://localhost:8000/graphql
 ```
 
-| Flag | Description |
-|------|-------------|
-| `-t4` | Use 4 threads |
-| `-c100` | Maintain 100 open connections |
-| `-d30s` | Run for 30 seconds |
-| `-s` | Lua script for custom requests |
+| Flag    | Description                    |
+| ------- | ------------------------------ |
+| `-t4`   | Use 4 threads                  |
+| `-c100` | Maintain 100 open connections  |
+| `-d30s` | Run for 30 seconds             |
+| `-s`    | Lua script for custom requests |
 
 ## Lua Script for GraphQL
 

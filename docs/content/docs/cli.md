@@ -25,14 +25,14 @@ gqlforge start <file_paths...> [options]
 
 **Arguments:**
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `file_paths` | Yes | One or more paths to GraphQL configuration files |
+| Argument     | Required | Description                                      |
+| ------------ | -------- | ------------------------------------------------ |
+| `file_paths` | Yes      | One or more paths to GraphQL configuration files |
 
 **Options:**
 
-| Flag | Description |
-|------|-------------|
+| Flag           | Description                                                         |
+| -------------- | ------------------------------------------------------------------- |
 | `--verify-ssl` | Enable strict SSL certificate verification for upstream connections |
 
 **Examples:**
@@ -60,17 +60,17 @@ gqlforge check <file_paths...> [options]
 
 **Arguments:**
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `file_paths` | Yes | One or more paths to GraphQL configuration files |
+| Argument     | Required | Description                                      |
+| ------------ | -------- | ------------------------------------------------ |
+| `file_paths` | Yes      | One or more paths to GraphQL configuration files |
 
 **Options:**
 
-| Flag | Description |
-|------|-------------|
+| Flag                   | Description                                    |
+| ---------------------- | ---------------------------------------------- |
 | `--n-plus-one-queries` | Detect and report potential N+1 query patterns |
-| `--schema` | Output the composed schema to stdout |
-| `--verify-ssl` | Enable strict SSL certificate verification |
+| `--schema`             | Output the composed schema to stdout           |
+| `--verify-ssl`         | Enable strict SSL certificate verification     |
 
 **Examples:**
 
@@ -97,9 +97,9 @@ gqlforge init [folder_path]
 
 **Arguments:**
 
-| Argument | Required | Default | Description |
-|----------|----------|---------|-------------|
-| `folder_path` | No | `.` | Directory where the project will be created |
+| Argument      | Required | Default | Description                                 |
+| ------------- | -------- | ------- | ------------------------------------------- |
+| `folder_path` | No       | `.`     | Directory where the project will be created |
 
 **Examples:**
 
@@ -123,9 +123,9 @@ gqlforge gen <file_path>
 
 **Arguments:**
 
-| Argument | Required | Description |
-|----------|----------|-------------|
-| `file_path` | Yes | Path to the source definition file |
+| Argument    | Required | Description                        |
+| ----------- | -------- | ---------------------------------- |
+| `file_path` | Yes      | Path to the source definition file |
 
 **Examples:**
 

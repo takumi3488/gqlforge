@@ -60,12 +60,12 @@ schema {
 
 type Query {
   newsById(news: NewsInput!): News!
-    @grpc(
-      method: "news.NewsService.GetMultipleNews"
-      url: "http://localhost:50051"
-      body: "{{.args.news}}"
-      batchKey: ["id"]
-    )
+  @grpc(
+    method: "news.NewsService.GetMultipleNews"
+    url: "http://localhost:50051"
+    body: "{{.args.news}}"
+    batchKey: ["id"]
+  )
 }
 input NewsInput {
   id: Int

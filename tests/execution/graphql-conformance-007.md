@@ -22,7 +22,7 @@ schema {
 
 type Query {
   profiles(handles: [ID!]!): [Profile!]!
-    @graphQL(url: "http://upstream/graphql", name: "profiles", args: [{key: "handles", value: "{{.args.handles}}"}])
+  @graphQL(url: "http://upstream/graphql", name: "profiles", args: [{ key: "handles", value: "{{.args.handles}}" }])
 }
 
 interface Profile {

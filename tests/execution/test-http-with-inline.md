@@ -11,8 +11,8 @@ schema @server {
 
 type Query @addField(name: "username", path: ["post", "user", "name"]) {
   post: Post
-    @http(url: "http://jsonplaceholder.typicode.com/posts/1")
-    @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
+  @http(url: "http://jsonplaceholder.typicode.com/posts/1")
+  @http(url: "http://jsonplaceholder.typicode.com/users/{{.value.userId}}")
 }
 
 type Post {

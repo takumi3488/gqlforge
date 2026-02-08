@@ -14,7 +14,7 @@ input PostInput {
 
 type Mutation {
   insertPost(input: PostInput): Post
-    @http(body: "{{.args.input}}", method: "POST", url: "http://jsonplaceholder.typicode.com/posts")
+  @http(body: "{{.args.input}}", method: "POST", url: "http://jsonplaceholder.typicode.com/posts")
 }
 
 type Post {
@@ -38,7 +38,7 @@ type User {
 - request:
     method: POST
     url: http://jsonplaceholder.typicode.com/posts
-    body: {"body": "post-body", "title": "post-title", "userId": 1}
+    body: { "body": "post-body", "title": "post-title", "userId": 1 }
   response:
     status: 200
     body:

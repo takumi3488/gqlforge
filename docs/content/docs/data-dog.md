@@ -30,15 +30,15 @@ Point the OTLP exporter to your Datadog Agent:
 
 ```graphql
 schema
-  @server(port: 8000)
-  @telemetry(
-    export: {
-      otlp: {
-        url: "http://localhost:4317"
-      }
+@server(port: 8000)
+@telemetry(
+  export: {
+    otlp: {
+      url: "http://localhost:4317"
     }
-    request_headers: ["x-request-id"]
-  ) {
+  }
+  request_headers: ["x-request-id"]
+) {
   query: Query
 }
 ```

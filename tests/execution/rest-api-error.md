@@ -1,7 +1,7 @@
 # Rest API error response
 
 ```graphql @file:operation-user.graphql
-query ($id: Int!) @rest(method: GET, path: "/user/$id") {
+query($id: Int!) @rest(method: GET, path: "/user/$id") {
   user(id: $id) {
     id
     name

@@ -9,18 +9,18 @@ GQLForge supports OpenTelemetry-based observability. You can export traces, metr
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `export` | ExportConfig | Configures where telemetry data is sent. |
-| `request_headers` | [String] | HTTP request headers captured and attached as span attributes. |
+| Field             | Type         | Description                                                    |
+| ----------------- | ------------ | -------------------------------------------------------------- |
+| `export`          | ExportConfig | Configures where telemetry data is sent.                       |
+| `request_headers` | [String]     | HTTP request headers captured and attached as span attributes. |
 
 ## Export Targets
 
-| Target | Description |
-|--------|-------------|
-| `Stdout` | Prints telemetry data to standard output. Useful for local development. |
-| `Otlp` | Sends data to an OpenTelemetry Protocol (OTLP) compatible collector. |
-| `Prometheus` | Exposes a `/metrics` endpoint for Prometheus scraping. |
+| Target       | Description                                                             |
+| ------------ | ----------------------------------------------------------------------- |
+| `Stdout`     | Prints telemetry data to standard output. Useful for local development. |
+| `Otlp`       | Sends data to an OpenTelemetry Protocol (OTLP) compatible collector.    |
+| `Prometheus` | Exposes a `/metrics` endpoint for Prometheus scraping.                  |
 
 ## OTLP Configuration
 
@@ -31,9 +31,7 @@ When using `Otlp`, provide an `url` pointing to the collector endpoint.
 ### Export to stdout
 
 ```graphql
-schema
-  @telemetry(export: {format: Stdout})
-  @server(port: 8000) {
+schema @telemetry(export: { format: Stdout }) @server(port: 8000) {
   query: Query
 }
 ```
@@ -42,11 +40,11 @@ schema
 
 ```graphql
 schema
-  @telemetry(
-    export: {format: Otlp, url: "http://localhost:4317"}
-    request_headers: ["X-Request-Id", "Authorization"]
-  )
-  @server(port: 8000) {
+@telemetry(
+  export: { format: Otlp, url: "http://localhost:4317" }
+  request_headers: ["X-Request-Id", "Authorization"]
+)
+@server(port: 8000) {
   query: Query
 }
 ```
@@ -54,9 +52,7 @@ schema
 ### Expose Prometheus metrics
 
 ```graphql
-schema
-  @telemetry(export: {format: Prometheus})
-  @server(port: 8000) {
+schema @telemetry(export: { format: Prometheus }) @server(port: 8000) {
   query: Query
 }
 ```

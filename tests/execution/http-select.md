@@ -17,10 +17,10 @@ schema {
 type Query {
   userCompany(id: Int!): Company @http(url: "http://upstream/users/{{.args.id}}", select: "{{.company}}")
   userDetails(id: Int!): UserDetails
-    @http(
-      url: "http://upstream/users/{{.args.id}}"
-      select: {id: "{{.id}}", city: "{{.address.city}}", phone: "{{.phone}}"}
-    )
+  @http(
+    url: "http://upstream/users/{{.args.id}}"
+    select: { id: "{{.id}}", city: "{{.address.city}}", phone: "{{.phone}}" }
+  )
 }
 
 type UserDetails {

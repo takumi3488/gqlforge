@@ -11,7 +11,7 @@ schema @server @upstream {
 
 type Post {
   id: Int
-  user: User @http(url: "http://jsonplaceholder.typicode.com/users", query: [{key: "id", value: "{{.value.userId}}"}])
+  user: User @http(url: "http://jsonplaceholder.typicode.com/users", query: [{ key: "id", value: "{{.value.userId}}" }])
   userId: Int!
 }
 

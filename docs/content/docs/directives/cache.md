@@ -9,9 +9,9 @@ The `@cache` directive caches a field's resolved value in memory for a specified
 
 ## Fields
 
-| Field | Type | Description |
-|-------|------|-------------|
-| `max_age` | Int | Duration in **milliseconds** to keep the cached value before it expires. |
+| Field     | Type | Description                                                              |
+| --------- | ---- | ------------------------------------------------------------------------ |
+| `max_age` | Int  | Duration in **milliseconds** to keep the cached value before it expires. |
 
 ## Behavior
 
@@ -27,13 +27,9 @@ schema @server(port: 8000) {
 }
 
 type Query {
-  users: [User]
-    @http(url: "https://jsonplaceholder.typicode.com/users")
-    @cache(max_age: 60000)
+  users: [User] @http(url: "https://jsonplaceholder.typicode.com/users") @cache(max_age: 60000)
 
-  user(id: Int!): User
-    @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}")
-    @cache(max_age: 30000)
+  user(id: Int!): User @http(url: "https://jsonplaceholder.typicode.com/users/{{.args.id}}") @cache(max_age: 30000)
 }
 
 type User {

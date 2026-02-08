@@ -20,6 +20,6 @@ schema {
 }
 
 type Query {
-  foo: Foo @expr(body: {bar: "foo"})
+  foo: Foo @expr(body: { bar: "foo" })
 }
 ```

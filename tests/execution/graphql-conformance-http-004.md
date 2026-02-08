@@ -15,22 +15,22 @@ schema {
 }
 
 type Query {
-  user(id: ID!): User! @http(url: "http://upstream/user", query: [{key: "id", value: "{{.args.id}}"}])
+  user(id: ID!): User! @http(url: "http://upstream/user", query: [{ key: "id", value: "{{.args.id}}" }])
 }
 
 type User {
   id: ID!
   name: String!
   profilePic(size: Int, width: Int, height: Int): String!
-    @http(
-      url: "http://upstream/pic"
-      query: [
-        {key: "id", value: "{{.value.id}}"}
-        {key: "size", value: "{{.args.size}}"}
-        {key: "width", value: "{{.args.width}}"}
-        {key: "height", value: "{{.args.height}}"}
-      ]
-    )
+  @http(
+    url: "http://upstream/pic"
+    query: [
+      { key: "id", value: "{{.value.id}}" }
+      { key: "size", value: "{{.args.size}}" }
+      { key: "width", value: "{{.args.width}}" }
+      { key: "height", value: "{{.args.height}}" }
+    ]
+  )
 }
 ```
 
