@@ -24,17 +24,14 @@ impl InstallationMethod {
             .arg("ls")
             .arg("--global")
             .output()
-        {
-            if String::from_utf8_lossy(&output.stdout).contains("@gqlforge/gqlforge") {
+            && String::from_utf8_lossy(&output.stdout).contains("@gqlforge/gqlforge") {
                 return InstallationMethod::Npm;
             }
-        }
 
-        if let Ok(result) = which("gqlforge") {
-            if result.to_str().is_some_and(|s| s.contains("homebrew")) {
+        if let Ok(result) = which("gqlforge")
+            && result.to_str().is_some_and(|s| s.contains("homebrew")) {
                 return InstallationMethod::Brew;
             }
-        }
 
         InstallationMethod::default()
     }

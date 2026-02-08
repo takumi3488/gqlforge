@@ -28,15 +28,14 @@ fn compute_selection_set<A: Display + Debug + JsonLikeOwned>(
     for field in base_field.iter_mut() {
         if let Some(ir) = field.ir.as_mut() {
             ir.modify_io(&mut |io| {
-                if let IO::GraphQL { req_template, .. } = io {
-                    if let Some(v) = format_selection_set(
+                if let IO::GraphQL { req_template, .. } = io
+                    && let Some(v) = format_selection_set(
                         field.selection.iter(),
                         interfaces,
                         interfaces.contains(field.type_of.name()),
                     ) {
                         req_template.selection = Some(Mustache::parse(&v).into());
                     }
-                }
             });
         }
         compute_selection_set(field.selection.as_mut(), interfaces);

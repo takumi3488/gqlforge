@@ -117,13 +117,11 @@ fn determine_type_from_schema(name: String, schema: &SchemaObject) -> Type {
     if let Some(subschema) = schema.subschemas.clone().into_iter().next() {
         let list = subschema.any_of.or(subschema.all_of).or(subschema.one_of);
 
-        if let Some(list) = list {
-            if let Some(Schema::Object(obj)) = list.first() {
-                if let Some(reference) = &obj.reference {
+        if let Some(list) = list
+            && let Some(Schema::Object(obj)) = list.first()
+                && let Some(reference) = &obj.reference {
                     return determine_type_from_reference(reference);
                 }
-            }
-        }
     }
 
     if let Some(reference) = &schema.reference {
@@ -134,7 +132,7 @@ fn determine_type_from_schema(name: String, schema: &SchemaObject) -> Type {
 }
 
 fn determine_type_from_reference(reference: &str) -> Type {
-    let mut name = reference.split('/').last().unwrap().to_string();
+    let mut name = reference.split('/').next_back().unwrap().to_string();
     first_char_to_upper(&mut name);
     Type { nullable: true, base: BaseType::Named(Name::new(name)) }
 }

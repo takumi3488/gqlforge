@@ -71,13 +71,12 @@ impl Transform for FlattenSingleField {
                     field_name,
                     field.type_of.name(),
                     &mut visited_types,
-                ) {
-                    if path.len() > 1 {
+                )
+                    && path.len() > 1 {
                         field.omit = Some(Omit {});
                         ty.added_fields
                             .push(AddField { name: field_name.to_owned(), path });
                     }
-                }
             }
         }
         Valid::succeed(config)

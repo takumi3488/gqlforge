@@ -4,7 +4,7 @@ use proc_macro::TokenStream;
 use syn::{parse_macro_input, DeriveInput};
 
 mod document_definition;
-mod gen;
+mod codegen;
 mod merge_right;
 mod resolver;
 
@@ -24,14 +24,14 @@ pub fn directive_definitions_derive(input: TokenStream) -> TokenStream {
 
 #[proc_macro_derive(Doc, attributes(gen_doc))]
 pub fn scalar_definition_derive(input: TokenStream) -> TokenStream {
-    gen::doc(input)
+    codegen::doc(input)
 }
 
 #[proc_macro]
 pub fn gen_doc(item: TokenStream) -> TokenStream {
     let input = syn::parse_macro_input!(item as syn::DeriveInput);
     let name = &input.ident;
-    let gen = quote::quote! {
+    let output = quote::quote! {
         impl #name {
             pub fn doc() -> &'static str {
                 stringify!(#name)
@@ -40,7 +40,7 @@ pub fn gen_doc(item: TokenStream) -> TokenStream {
     };
     TokenStream::from(quote::quote! {
         #input
-        #gen
+        #output
     })
 }
 

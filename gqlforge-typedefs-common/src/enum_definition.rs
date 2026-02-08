@@ -69,8 +69,8 @@ pub fn into_enum_value(obj: &Schema) -> Option<EnumValue> {
             // in case enum has description docs for the variants they will be generated
             // as schema with `one_of` entry, where every enum variant is separate enum
             // entry
-            if let Some(subschema) = &schema_object.subschemas {
-                if let Some(one_ofs) = &subschema.one_of {
+            if let Some(subschema) = &schema_object.subschemas
+                && let Some(one_ofs) = &subschema.one_of {
                     let variants = one_ofs
                         .iter()
                         .filter_map(|one_of| {
@@ -93,7 +93,6 @@ pub fn into_enum_value(obj: &Schema) -> Option<EnumValue> {
                         return Some(EnumValue { variants, description });
                     }
                 }
-            }
 
             None
         }

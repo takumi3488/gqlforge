@@ -1,5 +1,5 @@
 mod check;
-mod gen;
+mod r#gen;
 mod helpers;
 mod init;
 pub mod run;

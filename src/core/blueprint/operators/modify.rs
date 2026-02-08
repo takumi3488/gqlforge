@@ -14,15 +14,14 @@ pub fn update_modify<'a>() -> TryFold<
 > {
     TryFold::<(&ConfigModule, &Field, &config::Type, &'a str), FieldDefinition, BlueprintError>::new(
         |(config, field, type_of, _), mut b_field| {
-            if let Some(modify) = field.modify.as_ref() {
-                if let Some(new_name) = &modify.name {
+            if let Some(modify) = field.modify.as_ref()
+                && let Some(new_name) = &modify.name {
                     for name in type_of.implements.iter() {
                         let interface = config.find_type(name);
-                        if let Some(interface) = interface {
-                            if interface.fields.iter().any(|(name, _)| name == new_name) {
+                        if let Some(interface) = interface
+                            && interface.fields.iter().any(|(name, _)| name == new_name) {
                                 return Valid::fail(BlueprintError::FieldExistsInInterface);
                             }
-                        }
                     }
                     b_field.resolver = Some(
                         b_field
@@ -31,7 +30,6 @@ pub fn update_modify<'a>() -> TryFold<
                     );
                     b_field = b_field.name(new_name.clone());
                 }
-            }
             Valid::succeed(b_field)
         },
     )

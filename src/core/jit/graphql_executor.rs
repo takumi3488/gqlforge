@@ -85,9 +85,9 @@ impl JITExecutor {
             }
 
             let jit_request = jit::Request::from(request);
-            let exec = if let Some(op) = self.app_ctx.operation_plans.get(&hash) {
+            let exec = match self.app_ctx.operation_plans.get(&hash) { Some(op) => {
                 ConstValueExecutor::from(op.value().clone())
-            } else {
+            } _ => {
                 let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
                     Ok(exec) => exec,
                     Err(error) => {
@@ -100,7 +100,7 @@ impl JITExecutor {
                     .operation_plans
                     .insert(hash.clone(), exec.plan.clone());
                 exec
-            };
+            }};
 
             let is_const = exec.plan.is_const;
             let is_protected = exec.plan.is_protected;

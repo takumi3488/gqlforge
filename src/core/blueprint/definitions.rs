@@ -168,8 +168,8 @@ fn process_field_within_type(
                 }
             });
         }
-    } else if let Some((head, tail)) = remaining_path.split_first() {
-        if let Some(field) = type_info.fields.get(head) {
+    } else if let Some((head, tail)) = remaining_path.split_first()
+        && let Some(field) = type_info.fields.get(head) {
             return process_path(ProcessPathContext {
                 path: tail,
                 field,
@@ -181,7 +181,6 @@ fn process_field_within_type(
                 original_path: context.original_path,
             });
         }
-    }
 
     invalid_path_handler(field_name, remaining_path, context.original_path)
 }

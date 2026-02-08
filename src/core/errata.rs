@@ -153,11 +153,13 @@ impl From<hyper::Error> for Errata {
 impl From<anyhow::Error> for Errata {
     fn from(error: anyhow::Error) -> Self {
         // Convert other errors to Errata
-        let cli_error = match error.downcast::<Errata>() {
+        
+        match error.downcast::<Errata>() {
             Ok(cli_error) => cli_error,
             Err(error) => {
                 // Convert other errors to Errata
-                let cli_error = match error.downcast::<ValidationError<String>>() {
+                
+                match error.downcast::<ValidationError<String>>() {
                     Ok(validation_error) => Errata::from(validation_error),
                     Err(error) => {
                         let sources = error
@@ -167,11 +169,9 @@ impl From<anyhow::Error> for Errata {
 
                         Errata::new(&error.to_string()).caused_by(sources)
                     }
-                };
-                cli_error
+                }
             }
-        };
-        cli_error
+        }
     }
 }
 

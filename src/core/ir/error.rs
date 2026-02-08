@@ -94,11 +94,11 @@ impl ErrorExtensions for Error {
             }
 
             if let Error::HTTP { message: _, body } = self {
-                if let Ok(ConstValue::Object(map)) = serde_json::from_str::<ConstValue>(body) {
+                match serde_json::from_str::<ConstValue>(body) { Ok(ConstValue::Object(map)) => {
                     e.extend(map);
-                } else {
+                } _ => {
                     e.set("cause", body);
-                }
+                }}
             }
         })
     }

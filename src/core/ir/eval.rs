@@ -48,9 +48,9 @@ impl IR {
                     let io = io.deref();
                     let key = io.cache_key(ctx);
                     if let Some(key) = key {
-                        if let Some(val) = ctx.request_ctx.runtime.cache.get(&key).await? {
+                        match ctx.request_ctx.runtime.cache.get(&key).await? { Some(val) => {
                             Ok(val)
-                        } else {
+                        } _ => {
                             let val = eval_io(io, ctx).await?;
                             ctx.request_ctx
                                 .runtime
@@ -58,7 +58,7 @@ impl IR {
                                 .set(key, val.clone(), max_age.to_owned())
                                 .await?;
                             Ok(val)
-                        }
+                        }}
                     } else {
                         eval_io(io, ctx).await
                     }

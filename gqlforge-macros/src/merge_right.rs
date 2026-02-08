@@ -56,7 +56,7 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
 
     let name = input.ident.clone();
     let generics = input.generics.clone();
-    let gen = match input.data {
+    let output = match input.data {
         // Implement for structs
         Data::Struct(data) => {
             let fields = match &data.fields {
@@ -154,7 +154,7 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
         }
     };
 
-    gen.into()
+    output.into()
 }
 
 #[cfg(test)]

@@ -185,7 +185,7 @@ mod test {
     /// generates test asserts for valid scalar inputs
     #[macro_export]
     macro_rules! test_scalar_valid {
-    ($instance: expr, $($value: expr),+) => {
+    ($instance: expr_2021, $($value: expr_2021),+) => {
         #[test]
         fn test_scalar_valid() {
             let value = $instance;
@@ -200,7 +200,7 @@ mod test {
     // generates test asserts for invalid scalar inputs
     #[macro_export]
     macro_rules! test_scalar_invalid {
-    ($instance: expr, $($value: expr),+) => {
+    ($instance: expr_2021, $($value: expr_2021),+) => {
         #[test]
         fn test_scalar_invalid() {
             let value = $instance;

@@ -498,7 +498,7 @@ mod test {
     }
 
     macro_rules! assert_gen {
-        ($( $set:expr ), +) => {
+        ($( $set:expr_2021 ), +) => {
             let set = compile_protobuf(&[$( $set ),+]).unwrap();
             let config = from_proto(&[set], "Query", "http://localhost:50051").unwrap();
             let config_module = ConfigModule::from(config);

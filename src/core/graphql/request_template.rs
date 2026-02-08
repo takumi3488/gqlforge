@@ -147,14 +147,13 @@ impl RequestTemplate {
             }
         }
 
-        if let Some(directives) = ctx.directives() {
-            if !directives.is_empty() {
+        if let Some(directives) = ctx.directives()
+            && !directives.is_empty() {
                 let operation = operation.to_mut();
 
                 operation.push(' ');
                 operation.push_str(&directives.escape_default().to_string());
             }
-        }
 
         let query =
             format!(r#"{{ "query": "{operation_type} {{ {operation} {selection_set} }}" }}"#);

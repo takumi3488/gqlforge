@@ -138,17 +138,17 @@ impl Response<Bytes> {
                     let type_url = &detail.type_url;
                     let type_name = type_url.split('/').next_back().unwrap_or("");
 
-                    if let Some(message) = operation.find_message(type_name) {
-                        if let Ok(decoded) = message.decode(detail.value.as_slice()) {
+                    match operation.find_message(type_name) { Some(message) => {
+                        match message.decode(detail.value.as_slice()) { Ok(decoded) => {
                             status_details.push(decoded);
-                        } else {
+                        } _ => {
                             tracing::error!("Error while decoding message: {type_name}");
-                        }
-                    } else {
+                        }}
+                    } _ => {
                         tracing::error!(
                             "Error while searching descriptor for message: {type_name}"
                         );
-                    }
+                    }}
                 }
             } else {
                 tracing::error!("Error while decoding gRPC status details");

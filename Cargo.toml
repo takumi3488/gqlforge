@@ -1,5 +1,5 @@
 [package]
-edition = "2021"
+edition = "2024"
 name = "gqlforge"
 version = "0.1.0"
 description = "A high-performance GraphQL runtime"

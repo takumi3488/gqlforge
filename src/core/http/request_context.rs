@@ -114,8 +114,8 @@ impl RequestContext {
                     // Convert the existing HeaderValue to a str, append the new cookies,
                     // and then convert back to a HeaderValue. If the conversion fails, we skip
                     // appending.
-                    if let Ok(existing_str) = existing_cookies.to_str() {
-                        if let Ok(new_cookies_str) = new_cookies.to_str() {
+                    if let Ok(existing_str) = existing_cookies.to_str()
+                        && let Ok(new_cookies_str) = new_cookies.to_str() {
                             // Create a new value by appending the new cookies to the existing ones
                             let combined_cookies = format!("{}; {}", existing_str, new_cookies_str);
 
@@ -125,7 +125,6 @@ impl RequestContext {
                                 HeaderValue::from_str(&combined_cookies).unwrap(),
                             );
                         }
-                    }
                 } else {
                     // If 'set-cookie' does not already exist in our map, just insert the new value
                     map.insert(cookie_name, new_cookies.clone());

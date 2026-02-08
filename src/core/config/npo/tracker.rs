@@ -217,7 +217,7 @@ mod tests {
 
     #[macro_export]
     macro_rules! assert_n_plus_one {
-        ($cfg:expr) => {{
+        ($cfg:expr_2021) => {{
             let actual = $cfg.n_plus_one();
             insta::assert_snapshot!(actual);
         }};

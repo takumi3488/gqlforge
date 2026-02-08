@@ -91,8 +91,8 @@ impl<'a> Similarity<'a> {
                             // If the list properties don't match, we cannot merge these types.
                             return Valid::fail("Type merge failed: The fields have different list types and cannot be merged.".to_string());
                         }
-                    } else if let Some(type_1) = config.types.get(field_1_type_of) {
-                        if let Some(type_2) = config.types.get(field_2_type_of) {
+                    } else if let Some(type_1) = config.types.get(field_1_type_of)
+                        && let Some(type_2) = config.types.get(field_2_type_of) {
                             if visited_type.contains(field_1_type_of, field_2_type_of) {
                                 // it's cyclic type, return true as they're the same.
                                 return Valid::succeed(true);
@@ -116,7 +116,6 @@ impl<'a> Similarity<'a> {
                                 return is_nested_type_similar;
                             }
                         }
-                    }
                 }
             }
 
@@ -200,8 +199,8 @@ mod test {
         cfg.types.insert("Bar1".to_owned(), bar1);
         cfg.types.insert("Bar2".to_owned(), bar2);
 
-        let mut gen = Similarity::new(&cfg);
-        let is_similar = gen
+        let mut r#gen = Similarity::new(&cfg);
+        let is_similar = r#gen
             .similarity(("Foo1", &foo1), ("Foo2", &foo2), 0.5)
             .to_result();
 
@@ -240,8 +239,8 @@ mod test {
         cfg.types.insert("Bar1".to_owned(), bar1);
         cfg.types.insert("Bar2".to_owned(), bar2);
 
-        let mut gen = Similarity::new(&cfg);
-        let is_similar = gen
+        let mut r#gen = Similarity::new(&cfg);
+        let is_similar = r#gen
             .similarity(("Foo1", &foo1), ("Foo2", &foo2), 0.8)
             .to_result()
             .unwrap();
@@ -294,8 +293,8 @@ mod test {
         cfg.types.insert("Far1".to_owned(), far1);
         cfg.types.insert("Far2".to_owned(), far2);
 
-        let mut gen = Similarity::new(&cfg);
-        let is_similar = gen
+        let mut r#gen = Similarity::new(&cfg);
+        let is_similar = r#gen
             .similarity(("Foo1", &foo1), ("Foo2", &foo2), 0.8)
             .to_result()
             .unwrap();

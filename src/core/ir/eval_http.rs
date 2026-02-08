@@ -186,11 +186,10 @@ pub fn set_cache_control<Ctx: ResolverContextLike>(
     ctx: &EvalContext<'_, Ctx>,
     res: &Response<async_graphql::Value>,
 ) {
-    if ctx.request_ctx.server.get_enable_cache_control() && res.status.is_success() {
-        if let Some(policy) = cache_policy(res) {
+    if ctx.request_ctx.server.get_enable_cache_control() && res.status.is_success()
+        && let Some(policy) = cache_policy(res) {
             ctx.request_ctx.set_cache_control(policy);
         }
-    }
 }
 
 fn set_experimental_headers<Ctx: ResolverContextLike>(

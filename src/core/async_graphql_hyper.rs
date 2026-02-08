@@ -198,14 +198,13 @@ impl GraphQLResponse {
             .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
             .body(body)?;
 
-        if self.0.is_ok() {
-            if let Some(cache_control) = self.0.cache_control().value() {
+        if self.0.is_ok()
+            && let Some(cache_control) = self.0.cache_control().value() {
                 response.headers_mut().insert(
                     CACHE_CONTROL,
                     HeaderValue::from_str(cache_control.as_str())?,
                 );
             }
-        }
 
         Ok(response)
     }
@@ -371,8 +370,8 @@ impl GraphQLArcResponse {
             .status(status)
             .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
             .body(body)?;
-        if self.response.is_ok() {
-            if let Some(cache_control) = self
+        if self.response.is_ok()
+            && let Some(cache_control) = self
                 .response
                 .cache_control(self.cache_control.as_ref())
                 .value()
@@ -382,7 +381,6 @@ impl GraphQLArcResponse {
                     HeaderValue::from_str(cache_control.as_str())?,
                 );
             }
-        }
 
         Ok(response)
     }

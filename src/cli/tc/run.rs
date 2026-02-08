@@ -4,7 +4,7 @@ use dotenvy::dotenv;
 
 use super::helpers::TRACKER;
 use super::validate_rc::validate_rc_config_files;
-use super::{check, gen, init, start};
+use super::{check, r#gen, init, start};
 use crate::cli::command::{Cli, Command};
 use crate::cli::{self, update_checker};
 use crate::core::blueprint::Blueprint;
@@ -61,7 +61,7 @@ async fn run_command(cli: Cli) -> Result<()> {
         }
         Command::Gen { file_path } => {
             let (runtime, _) = get_runtime_and_config_reader(true);
-            gen::gen_command(&file_path, runtime).await?;
+            r#gen::gen_command(&file_path, runtime).await?;
         }
     }
     Ok(())

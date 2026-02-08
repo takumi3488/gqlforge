@@ -76,12 +76,11 @@ impl TypeMerger {
                             )
                             .to_result();
 
-                        if let Ok(similar) = is_similar {
-                            if similar {
+                        if let Ok(similar) = is_similar
+                            && similar {
                                 visited_types.insert(type_name_2.to_owned());
                                 similar_type_set.insert(type_name_2.to_owned());
                             }
-                        }
                     }
                 }
                 if similar_type_set.len() > 1 {

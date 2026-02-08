@@ -22,15 +22,14 @@ pub fn gather_path_matches<'json, J: JsonLike<'json>>(
         for value in root.iter() {
             vector = gather_path_matches(value, path, vector);
         }
-    } else if let Some((key, tail)) = path.split_first() {
-        if let Some(value) = root.get_key(key) {
+    } else if let Some((key, tail)) = path.split_first()
+        && let Some(value) = root.get_key(key) {
             if tail.is_empty() {
                 vector.push((value, root));
             } else {
                 vector = gather_path_matches(value, tail, vector);
             }
         }
-    }
 
     vector
 }

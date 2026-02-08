@@ -328,11 +328,9 @@ async fn handle_request_inner<T: DeserializeOwned + GraphQLRequestLike>(
         Method::GET => {
             if let Some(TelemetryExporter::Prometheus(prometheus)) =
                 app_ctx.blueprint.telemetry.export.as_ref()
-            {
-                if req.uri().path() == prometheus.path {
+                && req.uri().path() == prometheus.path {
                     return prometheus_metrics(prometheus);
-                }
-            };
+                };
             not_found()
         }
         _ => not_found(),
@@ -358,15 +356,15 @@ pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
 
     let response = if app_ctx.blueprint.server.cors.is_some() {
         handle_request_with_cors::<T>(req, app_ctx, &mut req_counter).await
-    } else if let Some(origin) = req.headers().get(&header::ORIGIN) {
+    } else { match req.headers().get(&header::ORIGIN) { Some(origin) => {
         if origin == GQLFORGE_HTTPS_ORIGIN || origin == GQLFORGE_HTTP_ORIGIN {
             handle_origin_gqlforge::<T>(req, app_ctx, &mut req_counter).await
         } else {
             handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
         }
-    } else {
+    } _ => {
         handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
-    };
+    }}};
 
     req_counter.update(&response);
     if let Ok(response) = &response {

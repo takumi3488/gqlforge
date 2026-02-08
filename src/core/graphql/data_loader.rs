@@ -96,8 +96,8 @@ fn extract_responses(
     keys: &[DataLoaderRequest],
 ) -> HashMap<DataLoaderRequest, Response<async_graphql::Value>> {
     let mut hashmap = HashMap::new();
-    if let Ok(res) = result {
-        if let async_graphql_value::ConstValue::List(values) = res.body {
+    if let Ok(res) = result
+        && let async_graphql_value::ConstValue::List(values) = res.body {
             for (i, request) in keys.iter().enumerate() {
                 let value = values
                     .get(i)
@@ -112,7 +112,6 @@ fn extract_responses(
                 );
             }
         }
-    }
     hashmap
 }
 

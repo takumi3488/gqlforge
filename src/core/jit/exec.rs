@@ -37,8 +37,8 @@ where
         let mut ctx = ExecutorInner::new(store.clone(), &self.exec, &self.ctx);
         ctx.init().await;
 
-        let store = std::mem::take(&mut *store.lock().unwrap());
-        store
+        
+        std::mem::take(&mut *store.lock().unwrap())
     }
 
     pub async fn execute<Output>(self, synth: &'a Synth<'a, Value>) -> Response<Output>

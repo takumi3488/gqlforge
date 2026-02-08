@@ -101,18 +101,18 @@ where
             Ok(res.body)
         }
         IO::Js { name } => {
-            if let Some((worker, value)) = ctx
+            match ctx
                 .request_ctx
                 .runtime
                 .worker
                 .as_ref()
                 .zip(ctx.value().cloned())
-            {
+            { Some((worker, value)) => {
                 let val = worker.call(name, value).await?;
                 Ok(val.unwrap_or_default())
-            } else {
+            } _ => {
                 Ok(ConstValue::Null)
-            }
+            }}
         }
     }
 }

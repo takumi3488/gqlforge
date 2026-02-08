@@ -108,11 +108,10 @@ where
     where
         Output: JsonLike<'a>,
     {
-        if let Some(root_name) = root_name {
-            if node.name.eq("__typename") {
+        if let Some(root_name) = root_name
+            && node.name.eq("__typename") {
                 return Ok(Output::string(Cow::Borrowed(root_name)));
             }
-        }
         // according to GraphQL spec https://spec.graphql.org/October2021/#sec-Handling-Field-Errors
         if node.type_of.is_nullable() {
             Ok(Output::null())

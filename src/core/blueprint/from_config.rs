@@ -62,13 +62,12 @@ pub fn apply_batching(mut blueprint: Blueprint) -> Blueprint {
     for def in blueprint.definitions.iter() {
         if let Definition::Object(object_type_definition) = def {
             for field in object_type_definition.fields.iter() {
-                if let Some(IR::IO(io)) = field.resolver.as_ref() {
-                    if matches!(io.as_ref(), IO::Http { group_by: Some(_), .. }) {
+                if let Some(IR::IO(io)) = field.resolver.as_ref()
+                    && matches!(io.as_ref(), IO::Http { group_by: Some(_), .. }) {
                         blueprint.upstream.batch =
                             blueprint.upstream.batch.or(Some(Batch::default()));
                         return blueprint;
                     }
-                }
             }
         }
     }

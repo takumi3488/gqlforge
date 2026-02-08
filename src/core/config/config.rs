@@ -491,11 +491,11 @@ impl Config {
     pub fn output_types(&self) -> HashSet<String> {
         let mut types = HashSet::new();
 
-        if let Some(ref query) = &self.schema.query {
+        if let Some(query) = &self.schema.query {
             types = self.find_connections(query, types);
         }
 
-        if let Some(ref mutation) = &self.schema.mutation {
+        if let Some(mutation) = &self.schema.mutation {
             types = self.find_connections(mutation, types);
         }
 
