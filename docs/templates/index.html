@@ -5,8 +5,29 @@
 
 {% block content %}
 <div class="hero">
+  <img src="{{ get_url(path='icons/gqlforge.svg') }}" alt="GQLForge" class="hero-logo">
   <h1>GQLForge</h1>
   <p class="hero-tagline">{{ config.extra.tagline }}</p>
   <a href="{{ get_url(path='docs/getting-started/') }}" class="hero-cta">Get Started</a>
 </div>
+
+<section class="features">
+  <div class="features-inner">
+    <div class="feature">
+      <div class="feature-icon">⚡</div>
+      <h3>High Performance</h3>
+      <p>Built in Rust for blazing-fast query resolution with minimal memory footprint and automatic N+1 detection.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">📐</div>
+      <h3>Schema-First</h3>
+      <p>Define your GraphQL schema with powerful directives — no boilerplate resolvers needed.</p>
+    </div>
+    <div class="feature">
+      <div class="feature-icon">🔗</div>
+      <h3>Protocol Agnostic</h3>
+      <p>Unify REST, gRPC, and GraphQL data sources into a single, cohesive GraphQL API.</p>
+    </div>
+  </div>
+</section>
 {% endblock %}
