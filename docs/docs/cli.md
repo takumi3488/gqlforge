@@ -114,7 +114,7 @@ This command prompts for file creation and configuration, creating the following
 | File Name | Description |
 | --------: | ----------- |
 
-<!-- TODO: uncomment when the Taillcall configuration will in separate file -->
+<!-- TODO: uncomment when the GQLForge configuration will in separate file -->
 <!-- | [.gqlforgerc.schema.json] | Provides autocomplete in your editor for the gqlforge configuration written in `json` or `yml` format.                                       | -->
 
 | [.graphqlrc.yml] | An IDE configuration that references your GraphQL schema and the following `.gqlforgerc.graphql`. |
