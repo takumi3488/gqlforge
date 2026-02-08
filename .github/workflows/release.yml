@@ -1,19 +1,109 @@
-name: Deploy & Release
+name: Release
 
 on:
-  release:
-    types: [published]
+  push:
+    tags:
+      - "v*.*.*"
+
+permissions:
+  contents: write
+  packages: write
 
 jobs:
-  deploy:
-    name: Deploy App
-    runs-on: ubuntu-latest
-    concurrency:
-      group: deploy-job
-      cancel-in-progress: true
+  setup_build_matrix:
+    name: Outputs matrix used for cross compilation
+    uses: ./.github/workflows/build_matrix.yml
+
+  release:
+    name: Release ${{ matrix.build }}
+    needs: [setup_build_matrix]
+    runs-on: ${{ matrix.os || 'ubuntu-latest' }}
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJson(needs.setup_build_matrix.outputs.matrix) }}
+    env:
+      APP_VERSION: ${{ github.ref_name }}
+
     steps:
-      - uses: actions/checkout@v4
-      - uses: superfly/flyctl-actions/setup-flyctl@master
-      - run: flyctl deploy --remote-only
-        env:
-          FLY_API_TOKEN: ${{ secrets.FLY_API_TOKEN }}
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Install Rust Toolchain
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          target: ${{ matrix.target }}
+
+      - name: Cache NASM
+        if: runner.os == 'Windows'
+        uses: actions/cache@v4
+        with:
+          path: |
+            nasm-2.16.01
+            nasm-2.16.01-win64.zip
+          key: ${{ runner.os }}-nasm-${{ matrix.build }}-v2
+          restore-keys: |
+            ${{ runner.os }}-nasm-${{ matrix.build }}-
+
+      - name: Install dependencies on Windows
+        if: runner.os == 'Windows'
+        run: |
+          if (Test-Path nasm-2.16.01) {
+            echo "Using cached NASM"
+          } else {
+            $nasmUrl = 'https://github.com/microsoft/vcpkg/files/12073957/nasm-2.16.01-win64.zip'
+            $nasmZip = 'nasm-2.16.01-win64.zip'
+            Invoke-WebRequest -Uri $nasmUrl -OutFile $nasmZip
+            Expand-Archive -Path $nasmZip -DestinationPath '.'
+          }
+          echo "$(Resolve-Path nasm-2.16.01)" >> $env:GITHUB_PATH
+
+      - name: Build
+        uses: ClementTsang/cargo-action@v0.0.6
+        with:
+          use-cross: ${{ matrix.cross }}
+          command: build
+          args: ${{ matrix.features }} --release --target ${{ matrix.target }}
+
+      - name: Rename Binary with Target Name
+        run: |
+          cp target/${{ matrix.target }}/release/gqlforge${{ matrix.ext }} target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
+
+      - name: Upload Binary to Release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: target/${{ matrix.target }}/release/gqlforge-${{ matrix.target }}${{ matrix.ext }}
+
+  build-and-push-image:
+    name: Build and Push Docker Image
+    needs: [release]
+    runs-on: ubuntu-latest
+    env:
+      REGISTRY: ghcr.io
+      IMAGE_NAME: ${{ github.repository }}/gf-server
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Log in to the Container Registry
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Extract Metadata (tags, labels) for Docker
+        id: meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          tags: |
+            type=raw,value=${{ github.ref_name }}
+            type=raw,value=latest
+
+      - name: Build and Push the Docker Image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          push: true
+          tags: ${{ steps.meta.outputs.tags }}
+          labels: ${{ steps.meta.outputs.labels }}
