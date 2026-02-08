@@ -12,7 +12,7 @@ This guide walks through deploying a GQLForge server to Fly.io using Docker.
 Create a `Dockerfile` in your project root:
 
 ```dockerfile
-FROM ghcr.io/gqlforge/gqlforge:latest
+FROM ghcr.io/takumi3488/gqlforge/gqlforge:latest
 
 COPY config.graphql /app/config.graphql
 

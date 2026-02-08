@@ -7,20 +7,21 @@ description = "Install GQLForge and create your first GraphQL API in minutes."
 
 ## Installation
 
-### Via npm
+### Via Cargo
 
-The simplest way to install GQLForge is through npm:
+Install GQLForge using Cargo:
 
 ```bash
-npm i -g @gqlforge/gqlforge
+cargo install --git https://github.com/takumi3488/gqlforge
 ```
 
-### Via curl (macOS / Linux)
+### Via Docker
 
-You can also install the binary directly:
+You can also run GQLForge using Docker:
 
 ```bash
-curl -sSL https://gqlforge.dev/install.sh | bash
+docker pull ghcr.io/takumi3488/gqlforge/gqlforge
+docker run -p 8000:8000 -p 8081:8081 ghcr.io/takumi3488/gqlforge/gqlforge
 ```
 
 After installation, verify it works:

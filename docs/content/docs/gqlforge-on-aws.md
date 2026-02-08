@@ -12,7 +12,7 @@ This guide covers deploying GQLForge to AWS using ECS with Fargate.
 Use the official GQLForge Docker image or build your own:
 
 ```dockerfile
-FROM ghcr.io/gqlforge/gqlforge:latest
+FROM ghcr.io/takumi3488/gqlforge/gqlforge:latest
 
 COPY config.graphql /app/config.graphql
 
