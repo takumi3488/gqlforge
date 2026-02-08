@@ -80,11 +80,11 @@ export default {
 
   themeConfig: {
     // Replace with your project's social card
-    image: "icons/companies/gqlforge.svg", // TODO: replace with gqlforge logo
+    image: "icons/companies/gqlforge.svg",
     navbar: {
       hideOnScroll: true,
       logo: {
-        alt: "My Site Logo",
+        alt: "GQLForge",
         src: "icons/companies/gqlforge.svg",
       },
       items: [
