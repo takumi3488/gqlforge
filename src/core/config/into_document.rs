@@ -1,7 +1,7 @@
 use async_graphql::parser::types::*;
 use async_graphql::Positioned;
 use async_graphql_value::{ConstValue, Name};
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::directive::to_const_directive;
 use super::Config;

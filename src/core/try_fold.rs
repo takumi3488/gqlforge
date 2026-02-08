@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 /// Trait for types that support a "try fold" operation.
 ///
@@ -140,7 +140,7 @@ impl<'a, I, O: Clone, E> FromIterator<TryFold<'a, I, O, E>> for TryFold<'a, I, O
 mod tests {
     use std::cell::RefCell;
 
-    use tailcall_valid::{Valid, ValidationError, Validator};
+    use gqlforge_valid::{Valid, ValidationError, Validator};
 
     use super::TryFold;
 

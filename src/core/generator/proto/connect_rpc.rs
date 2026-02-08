@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::config::{Config, Grpc, Http, Resolver, ResolverSet};
 use crate::core::Transform;

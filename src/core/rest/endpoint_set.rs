@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::endpoint::Endpoint;
 use super::partial_request::PartialRequest;

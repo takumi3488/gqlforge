@@ -1,5 +1,5 @@
 use async_graphql_value::ConstValue;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::*;
 use crate::core::config;

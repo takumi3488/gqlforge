@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use convert_case::{Case, Casing};
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::config::{Config, GraphQLOperationType};
 use crate::core::transform::Transform;
@@ -52,7 +52,7 @@ impl Transform for SchemaGenerator<'_> {
 mod test {
     use std::collections::BTreeSet;
 
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::SchemaGenerator;
     use crate::core::config::GraphQLOperationType;

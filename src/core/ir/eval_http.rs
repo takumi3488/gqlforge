@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_graphql::from_value;
 use reqwest::Request;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::model::DataLoaderId;
 use super::request::DynamicRequest;

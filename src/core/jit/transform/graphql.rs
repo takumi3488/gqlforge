@@ -4,7 +4,7 @@ use std::convert::Infallible;
 use std::fmt::{Debug, Display};
 use std::marker::PhantomData;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::document::print_directives;
 use crate::core::ir::model::{IO, IR};

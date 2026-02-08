@@ -3,7 +3,7 @@ use std::ops::DerefMut;
 
 use async_graphql_value::ConstValue;
 use serde::Deserialize;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::{transform, Builder, OperationPlan, Result, Variables};
 use crate::core::blueprint::Blueprint;

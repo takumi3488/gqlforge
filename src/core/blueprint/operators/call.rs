@@ -1,5 +1,5 @@
 use serde_json::Value;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::*;
 use crate::core::config;

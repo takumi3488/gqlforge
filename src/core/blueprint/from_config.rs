@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet};
 
 use async_graphql::dynamic::SchemaBuilder;
 use indexmap::IndexMap;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use self::telemetry::to_opentelemetry;
 use super::Server;

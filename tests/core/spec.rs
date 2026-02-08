@@ -23,7 +23,7 @@ use gqlforge_formatter::Parser;
 use http::{Request, Response};
 use http_body_util::{BodyExt, Full};
 use serde::{Deserialize, Serialize};
-use tailcall_valid::{Cause, Valid, ValidationError, Validator};
+use gqlforge_valid::{Cause, Valid, ValidationError, Validator};
 
 use super::file::File;
 use super::http::Http;

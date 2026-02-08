@@ -2,6 +2,9 @@
 edition = "2021"
 name = "gqlforge"
 version = "0.1.0"
+description = "A high-performance GraphQL runtime"
+license = "Apache-2.0"
+repository = "https://github.com/takumi3488/gqlforge"
 
 [[bin]]
 name = "gqlforge"
@@ -25,7 +28,7 @@ reqwest = { version = "0.13", features = [
 ], default-features = false }
 serde = { version = "1.0.228", features = ["derive"] }
 serde_json = { version = "1.0.149", features = ["preserve_order"] }
-tailcall-valid = "=0.1.1"
+gqlforge-valid = { path = "gqlforge-valid", version = "0.1.0" }
 thiserror = "2"
 tokio = { version = "1.49.0", features = ["rt", "time"] }
 tracing = "0.1.44"
@@ -36,9 +39,8 @@ url = { version = "2.5.8", features = ["serde"] }
 # one needs to add default feature tag if it is something IO related or might conflict with WASM
 
 ctrlc = { version = "3.5.1", optional = true }
-genai = { git = "https://github.com/laststylebender14/rust-genai.git", rev = "63a542ce20132503c520f4e07108e0d768f243c3", optional = true }
-gqlforge-http-cache = { path = "gqlforge-http-cache", optional = true }
-gqlforge-version = { path = "./gqlforge-version", optional = true }
+gqlforge-http-cache = { path = "gqlforge-http-cache", version = "0.1.0", optional = true }
+gqlforge-version = { path = "./gqlforge-version", version = "0.1.0", optional = true }
 http-cache-reqwest = { version = "1.0.0-alpha.4", features = [
   "manager-moka",
   "url-standard",
@@ -136,12 +138,12 @@ dashmap = "6.1.0"
 derive_more = { workspace = true }
 dotenvy = "0.15.7"
 getrandom = { version = "0.2.17", features = ["js"] }
-gqlforge-hasher = { path = "gqlforge-hasher" }
-gqlforge-macros = { path = "gqlforge-macros" }
-gqlforge-tracker = { path = "gqlforge-tracker", optional = true }
-gqlforge-typedefs-common = { path = "./gqlforge-typedefs-common" }
+gqlforge-hasher = { path = "gqlforge-hasher", version = "0.1.0" }
+gqlforge-macros = { path = "gqlforge-macros", version = "0.1.0" }
+gqlforge-tracker = { path = "gqlforge-tracker", version = "0.1.0", optional = true }
+gqlforge-typedefs-common = { path = "./gqlforge-typedefs-common", version = "0.1.0" }
 headers = { workspace = true }
-htpasswd-verify = { version = "0.3.0", git = "https://github.com/twistedfall/htpasswd-verify", rev = "ff14703083cbd639f7d05622b398926f3e718d61" } # fork version that is wasm compatible
+htpasswd-verify = { version = "0.3.0" } # fork version that is wasm compatible (see [patch.crates-io])
 http = { workspace = true }
 indenter = "0.3.4"
 jsonwebtoken = { version = "10.3.0", features = ["aws_lc_rs"] }
@@ -170,8 +172,8 @@ prometheus = "0.14"
 rand = "0.9.2"
 serde_json_borrow = { version = "0.9.0", default-features = false }
 strum = "0.27.2"
-tailcall-chunk = "0.3.1"
-tailcall-valid = { workspace = true }
+gqlforge-chunk = { path = "gqlforge-chunk", version = "0.1.0" }
+gqlforge-valid = { workspace = true }
 tonic = { version = "0.14", default-features = false }
 tonic-types = "0.14"
 tracing = { workspace = true }
@@ -200,8 +202,8 @@ cacache = { version = "13.1.0", default-features = false, features = [
 criterion = "0.8.2"
 datatest-stable = "0.3.3"
 flate2 = "1.1.9"
-gqlforge-fixtures = { path = "./gqlforge-fixtures" }
-gqlforge-formatter = { path = "gqlforge-formatter" }
+gqlforge-fixtures = { path = "./gqlforge-fixtures", version = "0.1.0" }
+gqlforge-formatter = { path = "gqlforge-formatter", version = "0.1.0" }
 http-cache-semantics = { version = "2", default-features = false, features = [
   "serde",
   "reqwest",
@@ -247,7 +249,6 @@ cli = [
   "dep:gqlforge-tracker",
   "dep:gqlforge-http-cache",
   "dep:gqlforge-version",
-  "dep:genai",
   "dep:ctrlc",
 ]
 
@@ -272,6 +273,8 @@ members = [
   "gqlforge-hasher",
   "gqlforge-http-cache",
   "gqlforge-version",
+  "gqlforge-valid",
+  "gqlforge-chunk",
 ]
 
 # Boost execution_spec snapshot diffing performance
@@ -309,3 +312,7 @@ path = "tests/cli/gen.rs"
 harness = false
 name = "json_to_config_spec"
 path = "src/core/generator/tests/json_to_config_spec.rs"
+
+[patch.crates-io]
+htpasswd-verify = { git = "https://github.com/twistedfall/htpasswd-verify", rev = "ff14703083cbd639f7d05622b398926f3e718d61" }
+posthog-rs = { git = "https://github.com/PostHog/posthog-rs.git", rev = "a006a81419031e4889d9c3882d7458d2efa588a8" }

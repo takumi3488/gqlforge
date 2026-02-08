@@ -1,4 +1,4 @@
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::config::Config;
 use crate::core::transform::Transform;

@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::BlueprintError;
 use crate::core::config::{Link, LinkType};

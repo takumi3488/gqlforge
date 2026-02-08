@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::config::{AddField, Config, Omit};
 use crate::core::transform::Transform;
@@ -89,7 +89,7 @@ mod test {
     use std::fs;
 
     use gqlforge_fixtures::configs;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::FlattenSingleField;
     use crate::core::config::Config;

@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::{Auth, BlueprintError, FieldDefinition, Provider};
 use crate::core::config::{self, ConfigModule, Field};

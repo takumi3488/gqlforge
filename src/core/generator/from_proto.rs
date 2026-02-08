@@ -7,7 +7,7 @@ use prost_reflect::prost_types::{
     DescriptorProto, EnumDescriptorProto, FileDescriptorSet, ServiceDescriptorProto, SourceCodeInfo,
 };
 use serde_json::Value;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::graphql_type::{GraphQLType, Unparsed};
 use super::proto::comments_builder::CommentsBuilder;

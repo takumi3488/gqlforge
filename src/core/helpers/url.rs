@@ -1,4 +1,4 @@
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::mustache::Mustache;
 
@@ -12,7 +12,7 @@ mod tests {
 
     #[test]
     fn parse_url() {
-        use tailcall_valid::Valid;
+        use gqlforge_valid::Valid;
 
         use crate::core::mustache::Mustache;
 

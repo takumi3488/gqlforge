@@ -11,7 +11,7 @@ mod tests {
     use gqlforge::core::jit::{ConstValueExecutor, Request};
     use gqlforge::core::json::JsonLike;
     use gqlforge::core::rest::EndpointSet;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     struct TestExecutor {
         app_ctx: Arc<AppContext>,

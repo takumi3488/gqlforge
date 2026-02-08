@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use async_graphql::dynamic::Schema;
-use tailcall_valid::{Cause, Valid, Validator};
+use gqlforge_valid::{Cause, Valid, Validator};
 
 use super::{Error, Result};
 use crate::core::async_graphql_hyper::{GraphQLRequest, GraphQLRequestLike};

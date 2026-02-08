@@ -253,7 +253,7 @@ where
 mod tests {
     use async_graphql_value::ConstValue;
     use serde::{Deserialize, Serialize};
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::ValueStore;
     use crate::core::blueprint::Blueprint;

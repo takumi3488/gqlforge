@@ -6,7 +6,7 @@ use std::time::Duration;
 use derive_setters::Setters;
 use http::header::{HeaderMap, HeaderName, HeaderValue};
 use rustls_pki_types::CertificateDer;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::BlueprintError;
 use crate::core::blueprint::Cors;

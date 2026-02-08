@@ -4,7 +4,7 @@ use async_graphql_value::ConstValue;
 use directive::Directive;
 use interface_resolver::update_interface_resolver;
 use regex::Regex;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 use union_resolver::update_union_resolver;
 
 use crate::core::blueprint::*;

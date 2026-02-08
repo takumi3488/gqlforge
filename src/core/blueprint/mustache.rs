@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::{BlueprintError, FieldDefinition};
 use crate::core::config::{self, Config};
@@ -201,7 +201,7 @@ impl FieldDefinition {
 
 #[cfg(test)]
 mod test {
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::MustachePartsValidator;
     use crate::core::blueprint::{FieldDefinition, InputFieldDefinition};

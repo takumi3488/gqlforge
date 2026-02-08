@@ -5,7 +5,7 @@ use std::fmt::{Display, Write};
 use std::ops::Deref;
 
 use gqlforge_macros::MergeRight;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::config::directive::to_directive;
 use crate::core::config::{

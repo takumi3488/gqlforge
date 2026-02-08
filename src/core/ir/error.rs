@@ -104,8 +104,8 @@ impl ErrorExtensions for Error {
     }
 }
 
-impl<'a> From<tailcall_valid::ValidationError<&'a str>> for Error {
-    fn from(value: tailcall_valid::ValidationError<&'a str>) -> Self {
+impl<'a> From<gqlforge_valid::ValidationError<&'a str>> for Error {
+    fn from(value: gqlforge_valid::ValidationError<&'a str>) -> Self {
         Error::APIValidation(
             value
                 .as_vec()

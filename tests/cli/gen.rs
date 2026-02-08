@@ -279,7 +279,7 @@ pub mod test {
         use gqlforge::core::blueprint::Blueprint;
         use gqlforge::core::config::{self, ConfigModule};
         use gqlforge::core::generator::Generator as ConfigGenerator;
-        use tailcall_valid::{ValidateInto, Validator};
+        use gqlforge_valid::{ValidateInto, Validator};
 
         use super::http::NativeHttpTest;
         use crate::env::Env;

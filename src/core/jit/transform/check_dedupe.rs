@@ -1,6 +1,6 @@
 use std::convert::Infallible;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::ir::model::IR;
 use crate::core::jit::OperationPlan;

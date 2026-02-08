@@ -379,7 +379,7 @@ pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
 
 #[cfg(test)]
 mod test {
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::*;
     use crate::core::async_graphql_hyper::GraphQLRequest;

@@ -5,7 +5,7 @@ use std::time::Duration;
 use async_graphql::async_trait;
 use async_graphql::futures_util::future::join_all;
 use async_graphql_value::ConstValue;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::transformations::{BodyBatching, QueryBatching};
 use crate::core::config::group_by::GroupBy;

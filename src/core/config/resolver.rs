@@ -4,7 +4,7 @@ use async_graphql::parser::types::ConstDirective;
 use async_graphql::Positioned;
 use gqlforge_macros::{CustomResolver, MergeRight};
 use serde::{Deserialize, Serialize};
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::{Call, EntityResolver, Expr, GraphQL, Grpc, Http, JS};
 use crate::core::directive::DirectiveCodec;

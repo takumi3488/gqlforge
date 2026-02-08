@@ -1,7 +1,7 @@
 use std::convert::Infallible;
 use std::fmt::Debug;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::blueprint::{Auth, DynamicValue};
 use crate::core::ir::model::IR;

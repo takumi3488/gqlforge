@@ -1,5 +1,5 @@
 use serde_json::{Map, Value};
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use super::OperationTypeGenerator;
 use crate::core::config::{Config, Field, Type};

@@ -1,7 +1,7 @@
 use std::str::FromStr;
 
 use http::header::{HeaderMap, HeaderName, HeaderValue};
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 use url::Url;
 
 use super::{BlueprintError, TryFoldConfig};

@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 
 use anyhow::{bail, Result};
 use async_graphql::Value;
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use super::TypedValue;
 
@@ -82,7 +82,7 @@ impl KeyedDiscriminator {
 mod tests {
     use async_graphql::Value;
     use serde_json::json;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
     use test_log::test;
 
     use super::KeyedDiscriminator;

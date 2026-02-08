@@ -2,7 +2,7 @@ use std::fmt::{Debug, Display};
 
 use colored::Colorize;
 use derive_setters::Setters;
-use tailcall_valid::ValidationError;
+use gqlforge_valid::ValidationError;
 
 use crate::core::error::Error as CoreError;
 
@@ -235,7 +235,7 @@ impl From<Box<dyn std::error::Error>> for Errata {
 mod tests {
     use pretty_assertions::assert_eq;
     use stripmargin::StripMargin;
-    use tailcall_valid::Cause;
+    use gqlforge_valid::Cause;
 
     use super::*;
 

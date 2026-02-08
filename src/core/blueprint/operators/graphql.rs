@@ -1,6 +1,6 @@
 use std::collections::{HashMap, HashSet};
 
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::BlueprintError;
 use crate::core::config::{Config, ConfigModule, GraphQL, GraphQLOperationType};

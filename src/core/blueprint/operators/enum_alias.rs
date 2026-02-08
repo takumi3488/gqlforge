@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::blueprint::*;
 use crate::core::config;

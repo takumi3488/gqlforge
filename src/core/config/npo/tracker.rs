@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 use std::fmt::{Display, Formatter};
 
-use tailcall_chunk::Chunk;
+use gqlforge_chunk::Chunk;
 
 use crate::core::config::Config;
 

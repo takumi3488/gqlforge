@@ -2,7 +2,7 @@ use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use convert_case::{Case, Casing};
 use serde_json::Value;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 use url::Url;
 
 use super::json::{self, GraphQLTypesGenerator};
@@ -138,7 +138,7 @@ impl Transform for FromJsonGenerator<'_> {
 
 #[cfg(test)]
 mod tests {
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use crate::core::config::transformer::Preset;
     use crate::core::generator::generator::test::JsonFixture;

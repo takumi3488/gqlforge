@@ -1,7 +1,7 @@
 use std::convert::Infallible;
 
 use reqwest::Request;
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::http::DataLoaderRequest;
 use crate::core::Transform;
@@ -73,7 +73,7 @@ mod tests {
     use http::Method;
     use reqwest::Request;
     use serde_json::json;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::*;
     use crate::core::http::DataLoaderRequest;

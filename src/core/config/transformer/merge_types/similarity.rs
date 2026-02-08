@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::pair_map::PairMap;
 use super::pair_set::PairSet;
@@ -138,7 +138,7 @@ impl<'a> Similarity<'a> {
 
 #[cfg(test)]
 mod test {
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::Similarity;
     use crate::core::config::{config, Config, Field};

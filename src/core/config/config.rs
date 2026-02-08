@@ -11,7 +11,7 @@ use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum::IntoEnumIterator;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::directive::Directive;
 use super::from_document::from_document;

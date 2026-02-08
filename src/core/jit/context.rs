@@ -111,7 +111,7 @@ impl ResolverContextLike for Context<'_, ConstValue, ConstValue> {
 #[cfg(test)]
 mod test {
     use async_graphql_value::ConstValue;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::{Context, RequestContext};
     use crate::core::blueprint::Blueprint;

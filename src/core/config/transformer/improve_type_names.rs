@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashSet};
 
 use convert_case::{Case, Casing};
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use super::RenameTypes;
 use crate::core::config::Config;
@@ -132,7 +132,7 @@ mod test {
 
     use anyhow::Ok;
     use gqlforge_fixtures::configs;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::ImproveTypeNames;
     use crate::core::config::Config;

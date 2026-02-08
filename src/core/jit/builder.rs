@@ -388,7 +388,7 @@ impl<'a> Builder<'a> {
 #[cfg(test)]
 mod tests {
     use pretty_assertions::assert_eq;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::*;
     use crate::core::blueprint::Blueprint;

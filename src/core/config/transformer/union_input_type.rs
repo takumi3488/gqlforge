@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::config::{Arg, Config, Field, Type};
 use crate::core::transform::Transform;
@@ -282,7 +282,7 @@ impl<'cfg> Visitor<'cfg> {
 #[cfg(test)]
 mod tests {
     use insta::assert_snapshot;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::UnionInputType;
     use crate::core::transform::Transform;

@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashSet};
 
 use directive::to_directive;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::*;
 use crate::core::config::{Config, Field, Type};

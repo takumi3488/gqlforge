@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use indexmap::IndexMap;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::config::Config;
 use crate::core::Transform;
@@ -142,7 +142,7 @@ impl Transform for RenameTypes {
 mod test {
     use indexmap::IndexMap;
     use maplit::hashmap;
-    use tailcall_valid::{ValidationError, Validator};
+    use gqlforge_valid::{ValidationError, Validator};
 
     use super::RenameTypes;
     use crate::core::config::Config;

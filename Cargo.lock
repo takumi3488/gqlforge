@@ -1081,7 +1081,7 @@ checksum = "d8b9f2e4c67f833b660cdb0a3523065869fb35570177239812ed4c905aeff87b"
 dependencies = [
  "bitflags 2.10.0",
  "crossterm_winapi",
- "derive_more 2.1.1",
+ "derive_more",
  "document-features",
  "mio",
  "parking_lot",
@@ -1320,32 +1320,11 @@ dependencies = [
 
 [[package]]
 name = "derive_more"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4a9b99b9cbbe49445b21764dc0625032a89b145a2642e67603e1c936f5458d05"
-dependencies = [
- "derive_more-impl 1.0.0",
-]
-
-[[package]]
-name = "derive_more"
 version = "2.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d751e9e49156b02b44f9c1815bcb94b984cdcc4396ecc32521c739452808b134"
 dependencies = [
- "derive_more-impl 2.1.1",
-]
-
-[[package]]
-name = "derive_more-impl"
-version = "1.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "cb7330aeadfbe296029522e6c40f315320aba36fc43a5b3632f3795348f3bd22"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.114",
- "unicode-xid",
+ "derive_more-impl",
 ]
 
 [[package]]
@@ -1571,17 +1550,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "eventsource-stream"
-version = "0.2.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "74fef4569247a5f429d9156b9d0a2599914385dd189c539334c625d8099d90ab"
-dependencies = [
- "futures-core",
- "nom",
- "pin-project-lite",
-]
-
-[[package]]
 name = "exitcode"
 version = "1.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1797,23 +1765,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "genai"
-version = "0.1.7-wip"
-source = "git+https://github.com/laststylebender14/rust-genai.git?rev=63a542ce20132503c520f4e07108e0d768f243c3#63a542ce20132503c520f4e07108e0d768f243c3"
-dependencies = [
- "bytes",
- "derive_more 1.0.0",
- "eventsource-stream",
- "futures",
- "reqwest 0.12.28",
- "reqwest-eventsource",
- "serde",
- "serde_json",
- "tokio",
- "tokio-stream",
-]
-
-[[package]]
 name = "generic-array"
 version = "0.14.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1904,7 +1855,7 @@ dependencies = [
  "dashmap",
  "datatest-stable",
  "derive-getters",
- "derive_more 2.1.1",
+ "derive_more",
  "derive_setters",
  "dotenvy",
  "exitcode",
@@ -1913,8 +1864,8 @@ dependencies = [
  "futures-channel",
  "futures-timer",
  "futures-util",
- "genai",
  "getrandom 0.2.17",
+ "gqlforge-chunk",
  "gqlforge-fixtures",
  "gqlforge-formatter",
  "gqlforge-hasher",
@@ -1922,6 +1873,7 @@ dependencies = [
  "gqlforge-macros",
  "gqlforge-tracker",
  "gqlforge-typedefs-common",
+ "gqlforge-valid",
  "gqlforge-version",
  "headers",
  "htpasswd-verify",
@@ -1989,8 +1941,6 @@ dependencies = [
  "stripmargin",
  "strum",
  "strum_macros",
- "tailcall-chunk",
- "tailcall-valid",
  "tempfile",
  "test-log",
  "thiserror 2.0.18",
@@ -2011,11 +1961,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "gqlforge-chunk"
+version = "0.1.0"
+
+[[package]]
 name = "gqlforge-fixtures"
 version = "0.1.0"
 dependencies = [
  "convert_case 0.11.0",
- "derive_more 2.1.1",
+ "derive_more",
  "indenter",
 ]
 
@@ -2066,7 +2020,7 @@ dependencies = [
  "async-trait",
  "chrono",
  "convert_case 0.11.0",
- "derive_more 2.1.1",
+ "derive_more",
  "gqlforge-version",
  "http 1.4.0",
  "lazy_static",
@@ -2113,7 +2067,7 @@ dependencies = [
 name = "gqlforge-upstream-grpc"
 version = "0.1.0"
 dependencies = [
- "derive_more 2.1.1",
+ "derive_more",
  "gqlforge-fixtures",
  "headers",
  "http 1.4.0",
@@ -2139,6 +2093,19 @@ dependencies = [
  "tracing",
  "tracing-opentelemetry",
  "tracing-subscriber",
+]
+
+[[package]]
+name = "gqlforge-valid"
+version = "0.1.0"
+dependencies = [
+ "derive_setters",
+ "http 1.4.0",
+ "regex",
+ "serde",
+ "serde_json",
+ "serde_path_to_error",
+ "thiserror 2.0.18",
 ]
 
 [[package]]
@@ -2577,7 +2544,6 @@ dependencies = [
  "tokio",
  "tokio-rustls 0.26.4",
  "tower-service",
- "webpki-roots 1.0.6",
 ]
 
 [[package]]
@@ -4482,7 +4448,7 @@ dependencies = [
  "wasm-bindgen",
  "wasm-bindgen-futures",
  "web-sys",
- "webpki-roots 0.25.4",
+ "webpki-roots",
  "winreg 0.50.0",
 ]
 
@@ -4501,31 +4467,23 @@ dependencies = [
  "http-body 1.0.1",
  "http-body-util",
  "hyper 1.8.1",
- "hyper-rustls 0.27.7",
  "hyper-util",
  "js-sys",
  "log",
  "percent-encoding",
  "pin-project-lite",
- "quinn",
- "rustls 0.23.36",
- "rustls-pki-types",
  "serde",
  "serde_json",
  "serde_urlencoded",
  "sync_wrapper 1.0.2",
  "tokio",
- "tokio-rustls 0.26.4",
- "tokio-util",
  "tower",
  "tower-http",
  "tower-service",
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
- "wasm-streams 0.4.2",
  "web-sys",
- "webpki-roots 1.0.6",
 ]
 
 [[package]]
@@ -4565,24 +4523,8 @@ dependencies = [
  "url",
  "wasm-bindgen",
  "wasm-bindgen-futures",
- "wasm-streams 0.5.0",
+ "wasm-streams",
  "web-sys",
-]
-
-[[package]]
-name = "reqwest-eventsource"
-version = "0.6.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "632c55746dbb44275691640e7b40c907c16a2dc1a5842aa98aaec90da6ec6bde"
-dependencies = [
- "eventsource-stream",
- "futures-core",
- "futures-timer",
- "mime",
- "nom",
- "pin-project-lite",
- "reqwest 0.12.28",
- "thiserror 1.0.69",
 ]
 
 [[package]]
@@ -5507,28 +5449,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7b2093cf4c8eb1e67749a6762251bc9cd836b6fc171623bd0a9d324d37af2417"
 
 [[package]]
-name = "tailcall-chunk"
-version = "0.3.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "2ce6ff6d7f5d6382f5486437dc3ba1e8b0105d34b45666a396263763b7ffe8df"
-
-[[package]]
-name = "tailcall-valid"
-version = "0.1.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d32dc2612dd67fdbe214cd396b388a386974d57daf732f00c2562b3b2421778d"
-dependencies = [
- "derive_setters",
- "http 1.4.0",
- "regex",
- "serde",
- "serde_json",
- "serde_path_to_error",
- "thiserror 1.0.69",
- "wasm-bindgen",
-]
-
-[[package]]
 name = "tempfile"
 version = "3.24.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6332,19 +6252,6 @@ dependencies = [
 
 [[package]]
 name = "wasm-streams"
-version = "0.4.2"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "15053d8d85c7eccdbefef60f06769760a563c7f0a9d6902a13d35c7800b0ad65"
-dependencies = [
- "futures-util",
- "js-sys",
- "wasm-bindgen",
- "wasm-bindgen-futures",
- "web-sys",
-]
-
-[[package]]
-name = "wasm-streams"
 version = "0.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "9d1ec4f6517c9e11ae630e200b2b65d193279042e28edd4a2cda233e46670bbb"
@@ -6390,15 +6297,6 @@ name = "webpki-roots"
 version = "0.25.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5f20c57d8d7db6d3b86154206ae5d8fba62dd39573114de97c2cb0578251f8e1"
-
-[[package]]
-name = "webpki-roots"
-version = "1.0.6"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "22cfaf3c063993ff62e73cb4311efde4db1efb31ab78a3e5c457939ad5cc0bed"
-dependencies = [
- "rustls-pki-types",
-]
 
 [[package]]
 name = "which"

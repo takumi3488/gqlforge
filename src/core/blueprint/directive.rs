@@ -3,7 +3,7 @@ use std::collections::HashMap;
 use async_graphql::parser::types::ConstDirective;
 use async_graphql::Name;
 use serde_json::Value;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::BlueprintError;
 use crate::core::{config, pos};

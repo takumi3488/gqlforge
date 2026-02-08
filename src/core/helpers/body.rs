@@ -1,5 +1,5 @@
 use serde_json::Value;
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::grpc::request_template::RequestBody;
 use crate::core::mustache::Mustache;
@@ -21,7 +21,7 @@ pub fn to_body(body: Option<&Value>) -> Valid<Option<RequestBody>, String> {
 
 #[cfg(test)]
 mod tests {
-    use tailcall_valid::Valid;
+    use gqlforge_valid::Valid;
 
     use super::to_body;
     use crate::core::grpc::request_template::RequestBody;

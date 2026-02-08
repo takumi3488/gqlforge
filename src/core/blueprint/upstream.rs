@@ -1,7 +1,7 @@
 use std::collections::BTreeSet;
 
 use derive_setters::Setters;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::BlueprintError;
 use crate::core::config::{self, Batch, ConfigModule};

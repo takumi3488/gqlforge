@@ -6,7 +6,7 @@ use std::collections::BTreeSet;
 use anyhow::{bail, Result};
 use async_graphql::Value;
 use keyed_discriminator::KeyedDiscriminator;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 use type_field_discriminator::TypeFieldDiscriminator;
 
 use crate::core::json::{JsonLike, JsonObjectLike};

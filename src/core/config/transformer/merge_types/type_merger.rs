@@ -1,7 +1,7 @@
 use std::collections::HashSet;
 
 use indexmap::{IndexMap, IndexSet};
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::mergeable_types::MergeableTypes;
 use super::similarity::Similarity;
@@ -245,7 +245,7 @@ impl Transform for TypeMerger {
 #[cfg(test)]
 mod test {
     use gqlforge_fixtures;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::TypeMerger;
     use crate::core::config::{Config, Field, Type};

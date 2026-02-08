@@ -4,7 +4,7 @@ use derive_setters::Setters;
 use prost_reflect::prost_types::FileDescriptorSet;
 use prost_reflect::DescriptorPool;
 use serde_json::Value;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 use url::Url;
 
 use super::from_proto::from_proto;

@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use serde::Deserialize;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use crate::core::blueprint::Blueprint;
 use crate::core::config::{Config, ConfigModule};

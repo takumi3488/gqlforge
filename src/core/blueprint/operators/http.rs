@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 use template_validation::validate_argument;
 
 use crate::core::blueprint::*;

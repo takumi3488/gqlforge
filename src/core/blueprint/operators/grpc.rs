@@ -2,7 +2,7 @@ use std::fmt::Display;
 
 use prost_reflect::prost_types::FileDescriptorSet;
 use prost_reflect::FieldDescriptor;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::apply_select;
 use crate::core::blueprint::BlueprintError;
@@ -256,7 +256,7 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
 mod tests {
     use std::convert::TryFrom;
 
-    use tailcall_valid::ValidationError;
+    use gqlforge_valid::ValidationError;
 
     use super::GrpcMethod;
     use crate::core::blueprint::BlueprintError;

@@ -1,5 +1,5 @@
 use convert_case::{Case, Casing};
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use super::http_directive_generator::HttpDirectiveGenerator;
 use crate::core::config::{Arg, Config, Field, GraphQLOperationType, Resolver};
@@ -79,7 +79,7 @@ impl OperationTypeGenerator {
 mod test {
     use std::collections::BTreeMap;
 
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::OperationTypeGenerator;
     use crate::core::config::{Config, Field, Type};

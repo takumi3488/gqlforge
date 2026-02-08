@@ -3,7 +3,7 @@ use std::path::Path;
 use futures_util::future::join_all;
 use rustls_pemfile;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer};
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 use url::Url;
 
 use super::{ConfigModule, Content, Link, LinkType, PrivateKey};

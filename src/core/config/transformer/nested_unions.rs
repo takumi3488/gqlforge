@@ -1,6 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::config::{Config, Union};
 use crate::core::transform::Transform;
@@ -72,7 +72,7 @@ impl<'cfg> Visitor<'cfg> {
 #[cfg(test)]
 mod tests {
     use insta::assert_snapshot;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::NestedUnions;
     use crate::core::transform::Transform;

@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use crate::core::config::Config;
 use crate::core::transform::Transform;
@@ -154,7 +154,7 @@ mod tests {
     use gqlforge_fixtures::protobuf;
     use insta::assert_snapshot;
     use prost_reflect::prost_types::FileDescriptorSet;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use crate::core::config::transformer::AmbiguousType;
     use crate::core::config::{self, Config};

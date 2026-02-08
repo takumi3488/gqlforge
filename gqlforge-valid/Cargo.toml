@@ -1,0 +1,15 @@
+[package]
+name = "gqlforge-valid"
+version = "0.1.0"
+edition = "2021"
+description = "Validation utilities for gqlforge"
+license = "Apache-2.0"
+
+[dependencies]
+derive_setters = "0.1.6"
+regex = "1.12.3"
+thiserror = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+serde_path_to_error = "0.1.20"
+http = { workspace = true }

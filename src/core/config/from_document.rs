@@ -9,7 +9,7 @@ use async_graphql::parser::Positioned;
 use async_graphql::Name;
 use async_graphql_value::ConstValue;
 use indexmap::IndexMap;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use super::directive::{to_directive, Directive};
 use super::{Alias, Discriminate, Resolver, RuntimeConfig, Telemetry, FEDERATION_DIRECTIVES};

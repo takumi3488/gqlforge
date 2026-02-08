@@ -1,5 +1,5 @@
 use http::header::HeaderName;
-use tailcall_valid::{Valid, ValidationError, Validator};
+use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use crate::core::config::KeyValue;
 use crate::core::mustache::Mustache;
@@ -25,7 +25,7 @@ pub fn to_mustache_headers(headers: &[KeyValue]) -> Valid<MustacheHeaders, Strin
 mod tests {
     use anyhow::Result;
     use http::header::HeaderName;
-    use tailcall_valid::Validator;
+    use gqlforge_valid::Validator;
 
     use super::to_mustache_headers;
     use crate::core::config::KeyValue;

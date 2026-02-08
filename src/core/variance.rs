@@ -1,4 +1,4 @@
-use tailcall_valid::Valid;
+use gqlforge_valid::Valid;
 
 use crate::core::merge_right::MergeRight;
 use crate::core::primitive::Primitive;

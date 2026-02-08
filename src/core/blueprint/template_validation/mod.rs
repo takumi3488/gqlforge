@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::BlueprintError;
 use crate::core::config::{Config, Field};
@@ -59,7 +59,7 @@ pub fn validate_argument(
 
 #[cfg(test)]
 mod test {
-    use tailcall_valid::{Valid, Validator};
+    use gqlforge_valid::{Valid, Validator};
 
     use super::validate_argument;
     use crate::core::blueprint::BlueprintError;

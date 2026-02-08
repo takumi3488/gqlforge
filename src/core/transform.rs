@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 /// A configuration transformer that allows us to perform various
 /// transformations on the configuration before it's further processed for

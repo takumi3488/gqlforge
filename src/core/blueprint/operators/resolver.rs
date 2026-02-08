@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::{compile_call, compile_expr, compile_graphql, compile_grpc, compile_http, compile_js};
 use crate::core::blueprint::{BlueprintError, FieldDefinition};

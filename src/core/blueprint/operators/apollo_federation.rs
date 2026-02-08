@@ -2,7 +2,7 @@ use std::collections::HashMap;
 use std::fmt::Write;
 
 use async_graphql::parser::types::ServiceDocument;
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::{compile_resolver, CompileResolver};
 use crate::core::blueprint::{Blueprint, BlueprintError, Definition, TryFoldConfig};

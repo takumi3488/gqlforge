@@ -1,4 +1,4 @@
-use tailcall_valid::{Valid, Validator};
+use gqlforge_valid::{Valid, Validator};
 
 use super::BlueprintError;
 use crate::core::blueprint::FieldDefinition;

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use async_graphql_value::{ConstValue, Value};
 use futures_util::future::join_all;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::context::Context;
 use super::exec::{Executor, IRExecutor};

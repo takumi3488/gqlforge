@@ -5,7 +5,7 @@ use async_graphql::parser::types::{
 };
 use async_graphql::{Name, Positioned};
 use async_graphql_value::ConstValue;
-use tailcall_valid::Validator;
+use gqlforge_valid::Validator;
 
 use super::blueprint;
 use super::directive::{to_const_directive, Directive};

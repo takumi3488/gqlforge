@@ -5,7 +5,7 @@ use async_graphql::parser::types::{Directive, Type};
 use async_graphql::{Name, ServerError};
 use derive_more::{Debug, From};
 use serde_json;
-use tailcall_valid::ValidationError;
+use gqlforge_valid::ValidationError;
 
 #[derive(From, thiserror::Error, Debug)]
 pub enum Error {
