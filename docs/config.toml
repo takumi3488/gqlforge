@@ -108,6 +108,4 @@ items = [
   { path = "contributors/testing", title = "Testing" },
   { path = "contributors/integration-testing", title = "Integration Testing" },
   { path = "contributors/telemetry", title = "Telemetry" },
-  { path = "contributors/micro-benchmark", title = "Micro Benchmarks" },
-  { path = "contributors/wrk-benchmark", title = "Wrk Benchmarks" },
 ]

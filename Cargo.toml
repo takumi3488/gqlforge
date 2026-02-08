@@ -199,7 +199,6 @@ cacache = { version = "13.1.0", default-features = false, features = [
   "tokio-runtime",
   "mmap",
 ] }
-criterion = "0.8.2"
 datatest-stable = "0.3.3"
 flate2 = "1.1.9"
 gqlforge-fixtures = { path = "./gqlforge-fixtures", version = "0.1.0" }
@@ -290,14 +289,6 @@ lto = 'fat'
 opt-level = 3
 overflow-checks = false
 panic = 'abort'
-
-[profile.benchmark]
-debug = true
-inherits = "release"
-
-[[bench]]
-harness = false
-name = "gqlforge_benches"
 
 [[test]]
 harness = false
