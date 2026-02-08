@@ -153,12 +153,12 @@ impl From<hyper::Error> for Errata {
 impl From<anyhow::Error> for Errata {
     fn from(error: anyhow::Error) -> Self {
         // Convert other errors to Errata
-        
+
         match error.downcast::<Errata>() {
             Ok(cli_error) => cli_error,
             Err(error) => {
                 // Convert other errors to Errata
-                
+
                 match error.downcast::<ValidationError<String>>() {
                     Ok(validation_error) => Errata::from(validation_error),
                     Err(error) => {
@@ -233,9 +233,9 @@ impl From<Box<dyn std::error::Error>> for Errata {
 
 #[cfg(test)]
 mod tests {
+    use gqlforge_valid::Cause;
     use pretty_assertions::assert_eq;
     use stripmargin::StripMargin;
-    use gqlforge_valid::Cause;
 
     use super::*;
 
@@ -305,15 +305,14 @@ mod tests {
 
     #[test]
     fn test_title_trace_caused_by() {
-        let error = Errata::new("Configuration Error").caused_by(vec![Errata::new(
-            "URL needs to be specified",
-        )
-        .trace(vec![
-            "User".into(),
-            "posts".into(),
-            "@http".into(),
-            "url".into(),
-        ])]);
+        let error = Errata::new("Configuration Error").caused_by(vec![
+            Errata::new("URL needs to be specified").trace(vec![
+                "User".into(),
+                "posts".into(),
+                "@http".into(),
+                "url".into(),
+            ]),
+        ]);
 
         let expected = r"|Configuration Error
                      |Caused by:

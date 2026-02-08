@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
-use indexmap::IndexMap;
 use gqlforge_valid::{Valid, Validator};
+use indexmap::IndexMap;
 
 use super::{Cache, ConfigModule};
 use crate::core::config::{Arg, Config, Enum, Field, RootSchema, Type};
@@ -420,8 +420,8 @@ where
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
-    use insta::assert_snapshot;
     use gqlforge_valid::Validator;
+    use insta::assert_snapshot;
 
     use super::*;
     use crate::core::config::ConfigModule;

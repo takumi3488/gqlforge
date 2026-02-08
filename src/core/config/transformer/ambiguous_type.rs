@@ -152,16 +152,16 @@ impl Transform for AmbiguousType {
 #[cfg(test)]
 mod tests {
     use gqlforge_fixtures::protobuf;
+    use gqlforge_valid::Validator;
     use insta::assert_snapshot;
     use prost_reflect::prost_types::FileDescriptorSet;
-    use gqlforge_valid::Validator;
 
+    use crate::core::Type;
     use crate::core::config::transformer::AmbiguousType;
     use crate::core::config::{self, Config};
     use crate::core::generator::{Generator, Input};
     use crate::core::proto_reader::ProtoMetadata;
     use crate::core::transform::Transform;
-    use crate::core::Type;
 
     fn build_qry(mut config: Config) -> Config {
         let mut query = config::Type::default();

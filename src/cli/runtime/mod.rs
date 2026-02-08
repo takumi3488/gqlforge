@@ -13,7 +13,7 @@ use crate::core::blueprint::Blueprint;
 use crate::core::cache::InMemoryCache;
 use crate::core::runtime::TargetRuntime;
 use crate::core::worker::{Command, Event};
-use crate::core::{blueprint, EnvIO, FileIO, HttpIO, WorkerIO};
+use crate::core::{EnvIO, FileIO, HttpIO, WorkerIO, blueprint};
 
 // Provides access to env in native rust environment
 fn init_env() -> Arc<dyn EnvIO> {

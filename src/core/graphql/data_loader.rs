@@ -97,21 +97,22 @@ fn extract_responses(
 ) -> HashMap<DataLoaderRequest, Response<async_graphql::Value>> {
     let mut hashmap = HashMap::new();
     if let Ok(res) = result
-        && let async_graphql_value::ConstValue::List(values) = res.body {
-            for (i, request) in keys.iter().enumerate() {
-                let value = values
-                    .get(i)
-                    .unwrap_or(&async_graphql_value::ConstValue::Null);
-                hashmap.insert(
-                    request.clone(),
-                    Response {
-                        status: res.status,
-                        headers: res.headers.clone(),
-                        body: value.clone(),
-                    },
-                );
-            }
+        && let async_graphql_value::ConstValue::List(values) = res.body
+    {
+        for (i, request) in keys.iter().enumerate() {
+            let value = values
+                .get(i)
+                .unwrap_or(&async_graphql_value::ConstValue::Null);
+            hashmap.insert(
+                request.clone(),
+                Response {
+                    status: res.status,
+                    headers: res.headers.clone(),
+                    body: value.clone(),
+                },
+            );
         }
+    }
     hashmap
 }
 

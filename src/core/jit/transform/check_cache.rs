@@ -3,9 +3,9 @@ use std::num::NonZeroU64;
 
 use gqlforge_valid::Valid;
 
+use crate::core::Transform;
 use crate::core::ir::model::IR;
 use crate::core::jit::OperationPlan;
-use crate::core::Transform;
 
 /// A transformer that sets the minimum cache TTL for the operation plan based
 /// on the IR.

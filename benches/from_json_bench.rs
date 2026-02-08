@@ -1,8 +1,8 @@
 use criterion::Criterion;
 use gqlforge::cli::runtime::NativeHttp;
+use gqlforge::core::HttpIO;
 use gqlforge::core::generator::{Generator, Input};
 use gqlforge::core::http::Method as HTTPMethod;
-use gqlforge::core::HttpIO;
 use http::Method;
 use serde_json::Value;
 

@@ -1,23 +1,23 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::fmt::{self, Display};
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 use async_graphql::parser::types::ServiceDocument;
 use derive_setters::Setters;
+use gqlforge_typedefs_common::ServiceDocumentBuilder;
 use gqlforge_typedefs_common::directive_definition::DirectiveDefinition;
 use gqlforge_typedefs_common::input_definition::InputDefinition;
-use gqlforge_typedefs_common::ServiceDocumentBuilder;
+use gqlforge_valid::{Valid, Validator};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
 use strum::IntoEnumIterator;
-use gqlforge_valid::{Valid, Validator};
 
 use super::directive::Directive;
 use super::from_document::from_document;
 use super::{
-    AddField, Alias, Cache, Call, Discriminate, Expr, GraphQL, Grpc, Http, Link, Modify, Omit,
-    Protected, ResolverSet, Server, Telemetry, Upstream, JS,
+    AddField, Alias, Cache, Call, Discriminate, Expr, GraphQL, Grpc, Http, JS, Link, Modify, Omit,
+    Protected, ResolverSet, Server, Telemetry, Upstream,
 };
 use crate::core::config::npo::QueryPath;
 use crate::core::config::source::Source;

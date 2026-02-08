@@ -4,12 +4,12 @@ use std::{env, fmt};
 use colored::Colorize;
 use tracing::level_filters::LevelFilter;
 use tracing::{Event, Level, Metadata, Subscriber};
-use tracing_subscriber::filter::{filter_fn, FilterFn};
+use tracing_subscriber::filter::{FilterFn, filter_fn};
 use tracing_subscriber::fmt::format::Writer;
 use tracing_subscriber::fmt::{FmtContext, FormatEvent, FormatFields};
 use tracing_subscriber::layer::SubscriberExt;
 use tracing_subscriber::registry::LookupSpan;
-use tracing_subscriber::{registry, Layer};
+use tracing_subscriber::{Layer, registry};
 struct FmtLevel<'a> {
     level: &'a Level,
     ansi: bool,

@@ -1,10 +1,10 @@
 use std::convert::Infallible;
 
-use reqwest::Request;
 use gqlforge_valid::Valid;
+use reqwest::Request;
 
-use crate::core::http::DataLoaderRequest;
 use crate::core::Transform;
+use crate::core::http::DataLoaderRequest;
 
 pub struct QueryBatching<'a> {
     dl_requests: &'a [&'a DataLoaderRequest],
@@ -47,9 +47,9 @@ impl Transform for QueryBatching<'_> {
 mod tests {
     use std::collections::HashMap;
 
+    use gqlforge_valid::Validator;
     use http::Method;
     use reqwest::Url;
-    use gqlforge_valid::Validator;
 
     use super::*;
 

@@ -1,19 +1,21 @@
-//! A Rust implementation of a persistent data structure that provides O(1) append and concatenation operations
-//! through structural sharing.
+//! A Rust implementation of a persistent data structure that provides O(1)
+//! append and concatenation operations through structural sharing.
 //!
 //! # Overview
 //! `Chunk` is a persistent data structure that offers:
 //! - **O(1) Append Operations**: Add elements to your chunk in constant time
 //! - **O(1) Concatenation**: Combine two chunks efficiently
-//! - **Immutable/Persistent**: All operations create new versions while preserving the original
+//! - **Immutable/Persistent**: All operations create new versions while
+//!   preserving the original
 //! - **Memory Efficient**: Uses structural sharing via reference counting
 //! - **Safe Rust**: Implemented using 100% safe Rust
 //!
 //! # Theoretical Background
 //!
-//! This implementation is inspired by the concepts presented in Hinze and Paterson's work on
-//! [Finger Trees](https://en.wikipedia.org/wiki/Finger_tree), though simplified for our specific use case.
-//! While our implementation differs in structure, it shares similar performance goals and theoretical foundations.
+//! This implementation is inspired by the concepts presented in Hinze and
+//! Paterson's work on [Finger Trees](https://en.wikipedia.org/wiki/Finger_tree), though simplified for our specific use case.
+//! While our implementation differs in structure, it shares similar performance
+//! goals and theoretical foundations.
 //!
 //! ## Relationship to Finger Trees
 //!
@@ -22,7 +24,8 @@
 //! - Concatenation in logarithmic time
 //! - Persistence through structural sharing
 //!
-//! Our `Chunk` implementation achieves similar goals through a simplified approach:
+//! Our `Chunk` implementation achieves similar goals through a simplified
+//! approach:
 //! - We use `Append` nodes for constant-time additions
 //! - The `Concat` variant enables efficient concatenation
 //! - `Rc` (Reference Counting) provides persistence and structural sharing
@@ -117,7 +120,8 @@
 //! - `Empty`: Represents an empty chunk
 //! - `Append`: Represents a single element appended to another chunk
 //! - `Concat`: Represents the concatenation of two chunks
-//! - `TransformFlatten`: Represents a lazy transformation and flattening of elements
+//! - `TransformFlatten`: Represents a lazy transformation and flattening of
+//!   elements
 //!
 //! The data structure achieves its performance characteristics through:
 //! - Structural sharing using `Rc`
@@ -126,7 +130,8 @@
 //!
 //! # Memory Efficiency
 //!
-//! The `Chunk` type uses structural sharing through reference counting (`Rc`), which means:
+//! The `Chunk` type uses structural sharing through reference counting (`Rc`),
+//! which means:
 //! - Appending or concatenating chunks doesn't copy the existing elements
 //! - Memory is automatically freed when no references remain
 //! - Multiple versions of the data structure can coexist efficiently
@@ -141,9 +146,10 @@
 //!
 //! # References
 //!
-//! 1. Ralf Hinze and Ross Paterson. "Finger Trees: A Simple General-purpose Data Structure",
-//!    Journal of Functional Programming 16(2):197-217, 2006.
-//! 2. Chris Okasaki. "Purely Functional Data Structures", Cambridge University Press, 1998.
+//! 1. Ralf Hinze and Ross Paterson. "Finger Trees: A Simple General-purpose
+//!    Data Structure", Journal of Functional Programming 16(2):197-217, 2006.
+//! 2. Chris Okasaki. "Purely Functional Data Structures", Cambridge University
+//!    Press, 1998.
 
 mod chunk;
 pub use chunk::*;

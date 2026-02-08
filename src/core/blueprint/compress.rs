@@ -61,9 +61,10 @@ fn build_dependency_graph(blueprint: &Blueprint) -> HashMap<&str, Vec<&String>> 
                 dependencies.extend(def.fields.iter().map(|field| field.of_type.name()));
                 for def_inner in &blueprint.definitions {
                     if let Definition::Object(def_inner) = def_inner
-                        && def_inner.implements.contains(&def.name) {
-                            dependencies.push(&def_inner.name);
-                        }
+                        && def_inner.implements.contains(&def.name)
+                    {
+                        dependencies.push(&def_inner.name);
+                    }
                 }
             }
             Definition::InputObject(def) => {
@@ -95,11 +96,12 @@ fn identify_referenced_types(
 
     while let Some(type_name) = stack.pop() {
         if referenced_types.insert(type_name.to_string())
-            && let Some(dependencies) = graph.get(type_name) {
-                for dependency in dependencies {
-                    stack.push(dependency);
-                }
+            && let Some(dependencies) = graph.get(type_name)
+        {
+            for dependency in dependencies {
+                stack.push(dependency);
             }
+        }
     }
 
     referenced_types

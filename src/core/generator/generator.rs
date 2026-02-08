@@ -1,15 +1,15 @@
 use std::collections::BTreeMap;
 
 use derive_setters::Setters;
-use prost_reflect::prost_types::FileDescriptorSet;
-use prost_reflect::DescriptorPool;
-use serde_json::Value;
 use gqlforge_valid::Validator;
+use prost_reflect::DescriptorPool;
+use prost_reflect::prost_types::FileDescriptorSet;
+use serde_json::Value;
 use url::Url;
 
 use super::from_proto::from_proto;
 use super::proto::connect_rpc::ConnectRPC;
-use super::{FromJsonGenerator, NameGenerator, RequestSample, PREFIX};
+use super::{FromJsonGenerator, NameGenerator, PREFIX, RequestSample};
 use crate::core::config::{self, Config, ConfigModule, Link, LinkType};
 use crate::core::http::Method;
 use crate::core::merge_right::MergeRight;

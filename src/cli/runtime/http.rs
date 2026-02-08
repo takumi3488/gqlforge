@@ -5,9 +5,9 @@ use bytes::Bytes;
 use gqlforge_http_cache::HttpCacheManager;
 use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
 use once_cell::sync::Lazy;
+use opentelemetry::KeyValue;
 use opentelemetry::metrics::Counter;
 use opentelemetry::trace::SpanKind;
-use opentelemetry::KeyValue;
 use opentelemetry_http::HeaderInjector;
 use opentelemetry_semantic_conventions::trace::{
     HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, NETWORK_PROTOCOL_VERSION, URL_FULL,
@@ -17,8 +17,8 @@ use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use super::HttpIO;
-use crate::core::blueprint::telemetry::Telemetry;
 use crate::core::blueprint::Upstream;
+use crate::core::blueprint::telemetry::Telemetry;
 use crate::core::http::Response;
 
 static HTTP_CLIENT_REQUEST_COUNT: Lazy<Counter<u64>> = Lazy::new(|| {

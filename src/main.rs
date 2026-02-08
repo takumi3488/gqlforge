@@ -3,8 +3,8 @@
 
 use std::cell::Cell;
 
-use gqlforge::core::tracing::default_tracing_gqlforge;
 use gqlforge::core::Errata;
+use gqlforge::core::tracing::default_tracing_gqlforge;
 use tracing::subscriber::DefaultGuard;
 
 thread_local! {

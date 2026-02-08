@@ -3,10 +3,10 @@ use std::fmt::Display;
 use async_graphql_value::{ConstValue, Value};
 
 use super::super::{Arg, Field, OperationPlan, ResolveInputError, Variables};
+use crate::core::Type;
 use crate::core::blueprint::Index;
 use crate::core::ir::model::IO;
 use crate::core::json::{JsonLikeOwned, JsonObjectLike};
-use crate::core::Type;
 
 /// Trait to represent conversion from some dynamic type (with variables)
 /// to the resolved variant based on the additional provided info.
@@ -99,9 +99,10 @@ where
             if let Some(ir) = field.ir.as_mut() {
                 ir.modify_io(&mut |io| {
                     if let IO::GraphQL { req_template, .. } = io
-                        && let Some(selection) = req_template.selection.take() {
-                            req_template.selection = Some(selection.resolve(variables));
-                        }
+                        && let Some(selection) = req_template.selection.take()
+                    {
+                        req_template.selection = Some(selection.resolve(variables));
+                    }
                 });
             }
             Self::resolve_graphql_selection_set(field.selection.as_mut(), variables);

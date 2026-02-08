@@ -1,18 +1,18 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use async_graphql::Name;
+use async_graphql::parser::Positioned;
 use async_graphql::parser::types::{
     ConstDirective, EnumType, FieldDefinition, InputObjectType, InputValueDefinition,
     InterfaceType, ObjectType, SchemaDefinition, ServiceDocument, Type, TypeDefinition, TypeKind,
     TypeSystemDefinition, UnionType,
 };
-use async_graphql::parser::Positioned;
-use async_graphql::Name;
 use async_graphql_value::ConstValue;
-use indexmap::IndexMap;
 use gqlforge_valid::{Valid, ValidationError, Validator};
+use indexmap::IndexMap;
 
-use super::directive::{to_directive, Directive};
-use super::{Alias, Discriminate, Resolver, RuntimeConfig, Telemetry, FEDERATION_DIRECTIVES};
+use super::directive::{Directive, to_directive};
+use super::{Alias, Discriminate, FEDERATION_DIRECTIVES, Resolver, RuntimeConfig, Telemetry};
 use crate::core::config::{
     self, Cache, Config, Enum, Link, Modify, Omit, Protected, RootSchema, Server, Union, Upstream,
     Variant,

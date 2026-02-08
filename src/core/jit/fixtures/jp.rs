@@ -1,17 +1,17 @@
 use std::collections::HashMap;
 
-use serde::Deserialize;
 use gqlforge_valid::Validator;
+use serde::Deserialize;
 
+use crate::core::Transform;
 use crate::core::blueprint::Blueprint;
 use crate::core::config::{Config, ConfigModule};
 use crate::core::jit::builder::Builder;
 use crate::core::jit::store::Store;
 use crate::core::jit::synth::Synth;
 use crate::core::jit::transform::InputResolver;
-use crate::core::jit::{transform, Field, OperationPlan, Variables};
+use crate::core::jit::{Field, OperationPlan, Variables, transform};
 use crate::core::json::{JsonLike, JsonObjectLike};
-use crate::core::Transform;
 
 /// NOTE: This is a bit of a boilerplate reducing module that is used in tests
 /// and benchmarks.

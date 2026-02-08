@@ -71,8 +71,8 @@ impl<'cfg> Visitor<'cfg> {
 
 #[cfg(test)]
 mod tests {
-    use insta::assert_snapshot;
     use gqlforge_valid::Validator;
+    use insta::assert_snapshot;
 
     use super::NestedUnions;
     use crate::core::transform::Transform;

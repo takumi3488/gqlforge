@@ -2,8 +2,8 @@ use std::fmt::Display;
 
 use gqlforge_valid::Valid;
 
-use crate::core::config::{Config, Grpc, Http, Resolver, ResolverSet};
 use crate::core::Transform;
+use crate::core::config::{Config, Grpc, Http, Resolver, ResolverSet};
 
 const HEADER_CONNECT_PROTOCOL_VERSION: &str = "Connect-Protocol-Version";
 
@@ -94,7 +94,7 @@ impl From<Grpc> for Http {
 
 #[cfg(test)]
 mod tests {
-    use serde_json::{json, Value};
+    use serde_json::{Value, json};
 
     use super::*;
     use crate::core::config::KeyValue;

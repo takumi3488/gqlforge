@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use async_graphql::Value;
 use gqlforge_valid::Valid;
 
@@ -38,7 +38,8 @@ impl KeyedDiscriminator {
     /// possible types, an error will be returned.
     pub fn resolve_type(&self, value: &Value) -> Result<String> {
         match value {
-            // INFO: when a value is null you cannot use __typename so we are safe returning whatever
+            // INFO: when a value is null you cannot use __typename so we are safe returning
+            // whatever
             Value::Null => Ok("NULL".to_string()),
             Value::Object(index_map) => {
                 let index_map_len = index_map.len();
@@ -49,15 +50,29 @@ impl KeyedDiscriminator {
                         Ok(type_name)
                     } else {
                         let types: Vec<_> = self.types.clone().into_iter().collect();
-                        bail!("The type `{}` is not in the list of acceptable types {:?} of KeyedDiscriminator(type=\"{}\")", type_name, types, self.type_name)
+                        bail!(
+                            "The type `{}` is not in the list of acceptable types {:?} of KeyedDiscriminator(type=\"{}\")",
+                            type_name,
+                            types,
+                            self.type_name
+                        )
                     }
                 } else if index_map_len == 0 {
-                    bail!("The KeyedDiscriminator(type=\"{}\") cannot discriminate the Value because it contains no keys.", self.type_name)
+                    bail!(
+                        "The KeyedDiscriminator(type=\"{}\") cannot discriminate the Value because it contains no keys.",
+                        self.type_name
+                    )
                 } else {
-                    bail!("The KeyedDiscriminator(type=\"{}\") cannot discriminate the Value because it contains more than one keys.", self.type_name)
+                    bail!(
+                        "The KeyedDiscriminator(type=\"{}\") cannot discriminate the Value because it contains more than one keys.",
+                        self.type_name
+                    )
                 }
-            },
-            _ => bail!("The KeyedDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.", self.type_name)
+            }
+            _ => bail!(
+                "The KeyedDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.",
+                self.type_name
+            ),
         }
     }
 
@@ -70,8 +85,11 @@ impl KeyedDiscriminator {
                 // this is safe to unwrap because we already validated it in `resolve_type``
                 let (_, value) = index_map.into_iter().next().unwrap();
                 value
-            },
-            _ => bail!("The KeyedDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.", self.type_name)
+            }
+            _ => bail!(
+                "The KeyedDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.",
+                self.type_name
+            ),
         };
         value.set_type_name(type_name)?;
         Ok(value)
@@ -81,8 +99,8 @@ impl KeyedDiscriminator {
 #[cfg(test)]
 mod tests {
     use async_graphql::Value;
-    use serde_json::json;
     use gqlforge_valid::Validator;
+    use serde_json::json;
     use test_log::test;
 
     use super::KeyedDiscriminator;
@@ -151,7 +169,12 @@ mod tests {
 
         assert_eq!(
             discriminator
-                .resolve_type(&Value::from_json(json!({ "Fizz": { "foo": "test" }, "Buzz": { "bar": "test" } })).unwrap())
+                .resolve_type(
+                    &Value::from_json(
+                        json!({ "Fizz": { "foo": "test" }, "Buzz": { "bar": "test" } })
+                    )
+                    .unwrap()
+                )
                 .unwrap_err()
                 .to_string(),
             "The KeyedDiscriminator(type=\"Test\") cannot discriminate the Value because it contains more than one keys."

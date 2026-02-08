@@ -1,7 +1,7 @@
 use criterion::Criterion;
 use gqlforge::cli::runtime::NativeHttp;
-use gqlforge::core::blueprint::Blueprint;
 use gqlforge::core::HttpIO;
+use gqlforge::core::blueprint::Blueprint;
 use http::Method;
 
 pub fn benchmark_http_execute_method(c: &mut Criterion) {

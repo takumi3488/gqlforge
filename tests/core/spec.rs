@@ -9,6 +9,7 @@ use anyhow::Context;
 use bytes::Bytes;
 use colored::Colorize;
 use futures_util::future::join_all;
+use gqlforge::core::Mustache;
 use gqlforge::core::app_context::AppContext;
 use gqlforge::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest};
 use gqlforge::core::blueprint::{Blueprint, BlueprintError};
@@ -18,12 +19,11 @@ use gqlforge::core::config::{Config, ConfigModule, ConfigReaderContext, LinkType
 use gqlforge::core::http::handle_request;
 use gqlforge::core::mustache::PathStringEval;
 use gqlforge::core::print_schema::print_schema;
-use gqlforge::core::Mustache;
 use gqlforge_formatter::Parser;
+use gqlforge_valid::{Cause, Valid, ValidationError, Validator};
 use http::{Request, Response};
 use http_body_util::{BodyExt, Full};
 use serde::{Deserialize, Serialize};
-use gqlforge_valid::{Cause, Valid, ValidationError, Validator};
 
 use super::file::File;
 use super::http::Http;

@@ -1,7 +1,7 @@
 use derive_setters::Setters;
+use gqlforge_valid::ValidationError;
 use http::header::{self, HeaderName, HeaderValue, InvalidHeaderValue};
 use http::request::Parts;
-use gqlforge_valid::ValidationError;
 
 use super::BlueprintError;
 use crate::core::config;

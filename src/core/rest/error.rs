@@ -4,8 +4,8 @@ use std::str::ParseBoolError;
 use async_graphql::parser::types::{Directive, Type};
 use async_graphql::{Name, ServerError};
 use derive_more::{Debug, From};
-use serde_json;
 use gqlforge_valid::ValidationError;
+use serde_json;
 
 #[derive(From, thiserror::Error, Debug)]
 pub enum Error {

@@ -119,9 +119,10 @@ fn determine_type_from_schema(name: String, schema: &SchemaObject) -> Type {
 
         if let Some(list) = list
             && let Some(Schema::Object(obj)) = list.first()
-                && let Some(reference) = &obj.reference {
-                    return determine_type_from_reference(reference);
-                }
+            && let Some(reference) = &obj.reference
+        {
+            return determine_type_from_reference(reference);
+        }
     }
 
     if let Some(reference) = &schema.reference {

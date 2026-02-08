@@ -5,7 +5,7 @@ use gqlforge_valid::Valid;
 use crate::core::blueprint::*;
 use crate::core::config;
 use crate::core::config::Field;
-use crate::core::ir::model::{Map, IR};
+use crate::core::ir::model::{IR, Map};
 use crate::core::try_fold::TryFold;
 
 pub fn update_enum_alias<'a>() -> TryFold<

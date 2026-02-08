@@ -140,7 +140,7 @@ mod tests {
 
     use assert_eq;
     use tokio::join;
-    use tokio::time::{sleep, timeout_at, Instant};
+    use tokio::time::{Instant, sleep, timeout_at};
 
     use super::*;
 

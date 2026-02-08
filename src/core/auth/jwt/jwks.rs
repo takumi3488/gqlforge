@@ -3,7 +3,7 @@ use std::str::FromStr;
 use anyhow::Result;
 use derive_setters::Setters;
 use jsonwebtoken::jwk::{Jwk, JwkSet};
-use jsonwebtoken::{decode, decode_header, Algorithm, DecodingKey, Validation};
+use jsonwebtoken::{Algorithm, DecodingKey, Validation, decode, decode_header};
 
 use super::jwt_verify::JwtClaim;
 use crate::core::auth::error::Error;
@@ -68,10 +68,10 @@ impl Jwks {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::core::auth::jwt::jwt_verify::OneOrMany;
     use crate::core::auth::jwt::jwt_verify::tests::{
         JWK_SET, JWT_VALID_TOKEN_NO_KID, JWT_VALID_TOKEN_WITH_KID,
     };
-    use crate::core::auth::jwt::jwt_verify::OneOrMany;
 
     #[test]
     fn test_decode_required_kid() {

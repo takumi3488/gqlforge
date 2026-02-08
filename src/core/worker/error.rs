@@ -105,8 +105,14 @@ impl Display for Error {
             }
             Error::Rquickjs(error) => write!(f, "Rquickjs error: {}", error),
             Error::DeserializeFailed(error) => write!(f, "Deserialize Failed: {}", error),
-            Error::GlobalThisNotInitialised(error) => write!(f, "globalThis not initialized: {}", error),
-            Error::FunctionValueParseError(error, name) => write!(f, "Error: {}\nUnable to parse value from js function: {} maybe because it's not returning a string?", error, name),
+            Error::GlobalThisNotInitialised(error) => {
+                write!(f, "globalThis not initialized: {}", error)
+            }
+            Error::FunctionValueParseError(error, name) => write!(
+                f,
+                "Error: {}\nUnable to parse value from js function: {} maybe because it's not returning a string?",
+                error, name
+            ),
             Error::Anyhow(msg) => write!(f, "Error: {}", msg),
         }
     }

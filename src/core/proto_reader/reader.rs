@@ -2,8 +2,8 @@ use std::collections::{HashMap, VecDeque};
 use std::path::{Path, PathBuf};
 use std::sync::Arc;
 
-use futures_util::future::{join_all, BoxFuture};
 use futures_util::FutureExt;
+use futures_util::future::{BoxFuture, join_all};
 use prost_reflect::prost_types::{FileDescriptorProto, FileDescriptorSet};
 use protox::file::{FileResolver, GoogleFileResolver};
 

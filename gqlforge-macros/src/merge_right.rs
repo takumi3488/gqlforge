@@ -3,7 +3,7 @@ extern crate proc_macro;
 use proc_macro::TokenStream;
 use quote::quote;
 use syn::spanned::Spanned;
-use syn::{parse_macro_input, Data, DeriveInput, Fields, Index};
+use syn::{Data, DeriveInput, Fields, Index, parse_macro_input};
 
 const MERGE_RIGHT_FN: &str = "merge_right_fn";
 const MERGE_RIGHT: &str = "merge_right";
@@ -70,7 +70,7 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
                             }
                         }
                     }
-                    .into()
+                    .into();
                 }
             };
 
@@ -150,7 +150,7 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
         Data::Union(_) => {
             return syn::Error::new_spanned(input, "Union types are not supported by MergeRight")
                 .to_compile_error()
-                .into()
+                .into();
         }
     };
 
@@ -159,7 +159,7 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
 
 #[cfg(test)]
 mod tests {
-    use syn::{parse_quote, Attribute};
+    use syn::{Attribute, parse_quote};
 
     use super::*;
 

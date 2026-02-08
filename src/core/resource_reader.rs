@@ -2,15 +2,15 @@ use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Mutex};
 
-use futures_util::future::join_all;
 use futures_util::TryFutureExt;
+use futures_util::future::join_all;
 use gqlforge_hasher::GqlforgeHasher;
 use url::Url;
 
+use crate::core::Mustache;
 use crate::core::mustache::PathStringEval;
 use crate::core::path::PathString;
 use crate::core::runtime::TargetRuntime;
-use crate::core::Mustache;
 
 /// Response of a file read operation
 #[derive(Debug)]

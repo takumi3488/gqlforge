@@ -47,7 +47,7 @@ pub mod test {
     use std::sync::Arc;
     use std::time::Duration;
 
-    use anyhow::{anyhow, Result};
+    use anyhow::{Result, anyhow};
     use async_graphql::Value;
     use bytes::Bytes;
     use gqlforge_http_cache::HttpCacheManager;
@@ -62,7 +62,7 @@ pub mod test {
     use crate::core::http::Response;
     use crate::core::runtime::TargetRuntime;
     use crate::core::worker::{Command, Event};
-    use crate::core::{blueprint, EnvIO, FileIO, HttpIO};
+    use crate::core::{EnvIO, FileIO, HttpIO, blueprint};
 
     #[derive(Clone)]
     struct TestHttp {

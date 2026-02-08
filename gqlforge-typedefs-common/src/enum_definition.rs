@@ -70,29 +70,30 @@ pub fn into_enum_value(obj: &Schema) -> Option<EnumValue> {
             // as schema with `one_of` entry, where every enum variant is separate enum
             // entry
             if let Some(subschema) = &schema_object.subschemas
-                && let Some(one_ofs) = &subschema.one_of {
-                    let variants = one_ofs
-                        .iter()
-                        .filter_map(|one_of| {
-                            // try to parse one_of value as enum
-                            into_enum_value(one_of).and_then(|mut en| {
-                                // if it has only single variant it's our high-level enum
-                                if en.variants.len() == 1 {
-                                    Some(EnumVariant {
-                                        value: en.variants.pop().unwrap().value,
-                                        description: en.description,
-                                    })
-                                } else {
-                                    None
-                                }
-                            })
+                && let Some(one_ofs) = &subschema.one_of
+            {
+                let variants = one_ofs
+                    .iter()
+                    .filter_map(|one_of| {
+                        // try to parse one_of value as enum
+                        into_enum_value(one_of).and_then(|mut en| {
+                            // if it has only single variant it's our high-level enum
+                            if en.variants.len() == 1 {
+                                Some(EnumVariant {
+                                    value: en.variants.pop().unwrap().value,
+                                    description: en.description,
+                                })
+                            } else {
+                                None
+                            }
                         })
-                        .collect::<Vec<_>>();
+                    })
+                    .collect::<Vec<_>>();
 
-                    if !variants.is_empty() {
-                        return Some(EnumValue { variants, description });
-                    }
+                if !variants.is_empty() {
+                    return Some(EnumValue { variants, description });
                 }
+            }
 
             None
         }

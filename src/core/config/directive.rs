@@ -1,11 +1,11 @@
 use std::collections::HashMap;
 
-use async_graphql::parser::types::ConstDirective;
 use async_graphql::Name;
+use async_graphql::parser::types::ConstDirective;
+use gqlforge_valid::{Valid, ValidationError, Validator};
 use indexmap::IndexMap;
 use serde::{Deserialize, Serialize};
 use serde_json::Value;
-use gqlforge_valid::{Valid, ValidationError, Validator};
 
 use crate::core::{is_default, pos};
 
@@ -48,8 +48,8 @@ mod tests {
 
     use async_graphql::parser::types::ConstDirective;
     use async_graphql_value::Name;
-    use pretty_assertions::assert_eq;
     use gqlforge_valid::Validator;
+    use pretty_assertions::assert_eq;
 
     use super::*;
 

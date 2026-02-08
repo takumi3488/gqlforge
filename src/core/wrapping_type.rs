@@ -1,8 +1,8 @@
 use std::fmt::Formatter;
 use std::ops::Deref;
 
-use async_graphql::parser::types as async_graphql_types;
 use async_graphql::Name;
+use async_graphql::parser::types as async_graphql_types;
 use serde::{Deserialize, Serialize};
 
 use crate::core::is_default;

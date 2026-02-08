@@ -6,8 +6,8 @@ use futures_util::future::join_all;
 
 use super::context::{Context, RequestContext};
 use super::{OperationPlan, Positioned, Response, Store};
-use crate::core::ir::model::IR;
 use crate::core::ir::TypedValue;
+use crate::core::ir::model::IR;
 use crate::core::jit;
 use crate::core::jit::synth::Synth;
 use crate::core::json::{JsonLike, JsonLikeList};
@@ -37,7 +37,6 @@ where
         let mut ctx = ExecutorInner::new(store.clone(), &self.exec, &self.ctx);
         ctx.init().await;
 
-        
         std::mem::take(&mut *store.lock().unwrap())
     }
 

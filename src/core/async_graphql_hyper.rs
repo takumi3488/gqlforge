@@ -6,7 +6,7 @@ use async_graphql::parser::types::{ExecutableDocument, OperationType};
 use async_graphql::{BatchResponse, Executor, Value};
 use bytes::Bytes;
 use gqlforge_hasher::GqlforgeHasher;
-use http::header::{HeaderMap, HeaderValue, CACHE_CONTROL, CONTENT_TYPE};
+use http::header::{CACHE_CONTROL, CONTENT_TYPE, HeaderMap, HeaderValue};
 use http::{Response, StatusCode};
 use http_body_util::Full;
 use once_cell::sync::Lazy;
@@ -199,12 +199,13 @@ impl GraphQLResponse {
             .body(body)?;
 
         if self.0.is_ok()
-            && let Some(cache_control) = self.0.cache_control().value() {
-                response.headers_mut().insert(
-                    CACHE_CONTROL,
-                    HeaderValue::from_str(cache_control.as_str())?,
-                );
-            }
+            && let Some(cache_control) = self.0.cache_control().value()
+        {
+            response.headers_mut().insert(
+                CACHE_CONTROL,
+                HeaderValue::from_str(cache_control.as_str())?,
+            );
+        }
 
         Ok(response)
     }
@@ -321,11 +322,7 @@ impl CacheControl {
             value += "private";
         }
 
-        if !value.is_empty() {
-            Some(value)
-        } else {
-            None
-        }
+        if !value.is_empty() { Some(value) } else { None }
     }
 
     pub fn merge(self, other: &CacheControl) -> CacheControl {
@@ -375,12 +372,12 @@ impl GraphQLArcResponse {
                 .response
                 .cache_control(self.cache_control.as_ref())
                 .value()
-            {
-                response.headers_mut().insert(
-                    CACHE_CONTROL,
-                    HeaderValue::from_str(cache_control.as_str())?,
-                );
-            }
+        {
+            response.headers_mut().insert(
+                CACHE_CONTROL,
+                HeaderValue::from_str(cache_control.as_str())?,
+            );
+        }
 
         Ok(response)
     }

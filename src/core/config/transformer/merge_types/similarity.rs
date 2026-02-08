@@ -92,30 +92,30 @@ impl<'a> Similarity<'a> {
                             return Valid::fail("Type merge failed: The fields have different list types and cannot be merged.".to_string());
                         }
                     } else if let Some(type_1) = config.types.get(field_1_type_of)
-                        && let Some(type_2) = config.types.get(field_2_type_of) {
-                            if visited_type.contains(field_1_type_of, field_2_type_of) {
-                                // it's cyclic type, return true as they're the same.
-                                return Valid::succeed(true);
-                            }
-                            visited_type
-                                .insert(field_1_type_of.to_owned(), field_2_type_of.to_owned());
-
-                            let type_info = SimilarityTypeInfo {
-                                type_1,
-                                type_2,
-                                type_1_name: field_1_type_of,
-                                type_2_name: field_2_type_of,
-                            };
-
-                            let is_nested_type_similar =
-                                self.similarity_inner(type_info, visited_type, threshold);
-
-                            if let Ok(result) = is_nested_type_similar.clone().to_result() {
-                                same_field_count += if result { 1 } else { 0 };
-                            } else {
-                                return is_nested_type_similar;
-                            }
+                        && let Some(type_2) = config.types.get(field_2_type_of)
+                    {
+                        if visited_type.contains(field_1_type_of, field_2_type_of) {
+                            // it's cyclic type, return true as they're the same.
+                            return Valid::succeed(true);
                         }
+                        visited_type.insert(field_1_type_of.to_owned(), field_2_type_of.to_owned());
+
+                        let type_info = SimilarityTypeInfo {
+                            type_1,
+                            type_2,
+                            type_1_name: field_1_type_of,
+                            type_2_name: field_2_type_of,
+                        };
+
+                        let is_nested_type_similar =
+                            self.similarity_inner(type_info, visited_type, threshold);
+
+                        if let Ok(result) = is_nested_type_similar.clone().to_result() {
+                            same_field_count += if result { 1 } else { 0 };
+                        } else {
+                            return is_nested_type_similar;
+                        }
+                    }
                 }
             }
 
@@ -140,8 +140,8 @@ mod test {
     use gqlforge_valid::Validator;
 
     use super::Similarity;
-    use crate::core::config::{config, Config, Field};
     use crate::core::Type;
+    use crate::core::config::{Config, Field, config};
 
     #[test]
     fn should_return_error_when_same_field_has_different_scalar_type() {

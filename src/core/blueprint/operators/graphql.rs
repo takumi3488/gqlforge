@@ -6,8 +6,8 @@ use crate::core::blueprint::BlueprintError;
 use crate::core::config::{Config, ConfigModule, GraphQL, GraphQLOperationType};
 use crate::core::graphql::RequestTemplate;
 use crate::core::helpers;
-use crate::core::ir::model::{IO, IR};
 use crate::core::ir::RelatedFields;
+use crate::core::ir::model::{IO, IR};
 
 fn create_related_fields(
     config: &Config,

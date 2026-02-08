@@ -5,21 +5,20 @@ use std::sync::Arc;
 use anyhow::Result;
 use async_graphql::ServerError;
 use bytes::Bytes;
-use http::header::{self, HeaderValue, CONTENT_TYPE};
+use http::header::{self, CONTENT_TYPE, HeaderValue};
 use http::request::Parts;
-use http::Method;
-use http::{HeaderMap, Request, Response, StatusCode};
+use http::{HeaderMap, Method, Request, Response, StatusCode};
 use http_body_util::{BodyExt, Full};
 use opentelemetry::trace::SpanKind;
 use opentelemetry_semantic_conventions::trace::{HTTP_REQUEST_METHOD, HTTP_ROUTE};
-use prometheus::{Encoder, ProtobufEncoder, TextEncoder, TEXT_FORMAT};
+use prometheus::{Encoder, ProtobufEncoder, TEXT_FORMAT, TextEncoder};
 use serde::de::DeserializeOwned;
 use tracing::Instrument;
 use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use super::request_context::RequestContext;
-use super::telemetry::{get_response_status_code, RequestCounter};
-use super::{showcase, telemetry, GQLFORGE_HTTPS_ORIGIN, GQLFORGE_HTTP_ORIGIN};
+use super::telemetry::{RequestCounter, get_response_status_code};
+use super::{GQLFORGE_HTTP_ORIGIN, GQLFORGE_HTTPS_ORIGIN, showcase, telemetry};
 use crate::core::app_context::AppContext;
 use crate::core::async_graphql_hyper::{GraphQLRequestLike, GraphQLResponse};
 use crate::core::blueprint::telemetry::TelemetryExporter;
@@ -328,9 +327,10 @@ async fn handle_request_inner<T: DeserializeOwned + GraphQLRequestLike>(
         Method::GET => {
             if let Some(TelemetryExporter::Prometheus(prometheus)) =
                 app_ctx.blueprint.telemetry.export.as_ref()
-                && req.uri().path() == prometheus.path {
-                    return prometheus_metrics(prometheus);
-                };
+                && req.uri().path() == prometheus.path
+            {
+                return prometheus_metrics(prometheus);
+            };
             not_found()
         }
         _ => not_found(),
@@ -356,15 +356,18 @@ pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
 
     let response = if app_ctx.blueprint.server.cors.is_some() {
         handle_request_with_cors::<T>(req, app_ctx, &mut req_counter).await
-    } else { match req.headers().get(&header::ORIGIN) { Some(origin) => {
-        if origin == GQLFORGE_HTTPS_ORIGIN || origin == GQLFORGE_HTTP_ORIGIN {
-            handle_origin_gqlforge::<T>(req, app_ctx, &mut req_counter).await
-        } else {
-            handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
+    } else {
+        match req.headers().get(&header::ORIGIN) {
+            Some(origin) => {
+                if origin == GQLFORGE_HTTPS_ORIGIN || origin == GQLFORGE_HTTP_ORIGIN {
+                    handle_origin_gqlforge::<T>(req, app_ctx, &mut req_counter).await
+                } else {
+                    handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
+                }
+            }
+            _ => handle_request_inner::<T>(req, app_ctx, &mut req_counter).await,
         }
-    } _ => {
-        handle_request_inner::<T>(req, app_ctx, &mut req_counter).await
-    }}};
+    };
 
     req_counter.update(&response);
     if let Ok(response) = &response {

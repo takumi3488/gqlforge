@@ -3,8 +3,8 @@ use bytes::Bytes;
 use http::{Request, Response};
 use http_body_util::Full;
 use once_cell::sync::Lazy;
-use opentelemetry::metrics::Counter;
 use opentelemetry::KeyValue;
+use opentelemetry::metrics::Counter;
 use opentelemetry_http::HeaderExtractor;
 use opentelemetry_semantic_conventions::trace::{
     HTTP_REQUEST_METHOD, HTTP_RESPONSE_STATUS_CODE, HTTP_ROUTE, URL_PATH,

@@ -1,8 +1,8 @@
 use std::str::FromStr;
 
 use anyhow::{Context, Result};
-use base64::prelude::BASE64_STANDARD;
 use base64::Engine;
+use base64::prelude::BASE64_STANDARD;
 use http::header::HeaderName;
 use nom::AsBytes;
 use prost::Message;
@@ -12,9 +12,9 @@ use serde_json::json;
 
 use crate::core::blueprint::GrpcMethod;
 use crate::core::config::{ConfigReaderContext, KeyValue};
+use crate::core::grpc::RequestTemplate;
 use crate::core::grpc::protobuf::ProtobufSet;
 use crate::core::grpc::request_template::RequestBody;
-use crate::core::grpc::RequestTemplate;
 use crate::core::mustache::Mustache;
 use crate::core::runtime::TargetRuntime;
 

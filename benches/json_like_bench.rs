@@ -1,5 +1,5 @@
 use criterion::Criterion;
-use gqlforge::core::json::{gather_path_matches, JsonLike};
+use gqlforge::core::json::{JsonLike, gather_path_matches};
 use serde_json::json;
 
 pub fn benchmark_batched_body(c: &mut Criterion) {

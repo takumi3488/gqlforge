@@ -25,15 +25,18 @@ pub async fn validate_rc_config_files(runtime: TargetRuntime, file_paths: &[Stri
         for (file_name, base_content) in &rc_config_files {
             let config_path = parent_dir.join(file_name);
             if config_path.exists() {
-                match runtime.file.read(&config_path.to_string_lossy()).await { Ok(content) => {
-                    if &content != base_content {
-                        // file content not same.
+                match runtime.file.read(&config_path.to_string_lossy()).await {
+                    Ok(content) => {
+                        if &content != base_content {
+                            // file content not same.
+                            outdated_files.push(file_name.to_owned());
+                        }
+                    }
+                    _ => {
+                        // unable to read file.
                         outdated_files.push(file_name.to_owned());
                     }
-                } _ => {
-                    // unable to read file.
-                    outdated_files.push(file_name.to_owned());
-                }}
+                }
             }
         }
 

@@ -2,20 +2,20 @@ use std::fs;
 use std::path::Path;
 
 use anyhow::anyhow;
+use gqlforge_valid::{ValidateInto, Validator};
 use http::header::{HeaderMap, HeaderName, HeaderValue};
 use inquire::Confirm;
 use pathdiff::diff_paths;
-use gqlforge_valid::{ValidateInto, Validator};
 
 use super::config::{Config, Resolved, Source};
 use super::source::ConfigSource;
+use crate::core::Mustache;
 use crate::core::config::transformer::Preset;
 use crate::core::config::{self, ConfigModule, ConfigReaderContext};
 use crate::core::generator::{Generator as ConfigGenerator, Input};
 use crate::core::proto_reader::ProtoReader;
 use crate::core::resource_reader::{Resource, ResourceReader};
 use crate::core::runtime::TargetRuntime;
-use crate::core::Mustache;
 
 /// CLI that reads the the config file and generates the required gqlforge
 /// configuration.

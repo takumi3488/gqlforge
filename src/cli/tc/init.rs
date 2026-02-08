@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 use std::path::Path;
 
-use anyhow::{anyhow, Result};
+use anyhow::{Result, anyhow};
 
 use super::helpers::{GQLFORGE_RC, GQLFORGE_RC_SCHEMA, GRAPHQL_RC};
 use crate::cli::runtime::{confirm_and_write, create_directory, select_prompt};
@@ -10,7 +10,7 @@ use crate::core::config::{
 };
 use crate::core::merge_right::MergeRight;
 use crate::core::runtime::TargetRuntime;
-use crate::core::{config, Type};
+use crate::core::{Type, config};
 
 const SCHEMA_FILENAME: &str = "main.graphql";
 
@@ -126,7 +126,7 @@ async fn create_main(
         _ => {
             return Err(anyhow!(
                 "Only json/yaml formats are supported for json configs"
-            ))
+            ));
         }
     };
 

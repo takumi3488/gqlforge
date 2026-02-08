@@ -2,9 +2,9 @@ use std::collections::HashSet;
 
 use async_graphql_value::ConstValue;
 use directive::Directive;
+use gqlforge_valid::{Valid, Validator};
 use interface_resolver::update_interface_resolver;
 use regex::Regex;
-use gqlforge_valid::{Valid, Validator};
 use union_resolver::update_union_resolver;
 
 use crate::core::blueprint::*;
@@ -12,7 +12,7 @@ use crate::core::config::{Config, Enum, Field, GraphQLOperationType, Protected, 
 use crate::core::directive::DirectiveCodec;
 use crate::core::ir::model::{Cache, IR};
 use crate::core::try_fold::TryFold;
-use crate::core::{config, scalar, Type};
+use crate::core::{Type, config, scalar};
 
 pub fn to_scalar_type_definition(name: &str) -> Valid<Definition, BlueprintError> {
     if scalar::Scalar::is_predefined(name) {
@@ -169,18 +169,19 @@ fn process_field_within_type(
             });
         }
     } else if let Some((head, tail)) = remaining_path.split_first()
-        && let Some(field) = type_info.fields.get(head) {
-            return process_path(ProcessPathContext {
-                path: tail,
-                field,
-                type_info,
-                is_required,
-                config_module,
-                invalid_path_handler,
-                path_resolver_error_handler,
-                original_path: context.original_path,
-            });
-        }
+        && let Some(field) = type_info.fields.get(head)
+    {
+        return process_path(ProcessPathContext {
+            path: tail,
+            field,
+            type_info,
+            is_required,
+            config_module,
+            invalid_path_handler,
+            path_resolver_error_handler,
+            original_path: context.original_path,
+        });
+    }
 
     invalid_path_handler(field_name, remaining_path, context.original_path)
 }

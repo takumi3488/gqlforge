@@ -3,10 +3,10 @@ use std::path::Path;
 use std::str::FromStr;
 
 use anyhow::anyhow;
-use gqlforge::core::config::Source;
 use gqlforge::core::FileIO;
-use markdown::mdast::Node;
+use gqlforge::core::config::Source;
 use markdown::ParseOptions;
+use markdown::mdast::Node;
 
 use crate::file::NativeFileTest;
 
@@ -74,7 +74,7 @@ impl ExecutionSpec {
                                     "Unexpected header annotation {:?} in {:?}",
                                     expect.value,
                                     path,
-                                ))
+                                ));
                             }
                         }
                     }
@@ -107,7 +107,10 @@ impl ExecutionSpec {
                                 let vars: HashMap<String, String> = match source {
                                     Source::Json => Ok(serde_json::from_str(&content)?),
                                     Source::Yml => Ok(serde_yaml_ng::from_str(&content)?),
-                                    _ => Err(anyhow!("Unexpected language in env block in {:?} (only JSON and YAML are supported)", path)),
+                                    _ => Err(anyhow!(
+                                        "Unexpected language in env block in {:?} (only JSON and YAML are supported)",
+                                        path
+                                    )),
                                 }?;
 
                                 env = Some(vars);

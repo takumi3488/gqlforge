@@ -148,12 +148,13 @@ impl RequestTemplate {
         }
 
         if let Some(directives) = ctx.directives()
-            && !directives.is_empty() {
-                let operation = operation.to_mut();
+            && !directives.is_empty()
+        {
+            let operation = operation.to_mut();
 
-                operation.push(' ');
-                operation.push_str(&directives.escape_default().to_string());
-            }
+            operation.push(' ');
+            operation.push_str(&directives.escape_default().to_string());
+        }
 
         let query =
             format!(r#"{{ "query": "{operation_type} {{ {operation} {selection_set} }}" }}"#);
@@ -210,11 +211,11 @@ mod tests {
     use serde_json::json;
 
     use crate::core::config::GraphQLOperationType;
-    use crate::core::graphql::request_template::RelatedFields;
     use crate::core::graphql::RequestTemplate;
+    use crate::core::graphql::request_template::RelatedFields;
     use crate::core::has_headers::HasHeaders;
-    use crate::core::ir::model::CacheKey;
     use crate::core::ir::GraphQLOperationContext;
+    use crate::core::ir::model::CacheKey;
     use crate::core::json::JsonLike;
     use crate::core::path::PathGraphql;
 

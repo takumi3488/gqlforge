@@ -3,9 +3,9 @@ use std::marker::PhantomData;
 
 use gqlforge_valid::Valid;
 
+use crate::core::Transform;
 use crate::core::ir::model::IR;
 use crate::core::jit::OperationPlan;
-use crate::core::Transform;
 
 pub struct CheckConst<A>(PhantomData<A>);
 impl<A> CheckConst<A> {

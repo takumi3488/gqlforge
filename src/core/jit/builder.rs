@@ -2,19 +2,19 @@ use std::collections::{HashMap, HashSet};
 use std::ops::Deref;
 use std::sync::Arc;
 
+use async_graphql::Positioned;
 use async_graphql::parser::types::{
     Directive, DocumentOperations, ExecutableDocument, FragmentDefinition, OperationDefinition,
     OperationType, Selection, SelectionSet,
 };
-use async_graphql::Positioned;
 use async_graphql_value::Value;
 
-use super::model::{Directive as JitDirective, *};
 use super::BuildError;
+use super::model::{Directive as JitDirective, *};
 use crate::core::blueprint::{Blueprint, Index, QueryField};
 use crate::core::counter::{Count, Counter};
 use crate::core::jit::model::OperationPlan;
-use crate::core::{scalar, Type};
+use crate::core::{Type, scalar};
 
 #[derive(PartialEq, strum_macros::Display)]
 enum Condition {
@@ -387,8 +387,8 @@ impl<'a> Builder<'a> {
 
 #[cfg(test)]
 mod tests {
-    use pretty_assertions::assert_eq;
     use gqlforge_valid::Validator;
+    use pretty_assertions::assert_eq;
 
     use super::*;
     use crate::core::blueprint::Blueprint;

@@ -33,9 +33,10 @@ fn compute_selection_set<A: Display + Debug + JsonLikeOwned>(
                         field.selection.iter(),
                         interfaces,
                         interfaces.contains(field.type_of.name()),
-                    ) {
-                        req_template.selection = Some(Mustache::parse(&v).into());
-                    }
+                    )
+                {
+                    req_template.selection = Some(Mustache::parse(&v).into());
+                }
             });
         }
         compute_selection_set(field.selection.as_mut(), interfaces);

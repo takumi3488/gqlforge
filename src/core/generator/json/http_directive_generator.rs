@@ -4,10 +4,10 @@ use convert_case::{Case, Casing};
 use regex::Regex;
 use url::Url;
 
+use crate::core::Type;
 use crate::core::config::{Arg, Field, Http, URLQuery};
 use crate::core::generator::PREFIX;
 use crate::core::helpers::gql_type::detect_gql_data_type;
-use crate::core::Type;
 
 #[derive(Debug)]
 struct QueryParamInfo {

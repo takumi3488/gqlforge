@@ -157,7 +157,9 @@ pub enum BlueprintError {
     #[error("Experimental headers must start with 'x-' or 'X-'. Got: '{0}'")]
     ExperimentalHeaderInvalidFormat(String),
 
-    #[error("Invalid CORS configuration: Cannot combine `Access-Control-Allow-Credentials: true` with `{0}: *`")]
+    #[error(
+        "Invalid CORS configuration: Cannot combine `Access-Control-Allow-Credentials: true` with `{0}: *`"
+    )]
     InvalidCORSConfiguration(String),
 
     #[error("{0}")]

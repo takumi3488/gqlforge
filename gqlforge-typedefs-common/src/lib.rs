@@ -1,6 +1,6 @@
 use async_graphql::parser::types::{ServiceDocument, TypeSystemDefinition};
-use schemars::schema::RootSchema;
 use schemars::JsonSchema;
+use schemars::schema::RootSchema;
 mod common;
 pub mod directive_definition;
 mod enum_definition;

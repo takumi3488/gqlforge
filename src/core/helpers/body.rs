@@ -1,5 +1,5 @@
-use serde_json::Value;
 use gqlforge_valid::Valid;
+use serde_json::Value;
 
 use crate::core::grpc::request_template::RequestBody;
 use crate::core::mustache::Mustache;

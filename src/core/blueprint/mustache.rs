@@ -204,9 +204,9 @@ mod test {
     use gqlforge_valid::Validator;
 
     use super::MustachePartsValidator;
+    use crate::core::Type;
     use crate::core::blueprint::{FieldDefinition, InputFieldDefinition};
     use crate::core::config::{self, Config, Field};
-    use crate::core::Type;
 
     fn initialize_test_config_and_field() -> (Config, FieldDefinition) {
         let mut config = Config::default();

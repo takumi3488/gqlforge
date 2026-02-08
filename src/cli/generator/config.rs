@@ -4,10 +4,10 @@ use std::marker::PhantomData;
 use std::path::Path;
 
 use derive_setters::Setters;
+use gqlforge_valid::{Valid, ValidateFrom, Validator};
 use path_clean::PathClean;
 use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
-use gqlforge_valid::{Valid, ValidateFrom, Validator};
 use url::Url;
 
 use crate::core::config::transformer::Preset;
@@ -248,12 +248,7 @@ impl Config {
 
         let output = self.output.resolve(parent_dir)?;
 
-        Ok(Config {
-            inputs,
-            output,
-            schema: self.schema,
-            preset: self.preset,
-        })
+        Ok(Config { inputs, output, schema: self.schema, preset: self.preset })
     }
 }
 
@@ -261,8 +256,8 @@ impl Config {
 mod tests {
     use std::collections::HashMap;
 
-    use pretty_assertions::assert_eq;
     use gqlforge_valid::{ValidateInto, ValidationError, Validator};
+    use pretty_assertions::assert_eq;
 
     use super::*;
 
@@ -375,8 +370,7 @@ mod tests {
     #[test]
     fn test_raise_error_unknown_field_at_root_level() {
         let json = r#"{"input": "value"}"#;
-        let expected_error =
-            "unknown field `input`, expected one of `inputs`, `output`, `preset`, `schema` at line 1 column 8";
+        let expected_error = "unknown field `input`, expected one of `inputs`, `output`, `preset`, `schema` at line 1 column 8";
         assert_deserialization_error(json, expected_error);
     }
 
@@ -392,8 +386,7 @@ mod tests {
                 }
             }]}
         "#;
-        let expected_error =
-            "unknown field `headerss`, expected one of `src`, `headers`, `method`, `body`, `isMutation`, `fieldName` at line 9 column 13";
+        let expected_error = "unknown field `headerss`, expected one of `src`, `headers`, `method`, `body`, `isMutation`, `fieldName` at line 9 column 13";
         assert_deserialization_error(json, expected_error);
 
         let json = r#"
@@ -418,8 +411,7 @@ mod tests {
                 "mergeTypes": 1.0
             }}
         "#;
-        let expected_error =
-            "unknown field `mergeTypes`, expected one of `mergeType`, `inferTypeNames`, `treeShake`, `unwrapSingleFieldTypes` at line 3 column 28";
+        let expected_error = "unknown field `mergeTypes`, expected one of `mergeType`, `inferTypeNames`, `treeShake`, `unwrapSingleFieldTypes` at line 3 column 28";
         assert_deserialization_error(json, expected_error);
     }
 
@@ -445,5 +437,4 @@ mod tests {
             "unknown field `querys`, expected `query` or `mutation` at line 3 column 22";
         assert_deserialization_error(json, expected_error);
     }
-
 }

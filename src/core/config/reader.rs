@@ -1,9 +1,9 @@
 use std::path::Path;
 
 use futures_util::future::join_all;
+use gqlforge_valid::{Valid, ValidationError, Validator};
 use rustls_pemfile;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer};
-use gqlforge_valid::{Valid, ValidationError, Validator};
 use url::Url;
 
 use super::{ConfigModule, Content, Link, LinkType, PrivateKey};

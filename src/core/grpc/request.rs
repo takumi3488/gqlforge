@@ -1,4 +1,4 @@
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use http::{HeaderMap, Method};
 use reqwest::Request;
 use url::Url;
@@ -53,13 +53,13 @@ mod tests {
     use serde_json::json;
     use tonic::{Code, Status};
 
+    use crate::core::HttpIO;
     use crate::core::blueprint::GrpcMethod;
     use crate::core::grpc::protobuf::{ProtobufOperation, ProtobufSet};
     use crate::core::grpc::request::execute_grpc_request;
     use crate::core::http::Response;
     use crate::core::ir::Error;
     use crate::core::runtime::TargetRuntime;
-    use crate::core::HttpIO;
 
     enum TestScenario {
         SuccessWithoutGrpcStatus,

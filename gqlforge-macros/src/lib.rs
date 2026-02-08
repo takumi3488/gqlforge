@@ -1,10 +1,10 @@
 extern crate proc_macro;
 
 use proc_macro::TokenStream;
-use syn::{parse_macro_input, DeriveInput};
+use syn::{DeriveInput, parse_macro_input};
 
-mod document_definition;
 mod codegen;
+mod document_definition;
 mod merge_right;
 mod resolver;
 

@@ -140,10 +140,10 @@ mod tests {
         use indexmap::IndexMap;
         use once_cell::sync::Lazy;
 
+        use crate::core::EnvIO;
         use crate::core::http::RequestContext;
         use crate::core::ir::{EvalContext, ResolverContextLike, SelectionField};
         use crate::core::path::{PathGraphql, PathString, PathValue, ValueString};
-        use crate::core::EnvIO;
 
         struct Env {
             env: BTreeMap<String, String>,

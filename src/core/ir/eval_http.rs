@@ -1,8 +1,8 @@
 use std::sync::Arc;
 
 use async_graphql::from_value;
-use reqwest::Request;
 use gqlforge_valid::Validator;
+use reqwest::Request;
 
 use super::model::DataLoaderId;
 use super::request::DynamicRequest;
@@ -12,12 +12,12 @@ use crate::core::grpc::protobuf::ProtobufOperation;
 use crate::core::grpc::request::execute_grpc_request;
 use crate::core::grpc::request_template::RenderedRequestTemplate;
 use crate::core::http::{
-    cache_policy, DataLoaderRequest, HttpDataLoader, RequestTemplate, Response,
+    DataLoaderRequest, HttpDataLoader, RequestTemplate, Response, cache_policy,
 };
 use crate::core::ir::Error;
 use crate::core::json::JsonLike;
 use crate::core::worker_hooks::WorkerHooks;
-use crate::core::{grpc, http, worker, WorkerIO};
+use crate::core::{WorkerIO, grpc, http, worker};
 
 pub struct WorkerContext<'a> {
     pub worker: &'a Arc<dyn WorkerIO<worker::Event, worker::Command>>,
@@ -186,10 +186,12 @@ pub fn set_cache_control<Ctx: ResolverContextLike>(
     ctx: &EvalContext<'_, Ctx>,
     res: &Response<async_graphql::Value>,
 ) {
-    if ctx.request_ctx.server.get_enable_cache_control() && res.status.is_success()
-        && let Some(policy) = cache_policy(res) {
-            ctx.request_ctx.set_cache_control(policy);
-        }
+    if ctx.request_ctx.server.get_enable_cache_control()
+        && res.status.is_success()
+        && let Some(policy) = cache_policy(res)
+    {
+        ctx.request_ctx.set_cache_control(policy);
+    }
 }
 
 fn set_experimental_headers<Ctx: ResolverContextLike>(
@@ -237,10 +239,10 @@ pub async fn execute_raw_grpc_request<Ctx: ResolverContextLike>(
 pub async fn execute_grpc_request_with_dl<
     Ctx: ResolverContextLike,
     Dl: Loader<
-        grpc::DataLoaderRequest,
-        Value = Response<async_graphql::Value>,
-        Error = Arc<anyhow::Error>,
-    >,
+            grpc::DataLoaderRequest,
+            Value = Response<async_graphql::Value>,
+            Error = Arc<anyhow::Error>,
+        >,
 >(
     ctx: &EvalContext<'_, Ctx>,
     rendered: RenderedRequestTemplate,

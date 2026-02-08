@@ -8,7 +8,7 @@ use serde::{Deserialize, Serialize};
 
 use super::error::{Error, Result};
 use crate::core::ir::DynamicRequest;
-use crate::core::{is_default, Response};
+use crate::core::{Response, is_default};
 
 #[derive(Serialize, Deserialize, Default, Debug, PartialEq, Eq)]
 pub enum Scheme {

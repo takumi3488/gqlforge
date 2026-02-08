@@ -1,10 +1,10 @@
 use std::convert::Infallible;
 
-use reqwest::Request;
 use gqlforge_valid::Valid;
+use reqwest::Request;
 
-use crate::core::http::DataLoaderRequest;
 use crate::core::Transform;
+use crate::core::http::DataLoaderRequest;
 
 pub struct BodyBatching<'a> {
     dl_requests: &'a [&'a DataLoaderRequest],
@@ -70,10 +70,10 @@ impl Transform for BodyBatching<'_> {
 
 #[cfg(test)]
 mod tests {
+    use gqlforge_valid::Validator;
     use http::Method;
     use reqwest::Request;
     use serde_json::json;
-    use gqlforge_valid::Validator;
 
     use super::*;
     use crate::core::http::DataLoaderRequest;

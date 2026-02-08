@@ -5,7 +5,7 @@ use http::HeaderValue;
 pub use method::Method;
 pub use query_encoder::QueryEncoder;
 pub use request_context::RequestContext;
-pub use request_handler::{handle_request, API_URL_PREFIX};
+pub use request_handler::{API_URL_PREFIX, handle_request};
 pub use request_template::RequestTemplate;
 pub use response::*;
 

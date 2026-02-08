@@ -1,12 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet, HashMap};
 
 use convert_case::{Case, Casing};
-use serde_json::Value;
 use gqlforge_valid::{Valid, Validator};
+use serde_json::Value;
 use url::Url;
 
-use super::json::{self, GraphQLTypesGenerator};
 use super::NameGenerator;
+use super::json::{self, GraphQLTypesGenerator};
 use crate::core::config::transformer::RenameTypes;
 use crate::core::config::{Config, GraphQLOperationType};
 use crate::core::http::Method;

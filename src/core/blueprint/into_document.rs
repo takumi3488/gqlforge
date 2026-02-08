@@ -8,7 +8,7 @@ use async_graphql_value::ConstValue;
 use gqlforge_valid::Validator;
 
 use super::blueprint;
-use super::directive::{to_const_directive, Directive};
+use super::directive::{Directive, to_const_directive};
 use crate::core::blueprint::{Blueprint, Definition};
 use crate::core::pos;
 

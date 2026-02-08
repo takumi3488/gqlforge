@@ -2,14 +2,14 @@ extern crate core;
 
 use std::path::Path;
 use std::str::FromStr;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use anyhow::anyhow;
 use bytes::Bytes;
+use gqlforge::core::HttpIO;
 use gqlforge::core::http::Response;
 use gqlforge::core::ir::Error;
-use gqlforge::core::HttpIO;
 use http::header::{HeaderName, HeaderValue};
 
 use super::runtime::{ExecutionMock, ExecutionSpec};

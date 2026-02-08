@@ -3,8 +3,8 @@ use gqlforge_valid::{Valid, Validator};
 use super::BlueprintError;
 use crate::core::blueprint::FieldDefinition;
 use crate::core::config::{ConfigModule, Discriminate, Field, Type, Union};
-use crate::core::ir::model::IR;
 use crate::core::ir::Discriminator;
+use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
 fn compile_union_resolver(
@@ -26,9 +26,8 @@ fn compile_union_resolver(
     }
 }
 
-pub fn update_union_resolver<'a>(
-) -> TryFold<'a, (&'a ConfigModule, &'a Field, &'a Type, &'a str), FieldDefinition, BlueprintError>
-{
+pub fn update_union_resolver<'a>()
+-> TryFold<'a, (&'a ConfigModule, &'a Field, &'a Type, &'a str), FieldDefinition, BlueprintError> {
     TryFold::<(&ConfigModule, &Field, &Type, &str), FieldDefinition, BlueprintError>::new(
         |(config, field, _, _), mut b_field| {
             let Some(union_definition) = config.find_union(field.type_of.name()) else {

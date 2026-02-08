@@ -1,9 +1,9 @@
 use std::fmt::Debug;
 
-use anyhow::{anyhow, bail, Context, Result};
+use anyhow::{Context, Result, anyhow, bail};
 use async_graphql::Value;
-use prost::bytes::BufMut;
 use prost::Message;
+use prost::bytes::BufMut;
 use prost_reflect::prost_types::FileDescriptorSet;
 use prost_reflect::{
     DescriptorPool, DynamicMessage, MessageDescriptor, MethodDescriptor, SerializeOptions,
@@ -413,12 +413,14 @@ pub mod tests {
         let grpc_method = GrpcMethod::try_from("news.NewsService.GetNews").unwrap();
 
         let path: &str = protobuf::NEWS_PROTO_PATHS;
-        let proto_paths = Some(vec![Path::new(path)
-            .ancestors()
-            .nth(2)
-            .unwrap()
-            .to_string_lossy()
-            .to_string()]);
+        let proto_paths = Some(vec![
+            Path::new(path)
+                .ancestors()
+                .nth(2)
+                .unwrap()
+                .to_string_lossy()
+                .to_string(),
+        ]);
         let file = ProtobufSet::from_proto_file(
             get_proto_file_with_config(path, LinkConfig { proto_paths }).await?,
         )?;

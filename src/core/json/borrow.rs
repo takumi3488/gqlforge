@@ -2,7 +2,7 @@ use std::borrow::Cow;
 
 use serde_json_borrow::{ObjectAsVec, Value};
 
-use super::{gather_path_matches, group_by_key, JsonLike, JsonObjectLike, JsonPrimitive};
+use super::{JsonLike, JsonObjectLike, JsonPrimitive, gather_path_matches, group_by_key};
 
 // BorrowedValue
 impl<'ctx> JsonObjectLike<'ctx> for ObjectAsVec<'ctx> {

@@ -11,12 +11,12 @@ mod tests {
     use std::collections::HashSet;
 
     use gqlforge_typedefs_common::directive_definition::{
-        into_directive_definition, Attrs, DirectiveDefinition,
+        Attrs, DirectiveDefinition, into_directive_definition,
     };
-    use gqlforge_typedefs_common::scalar_definition::{into_scalar_definition, ScalarDefinition};
-    use gqlforge_typedefs_common::{into_schemars, ServiceDocumentBuilder};
-    use schemars::schema::Schema;
+    use gqlforge_typedefs_common::scalar_definition::{ScalarDefinition, into_scalar_definition};
+    use gqlforge_typedefs_common::{ServiceDocumentBuilder, into_schemars};
     use schemars::JsonSchema;
+    use schemars::schema::Schema;
 
     #[derive(JsonSchema)]
     struct FooScalar(String);

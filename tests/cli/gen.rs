@@ -4,8 +4,8 @@ pub mod cacache_manager {
     use std::io::{Read, Write};
     use std::path::PathBuf;
 
-    use flate2::write::GzEncoder;
     use flate2::Compression;
+    use flate2::write::GzEncoder;
     use http_cache_reqwest::{CacheManager, HttpResponse};
     use http_cache_semantics::CachePolicy;
     use serde::{Deserialize, Serialize};
@@ -101,8 +101,8 @@ pub mod file {
 pub mod http {
     use anyhow::Result;
     use bytes::Bytes;
-    use gqlforge::core::http::Response;
     use gqlforge::core::HttpIO;
+    use gqlforge::core::http::Response;
     use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
     use reqwest::Client;
     use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};
@@ -165,8 +165,8 @@ pub mod test {
         use std::io::{Read, Write};
         use std::path::PathBuf;
 
-        use flate2::write::GzEncoder;
         use flate2::Compression;
+        use flate2::write::GzEncoder;
         use http_cache_reqwest::{CacheManager, HttpResponse};
         use http_cache_semantics::CachePolicy;
         use serde::{Deserialize, Serialize};
@@ -231,8 +231,8 @@ pub mod test {
     mod http {
         use anyhow::Result;
         use bytes::Bytes;
-        use gqlforge::core::http::Response;
         use gqlforge::core::HttpIO;
+        use gqlforge::core::http::Response;
         use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
         use reqwest::Client;
         use reqwest_middleware::{ClientBuilder, ClientWithMiddleware};

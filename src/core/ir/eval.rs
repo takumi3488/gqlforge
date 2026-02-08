@@ -7,7 +7,7 @@ use futures_util::future::join_all;
 use indexmap::IndexMap;
 
 use super::eval_io::eval_io;
-use super::model::{Cache, CacheKey, Map, IR};
+use super::model::{Cache, CacheKey, IR, Map};
 use super::{Error, EvalContext, ResolverContextLike, TypedValue};
 use crate::core::auth::verify::{AuthVerifier, Verify};
 use crate::core::json::{JsonLike, JsonObjectLike};
@@ -48,17 +48,18 @@ impl IR {
                     let io = io.deref();
                     let key = io.cache_key(ctx);
                     if let Some(key) = key {
-                        match ctx.request_ctx.runtime.cache.get(&key).await? { Some(val) => {
-                            Ok(val)
-                        } _ => {
-                            let val = eval_io(io, ctx).await?;
-                            ctx.request_ctx
-                                .runtime
-                                .cache
-                                .set(key, val.clone(), max_age.to_owned())
-                                .await?;
-                            Ok(val)
-                        }}
+                        match ctx.request_ctx.runtime.cache.get(&key).await? {
+                            Some(val) => Ok(val),
+                            _ => {
+                                let val = eval_io(io, ctx).await?;
+                                ctx.request_ctx
+                                    .runtime
+                                    .cache
+                                    .set(key, val.clone(), max_age.to_owned())
+                                    .await?;
+                                Ok(val)
+                            }
+                        }
                     } else {
                         eval_io(io, ctx).await
                     }

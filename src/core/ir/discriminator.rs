@@ -3,10 +3,10 @@ mod type_field_discriminator;
 
 use std::collections::BTreeSet;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use async_graphql::Value;
-use keyed_discriminator::KeyedDiscriminator;
 use gqlforge_valid::{Valid, Validator};
+use keyed_discriminator::KeyedDiscriminator;
 use type_field_discriminator::TypeFieldDiscriminator;
 
 use crate::core::json::{JsonLike, JsonObjectLike};
@@ -49,12 +49,13 @@ impl Discriminator {
         typename_field: Option<String>,
     ) -> Valid<Self, String> {
         if let Some(typename_field) = &typename_field
-            && typename_field.is_empty() {
-                return Valid::fail(format!(
-                    "The `field` cannot be an empty string for the `@discriminate` of type {}",
-                    type_name
-                ));
-            }
+            && typename_field.is_empty()
+        {
+            return Valid::fail(format!(
+                "The `field` cannot be an empty string for the `@discriminate` of type {}",
+                type_name
+            ));
+        }
 
         if let Some(typename_field) = typename_field {
             TypeFieldDiscriminator::new(type_name, types, typename_field).map(Self::TypeField)
@@ -74,20 +75,23 @@ impl Discriminator {
         match value {
             Value::Null => Ok(value),
             Value::List(arr) => {
-                let arr = arr.into_iter().map(|i| self.resolve_type(i)).collect::<Result<Vec<_>>>()?;
+                let arr = arr
+                    .into_iter()
+                    .map(|i| self.resolve_type(i))
+                    .collect::<Result<Vec<_>>>()?;
                 Ok(Value::array(arr))
-            },
-            Value::Object(_) => {
-                match self {
-                    Discriminator::Keyed(keyed_discriminator) => {
-                        keyed_discriminator.resolve_and_set_type(value)
-                    }
-                    Discriminator::TypeField(type_field_discriminator) => {
-                        type_field_discriminator.resolve_and_set_type(value)
-                    }
+            }
+            Value::Object(_) => match self {
+                Discriminator::Keyed(keyed_discriminator) => {
+                    keyed_discriminator.resolve_and_set_type(value)
+                }
+                Discriminator::TypeField(type_field_discriminator) => {
+                    type_field_discriminator.resolve_and_set_type(value)
                 }
             },
-            _ => bail!("Discriminator can only determine the types of arrays or objects but a different type.")
+            _ => bail!(
+                "Discriminator can only determine the types of arrays or objects but a different type."
+            ),
         }
     }
 }
@@ -133,7 +137,10 @@ mod tests {
     fn empty_type_field_is_invalid() {
         let result = Discriminator::new("Test".to_string(), BTreeSet::new(), Some("".to_string()));
         assert!(result.is_fail());
-        assert_eq!(result.to_result().unwrap_err().to_string(), "Validation Error\n• The `field` cannot be an empty string for the `@discriminate` of type Test\n");
+        assert_eq!(
+            result.to_result().unwrap_err().to_string(),
+            "Validation Error\n• The `field` cannot be an empty string for the `@discriminate` of type Test\n"
+        );
     }
 
     #[test]

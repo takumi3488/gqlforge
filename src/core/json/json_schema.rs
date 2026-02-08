@@ -2,9 +2,9 @@ use std::collections::{BTreeMap, BTreeSet};
 use std::fmt::Display;
 
 use convert_case::{Case, Casing};
+use gqlforge_valid::{Valid, Validator};
 use prost_reflect::{EnumDescriptor, FieldDescriptor, Kind, MessageDescriptor};
 use serde::{Deserialize, Serialize};
-use gqlforge_valid::{Valid, Validator};
 
 #[derive(Clone, Debug, Serialize, Deserialize, PartialEq, Eq, schemars::JsonSchema)]
 #[serde(rename = "schema")]
@@ -328,13 +328,13 @@ mod tests {
 
     use async_graphql::Name;
     use gqlforge_fixtures::protobuf;
+    use gqlforge_valid::{Valid, Validator};
     use indexmap::IndexMap;
     use pretty_assertions::assert_eq;
-    use gqlforge_valid::{Valid, Validator};
 
     use crate::core::blueprint::GrpcMethod;
-    use crate::core::grpc::protobuf::tests::get_proto_file;
     use crate::core::grpc::protobuf::ProtobufSet;
+    use crate::core::grpc::protobuf::tests::get_proto_file;
     use crate::core::json::JsonSchema;
 
     #[test]

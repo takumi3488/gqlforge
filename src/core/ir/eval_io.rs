@@ -1,8 +1,8 @@
 use async_graphql_value::ConstValue;
 
 use super::eval_http::{
-    execute_grpc_request_with_dl, execute_raw_grpc_request, execute_raw_request,
-    execute_request_with_dl, parse_graphql_response, set_headers, EvalHttp, WorkerContext,
+    EvalHttp, WorkerContext, execute_grpc_request_with_dl, execute_raw_grpc_request,
+    execute_raw_request, execute_request_with_dl, parse_graphql_response, set_headers,
 };
 use super::model::{CacheKey, IO};
 use super::{DynamicRequest, EvalContext, ResolverContextLike};
@@ -107,12 +107,13 @@ where
                 .worker
                 .as_ref()
                 .zip(ctx.value().cloned())
-            { Some((worker, value)) => {
-                let val = worker.call(name, value).await?;
-                Ok(val.unwrap_or_default())
-            } _ => {
-                Ok(ConstValue::Null)
-            }}
+            {
+                Some((worker, value)) => {
+                    let val = worker.call(name, value).await?;
+                    Ok(val.unwrap_or_default())
+                }
+                _ => Ok(ConstValue::Null),
+            }
         }
     }
 }

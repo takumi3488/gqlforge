@@ -11,8 +11,8 @@ use serde::{Deserialize, Serialize};
 
 use super::Error;
 use crate::core::blueprint::Index;
-use crate::core::ir::model::IR;
 use crate::core::ir::TypedValue;
+use crate::core::ir::model::IR;
 use crate::core::json::{JsonLike, JsonLikeOwned};
 use crate::core::path::PathString;
 use crate::core::scalar::Scalar;
@@ -580,8 +580,8 @@ impl From<ServerError> for Positioned<Error> {
 
 #[cfg(test)]
 mod test {
-    use async_graphql::parser::types::ConstDirective;
     use async_graphql::Request;
+    use async_graphql::parser::types::ConstDirective;
     use async_graphql_value::ConstValue;
 
     use super::{Directive, OperationPlan};

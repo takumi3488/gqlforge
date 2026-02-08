@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use anyhow::Result;
 use derive_setters::Setters;
 use gqlforge_hasher::GqlforgeHasher;
-use http::header::{HeaderMap, HeaderValue, CONTENT_TYPE};
+use http::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
 use url::Url;
 
 use super::request::create_grpc_request;
@@ -133,8 +133,8 @@ mod tests {
 
     use derive_setters::Setters;
     use gqlforge_fixtures::protobuf;
-    use http::header::{HeaderMap, HeaderName, HeaderValue};
     use http::Method;
+    use http::header::{HeaderMap, HeaderName, HeaderValue};
     use pretty_assertions::assert_eq;
 
     use super::{RequestBody, RequestTemplate};

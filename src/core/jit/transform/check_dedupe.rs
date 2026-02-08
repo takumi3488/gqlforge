@@ -2,9 +2,9 @@ use std::convert::Infallible;
 
 use gqlforge_valid::Valid;
 
+use crate::core::Transform;
 use crate::core::ir::model::IR;
 use crate::core::jit::OperationPlan;
-use crate::core::Transform;
 
 pub struct CheckDedupe<A>(std::marker::PhantomData<A>);
 impl<A> CheckDedupe<A> {

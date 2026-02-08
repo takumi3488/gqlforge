@@ -1,22 +1,22 @@
 use std::collections::{BTreeSet, HashSet};
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use derive_setters::Setters;
+use gqlforge_valid::Validator;
 use prost_reflect::prost_types::field_descriptor_proto::Label;
 use prost_reflect::prost_types::{
     DescriptorProto, EnumDescriptorProto, FileDescriptorSet, ServiceDescriptorProto, SourceCodeInfo,
 };
 use serde_json::Value;
-use gqlforge_valid::Validator;
 
 use super::graphql_type::{GraphQLType, Unparsed};
 use super::proto::comments_builder::CommentsBuilder;
 use super::proto::path_builder::PathBuilder;
 use super::proto::path_field::PathField;
+use crate::core::Type;
 use crate::core::config::transformer::{AmbiguousType, TreeShake};
 use crate::core::config::{self, Arg, Config, Enum, Field, Grpc, Resolver, Union, Variant};
 use crate::core::transform::{Transform, TransformerOps};
-use crate::core::Type;
 
 /// Assists in the mapping and retrieval of proto type names to custom formatted
 /// strings based on the descriptor type.

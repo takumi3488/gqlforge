@@ -1,7 +1,7 @@
 use std::collections::{BTreeMap, HashSet};
 
-use async_graphql::parser::types::{DirectiveLocation, TypeSystemDefinition};
 use async_graphql::Name;
+use async_graphql::parser::types::{DirectiveLocation, TypeSystemDefinition};
 use schemars::schema::{RootSchema, Schema, SchemaObject};
 
 use crate::common::{first_char_to_lower, first_char_to_upper, get_description, pos};

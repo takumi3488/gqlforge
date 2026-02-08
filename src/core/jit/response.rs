@@ -3,8 +3,8 @@ use std::sync::Arc;
 use derive_setters::Setters;
 use serde::Serialize;
 
-use super::graphql_error::GraphQLError;
 use super::Positioned;
+use super::graphql_error::GraphQLError;
 use crate::core::async_graphql_hyper::CacheControl;
 use crate::core::jit;
 use crate::core::json::{JsonLike, JsonObjectLike};

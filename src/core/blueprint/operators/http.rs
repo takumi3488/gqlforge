@@ -2,13 +2,13 @@ use gqlforge_valid::{Valid, Validator};
 use template_validation::validate_argument;
 
 use crate::core::blueprint::*;
-use crate::core::config::group_by::GroupBy;
 use crate::core::config::Field;
+use crate::core::config::group_by::GroupBy;
 use crate::core::endpoint::Endpoint;
 use crate::core::http::{Method, RequestTemplate};
 use crate::core::ir::model::{IO, IR};
 use crate::core::worker_hooks::WorkerHooks;
-use crate::core::{config, helpers, Mustache};
+use crate::core::{Mustache, config, helpers};
 
 pub fn compile_http(
     config_module: &config::ConfigModule,

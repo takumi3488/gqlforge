@@ -77,7 +77,7 @@ mod tests {
     use crate::core::auth::basic::tests::create_basic_auth_request;
     use crate::core::auth::error::Error;
     use crate::core::auth::jwt::jwt_verify::tests::{
-        create_jwt_auth_request, JWT_VALID_TOKEN_WITH_KID,
+        JWT_VALID_TOKEN_WITH_KID, create_jwt_auth_request,
     };
     use crate::core::auth::verification::Verification;
     use crate::core::auth::verify::Verify;

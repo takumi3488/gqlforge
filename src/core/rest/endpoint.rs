@@ -14,7 +14,7 @@ use super::{Request, Result};
 use crate::core::async_graphql_hyper::GraphQLRequest;
 use crate::core::directive::DirectiveCodec;
 use crate::core::http::Method;
-use crate::core::rest::typed_variables::{UrlParamType, N};
+use crate::core::rest::typed_variables::{N, UrlParamType};
 
 /// An executable Http Endpoint created from a GraphQL query
 #[derive(Debug, Setters, Clone)]
@@ -290,8 +290,8 @@ mod tests {
         use pretty_assertions::assert_eq;
 
         use super::Result;
-        use crate::core::rest::endpoint::tests::TEST_QUERY;
         use crate::core::rest::endpoint::Endpoint;
+        use crate::core::rest::endpoint::tests::TEST_QUERY;
 
         fn test_request(method: Method, uri: &str) -> Result<http::Request<Full<Bytes>>> {
             Ok(Request::builder()

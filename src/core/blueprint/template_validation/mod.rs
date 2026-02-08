@@ -1,10 +1,10 @@
 use gqlforge_valid::{Valid, Validator};
 
 use super::BlueprintError;
+use crate::core::Mustache;
 use crate::core::config::{Config, Field};
 use crate::core::mustache::Segment;
 use crate::core::scalar::Scalar;
-use crate::core::Mustache;
 
 // given a path, it follows path till leaf node and provides callback at leaf
 // node.
@@ -62,8 +62,8 @@ mod test {
     use gqlforge_valid::{Valid, Validator};
 
     use super::validate_argument;
-    use crate::core::blueprint::BlueprintError;
     use crate::core::Mustache;
+    use crate::core::blueprint::BlueprintError;
     use crate::include_config;
 
     #[test]

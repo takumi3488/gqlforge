@@ -1,7 +1,7 @@
 use colored::Colorize;
 use ctrlc::set_handler;
 use gqlforge_version::VERSION;
-use update_informer::{registry, Check, Version};
+use update_informer::{Check, Version, registry};
 use which::which;
 
 #[derive(Default)]
@@ -24,14 +24,16 @@ impl InstallationMethod {
             .arg("ls")
             .arg("--global")
             .output()
-            && String::from_utf8_lossy(&output.stdout).contains("@gqlforge/gqlforge") {
-                return InstallationMethod::Npm;
-            }
+            && String::from_utf8_lossy(&output.stdout).contains("@gqlforge/gqlforge")
+        {
+            return InstallationMethod::Npm;
+        }
 
         if let Ok(result) = which("gqlforge")
-            && result.to_str().is_some_and(|s| s.contains("homebrew")) {
-                return InstallationMethod::Brew;
-            }
+            && result.to_str().is_some_and(|s| s.contains("homebrew"))
+        {
+            return InstallationMethod::Brew;
+        }
 
         InstallationMethod::default()
     }

@@ -180,7 +180,7 @@ mod test {
     use async_graphql_value::ConstValue;
     use schemars::schema::Schema;
 
-    use crate::core::scalar::{Scalar, CUSTOM_SCALARS};
+    use crate::core::scalar::{CUSTOM_SCALARS, Scalar};
 
     /// generates test asserts for valid scalar inputs
     #[macro_export]

@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use prost_reflect::prost_types::FileDescriptorSet;
-use prost_reflect::FieldDescriptor;
 use gqlforge_valid::{Valid, ValidationError, Validator};
+use prost_reflect::FieldDescriptor;
+use prost_reflect::prost_types::FileDescriptorSet;
 
 use super::apply_select;
 use crate::core::blueprint::BlueprintError;

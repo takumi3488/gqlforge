@@ -5,7 +5,7 @@ use criterion::Criterion;
 use gqlforge::core::blueprint::GrpcMethod;
 use gqlforge::core::grpc::protobuf::ProtobufSet;
 use rand::Rng;
-use serde_json::{json, Value};
+use serde_json::{Value, json};
 
 const PROTO_DIR: &str = "benches/grpc";
 const PROTO_FILE: &str = "dummy.proto";

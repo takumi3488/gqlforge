@@ -6,7 +6,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 
 use crate::core::config::headers::Headers;
-use crate::core::config::{merge_key_value_vecs, KeyValue};
+use crate::core::config::{KeyValue, merge_key_value_vecs};
 use crate::core::is_default;
 use crate::core::macros::MergeRight;
 

@@ -25,7 +25,9 @@ fn set_default_value(
         match ConstValue::from_json(value) {
             Ok(const_value) => input_value.default_value(const_value),
             Err(err) => {
-                tracing::warn!("conversion from serde_json::Value to ConstValue failed for default_value with error {err:?}");
+                tracing::warn!(
+                    "conversion from serde_json::Value to ConstValue failed for default_value with error {err:?}"
+                );
                 input_value
             }
         }

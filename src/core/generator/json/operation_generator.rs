@@ -4,8 +4,8 @@ use gqlforge_valid::Valid;
 use super::http_directive_generator::HttpDirectiveGenerator;
 use crate::core::config::{Arg, Config, Field, GraphQLOperationType, Resolver};
 use crate::core::generator::json::types_generator::TypeGenerator;
-use crate::core::generator::{NameGenerator, RequestSample, PREFIX};
-use crate::core::{config, Type};
+use crate::core::generator::{NameGenerator, PREFIX, RequestSample};
+use crate::core::{Type, config};
 
 pub struct OperationTypeGenerator;
 

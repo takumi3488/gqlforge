@@ -11,8 +11,8 @@ use crate::core::config::Encoding;
 use crate::core::endpoint::Endpoint;
 use crate::core::has_headers::HasHeaders;
 use crate::core::helpers::headers::MustacheHeaders;
-use crate::core::ir::model::{CacheKey, IoId};
 use crate::core::ir::DynamicRequest;
+use crate::core::ir::model::{CacheKey, IoId};
 use crate::core::mustache::{Eval, Mustache, Segment};
 use crate::core::path::{PathString, PathValue, ValueString};
 
@@ -712,8 +712,8 @@ mod tests {
         use http::header::HeaderMap;
         use serde_json::json;
 
-        use crate::core::http::request_template::tests::Context;
         use crate::core::http::RequestTemplate;
+        use crate::core::http::request_template::tests::Context;
 
         #[test]
         fn test_from_endpoint() {
@@ -852,8 +852,8 @@ mod tests {
     mod form_encoded_url {
         use serde_json::json;
 
-        use crate::core::http::request_template::tests::Context;
         use crate::core::http::RequestTemplate;
+        use crate::core::http::request_template::tests::Context;
         use crate::core::mustache::Mustache;
 
         #[test]
@@ -917,8 +917,8 @@ mod tests {
         use http::header::HeaderMap;
         use serde_json::json;
 
-        use crate::core::http::request_template::tests::Context;
         use crate::core::http::RequestTemplate;
+        use crate::core::http::request_template::tests::Context;
         use crate::core::ir::model::{CacheKey, IoId};
         use crate::core::mustache::Mustache;
 

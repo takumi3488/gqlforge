@@ -21,9 +21,10 @@ impl TryFrom<Vec<Link>> for Links {
                 })
                 .and_then(|link| {
                     if let Some(id) = &link.id
-                        && links.iter().filter(|l| l.id.as_ref() == Some(id)).count() > 1 {
-                            return Valid::fail(BlueprintError::Duplicated(id.clone()));
-                        }
+                        && links.iter().filter(|l| l.id.as_ref() == Some(id)).count() > 1
+                    {
+                        return Valid::fail(BlueprintError::Duplicated(id.clone()));
+                    }
                     Valid::succeed(link)
                 })
                 .trace(&pos.to_string())

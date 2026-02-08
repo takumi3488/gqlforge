@@ -4,13 +4,13 @@ use std::fmt::Write;
 use async_graphql::parser::types::ServiceDocument;
 use gqlforge_valid::{Valid, Validator};
 
-use super::{compile_resolver, CompileResolver};
+use super::{CompileResolver, compile_resolver};
+use crate::core::Type;
 use crate::core::blueprint::{Blueprint, BlueprintError, Definition, TryFoldConfig};
 use crate::core::config::{
     ApolloFederation, ConfigModule, EntityResolver, Field, GraphQLOperationType, Resolver,
 };
 use crate::core::ir::model::IR;
-use crate::core::Type;
 
 pub struct CompileEntityResolver<'a> {
     pub config_module: &'a ConfigModule,

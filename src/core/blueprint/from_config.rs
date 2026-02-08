@@ -1,11 +1,12 @@
 use std::collections::{BTreeMap, BTreeSet};
 
 use async_graphql::dynamic::SchemaBuilder;
-use indexmap::IndexMap;
 use gqlforge_valid::{Valid, ValidationError, Validator};
+use indexmap::IndexMap;
 
 use self::telemetry::to_opentelemetry;
 use super::Server;
+use crate::core::Type;
 use crate::core::blueprint::compress::compress;
 use crate::core::blueprint::*;
 use crate::core::config::transformer::Required;
@@ -13,7 +14,6 @@ use crate::core::config::{Arg, Batch, Config, ConfigModule};
 use crate::core::ir::model::{IO, IR};
 use crate::core::json::JsonSchema;
 use crate::core::try_fold::TryFold;
-use crate::core::Type;
 
 pub fn config_blueprint<'a>() -> TryFold<'a, ConfigModule, Blueprint, BlueprintError> {
     let server = TryFoldConfig::<Blueprint>::new(|config_module, blueprint| {
@@ -63,11 +63,11 @@ pub fn apply_batching(mut blueprint: Blueprint) -> Blueprint {
         if let Definition::Object(object_type_definition) = def {
             for field in object_type_definition.fields.iter() {
                 if let Some(IR::IO(io)) = field.resolver.as_ref()
-                    && matches!(io.as_ref(), IO::Http { group_by: Some(_), .. }) {
-                        blueprint.upstream.batch =
-                            blueprint.upstream.batch.or(Some(Batch::default()));
-                        return blueprint;
-                    }
+                    && matches!(io.as_ref(), IO::Http { group_by: Some(_), .. })
+                {
+                    blueprint.upstream.batch = blueprint.upstream.batch.or(Some(Batch::default()));
+                    return blueprint;
+                }
             }
         }
     }

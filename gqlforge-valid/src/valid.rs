@@ -88,11 +88,7 @@ pub trait Validator<A, E>: Sized {
         self.map(|_| b)
     }
     fn when(self, f: impl FnOnce() -> bool) -> Valid<(), E> {
-        if f() {
-            self.unit()
-        } else {
-            Valid::succeed(())
-        }
+        if f() { self.unit() } else { Valid::succeed(()) }
     }
 }
 

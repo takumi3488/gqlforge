@@ -5,8 +5,8 @@ use std::sync::Arc;
 
 use async_graphql::{BatchRequest, Value};
 use async_graphql_value::{ConstValue, Extensions};
-use futures_util::stream::FuturesOrdered;
 use futures_util::StreamExt;
+use futures_util::stream::FuturesOrdered;
 use gqlforge_hasher::GqlforgeHasher;
 
 use super::{AnyResponse, BatchResponse, Response};
@@ -85,22 +85,23 @@ impl JITExecutor {
             }
 
             let jit_request = jit::Request::from(request);
-            let exec = match self.app_ctx.operation_plans.get(&hash) { Some(op) => {
-                ConstValueExecutor::from(op.value().clone())
-            } _ => {
-                let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
-                    Ok(exec) => exec,
-                    Err(error) => {
-                        return Response::<async_graphql::Value>::default()
-                            .with_errors(vec![Positioned::new(error, Pos::default())])
-                            .into()
-                    }
-                };
-                self.app_ctx
-                    .operation_plans
-                    .insert(hash.clone(), exec.plan.clone());
-                exec
-            }};
+            let exec = match self.app_ctx.operation_plans.get(&hash) {
+                Some(op) => ConstValueExecutor::from(op.value().clone()),
+                _ => {
+                    let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
+                        Ok(exec) => exec,
+                        Err(error) => {
+                            return Response::<async_graphql::Value>::default()
+                                .with_errors(vec![Positioned::new(error, Pos::default())])
+                                .into();
+                        }
+                    };
+                    self.app_ctx
+                        .operation_plans
+                        .insert(hash.clone(), exec.plan.clone());
+                    exec
+                }
+            };
 
             let is_const = exec.plan.is_const;
             let is_protected = exec.plan.is_protected;

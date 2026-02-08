@@ -2,8 +2,8 @@ use std::collections::BTreeSet;
 
 use serde::{Deserialize, Serialize};
 
-use crate::core::config::cors::Cors;
 use crate::core::config::KeyValue;
+use crate::core::config::cors::Cors;
 use crate::core::is_default;
 use crate::core::macros::MergeRight;
 

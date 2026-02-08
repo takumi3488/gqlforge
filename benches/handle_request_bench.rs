@@ -6,8 +6,8 @@ use gqlforge::core::async_graphql_hyper::GraphQLRequest;
 use gqlforge::core::blueprint::Blueprint;
 use gqlforge::core::config::{Config, ConfigModule};
 use gqlforge::core::http::handle_request;
-use http::Request;
 use gqlforge_valid::Validator;
+use http::Request;
 
 static QUERY: &str = r#"{"query":"query{posts{title}}"}"#;
 

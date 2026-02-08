@@ -6,7 +6,7 @@ use derive_more::From;
 use thiserror::Error;
 
 use crate::core::jit::graphql_error::{Error as ExtensionError, ErrorExtensions};
-use crate::core::{auth, cache, worker, Errata};
+use crate::core::{Errata, auth, cache, worker};
 
 #[derive(From, Debug, Error, Clone)]
 pub enum Error {
@@ -94,11 +94,14 @@ impl ErrorExtensions for Error {
             }
 
             if let Error::HTTP { message: _, body } = self {
-                match serde_json::from_str::<ConstValue>(body) { Ok(ConstValue::Object(map)) => {
-                    e.extend(map);
-                } _ => {
-                    e.set("cause", body);
-                }}
+                match serde_json::from_str::<ConstValue>(body) {
+                    Ok(ConstValue::Object(map)) => {
+                        e.extend(map);
+                    }
+                    _ => {
+                        e.set("cause", body);
+                    }
+                }
             }
         })
     }

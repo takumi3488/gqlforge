@@ -438,11 +438,13 @@ mod tests {
     #[tokio::test]
     async fn test_dataloader_load_empty() {
         let loader = DataLoader::new(MyLoader);
-        assert!(loader
-            .load_many::<Vec<i32>>(vec![])
-            .await
-            .unwrap()
-            .is_empty());
+        assert!(
+            loader
+                .load_many::<Vec<i32>>(vec![])
+                .await
+                .unwrap()
+                .is_empty()
+        );
     }
 
     #[tokio::test]

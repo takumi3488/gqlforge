@@ -10,7 +10,7 @@ use tokio::time::Duration;
 
 use super::Result;
 use crate::can_track::can_track;
-use crate::collect::{ga, posthog, Collect};
+use crate::collect::{Collect, ga, posthog};
 use crate::{Event, EventKind};
 
 const GA_API_SECRET: &str = match option_env!("GA_API_SECRET") {

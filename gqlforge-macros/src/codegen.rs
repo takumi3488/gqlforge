@@ -1,6 +1,6 @@
 use proc_macro::TokenStream;
 use quote::quote;
-use syn::{parse_macro_input, Attribute, Data, DeriveInput, Expr, Meta};
+use syn::{Attribute, Data, DeriveInput, Expr, Meta, parse_macro_input};
 
 fn extract_gen_doc_ty(attrs: &[Attribute]) -> String {
     attrs
@@ -10,14 +10,16 @@ fn extract_gen_doc_ty(attrs: &[Attribute]) -> String {
                 let meta_list = attr.meta.require_list().ok()?;
                 let expr = meta_list.parse_args::<Expr>().ok()?;
                 if let Expr::Assign(assign) = expr
-                    && let Expr::Path(expr_path) = assign.left.as_ref() {
-                        let segment = expr_path.path.segments.first()?;
-                        if segment.ident == "ty"
-                            && let Expr::Lit(expr_lit) = *assign.right
-                                && let syn::Lit::Str(lit_str) = expr_lit.lit {
-                                    return Some(lit_str.value().trim().to_string());
-                                }
+                    && let Expr::Path(expr_path) = assign.left.as_ref()
+                {
+                    let segment = expr_path.path.segments.first()?;
+                    if segment.ident == "ty"
+                        && let Expr::Lit(expr_lit) = *assign.right
+                        && let syn::Lit::Str(lit_str) = expr_lit.lit
+                    {
+                        return Some(lit_str.value().trim().to_string());
                     }
+                }
             }
             None
         })
@@ -45,10 +47,11 @@ pub fn doc(input: TokenStream) -> TokenStream {
             .filter_map(|attr| {
                 if attr.path().is_ident("doc")
                     && let Meta::NameValue(value) = &attr.meta
-                        && let Expr::Lit(lit) = &value.value
-                            && let syn::Lit::Str(lit_str) = &lit.lit {
-                                return Some(lit_str.value().trim().to_string());
-                            }
+                    && let Expr::Lit(lit) = &value.value
+                    && let syn::Lit::Str(lit_str) = &lit.lit
+                {
+                    return Some(lit_str.value().trim().to_string());
+                }
                 None
             })
             .collect::<Vec<_>>()

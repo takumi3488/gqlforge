@@ -5,7 +5,7 @@ pub mod test {
     use std::sync::Arc;
     use std::time::Duration;
 
-    use anyhow::{anyhow, Result};
+    use anyhow::{Result, anyhow};
     use async_graphql::Value;
     use bytes::Bytes;
     use gqlforge::cli::javascript::init_worker_io;

@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use super::ir::Error;
 use super::worker::WorkerRequest;
-use super::{worker, WorkerIO};
+use super::{WorkerIO, worker};
 use crate::core::http::Response;
 
 /// User can configure the hooks on directive

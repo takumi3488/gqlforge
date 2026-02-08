@@ -1,5 +1,5 @@
-use serde_json::Value;
 use gqlforge_valid::Valid;
+use serde_json::Value;
 
 use crate::core::blueprint::{BlueprintError, DynamicValue};
 use crate::core::ir::model::IR;
@@ -14,7 +14,7 @@ pub fn apply_select(input: (IR, &Option<Value>)) -> Valid<IR, BlueprintError> {
                 return Valid::fail_with(
                     BlueprintError::SyntaxErrorWhenParsing(format!("{:?}", select)),
                     BlueprintError::Error(e),
-                )
+                );
             }
         };
 

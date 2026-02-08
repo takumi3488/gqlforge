@@ -1,7 +1,9 @@
-//! A Rust implementation of a persistent data structure for efficient append and concatenation operations.
+//! A Rust implementation of a persistent data structure for efficient append
+//! and concatenation operations.
 //!
-//! This crate provides the [`Chunk`] type, which implements a persistent data structure
-//! that allows O(1) append and concatenation operations through structural sharing.
+//! This crate provides the [`Chunk`] type, which implements a persistent data
+//! structure that allows O(1) append and concatenation operations through
+//! structural sharing.
 //!
 //! # Features
 //! - O(1) append operations
@@ -20,14 +22,16 @@
 //! assert_eq!(combined.as_vec(), vec![1, 2, 3, 4]);
 //! ```
 
-use std::{cell::RefCell, rc::Rc};
+use std::cell::RefCell;
+use std::rc::Rc;
 
-/// A persistent data structure that provides efficient append and concatenation operations.
+/// A persistent data structure that provides efficient append and concatenation
+/// operations.
 ///
 /// # Overview
-/// `Chunk<A>` is an immutable data structure that allows O(1) complexity for append and
-/// concatenation operations through structural sharing. It uses [`Rc`] (Reference Counting)
-/// for efficient memory management.
+/// `Chunk<A>` is an immutable data structure that allows O(1) complexity for
+/// append and concatenation operations through structural sharing. It uses
+/// [`Rc`] (Reference Counting) for efficient memory management.
 ///
 /// # Performance
 /// - Append operation: O(1)
@@ -195,17 +199,18 @@ impl<A> Chunk<A> {
 
     /// Transforms each element in the chunk using the provided function.
     ///
-    /// This method creates a lazy representation of the transformation without actually
-    /// performing it. The transformation is only executed when [`as_vec`](Chunk::as_vec)
-    /// or [`as_vec_mut`](Chunk::as_vec_mut) is called.
+    /// This method creates a lazy representation of the transformation without
+    /// actually performing it. The transformation is only executed when
+    /// [`as_vec`](Chunk::as_vec) or [`as_vec_mut`](Chunk::as_vec_mut) is
+    /// called.
     ///
     /// # Performance
     /// - Creating the transformation: O(1)
     /// - Executing the transformation (during [`as_vec`](Chunk::as_vec)): O(n)
     ///
     /// # Arguments
-    /// * `f` - A function that takes a reference to an element of type `A` and returns
-    ///   a new element of type `A`
+    /// * `f` - A function that takes a reference to an element of type `A` and
+    ///   returns a new element of type `A`
     ///
     /// # Examples
     /// ```
@@ -223,13 +228,15 @@ impl<A> Chunk<A> {
 
     /// Materializes a chunk by converting it into a collected form.
     ///
-    /// This method evaluates any lazy transformations and creates a new chunk containing
-    /// all elements in a `Collect` variant. This can be useful for performance when you
-    /// plan to reuse the chunk multiple times, as it prevents re-evaluation of transformations.
+    /// This method evaluates any lazy transformations and creates a new chunk
+    /// containing all elements in a `Collect` variant. This can be useful
+    /// for performance when you plan to reuse the chunk multiple times, as
+    /// it prevents re-evaluation of transformations.
     ///
     /// # Performance
     /// - Time complexity: O(n) where n is the number of elements
-    /// - Space complexity: O(n) as it creates a new vector containing all elements
+    /// - Space complexity: O(n) as it creates a new vector containing all
+    ///   elements
     ///
     /// # Examples
     /// ```
@@ -252,19 +259,21 @@ impl<A> Chunk<A> {
         Chunk::Collect(Rc::new(RefCell::new(self.as_vec())))
     }
 
-    /// Transforms each element in the chunk into a new chunk and flattens the result.
+    /// Transforms each element in the chunk into a new chunk and flattens the
+    /// result.
     ///
-    /// This method creates a lazy representation of the transformation without actually
-    /// performing it. The transformation is only executed when [`as_vec`](Chunk::as_vec)
-    /// or [`as_vec_mut`](Chunk::as_vec_mut) is called.
+    /// This method creates a lazy representation of the transformation without
+    /// actually performing it. The transformation is only executed when
+    /// [`as_vec`](Chunk::as_vec) or [`as_vec_mut`](Chunk::as_vec_mut) is
+    /// called.
     ///
     /// # Performance
     /// - Creating the transformation: O(1)
     /// - Executing the transformation (during [`as_vec`](Chunk::as_vec)): O(n)
     ///
     /// # Arguments
-    /// * `f` - A function that takes an element of type `A` and returns
-    ///   a new `Chunk<A>`
+    /// * `f` - A function that takes an element of type `A` and returns a new
+    ///   `Chunk<A>`
     ///
     /// # Examples
     /// ```
@@ -302,7 +311,8 @@ impl<A> Chunk<A> {
         vec
     }
 
-    /// Helper method that populates a vector with references to the chunk's elements.
+    /// Helper method that populates a vector with references to the chunk's
+    /// elements.
     ///
     /// This method is used internally by [`as_vec`](Chunk::as_vec) to avoid
     /// allocating multiple vectors during the traversal.

@@ -1,10 +1,10 @@
-use async_graphql::parser::types::*;
 use async_graphql::Positioned;
+use async_graphql::parser::types::*;
 use async_graphql_value::{ConstValue, Name};
 use gqlforge_valid::Validator;
 
-use super::directive::to_const_directive;
 use super::Config;
+use super::directive::to_const_directive;
 use crate::core::directive::DirectiveCodec;
 use crate::core::pos;
 

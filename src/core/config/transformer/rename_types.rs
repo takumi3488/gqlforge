@@ -1,10 +1,10 @@
 use std::collections::HashSet;
 
-use indexmap::IndexMap;
 use gqlforge_valid::{Valid, Validator};
+use indexmap::IndexMap;
 
-use crate::core::config::Config;
 use crate::core::Transform;
+use crate::core::config::Config;
 
 /// A transformer that renames existing types by replacing them with suggested
 /// names.
@@ -140,9 +140,9 @@ impl Transform for RenameTypes {
 
 #[cfg(test)]
 mod test {
+    use gqlforge_valid::{ValidationError, Validator};
     use indexmap::IndexMap;
     use maplit::hashmap;
-    use gqlforge_valid::{ValidationError, Validator};
 
     use super::RenameTypes;
     use crate::core::config::Config;

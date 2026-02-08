@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 use std::collections::BTreeSet;
 use std::num::NonZeroU64;
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use async_graphql::futures_util::future::join_all;
 use async_graphql_value::ConstValue;
@@ -12,7 +12,7 @@ use gqlforge::core::config::Batch;
 use gqlforge::core::http::{DataLoaderRequest, HttpDataLoader, Response};
 use gqlforge::core::ir::model::IoId;
 use gqlforge::core::runtime::TargetRuntime;
-use gqlforge::core::{cache, EnvIO, FileIO, HttpIO};
+use gqlforge::core::{EnvIO, FileIO, HttpIO, cache};
 use reqwest::Request;
 
 #[derive(Clone)]

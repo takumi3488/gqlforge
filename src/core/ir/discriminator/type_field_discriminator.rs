@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 
-use anyhow::{bail, Result};
+use anyhow::{Result, bail};
 use async_graphql::Value;
 use gqlforge_valid::Valid;
 
@@ -48,22 +48,38 @@ impl TypeFieldDiscriminator {
         }
 
         let Some(index_map) = value.as_object() else {
-            bail!("The TypeFieldDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.", self.type_name)
+            bail!(
+                "The TypeFieldDiscriminator(type=\"{}\") can only use object values to discriminate, but received a different type.",
+                self.type_name
+            )
         };
 
         let Some(value) = index_map.get(self.typename_field.as_str()) else {
-            bail!("The TypeFieldDiscriminator(type=\"{}\") cannot discriminate the Value because it does not contain the type name field `{}`", self.type_name, self.typename_field)
+            bail!(
+                "The TypeFieldDiscriminator(type=\"{}\") cannot discriminate the Value because it does not contain the type name field `{}`",
+                self.type_name,
+                self.typename_field
+            )
         };
 
         let Value::String(type_name) = value else {
-            bail!("The TypeFieldDiscriminator(type=\"{}\") requires `{}` of type string, but received a different type.", self.type_name, self.typename_field)
+            bail!(
+                "The TypeFieldDiscriminator(type=\"{}\") requires `{}` of type string, but received a different type.",
+                self.type_name,
+                self.typename_field
+            )
         };
 
         if self.types.contains(type_name) {
             Ok(type_name.to_string())
         } else {
             let types: Vec<_> = self.types.clone().into_iter().collect();
-            bail!("The type `{}` is not in the list of acceptable types {:?} of TypeFieldDiscriminator(type=\"{}\")", type_name, types, self.type_name)
+            bail!(
+                "The type `{}` is not in the list of acceptable types {:?} of TypeFieldDiscriminator(type=\"{}\")",
+                type_name,
+                types,
+                self.type_name
+            )
         }
     }
 
@@ -79,8 +95,8 @@ impl TypeFieldDiscriminator {
 #[cfg(test)]
 mod tests {
     use async_graphql::Value;
-    use serde_json::json;
     use gqlforge_valid::Validator;
+    use serde_json::json;
     use test_log::test;
 
     use super::TypeFieldDiscriminator;

@@ -1,8 +1,8 @@
 use std::borrow::Cow;
 use std::fmt::Display;
 
-use async_graphql::parser::types::*;
 use async_graphql::Positioned;
+use async_graphql::parser::types::*;
 use async_graphql_value::ConstValue;
 use unicode_segmentation::UnicodeSegmentation;
 

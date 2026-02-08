@@ -109,9 +109,10 @@ where
         Output: JsonLike<'a>,
     {
         if let Some(root_name) = root_name
-            && node.name.eq("__typename") {
-                return Ok(Output::string(Cow::Borrowed(root_name)));
-            }
+            && node.name.eq("__typename")
+        {
+            return Ok(Output::string(Cow::Borrowed(root_name)));
+        }
         // according to GraphQL spec https://spec.graphql.org/October2021/#sec-Handling-Field-Errors
         if node.type_of.is_nullable() {
             Ok(Output::null())
@@ -251,18 +252,18 @@ where
 #[cfg(test)]
 mod tests {
     use async_graphql_value::ConstValue;
-    use serde::{Deserialize, Serialize};
     use gqlforge_valid::Validator;
+    use serde::{Deserialize, Serialize};
 
     use super::ValueStore;
     use crate::core::blueprint::Blueprint;
     use crate::core::config::{Config, ConfigModule};
+    use crate::core::jit::OperationPlan;
     use crate::core::jit::builder::Builder;
     use crate::core::jit::fixtures::JP;
     use crate::core::jit::model::{FieldId, Variables};
     use crate::core::jit::store::Store;
     use crate::core::jit::synth::Synth;
-    use crate::core::jit::OperationPlan;
     use crate::core::json::JsonLike;
 
     const POSTS: &str = r#"

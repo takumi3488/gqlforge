@@ -130,8 +130,8 @@ mod tests {
     }
 
     #[allow(dead_code)]
-    fn test_json_object_like_lifetime<'a, Value: JsonObjectLike<'a, Value = bool> + Clone + 'a>(
-    ) -> Value {
+    fn test_json_object_like_lifetime<'a, Value: JsonObjectLike<'a, Value = bool> + Clone + 'a>()
+    -> Value {
         let mut value = Value::new();
 
         value.insert_key("test_key", true);

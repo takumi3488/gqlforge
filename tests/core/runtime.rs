@@ -2,8 +2,8 @@ extern crate core;
 
 use std::collections::{BTreeMap, HashMap};
 use std::path::{Path, PathBuf};
-use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
+use std::sync::atomic::{AtomicUsize, Ordering};
 
 use async_graphql::Value;
 use derive_setters::Setters;
@@ -56,7 +56,10 @@ impl ExecutionMock {
         assert_eq!(
             expected_hits,
             actual_hits,
-            "expected mock for {} to be hit exactly {} times, but it was hit {} times for file: {:?}", url, expected_hits, actual_hits,
+            "expected mock for {} to be hit exactly {} times, but it was hit {} times for file: {:?}",
+            url,
+            expected_hits,
+            actual_hits,
             path.as_ref()
         );
     }
