@@ -1,0 +1,166 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 668.71">
+  <defs>
+    <!-- Gradients from logo_main.svg -->
+    <linearGradient id="hexBorder" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#5a6577"/>
+      <stop offset="30%" stop-color="#3d4556"/>
+      <stop offset="70%" stop-color="#2d3448"/>
+      <stop offset="100%" stop-color="#1e2536"/>
+    </linearGradient>
+    <linearGradient id="hexFill" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#1c2333"/>
+      <stop offset="100%" stop-color="#0f1520"/>
+    </linearGradient>
+    <radialGradient id="centralGlow" cx="50%" cy="48%" r="25%">
+      <stop offset="0%" stop-color="#ffeaa0" stop-opacity="0.9"/>
+      <stop offset="40%" stop-color="#ffcc33" stop-opacity="0.4"/>
+      <stop offset="100%" stop-color="#ff8c00" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="flameGrad1" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#cc3300"/>
+      <stop offset="40%" stop-color="#ff6600"/>
+      <stop offset="70%" stop-color="#ff9900"/>
+      <stop offset="100%" stop-color="#ffcc00"/>
+    </linearGradient>
+    <linearGradient id="flameGrad2" x1="0%" y1="100%" x2="0%" y2="0%">
+      <stop offset="0%" stop-color="#ff4400"/>
+      <stop offset="50%" stop-color="#ff8800"/>
+      <stop offset="100%" stop-color="#ffdd44"/>
+    </linearGradient>
+    <linearGradient id="anvilGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" stop-color="#6b7a8d"/>
+      <stop offset="50%" stop-color="#4a5568"/>
+      <stop offset="100%" stop-color="#3a4555"/>
+    </linearGradient>
+    <filter id="glowFilter" x="-30%" y="-30%" width="160%" height="160%">
+      <feGaussianBlur stdDeviation="4" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="sparkFilter" x="-50%" y="-50%" width="200%" height="200%">
+      <feGaussianBlur stdDeviation="6" result="blur"/>
+      <feMerge>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="blur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+    <filter id="flameBlur">
+      <feGaussianBlur stdDeviation="2"/>
+    </filter>
+
+    <!-- Text gradient -->
+    <linearGradient id="textGrad" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" stop-color="#4a9eff"/>
+      <stop offset="60%" stop-color="#b8d8ff"/>
+      <stop offset="100%" stop-color="#ff8c00"/>
+    </linearGradient>
+  </defs>
+
+  <!-- Icon: logo_main.svg scaled and centered vertically -->
+  <g transform="translate(40, 34) scale(1.67)">
+    <!-- Hexagonal badge - outer border -->
+    <polygon points="200,18 338,98 338,258 200,338 62,258 62,98"
+             fill="url(#hexBorder)" stroke="#78879a" stroke-width="3"/>
+
+    <!-- Hexagonal badge - inner fill -->
+    <polygon points="200,30 329,105 329,251 200,326 71,251 71,105"
+             fill="url(#hexFill)"/>
+
+    <!-- Central glow effect -->
+    <ellipse cx="200" cy="185" rx="90" ry="70" fill="url(#centralGlow)"/>
+
+    <!-- Flames - back layer (blurred) -->
+    <g filter="url(#flameBlur)" opacity="0.6">
+      <path d="M150,275 Q155,245 162,265 Q168,235 175,258 Q180,225 188,255 Q192,220 200,250 Q208,218 212,255 Q218,228 225,258 Q230,238 238,265 Q244,248 250,275 Z"
+            fill="url(#flameGrad2)"/>
+    </g>
+
+    <!-- Flames - main layer -->
+    <path d="M155,273 Q160,250 165,268 Q170,240 178,262 Q182,230 190,258 Q195,222 200,252 Q205,225 210,258 Q216,232 222,262 Q228,242 235,268 Q240,252 245,273 Z"
+          fill="url(#flameGrad1)" opacity="0.9"/>
+
+    <!-- Flames - bright inner -->
+    <path d="M170,273 Q175,255 180,268 Q185,242 192,263 Q196,235 200,258 Q204,238 208,263 Q213,245 220,268 Q225,258 230,273 Z"
+          fill="#ffdd44" opacity="0.7"/>
+
+    <!-- Anvil body -->
+    <path d="M135,228 L135,210 L148,192 L160,182 L165,178 L235,178 L240,182 L252,192 L265,210 L265,228 L255,228 L255,215 L245,198 L235,190 L170,190 L158,200 L150,215 L150,228 Z"
+          fill="url(#anvilGrad)" stroke="#8899aa" stroke-width="1.5"/>
+
+    <!-- Anvil horn (left extension) -->
+    <path d="M135,210 L115,205 L110,210 L115,218 L135,220 Z"
+          fill="url(#anvilGrad)" stroke="#8899aa" stroke-width="1"/>
+
+    <!-- Anvil top surface highlight -->
+    <path d="M165,178 L235,178 L240,182 L160,182 Z"
+          fill="#8899aa" opacity="0.4"/>
+
+    <!-- Anvil base plate -->
+    <rect x="148" y="228" width="104" height="14" rx="2"
+          fill="url(#anvilGrad)" stroke="#8899aa" stroke-width="1"/>
+
+    <!-- Anvil base -->
+    <path d="M155,242 L155,260 L162,268 L238,268 L245,260 L245,242 Z"
+          fill="url(#anvilGrad)" stroke="#8899aa" stroke-width="1"/>
+
+    <!-- Graph edges (connections) -->
+    <g opacity="0.85">
+      <!-- Orange edges -->
+      <line x1="200" y1="95" x2="155" y2="135" stroke="#ff8c00" stroke-width="2.5"/>
+      <line x1="155" y1="135" x2="120" y2="115" stroke="#ff8c00" stroke-width="2"/>
+      <line x1="245" y1="130" x2="275" y2="108" stroke="#ff8c00" stroke-width="2"/>
+      <line x1="200" y1="65" x2="170" y2="55" stroke="#ff8c00" stroke-width="2"/>
+      <line x1="155" y1="135" x2="130" y2="165" stroke="#ff8c00" stroke-width="1.8"/>
+      <line x1="245" y1="130" x2="265" y2="160" stroke="#ff8c00" stroke-width="1.8"/>
+
+      <!-- Blue edges -->
+      <line x1="200" y1="95" x2="245" y2="130" stroke="#4a9eff" stroke-width="2.5"/>
+      <line x1="200" y1="95" x2="200" y2="65" stroke="#4a9eff" stroke-width="2.2"/>
+      <line x1="155" y1="135" x2="185" y2="172" stroke="#4a9eff" stroke-width="2"/>
+      <line x1="245" y1="130" x2="215" y2="172" stroke="#4a9eff" stroke-width="2"/>
+      <line x1="200" y1="65" x2="232" y2="52" stroke="#4a9eff" stroke-width="1.8"/>
+      <line x1="120" y1="115" x2="100" y2="138" stroke="#4a9eff" stroke-width="1.5"/>
+      <line x1="275" y1="108" x2="295" y2="132" stroke="#4a9eff" stroke-width="1.5"/>
+    </g>
+
+    <!-- Graph nodes -->
+    <g filter="url(#glowFilter)">
+      <circle cx="200" cy="95" r="9" fill="#4a9eff" stroke="#b8d8ff" stroke-width="2"/>
+      <circle cx="200" cy="65" r="7.5" fill="#ff8c00" stroke="#ffe0aa" stroke-width="2"/>
+      <circle cx="155" cy="135" r="7" fill="#ff8c00" stroke="#ffe0aa" stroke-width="1.8"/>
+      <circle cx="245" cy="130" r="7" fill="#ff8c00" stroke="#ffe0aa" stroke-width="1.8"/>
+      <circle cx="120" cy="115" r="5.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1.5"/>
+      <circle cx="275" cy="108" r="5.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1.5"/>
+      <circle cx="170" cy="55" r="4.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1.2"/>
+      <circle cx="232" cy="52" r="4.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1.2"/>
+      <circle cx="185" cy="172" r="5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1.5"/>
+      <circle cx="215" cy="172" r="5" fill="#ff8c00" stroke="#ffe0aa" stroke-width="1.5"/>
+      <circle cx="130" cy="165" r="4" fill="#ff8c00" stroke="#ffe0aa" stroke-width="1"/>
+      <circle cx="265" cy="160" r="4" fill="#ff8c00" stroke="#ffe0aa" stroke-width="1"/>
+      <circle cx="100" cy="138" r="3.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1"/>
+      <circle cx="295" cy="132" r="3.5" fill="#4a9eff" stroke="#b8d8ff" stroke-width="1"/>
+    </g>
+
+    <!-- Central spark / bright point on anvil -->
+    <g filter="url(#sparkFilter)">
+      <circle cx="200" cy="178" r="10" fill="#ffdd66" opacity="0.5"/>
+      <circle cx="200" cy="178" r="5" fill="#fff8dd" opacity="0.8"/>
+      <circle cx="200" cy="178" r="2.5" fill="#ffffff" opacity="1"/>
+    </g>
+
+    <!-- Spark rays -->
+    <g stroke="#ffdd66" stroke-width="1" opacity="0.6">
+      <line x1="200" y1="168" x2="200" y2="162"/>
+      <line x1="208" y1="171" x2="214" y2="167"/>
+      <line x1="192" y1="171" x2="186" y2="167"/>
+      <line x1="210" y1="178" x2="216" y2="178"/>
+      <line x1="190" y1="178" x2="184" y2="178"/>
+    </g>
+  </g>
+
+  <!-- Wordmark "gqlforge" -->
+  <text x="760" y="395" font-family="'Arial Black','Impact','Helvetica Neue',Arial,sans-serif" font-size="200" font-weight="900" fill="url(#textGrad)">gqlforge</text>
+</svg>

@@ -1,0 +1,34 @@
+{% extends "base.html" %}
+
+{% block title %}{{ section.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ section.description | default(value=config.description) }}{% endblock %}
+
+{% block content %}
+<div class="docs-layout">
+  <aside class="sidebar">
+    {% set cp = current_path | default(value="") %}
+    {% for category in config.extra.sidebar %}
+    <div class="sidebar-category">
+      <h3 class="sidebar-heading">{{ category.label }}</h3>
+      <ul class="sidebar-list">
+        {% for item in category.items %}
+        {% set item_url = "/docs/" ~ item.path ~ "/" %}
+        <li>
+          <a href="{{ get_url(path=item_url) }}"
+             {% if cp == item_url %}class="active"{% endif %}>
+            {{ item.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </aside>
+
+  <article class="docs-content">
+    {{ section.content | safe }}
+  </article>
+
+  <div class="toc-spacer"></div>
+</div>
+{% endblock %}

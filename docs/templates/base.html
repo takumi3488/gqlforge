@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>{% block title %}{{ config.title }}{% endblock %}</title>
+  <meta name="description" content="{% block description %}{{ config.description }}{% endblock %}">
+  <link rel="icon" href="{{ get_url(path='favicon.ico') }}">
+  <link rel="stylesheet" href="{{ get_url(path='style.css') }}">
+</head>
+<body>
+  <nav class="navbar">
+    <div class="navbar-inner">
+      <a href="{{ config.base_url }}" class="navbar-brand">
+        <img src="{{ get_url(path='icons/gqlforge.svg') }}" alt="GQLForge" class="navbar-logo">
+        <span>GQLForge</span>
+      </a>
+      <div class="navbar-links">
+        <a href="{{ get_url(path='docs/getting-started/') }}">Docs</a>
+        <a href="{{ config.extra.github_url }}" rel="noopener">GitHub</a>
+      </div>
+    </div>
+  </nav>
+
+  <main>
+    {% block content %}{% endblock %}
+  </main>
+
+  <footer class="footer">
+    <div class="footer-inner">
+      <p>&copy; {{ now() | date(format="%Y") }} GQLForge. Built with <a href="https://www.getzola.org/">Zola</a>.</p>
+    </div>
+  </footer>
+</body>
+</html>

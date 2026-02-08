@@ -1,0 +1,12 @@
+{% extends "base.html" %}
+
+{% block title %}GQLForge — {{ config.extra.tagline }}{% endblock %}
+{% block description %}{{ config.description }}{% endblock %}
+
+{% block content %}
+<div class="hero">
+  <h1>GQLForge</h1>
+  <p class="hero-tagline">{{ config.extra.tagline }}</p>
+  <a href="{{ get_url(path='docs/getting-started/') }}" class="hero-cta">Get Started</a>
+</div>
+{% endblock %}

@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}{{ page.title }} — {{ config.title }}{% endblock %}
+{% block description %}{{ page.description | default(value=config.description) }}{% endblock %}
+
+{% block content %}
+<div class="docs-layout">
+  <aside class="sidebar">
+    {% set cp = current_path | default(value="") %}
+    {% for category in config.extra.sidebar %}
+    <div class="sidebar-category">
+      <h3 class="sidebar-heading">{{ category.label }}</h3>
+      <ul class="sidebar-list">
+        {% for item in category.items %}
+        {% set item_url = "/docs/" ~ item.path ~ "/" %}
+        <li>
+          <a href="{{ get_url(path=item_url) }}"
+             {% if cp == item_url %}class="active"{% endif %}>
+            {{ item.title }}
+          </a>
+        </li>
+        {% endfor %}
+      </ul>
+    </div>
+    {% endfor %}
+  </aside>
+
+  <article class="docs-content">
+    {{ page.content | safe }}
+  </article>
+
+  {% if page.toc %}
+  <aside class="toc">
+    <h4 class="toc-heading">On this page</h4>
+    <ul class="toc-list">
+      {% for h in page.toc %}
+      <li>
+        <a href="#{{ h.id }}">{{ h.title }}</a>
+        {% if h.children %}
+        <ul>
+          {% for child in h.children %}
+          <li><a href="#{{ child.id }}">{{ child.title }}</a></li>
+          {% endfor %}
+        </ul>
+        {% endif %}
+      </li>
+      {% endfor %}
+    </ul>
+  </aside>
+  {% else %}
+  <div class="toc-spacer"></div>
+  {% endif %}
+</div>
+{% endblock %}

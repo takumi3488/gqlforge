@@ -1,0 +1,113 @@
+base_url = "https://gqlforge.pages.dev"
+title = "GQLForge"
+description = "GraphQL platform engineered for scale"
+compile_sass = false
+build_search_index = false
+output_dir = "dist"
+generate_feeds = false
+
+[slugify]
+paths = "safe"
+
+[markdown]
+smart_punctuation = true
+
+[markdown.highlighting]
+theme = "github-light"
+
+[extra]
+tagline = "GraphQL platform engineered for scale"
+github_url = "https://github.com/gqlforge/gqlforge"
+
+[[extra.sidebar]]
+label = "Getting Started"
+items = [
+  { path = "getting-started", title = "Getting Started" },
+  { path = "cli", title = "CLI Reference" },
+  { path = "conventions", title = "Conventions" },
+  { path = "playground", title = "Playground" },
+]
+
+[[extra.sidebar]]
+label = "Configuration"
+items = [
+  { path = "runtime-config", title = "Runtime Configuration" },
+  { path = "config/server", title = "@server" },
+  { path = "config/upstream", title = "@upstream" },
+  { path = "config/links", title = "@link" },
+  { path = "config/telemetry", title = "Telemetry Configuration" },
+]
+
+[[extra.sidebar]]
+label = "Resolver Directives"
+items = [
+  { path = "directives", title = "Directives Overview" },
+  { path = "directives/http", title = "@http" },
+  { path = "directives/grpc", title = "@grpc" },
+  { path = "directives/graphQL", title = "@graphQL" },
+  { path = "directives/call", title = "@call" },
+  { path = "directives/expr", title = "@expr" },
+  { path = "directives/js", title = "@js" },
+]
+
+[[extra.sidebar]]
+label = "Schema Directives"
+items = [
+  { path = "directives/addField", title = "@addField" },
+  { path = "directives/modify", title = "@modify" },
+  { path = "directives/omit", title = "@omit" },
+  { path = "directives/discriminate", title = "@discriminate" },
+  { path = "directives/rest", title = "@rest" },
+  { path = "directives/cache", title = "@cache" },
+  { path = "directives/protected", title = "@protected" },
+]
+
+[[extra.sidebar]]
+label = "Features"
+items = [
+  { path = "N+1", title = "N+1 Detection" },
+  { path = "auth", title = "Authentication" },
+  { path = "http-cache", title = "HTTP Cache" },
+  { path = "http2", title = "HTTP/2" },
+  { path = "logging", title = "Logging" },
+  { path = "telemetry", title = "Telemetry" },
+  { path = "scalar", title = "Custom Scalars" },
+  { path = "config-generation", title = "Config Generation" },
+  { path = "watch-mode", title = "Watch Mode" },
+  { path = "execution-strategy", title = "Execution Strategy" },
+  { path = "context", title = "Context" },
+  { path = "environment-variables", title = "Environment Variables" },
+  { path = "grpc", title = "gRPC" },
+  { path = "scripting", title = "Scripting" },
+  { path = "rest", title = "REST" },
+  { path = "apollo-federation-subgraph", title = "Apollo Federation" },
+]
+
+[[extra.sidebar]]
+label = "Integrations"
+items = [
+  { path = "apollo-studio", title = "Apollo Studio" },
+  { path = "data-dog", title = "Datadog" },
+  { path = "new-relic", title = "New Relic" },
+  { path = "honey-comb", title = "Honeycomb" },
+]
+
+[[extra.sidebar]]
+label = "Deployment"
+items = [
+  { path = "gqlforge-on-fly", title = "Deploy on Fly.io" },
+  { path = "gqlforge-on-aws", title = "Deploy on AWS" },
+  { path = "gh-action", title = "GitHub Action" },
+  { path = "client-tuning", title = "Client Tuning" },
+]
+
+[[extra.sidebar]]
+label = "Contributing"
+items = [
+  { path = "contributors/guidelines", title = "Guidelines" },
+  { path = "contributors/testing", title = "Testing" },
+  { path = "contributors/integration-testing", title = "Integration Testing" },
+  { path = "contributors/telemetry", title = "Telemetry" },
+  { path = "contributors/micro-benchmark", title = "Micro Benchmarks" },
+  { path = "contributors/wrk-benchmark", title = "Wrk Benchmarks" },
+]
