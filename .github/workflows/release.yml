@@ -28,7 +28,7 @@ jobs:
     runs-on: ubuntu-latest
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}/gf-server
+      IMAGE_NAME: ${{ github.repository }}/gqlforge
     steps:
       - name: Checkout Repository
         uses: actions/checkout@v4

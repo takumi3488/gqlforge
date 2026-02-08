@@ -47,8 +47,8 @@ curl -sSL https://raw.githubusercontent.com/takumi3488/gqlforge/master/install.s
 ### Docker
 
 ```bash
-docker pull ghcr.io/takumi3488/gqlforge/tc-server
-docker run -p 8080:8080 -p 8081:8081 ghcr.io/takumi3488/gqlforge/tc-server
+docker pull ghcr.io/takumi3488/gqlforge/gqlforge
+docker run -p 8080:8080 -p 8081:8081 ghcr.io/takumi3488/gqlforge/gqlforge
 ```
 
 ## Get Started
