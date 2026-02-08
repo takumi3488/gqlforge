@@ -37,6 +37,11 @@ server:
     graphQL: "/graphql"
     status: "/status"
   enableFederation: false
+  apolloTracing: false
+  pipelineFlush: true
+  limitComplexity: 1000
+  limitDepth: 15
+  limitDirectives: 50
   vars:
     - key: "apiKey"
       value: "YOUR_API_KEY_HERE"
@@ -337,4 +342,57 @@ A boolean flag, if set to `true` the GQLForge server will additionally act as fe
 ```yaml showLineNumbers
 server:
   enableFederation: true
+```
+
+## apolloTracing
+
+Enables [Apollo Tracing](https://github.com/apollographql/apollo-tracing) which exposes GraphQL query performance data, including execution time of queries and individual resolvers. If not specified, the default value is `false`.
+
+```yaml showLineNumbers
+server:
+  apolloTracing: true
+```
+
+## pipelineFlush
+
+Controls the flushing behavior of the server pipeline. When enabled, the server flushes the pipeline after processing each request. If not specified, the default value is `true`.
+
+```yaml showLineNumbers
+server:
+  pipelineFlush: false
+```
+
+## limitComplexity
+
+Sets the maximum allowed query complexity. Queries exceeding this limit are rejected during validation. If not specified, the default value is `1000`. Set to `0` to disable.
+
+```yaml showLineNumbers
+server:
+  limitComplexity: 2000
+```
+
+:::tip
+Setting a complexity limit helps protect your server from resource-intensive queries that could degrade performance or be used in denial-of-service attacks.
+:::
+
+## limitDepth
+
+Sets the maximum allowed query nesting depth. Queries exceeding this limit are rejected during validation. If not specified, the default value is `15`. Set to `0` to disable.
+
+```yaml showLineNumbers
+server:
+  limitDepth: 10
+```
+
+:::tip
+Limiting query depth prevents deeply nested queries that could cause excessive resource consumption.
+:::
+
+## limitDirectives
+
+Sets the maximum number of directives allowed in a query. Queries exceeding this limit are rejected during validation. If not specified, the default value is `50`. Set to `0` to disable.
+
+```yaml showLineNumbers
+server:
+  limitDirectives: 100
 ```

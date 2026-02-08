@@ -14,12 +14,15 @@ directive @http(
   method: Method
   query: [InputKeyValue!]
   body: JSON
+  encoding: Encoding
   headers: [InputKeyValue!]
   batchKey: [String!]
   onRequest: String
   onResponseBody: String
   select: JSON
   dedupe: Boolean
+  input: JSON
+  output: JSON
 ) on FIELD_DEFINITION
 ```
 
@@ -109,6 +112,24 @@ type Mutation {
 ```
 
 In the example above, the `createUser` mutation sends a POST request to `/users`, with the input object converted to JSON and included in the request body.
+
+### encoding
+
+Specifies the encoding of the request body. Supported values are `ApplicationJson` (default) and `ApplicationXWwwFormUrlencoded`.
+
+```graphql showLineNumbers
+type Mutation {
+  submitForm(input: FormInput!): Response
+    @http(
+      method: "POST"
+      url: "https://example.com/form"
+      body: "{{.args.input}}"
+      encoding: ApplicationXWwwFormUrlencoded
+    )
+}
+```
+
+In this example, the request body is encoded as `application/x-www-form-urlencoded` instead of the default `application/json`.
 
 ### headers
 
@@ -244,6 +265,34 @@ A boolean flag, if set to `true`, will enable deduplication of IO operations to 
   url: "https://jsonplaceholder.typicode.com/users/"
   dedupe: true
 )
+```
+
+### input
+
+Specifies the JSON schema for the API call's input. In most cases, this is automatically inferred from the GraphQL schema and does not need to be specified manually. Use this when the automatic inference does not produce the desired schema.
+
+```graphql showLineNumbers
+type Query {
+  users: [User]
+    @http(
+      url: "https://example.com/users"
+      input: {type: "object", properties: {name: {type: "string"}}}
+    )
+}
+```
+
+### output
+
+Specifies the JSON schema for the API call's output. In most cases, this is automatically inferred from the GraphQL schema and does not need to be specified manually. Use this when the upstream API response shape differs from what GQLForge infers.
+
+```graphql showLineNumbers
+type Query {
+  users: [User]
+    @http(
+      url: "https://example.com/users"
+      output: {type: "array", items: {type: "object", properties: {id: {type: "integer"}, name: {type: "string"}}}}
+    )
+}
 ```
 
 ## Batching with POST Requests
