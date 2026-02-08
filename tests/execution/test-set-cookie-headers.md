@@ -2,7 +2,7 @@
 
 ```yaml @config
 server:
-  port: 8080
+  port: 8000
   hostname: "0.0.0.0"
   headers:
     setCookies: true

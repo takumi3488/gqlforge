@@ -34,7 +34,7 @@ upstream:
   batch:
     delay: 10
 server:
-  port: 8080
+  port: 8000
 links:
   - id: "news"
     src: "./service.proto"

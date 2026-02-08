@@ -29,7 +29,7 @@ cargo install --git https://github.com/takumi3488/gqlforge
 
 ```bash
 docker pull ghcr.io/takumi3488/gqlforge/gqlforge
-docker run -p 8080:8080 -p 8081:8081 ghcr.io/takumi3488/gqlforge/gqlforge
+docker run -p 8000:8000 -p 8081:8081 ghcr.io/takumi3488/gqlforge/gqlforge
 ```
 
 ## Get Started
