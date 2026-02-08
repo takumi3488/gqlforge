@@ -229,7 +229,7 @@ mod tests {
         assert_eq!(response.body, Bytes::from("Hello"));
         assert!(response.headers.get("x-cache-lookup").is_none());
 
-        header_serv.assert_hits(2);
+        header_serv.assert_calls(2);
     }
 
     #[tokio::test]

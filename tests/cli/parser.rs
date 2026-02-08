@@ -60,21 +60,21 @@ impl ExecutionSpec {
         for node in children {
             match node {
                 Node::Heading(heading) => {
-                    if heading.depth == 2 {
-                        if let Some(Node::Text(expect)) = heading.children.first() {
-                            let split = expect.value.splitn(2, ':').collect::<Vec<&str>>();
-                            match split[..] {
-                                [a, b] => {
-                                    debug_assert_config =
-                                        a.contains("debug_assert") && b.ends_with("true");
-                                }
-                                _ => {
-                                    return Err(anyhow!(
-                                        "Unexpected header annotation {:?} in {:?}",
-                                        expect.value,
-                                        path,
-                                    ))
-                                }
+                    if heading.depth == 2
+                        && let Some(Node::Text(expect)) = heading.children.first()
+                    {
+                        let split = expect.value.splitn(2, ':').collect::<Vec<&str>>();
+                        match split[..] {
+                            [a, b] => {
+                                debug_assert_config =
+                                    a.contains("debug_assert") && b.ends_with("true");
+                            }
+                            _ => {
+                                return Err(anyhow!(
+                                    "Unexpected header annotation {:?} in {:?}",
+                                    expect.value,
+                                    path,
+                                ))
                             }
                         }
                     }

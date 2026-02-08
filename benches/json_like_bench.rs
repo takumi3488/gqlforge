@@ -1,4 +1,4 @@
-use criterion::{black_box, Criterion};
+use criterion::Criterion;
 use gqlforge::core::json::{gather_path_matches, JsonLike};
 use serde_json::json;
 
@@ -18,7 +18,7 @@ pub fn benchmark_batched_body(c: &mut Criterion) {
                 ]
             });
 
-            black_box(
+            std::hint::black_box(
                 serde_json::to_value(gather_path_matches(
                     &input,
                     &["data".into(), "user".into(), "id".into()],
@@ -43,7 +43,7 @@ pub fn benchmark_group_by(c: &mut Criterion) {
     c.bench_function("group_by", |b| {
         b.iter(|| {
             let binding = ["data".into(), "type".into()];
-            black_box(input.group_by(&binding));
+            std::hint::black_box(input.group_by(&binding));
         })
     });
 }

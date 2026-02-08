@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use anyhow::Result;
-use criterion::{black_box, Criterion};
+use criterion::Criterion;
 use gqlforge::core::blueprint::GrpcMethod;
 use gqlforge::core::grpc::protobuf::ProtobufSet;
 use rand::Rng;
@@ -57,7 +57,7 @@ pub fn benchmark_convert_output(c: &mut Criterion) {
 
     c.bench_function("test_batched_body", |b| {
         b.iter(|| {
-            black_box(
+            std::hint::black_box(
                 protobuf_operation
                     .convert_output::<serde_json::Value>(&msg)
                     .unwrap(),
