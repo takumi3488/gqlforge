@@ -882,10 +882,6 @@ llm:
 </TabItem>
 </Tabs>
 
-:::tip
-Checkout our [LLM](llm.md) section to get a list of all the LLM models that GQLForge supports.
-:::
-
 ## Best Practices
 
 When setting up your configuration file for GraphQL generation with GQLForge, consider these key parameters to optimize and customize your setup:

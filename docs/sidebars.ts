@@ -72,7 +72,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Integrations",
       collapsed: false,
-      items: ["apollo-studio", "data-dog", "new-relic", "honey-comb", "llm"],
+      items: ["apollo-studio", "data-dog", "new-relic", "honey-comb"],
     },
     {
       type: "category",
