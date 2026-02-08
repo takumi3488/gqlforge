@@ -3,7 +3,7 @@
     "url": "https://fakestoreapi.com/products",
     "method": "POST",
     "body": {
-      "title": "Tailcall",
+      "title": "GQLForge",
       "price": 200,
       "description": "a modern graphQL runtime",
       "image": "https://gqlforge.pages.dev/icons/companies/taicall.svg",
@@ -16,7 +16,7 @@
     "status": 201,
     "body": {
       "id": 21,
-      "title": "Tailcall",
+      "title": "GQLForge",
       "price": 200,
       "description": "a modern graphQL runtime",
       "image": "https://gqlforge.pages.dev/icons/companies/taicall.svg",

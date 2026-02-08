@@ -29,8 +29,6 @@ server:
   responseValidation: false
   globalResponseTimeout: 5000
   version: "HTTP1"
-  cert: "./cert.pem"
-  key: "./key.pem"
   showcase: false
   batchRequests: false
   routes:
@@ -64,7 +62,7 @@ This example sets the `workers` to `32`, meaning the GraphQL server will use 32 
 
 ## port
 
-Setting the `port` to `8090` means that GQLForge will be accessible at `http://localhost:8000`.
+Setting the `port` to `8090` means that GQLForge will be accessible at `http://localhost:8090`.
 
 ```yaml showLineNumbers
 server:
@@ -267,34 +265,6 @@ The server uses the HTTP version. If not specified, the default value is `HTTP1`
 server:
   version: "HTTP2"
 ```
-
-## cert
-
-The path to certificate(s) for running the server over HTTP2 (HTTPS). If not specified, the default value is `null`.
-
-```yaml showLineNumbers
-server:
-  cert: "./cert.pem"
-```
-
-<!-- prefer to use standard extension libraries -->
-
-:::tip
-The certificate can be of any extension, but it's highly recommended to use standards (`pem`, `crt`, `key`).
-:::
-
-## key
-
-The path to the key for running the server over HTTP2 (HTTPS). If not specified, the default value is `null`.
-
-```yaml showLineNumbers
-server:
-  key: "./key.pem"
-```
-
-:::tip
-The key can be of any extension, but it's highly recommended to use standards (`pem`, `crt`, `key`).
-:::
 
 ## showcase
 

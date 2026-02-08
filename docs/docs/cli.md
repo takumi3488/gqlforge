@@ -142,10 +142,6 @@ To generate a GQLForge GraphQL configuration, provide a configuration file to th
 
 ```json
 {
-  "llm": {
-    "model": "gemini-1.5-flash-latest",
-    "secret": "API_KEY"
-  },
   "inputs": [
     {
       "curl": {
@@ -203,9 +199,6 @@ To generate a GQLForge GraphQL configuration, provide a configuration file to th
 <TabItem value="yml" label="YML">
 
 ```yaml
-llm:
-  model: "gemini-1.5-flash-latest"
-  secret: "API_KEY"
 inputs:
   - curl:
       src: "https://jsonplaceholder.typicode.com/posts/1"
@@ -573,29 +566,3 @@ preset:
 
    By leveraging field names to derive type names, the schema becomes more intuitive and aligned with the data it represents, enhancing overall readability and understanding. You can learn more about config autogen [here](./config-generation.md).
 
-### LLM
-
-GQLForge leverages LLM to improve the quality of configuration files by suggesting better names for types, fields, and more. The `llm` section in the configuration allows you to specify the [LLM model](./llm.md) and secret (API key) that will be used for generating the configuration.
-
-Example:
-
-- Using Gemini. Set GQLFORGE_LLM_API_KEY to your Gemini API key.
-
-  ```json
-  "llm": {
-      "model": "gemini-1.5-flash-latest",
-      "secret": "{{.env.GQLFORGE_LLM_API_KEY}}"
-  }
-  ```
-
-- Using Ollama. Don't need secret.
-
-  ```json
-  "llm": {
-      "model": "gemma2",
-  }
-  ```
-
-:::important
-Ensure that secrets are not stored directly in the configuration file. Instead, use templates to securely reference secrets from environment variables. For example, you can write secret as `{{.env.GQLFORGE_SECRET}}`, where `GQLFORGE_SECRET` is referenced from the running environment.
-:::

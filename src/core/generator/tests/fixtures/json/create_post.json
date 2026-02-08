@@ -4,7 +4,7 @@
     "method": "POST",
     "body": {
       "userId": 1,
-      "title": "Tailcall: modern graphQL runtime.",
+      "title": "GQLForge: modern graphQL runtime.",
       "body": " modern graphQL runtime"
     }
   },
@@ -15,7 +15,7 @@
     "body": {
       "userId": 1,
       "id": 1,
-      "title": "Tailcall: modern graphQL runtime.",
+      "title": "GQLForge: modern graphQL runtime.",
       "body": " modern graphQL runtime"
     }
   }

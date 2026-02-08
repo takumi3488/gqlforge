@@ -26,7 +26,7 @@ const POSTHOG_API_SECRET: &str = match option_env!("POSTHOG_API_SECRET") {
     None => "dev",
 };
 
-const PARAPHRASE: &str = "tc_key";
+const PARAPHRASE: &str = "gqlforge_key";
 
 const DEFAULT_CLIENT_ID: &str = "<anonymous>";
 

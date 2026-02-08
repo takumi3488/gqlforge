@@ -3,7 +3,7 @@
     "url": "https://jsonplaceholder.typicode.com/posts",
     "method": "POST",
     "body": {
-      "name": "Tailcall User",
+      "name": "GQLForge User",
       "username": "gqlforge_user",
       "email": "gqlforge@test.in",
       "phone": "8888888888",
@@ -16,7 +16,7 @@
     "status": 201,
     "body": {
       "id": 1,
-      "name": "Tailcall User",
+      "name": "GQLForge User",
       "username": "gqlforge_user",
       "email": "gqlforge@test.in",
       "phone": "8888888888",
