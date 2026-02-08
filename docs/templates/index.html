@@ -1,12 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}GQLForge — {{ config.extra.tagline }}{% endblock %}
+{% block title %}{{ config.title }} — {{ config.extra.tagline }}{% endblock %}
 {% block description %}{{ config.description }}{% endblock %}
 
 {% block content %}
 <div class="hero">
-  <img src="{{ get_url(path='icons/gqlforge.svg') }}" alt="GQLForge" class="hero-logo">
-  <h1>GQLForge</h1>
+  <img src="{{ get_url(path='icons/logo_light.svg') }}" alt="GQLForge" class="hero-logo">
   <p class="hero-tagline">{{ config.extra.tagline }}</p>
   <a href="{{ get_url(path='docs/getting-started/') }}" class="hero-cta">Get Started</a>
 </div>
