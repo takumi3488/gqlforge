@@ -7,17 +7,16 @@ use http::header::{HeaderMap, HeaderName, HeaderValue};
 use news::news_service_server::{NewsService, NewsServiceServer};
 use news::{MultipleNewsId, News, NewsId, NewsList};
 use once_cell::sync::Lazy;
-use opentelemetry::trace::{TraceError, TracerProvider};
+use opentelemetry::trace::TracerProvider;
 use opentelemetry::{global, KeyValue};
-use opentelemetry_otlp::WithExportConfig;
+use opentelemetry_otlp::{SpanExporter, WithExportConfig, WithTonicConfig};
 use opentelemetry_sdk::propagation::TraceContextPropagator;
-use opentelemetry_sdk::{runtime, Resource};
+use opentelemetry_sdk::trace::SdkTracerProvider;
+use opentelemetry_sdk::Resource;
 use tonic::metadata::MetadataMap;
 use tonic::service::interceptor::InterceptedService;
-use tonic::transport::Server as TonicServer;
 use tonic::{Request, Response, Status};
 use tonic_tracing_opentelemetry::middleware::server;
-use tower::make::Shared;
 use tracing_subscriber::layer::SubscriberExt;
 
 pub mod news {
@@ -164,16 +163,18 @@ impl NewsService for MyNewsService {
 }
 
 static RESOURCE: Lazy<Resource> = Lazy::new(|| {
-    Resource::default().merge(&Resource::new(vec![
-        KeyValue::new(
-            opentelemetry_semantic_conventions::resource::SERVICE_NAME,
-            "rust-grpc",
-        ),
-        KeyValue::new(
-            opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
-            "test",
-        ),
-    ]))
+    Resource::builder_empty()
+        .with_attributes(vec![
+            KeyValue::new(
+                opentelemetry_semantic_conventions::resource::SERVICE_NAME,
+                "rust-grpc",
+            ),
+            KeyValue::new(
+                opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
+                "test",
+            ),
+        ])
+        .build()
 });
 
 fn init_tracer() -> Result<(), Error> {
@@ -185,20 +186,16 @@ fn init_tracer() -> Result<(), Error> {
         HeaderValue::from_str(&std::env::var("HONEYCOMB_API_KEY")?)?,
     )]);
 
-    let otlp_exporter = opentelemetry_otlp::new_exporter()
-        .tonic()
+    let exporter = SpanExporter::builder()
+        .with_tonic()
         .with_endpoint(TELEMETRY_URL)
-        .with_metadata(MetadataMap::from_headers(headers));
+        .with_metadata(MetadataMap::from_headers(headers))
+        .build()?;
 
-    let provider = opentelemetry_otlp::new_pipeline()
-        .tracing()
-        .with_exporter(otlp_exporter)
-        .with_trace_config(opentelemetry_sdk::trace::config().with_resource(RESOURCE.clone()))
-        .install_batch(runtime::Tokio)?
-        .provider()
-        .ok_or(TraceError::Other(
-            Error::OltpProviderInstantiationFailed.into(),
-        ))?;
+    let provider = SdkTracerProvider::builder()
+        .with_batch_exporter(exporter)
+        .with_resource(RESOURCE.clone())
+        .build();
 
     let tracer = provider.tracer("tracing");
     let trace_layer = tracing_opentelemetry::layer()
@@ -233,22 +230,19 @@ async fn main() -> Result<(), Error> {
     let addr = ([127, 0, 0, 1], 50051).into();
 
     let news_service = MyNewsService::new();
-    let service = tonic_reflection::server::Builder::configure()
+    let reflection = tonic_reflection::server::Builder::configure()
         .register_encoded_file_descriptor_set(news::FILE_DESCRIPTOR_SET)
-        .build()
+        .build_v1()
         .unwrap();
 
     println!("NewsService server listening on {}", addr);
 
-    let tonic_service = TonicServer::builder()
+    tonic::transport::Server::builder()
         .layer(server::OtelGrpcLayer::default())
         .add_service(NewsServiceServer::new(news_service))
-        .add_service(InterceptedService::new(service, intercept))
-        .into_service();
-    let make_svc = Shared::new(tonic_service);
-    println!("Server listening on grpc://{}", addr);
-    let server = hyper::Server::bind(&addr).serve(make_svc);
-    server.await?;
+        .add_service(InterceptedService::new(reflection, intercept))
+        .serve(addr)
+        .await?;
 
     Ok(())
 }

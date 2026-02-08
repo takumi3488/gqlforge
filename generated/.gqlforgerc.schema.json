@@ -466,6 +466,33 @@
             "null"
           ]
         },
+        "limitComplexity": {
+          "description": "`limitComplexity` sets the maximum allowed query complexity. Queries exceeding this limit are rejected during validation. @default `1000`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "limitDepth": {
+          "description": "`limitDepth` sets the maximum allowed query nesting depth. Queries exceeding this limit are rejected during validation. @default `15`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0.0
+        },
+        "limitDirectives": {
+          "description": "`limitDirectives` sets the maximum number of directives allowed. Queries exceeding this limit are rejected during validation. @default `50`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0.0
+        },
         "pipelineFlush": {
           "description": "`pipelineFlush` allows to control flushing behavior of the server pipeline.",
           "type": [
