@@ -23,7 +23,7 @@ cargo build --release
 Start the GQLForge server by setting the appropriate environment variable to control log output and using the release binary:
 
 ```bash
-export TC_LOG_LEVEL=error
+export GQLFORGE_LOG_LEVEL=error
 cargo run --release -- start ./jsonplaceholder.graphql
 ```
 

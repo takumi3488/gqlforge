@@ -5,7 +5,7 @@ slug: graphql-logging-levels-gqlforge
 sidebar_label: Log Levels
 ---
 
-Logging acts as an essential tool for obtaining insights into code execution and addressing software development challenges. You can configure the verbosity of logs via log levels. Use `GQLFORGE_LOG_LEVEL` or `TC_LOG_LEVEL` environment variables to set the application's log level. The available log levels include:
+Logging acts as an essential tool for obtaining insights into code execution and addressing software development challenges. You can configure the verbosity of logs via log levels. Use `GQLFORGE_LOG_LEVEL` or `GF_LOG_LEVEL` environment variables to set the application's log level. The available log levels include:
 
 ### error
 
@@ -14,7 +14,7 @@ This is the highest severity level. It indicates a critical issue that may lead 
 ```bash
 GQLFORGE_LOG_LEVEL=error gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=error gqlforge <COMMAND>
+GF_LOG_LEVEL=error gqlforge <COMMAND>
 ```
 
 ### warn
@@ -24,7 +24,7 @@ This log level signifies potential issues or warnings that do not necessarily re
 ```bash
 GQLFORGE_LOG_LEVEL=warn gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=warn gqlforge <COMMAND>
+GF_LOG_LEVEL=warn gqlforge <COMMAND>
 ```
 
 ### info
@@ -34,7 +34,7 @@ This level offers general information about the program's execution, providing i
 ```bash
 GQLFORGE_LOG_LEVEL=info gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=info gqlforge <COMMAND>
+GF_LOG_LEVEL=info gqlforge <COMMAND>
 ```
 
 ### debug
@@ -44,7 +44,7 @@ The `debug` log level is useful for developers during the debugging process, pro
 ```bash
 GQLFORGE_LOG_LEVEL=debug gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=debug gqlforge <COMMAND>
+GF_LOG_LEVEL=debug gqlforge <COMMAND>
 ```
 
 ### trace
@@ -54,7 +54,7 @@ The `trace` log level is the most detailed logging level, used for fine-grained 
 ```bash
 GQLFORGE_LOG_LEVEL=trace gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=trace gqlforge <COMMAND>
+GF_LOG_LEVEL=trace gqlforge <COMMAND>
 ```
 
 ### off
@@ -64,7 +64,7 @@ This level serves as a special indicator for generating no logs, allowing the op
 ```bash
 GQLFORGE_LOG_LEVEL=off gqlforge <COMMAND>
 # or
-TC_LOG_LEVEL=off gqlforge <COMMAND>
+GF_LOG_LEVEL=off gqlforge <COMMAND>
 ```
 
 :::info
