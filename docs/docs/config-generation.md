@@ -107,7 +107,6 @@ GQLForge simplifies GraphQL schema generation from REST APIs, supporting various
     Let's understand the above configuration file.
 
     **Input**: Defines the API endpoints that the configuration interacts with. Each input specifies:
-
     - **src**: Specifies the endpoint URL (`https://jsonplaceholder.typicode.com/posts`) in this example.
     - **fieldName**: A unique name that should be used as the field name, which is then used in the operation type. In the example above, it's set to `posts`.
 
@@ -123,13 +122,11 @@ GQLForge simplifies GraphQL schema generation from REST APIs, supporting various
       :::
 
     **Preset**: We've applied only one tuning parameter for the configuration. let's understand it in short.
-
     - We've set [mergeType](config-generation.md#mergetype) to `1.0`, which basically tells config generator to merge any two GraphQL types that are exactly similar.
 
       if you're interested in understanding preset's in detail head over to [preset](config-generation.md#understanding-presets) section.
 
     **Output**: Specifies where and in what format the output data should be saved.
-
     - **path**: Defines the output file path (in above example, it's `./jsonplaceholder.graphql`).
     - **format**: Specifies the output format as GraphQL (in above example, it's `graphQL`).
 
@@ -244,7 +241,6 @@ type Query {
     Let's understand the above configuration file.
 
     **Input**: Defines the API endpoints that the configuration interacts with. Each input specifies:
-
     - **src**: Specifies the endpoint URL (https://jsonplaceholder.typicode.com/posts in this example).
     - **fieldName**: A unique name that should be used as the field name, which is then used in the operation type. In the example above, it's set to `createPost`.
 
@@ -267,13 +263,11 @@ type Query {
     - **isMutation**: This flag indicates whether the request should be treated as a GraphQL Mutation. Set `isMutation` to `true` to configure the request as a `Mutation`. If not specified or set to false, the request will be treated as a `Query by default`. in above example it's set to true.
 
     **Preset**: We've applied only one tuning parameter for the configuration. let's understand it in short.
-
     - We've set [mergeType](config-generation.md#mergetype) to `1.0`, which basically tells config generator to merge any two GraphQL types that are exactly similar.
 
       if you're interested in understanding preset's in detail head over to [preset](config-generation.md#understanding-presets) section.
 
     **Output**: Specifies where and in what format the output data should be saved.
-
     - **path**: Defines the output file path (in above example, it's `./jsonplaceholder.graphql`).
     - **format**: Specifies the output format as GraphQL (in above example, it's `graphQL`).
 

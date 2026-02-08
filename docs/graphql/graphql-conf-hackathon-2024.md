@@ -81,23 +81,19 @@ type Geo {
 1. **Test Execution:** For every commit, a set of predefined tests and benchmarks are executed. These tests are located in the `./tests` directory.
 
 2. **Throughput Normalization:**
-
    - Your performance is measured in terms of requests per second (RPS) for each query.
    - This performance is then compared to GQLForge's RPS for the same query.
    - The comparison is done by dividing your RPS by GQLForge's RPS. This gives a normalized score for each query.
 
      **Example:**
-
      - For the `posts-title` query:
        - If your RPS is `100` and GQLForge's RPS is `50`, the normalized score for this query would be `100/50 = 2.0`.
 
 3. **Final Score Calculation:**
-
    - The normalized scores for all queries are averaged.
    - The final score is this average multiplied by 1000.
 
      **Example:**
-
      - Given the following scores:
        | Query | Your RPS | GQLForge RPS | Normalized |
        | ----------------- | -------- | ------------ | ---------- |

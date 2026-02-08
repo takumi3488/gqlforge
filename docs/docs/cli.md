@@ -242,7 +242,6 @@ preset:
 The `inputs` section specifies the sources from which the GraphQL configuration should be generated. Each source can be either a REST endpoint or a protobuf file.
 
 1.  **REST:** When defining REST endpoints, the configuration should include the following properties.
-
     1. **src (Required):** The URL of the REST endpoint. In this example, it points to a specific post on `jsonplaceholder.typicode.com`.
     2. **fieldName (Required):** A unique name that should be used as the field name, which is then used in the operation type. In the example below, it's set to `post`.
        :::important
@@ -364,7 +363,6 @@ The `inputs` section specifies the sources from which the GraphQL configuration 
     ```
 
 4.  **Proto:**
-
     - Specify the **path to the proto file** (`src`) to help GQLForge create a schema and understand the gRPC methods to call when a field is queried.
     - Specify the **gRPC URL** (`url`) where the gRPC service is hosted.
     - Include a **boolean parameter** `connectRPC` (optional). If set to `true`, the proto file will be used to generate the schema, but the communication between GQLForge and the upstream will happen using the [Connect-RPC protocol](https://connectrpc.com/docs/protocol/).
@@ -565,4 +563,3 @@ preset:
    ```
 
    By leveraging field names to derive type names, the schema becomes more intuitive and aligned with the data it represents, enhancing overall readability and understanding. You can learn more about config autogen [here](./config-generation.md).
-

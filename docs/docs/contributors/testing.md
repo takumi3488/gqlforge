@@ -81,7 +81,6 @@ Unit tests should focus on individual components, ensuring each functions as exp
    ```
 
 3. For every new feature or bug fix, structure your tests as follows:
-
    - Set up the value using helper methods in tests.
    - Compare an actual and an expected value.
    - Assert the two values on separate lines.

@@ -153,12 +153,10 @@ testuser3:{SHA}Y2fEjdGT1W6nsLqtJbGUVeUp9e4=
 ### Scenarios
 
 1. **Accessing `Dog.bark` Field**:
-
    - Authentication via provider `a` is required.
    - **Allowed Users**: `testuser1`, `testuser2`.
 
 2. **Accessing `Cat.meow` Field**:
-
    - Authentication via providers `a` **and** `c` is required.
    - **Allowed Users**: `testuser1` (from `a` and `c`).
 
@@ -195,15 +193,12 @@ type Pet @protected(id: ["a"]) {
 #### Explanation:
 
 1. **Type-Level Rule (`id: ["a"]`)**:
-
    - Protects all fields (`name`, `age`, and `breed`).
    - Requires authentication via provider `a`.
 
 2. **Field-Level Rule (`breed` with `id: ["c"]`)**:
-
    - Adds provider `c` for the `breed` field.
 
 3. **Merged Authentication Rule:**
-
    - For fields like `name` and `age`, authentication via provider `a` suffices.
    - For the `breed` field, authentication via both `a` and `c` is required.

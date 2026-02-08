@@ -276,7 +276,10 @@ type Query {
   users: [User]
     @http(
       url: "https://example.com/users"
-      input: {type: "object", properties: {name: {type: "string"}}}
+      input: {
+        type: "object"
+        properties: {name: {type: "string"}}
+      }
     )
 }
 ```
@@ -290,7 +293,16 @@ type Query {
   users: [User]
     @http(
       url: "https://example.com/users"
-      output: {type: "array", items: {type: "object", properties: {id: {type: "integer"}, name: {type: "string"}}}}
+      output: {
+        type: "array"
+        items: {
+          type: "object"
+          properties: {
+            id: {type: "integer"}
+            name: {type: "string"}
+          }
+        }
+      }
     )
 }
 ```

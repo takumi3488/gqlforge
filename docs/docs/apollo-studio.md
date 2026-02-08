@@ -25,7 +25,6 @@ This guide illustrates how to configure `gqlforge` to send usage metrics to [Apo
 1. Copy the fields `APOLLO_KEY` and `APOLLO_GRAPH_REF` as they are required by `gqlforge` to be able to send the usage metrics.
 
 1. Next we need to connect Apollo with our running instance of GQLForge. There are two ways to let Apollo know about your GraphQL schema:
-
    1. Navigate to `Local Introspection`. If you have a deployed instance of your GraphQL server you can put the URL pointing to that in `Endpoint URL` and click on `Introspect and Upload`. If not, start a local instance of `gqlforge` and put the local url here, similar to how is shown in the image below. You can start a local instance of GQLForge by running `gqlforge start` (click [here](/docs/cli.md) to know more).
 
       ![local-introspection.png](../static/images/apollo-studio/local-introspection.png)
