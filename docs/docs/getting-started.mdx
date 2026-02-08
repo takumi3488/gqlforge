@@ -2,7 +2,7 @@
 title: Getting Started with GraphQL
 slug: /
 sidebar_position: 2
-description: "Discover how to efficiently get started with GraphQL using Tailcall, enhancing your data access capabilities through optimized execution strategies."
+description: "Discover how to efficiently get started with GraphQL using GQLForge, enhancing your data access capabilities through optimized execution strategies."
 sidebar_label: Getting Started
 ---
 
@@ -12,7 +12,7 @@ import InstallCommand from "../src/components/install"
 import Tabs from "@theme/Tabs"
 import TabItem from "@theme/TabItem"
 
-## Installing the Tailcall CLI
+## Installing the GQLForge CLI
 
 <>
   <p>
@@ -24,14 +24,14 @@ import TabItem from "@theme/TabItem"
 ### NPM
 
 1. If you don't already have **nodejs** installed, you can find the instructions [here](https://nodejs.org/en/learn/getting-started/how-to-install-nodejs).
-2. Install Tailcall by running the following command in your terminal:
+2. Install GQLForge by running the following command in your terminal:
    ```bash
-   npm i -g @tailcallhq/tailcall
+   npm i -g @takumi3488/gqlforge
    ```
-3. To verify the correct installation of Tailcall, run:
+3. To verify the correct installation of GQLForge, run:
 
    ```bash
-   tailcall
+   gqlforge
    ```
 
    :::note
@@ -40,36 +40,36 @@ import TabItem from "@theme/TabItem"
 
 ### Yarn
 
-1. Install Tailcall by running the following command in your terminal:
+1. Install GQLForge by running the following command in your terminal:
    ```bash
-   yarn global add @tailcallhq/tailcall
+   yarn global add @takumi3488/gqlforge
    ```
-2. To verify the correct installation of Tailcall, run:
+2. To verify the correct installation of GQLForge, run:
 
    ```bash
-   tailcall
+   gqlforge
    ```
 
 ### Homebrew
 
 1. If you don't already have Homebrew installed, you can find the instructions [here](https://brew.sh/).
 
-2. Add the Tailcall repository to Homebrew by running the following command in your terminal:
+2. Add the GQLForge repository to Homebrew by running the following command in your terminal:
    ```bash
-   brew tap tailcallhq/tailcall
-   brew install tailcall
+   brew tap takumi3488/gqlforge
+   brew install gqlforge
    ```
-3. To verify the correct installation of Tailcall, run:
+3. To verify the correct installation of GQLForge, run:
 
    ```bash
-   tailcall
+   gqlforge
    ```
 
 4. After completing the installation, perform **upgrades** with:
 
    ```bash
    brew update
-   brew upgrade tailcall
+   brew upgrade gqlforge
    ```
 
 ### Curl
@@ -78,36 +78,36 @@ Follow the steps below to manually install the cli on your system:
 
 <InstallCommand />
 
-This command fetches and executes the Tailcall installation script. The `~/.tailcall` directory contains the installed files.
+This command fetches and executes the GQLForge installation script. The `~/.gqlforge` directory contains the installed files.
 
-Upon completion of the installation, extend your `PATH` environment variable to include the `~/.tailcall/bin` directory:
+Upon completion of the installation, extend your `PATH` environment variable to include the `~/.gqlforge/bin` directory:
 
 ```bash
-# export PATH=$PATH:~/.tailcall/bin
+# export PATH=$PATH:~/.gqlforge/bin
 ```
 
 ### Docker
 
-To install Tailcall with Docker, follow the steps below. Please note that currently, this installation method only works on Linux/amd64 systems. Before starting, make sure you have Docker installed on your system. If not, download it from [here](https://www.docker.com/products/docker-desktop).
+To install GQLForge with Docker, follow the steps below. Please note that currently, this installation method only works on Linux/amd64 systems. Before starting, make sure you have Docker installed on your system. If not, download it from [here](https://www.docker.com/products/docker-desktop).
 
-1. Pull the latest Tailcall Docker image using the following command:
+1. Pull the latest GQLForge Docker image using the following command:
 
    <CodeBlock language="bash">
      {/*  prettier-ignore-start  */}
-     docker pull tailcall.docker.scarf.sh/tailcallhq/tailcall/tc-server:
+     docker pull gqlforge.docker.scarf.sh/takumi3488/gqlforge/gqlforge-server:
      <Version />
      {/*  prettier-ignore-end  */}
    </CodeBlock>
 
-   This command fetches the latest version of the Tailcall Docker image from the Docker registry.
+   This command fetches the latest version of the GQLForge Docker image from the Docker registry.
 
-2. Run the Tailcall Docker container with the following command:
+2. Run the GQLForge Docker container with the following command:
 
    <CodeBlock language="bash">
      {/* prettier-ignore-start  */}
-     docker run -d --name graphql-server -p 8000:8000 \ -v /path/to/your/configs:/etc/tailcall \ --entrypoint "/bin/sh"
-     \ ghcr.io/tailcallhq/tailcall/tc-server:
-     <Version /> \ -c "export PATH=\$PATH:~/.tailcall/bin && tailcall start /etc/tailcall/config.graphql"
+     docker run -d --name graphql-server -p 8000:8000 \ -v /path/to/your/configs:/etc/gqlforge \ --entrypoint "/bin/sh"
+     \ ghcr.io/takumi3488/gqlforge/gqlforge-server:
+     <Version /> \ -c "export PATH=\$PATH:~/.gqlforge/bin && gqlforge start /etc/gqlforge/config.graphql"
      {/* prettier-ignore-end  */}
    </CodeBlock>
 
@@ -115,19 +115,19 @@ To install Tailcall with Docker, follow the steps below. Please note that curren
 
 ## Initializing a GraphQL project
 
-Once you have installed the Tailcall binaries, you can simply use the [init](cli.md#init) command to initialize your GraphQL project.
+Once you have installed the GQLForge binaries, you can simply use the [init](cli.md#init) command to initialize your GraphQL project.
 
 ```bash
-tailcall init <directory>
+gqlforge init <directory>
 ```
 
 The command will ask you a few questions and based on your input bootstrap a new GraphQL project with a few files:
 
 {/* TODO: uncomment when the Taillcall configuration will in separate file */}
-{/* 1. `.tailcallrc.schema.json`: Provides autocomplete in your editor for the tailcall configuration written in `json` or `yml` format. */}
+{/* 1. `.gqlforgerc.schema.json`: Provides autocomplete in your editor for the gqlforge configuration written in `json` or `yml` format. */}
 
-1. `.graphqlrc.yml`: An IDE configuration that references your GraphQL schema and the following `.tailcallrc.graphql`.
-2. `.tailcallrc.graphql`: Contains Tailcall specific auto-completions for `.graphql` format.
+1. `.graphqlrc.yml`: An IDE configuration that references your GraphQL schema and the following `.gqlforgerc.graphql`.
+2. `.gqlforgerc.graphql`: Contains GQLForge specific auto-completions for `.graphql` format.
 3. `main.graphql`: This is your root configuration that contains
 
 ## Writing a GraphQL Configuration
@@ -177,7 +177,7 @@ The above file is a standard `.graphQL` file, with some minor additions such as 
 Now, run the following command to start the server with the full path to the file that you created earlier.
 
 ```bash
-tailcall start ./jsonplaceholder.graphql
+gqlforge start ./jsonplaceholder.graphql
 ```
 
 If the command succeeds, you should see logs like the following below.
@@ -185,15 +185,15 @@ If the command succeeds, you should see logs like the following below.
 ```bash
 INFO File read: ./jsonplaceholder.graphql ... ok
 INFO N + 1 detected: 0
-INFO 🚀 Tailcall launched at [0.0.0.0:8000] over HTTP/1.1
-INFO 🌍 Playground: https://tailcall.run/playground/?u=http://127.0.0.1:8000/graphql
+INFO 🚀 GQLForge launched at [0.0.0.0:8000] over HTTP/1.1
+INFO 🌍 Playground: https://gqlforge.pages.dev/playground/?u=http://127.0.0.1:8000/graphql
 ```
 
 The server starts with the schema provided and prints out a load of meta information. We will cover those in detail in a bit. For now, open the **playground URL** in a new tab in your browser and try it out for yourself!
 
 ## Making GraphQL requests to the server
 
-1. Open a web browser and go to [https://tailcall.run/playground/?u=http://127.0.0.1:8000/graphql](https://tailcall.run/playground/?u=http://127.0.0.1:8000/graphql). This should load the GraphiQL interface.
+1. Open a web browser and go to [https://gqlforge.pages.dev/playground/?u=http://127.0.0.1:8000/graphql](https://gqlforge.pages.dev/playground/?u=http://127.0.0.1:8000/graphql). This should load the GraphiQL interface.
 2. In the query editor of GraphiQL, enter the following query
 
    ```graphql showLineNumbers
@@ -247,5 +247,5 @@ The server starts with the schema provided and prints out a load of meta informa
 
 Now that you have a running GraphQL server, you can follow our [Github Actions Guide](./gh-action.md) to deploy the application on one of the following cloud providers.
 
-- [AWS Lambda](./tailcall-on-aws.md)
-- [Fly.io](./tailcall-on-fly.md)
+- [AWS Lambda](./gqlforge-on-aws.md)
+- [Fly.io](./gqlforge-on-fly.md)

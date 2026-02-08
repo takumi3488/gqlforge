@@ -1,6 +1,6 @@
 ---
 title: Reading Environment Variables
-description: "Learn how to effectively manage environment variables in your Tailcall GraphQL schema, enhancing security and flexibility in your application configuration. This guide explores the need for environment variables, their implementation in Tailcall schemas, and best practices for security and management."
+description: "Learn how to effectively manage environment variables in your GQLForge GraphQL schema, enhancing security and flexibility in your application configuration. This guide explores the need for environment variables, their implementation in GQLForge schemas, and best practices for security and management."
 slug: graphql-environment-variables
 sidebar_label: Environment Variables
 ---
@@ -29,7 +29,7 @@ There are two ways to manage this:
 
 ## Environment Variables
 
-With Tailcall, you can seamlessly integrate environment variables into your GraphQL schema. Tailcall supports this through a `env` [Context](context.md) variable. All directives share this Context, allowing you to resolve values in your schema.
+With GQLForge, you can seamlessly integrate environment variables into your GraphQL schema. GQLForge supports this through a `env` [Context](context.md) variable. All directives share this Context, allowing you to resolve values in your schema.
 
 Example schema:
 
@@ -81,7 +81,7 @@ To ensure your secrets remain secure, consider the following tips:
 - **Use a `.env` file**: \
   It's a common practice to create a `.env` file in your project's root directory for storing all environment variables. Avoid committing this file to your version control system; instead, add it to `.gitignore` to prevent public exposure of your secrets. For clarity and collaboration, maintain a `.env.example` file that enumerates all the necessary environment variables for your application, thereby guiding other developers on what variables they need to set.
 
-  Within Tailcall (or in other environments), you can make use of this `.env` file by exporting its key-value pairs to your operating system.
+  Within GQLForge (or in other environments), you can make use of this `.env` file by exporting its key-value pairs to your operating system.
 
   For example, if your `.env` file looks like this:
 

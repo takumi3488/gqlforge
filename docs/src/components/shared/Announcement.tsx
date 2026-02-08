@@ -13,7 +13,7 @@ const Announcement: React.FC<AnnouncementProps> = ({text, refLink, refText}) => 
         <span className="text-sm sm:text-base md:text-lg font-bold">
           {text}
           {refLink && refText && (
-            <a className="text-tailCall-yellow font-bold ml-2" href={refLink}>
+            <a className="text-gqlForge-yellow font-bold ml-2" href={refLink}>
               {refText}
             </a>
           )}

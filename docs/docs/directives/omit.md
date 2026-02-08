@@ -14,7 +14,7 @@ Within a GraphQL schema, the `@omit` directive excludes fields or nodes from the
 
 ## How it works
 
-When applied to a field or node, the `@omit` directive instructs the Tailcall not to include that field or node in the schema. This means that clients cannot query or mutate data in those fields.
+When applied to a field or node, the `@omit` directive instructs the GQLForge not to include that field or node in the schema. This means that clients cannot query or mutate data in those fields.
 
 ## Example
 

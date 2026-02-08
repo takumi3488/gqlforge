@@ -27,7 +27,7 @@ The server determines the HTTP version. Thus, if the server supports HTTP/1, the
 
 TCP ensures the data sent and received over the internet reaches its destination and in order.
 
-TCP, like dialing a number before talking on the phone, establishes a connection between the client and server before exchanging data using HTTP. This guide will show how to tune Tailcall's HTTP client to enhance this connection's performance. Learn more about TCP in detail [here](https://www.techtarget.com/searchnetworking/definition/TCP).
+TCP, like dialing a number before talking on the phone, establishes a connection between the client and server before exchanging data using HTTP. This guide will show how to tune GQLForge's HTTP client to enhance this connection's performance. Learn more about TCP in detail [here](https://www.techtarget.com/searchnetworking/definition/TCP).
 
 ### QUIC (Quick UDP Internet Connections)
 
@@ -50,7 +50,7 @@ Connection pooling mitigates these issues by reusing existing connections for re
 
 ## Tuning HTTP Client
 
-Tailcall uses connection pooling by default and sets up with default tuning suitable for most use cases. You might need to further tune the HTTP client to improve your application's performance. Tailcall DSL provides a directive named [`@upstream`](./config/upstream.md) for this purpose.
+GQLForge uses connection pooling by default and sets up with default tuning suitable for most use cases. You might need to further tune the HTTP client to improve your application's performance. GQLForge DSL provides a directive named [`@upstream`](./config/upstream.md) for this purpose.
 
 :::note
 Connection pooling optimizes HTTP/1. Since HTTP/2 and HTTP/3 support multiplexing, pooling enabled does not noticeably affect performance.
@@ -81,7 +81,7 @@ For applications connecting to hosts, set this value lower to keep connections a
 
 `tcpKeepAlive` keeps TCP connections alive for a duration, during inactivity, by periodically sending packets to the server to check if the connection remains open. In connection pooling, `tcpKeepAlive` maintains reusable connections in a ready-to-use state. This setting is useful for long-lived connections, preventing -lived connections, preventing the client from using a connection the server has closed due to inactivity. Without `tcpKeepAlive`, connections in the pool might get dropped by the server or intermediate network devices (like firewalls or load balancers). When your client tries to use such a dropped connection, it would fail, causing delays and errors. Keeping connections alive and monitored means you can efficiently reuse them, reducing the overhead of establishing new connections frequently.
 
-Tailcall provides a parameter named `tcpKeepAlive` for the upstream which defaults to 5 seconds. Example:
+GQLForge provides a parameter named `tcpKeepAlive` for the upstream which defaults to 5 seconds. Example:
 schema
 
 ```graphql
@@ -99,7 +99,7 @@ query: Query
 
 `connectTimeout` specifically applies to the phase where your client attempts to establish a connection with the server. When making a connection request, the client tries to resolve the DNS, complete the SSL handshake, and establish a TCP connection. In environments where pods are frequently created and destroyed, maintaining a low `connectTimeout` is crucial to avoid unnecessary delays. In systems using connection pooling, the system aborts the attempt if it cannot establish a connection within the `connectTimeout` period. This approach prevents indefinite waiting for a connection to establish, which could cause delays and timeouts.
 
-Tailcall offers a `connectTimeout` parameter to set the connection timeout in seconds for the HTTP client, defaulting to 60 seconds. Example:
+GQLForge offers a `connectTimeout` parameter to set the connection timeout in seconds for the HTTP client, defaulting to 60 seconds. Example:
 
 ```graphql showLineNumbers
 schema

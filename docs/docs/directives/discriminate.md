@@ -48,7 +48,7 @@ The API is expected to respond with an object that is wrapped with a key represe
 The **key** is always case sensitive and should match the type name.
 :::
 
-This allows Tailcall to correctly decode the response and resolve with the exact variant of the union type. However its also a common practice to have a special field to specify the type. For example:
+This allows GQLForge to correctly decode the response and resolve with the exact variant of the union type. However its also a common practice to have a special field to specify the type. For example:
 
 ```json
 [

@@ -1,14 +1,14 @@
 ---
-title: Getting Started with Tailcall Directives
-description: Enhance your GraphQL API with Tailcall custom directives. These directives offer powerful compile-time guarantees, ensuring robust and optimized API composition. Tailcall automates the generation of resolver logic for improved performance.
-slug: tailcall-dsl-graphql-custom-directives
+title: Getting Started with GQLForge Directives
+description: Enhance your GraphQL API with GQLForge custom directives. These directives offer powerful compile-time guarantees, ensuring robust and optimized API composition. GQLForge automates the generation of resolver logic for improved performance.
+slug: gqlforge-dsl-graphql-custom-directives
 sidebar_label: Getting Started
 sidebar_position: 5
 ---
 
-Tailcall DSL builds on your existing GraphQL knowledge by allowing the addition of some custom directives. These directives provide powerful compile time guarantees to ensure your API composition is tight and robust. Behind the scenes, Tailcall automatically generates highly optimized resolver logic for your types using the information in the directives.
+GQLForge DSL builds on your existing GraphQL knowledge by allowing the addition of some custom directives. These directives provide powerful compile time guarantees to ensure your API composition is tight and robust. Behind the scenes, GQLForge automatically generates highly optimized resolver logic for your types using the information in the directives.
 
-Here is a list of all the custom directives supported by Tailcall:
+Here is a list of all the custom directives supported by GQLForge:
 
 <!-- SORT OPERATOR BY NAME -->
 

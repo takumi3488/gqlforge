@@ -24,14 +24,14 @@ type Social = {
   href: string
 }
 
-type ChooseTailcall = {
+type ChooseGQLForge = {
   id: number
   title: string
   description: string
   image: string
 }
 
-type TailcallFeatures = {
+type GQLForgeFeatures = {
   id: number
   title: string
   image: string

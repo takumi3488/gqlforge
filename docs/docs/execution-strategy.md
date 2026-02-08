@@ -1,11 +1,11 @@
 ---
 title: Sequencing & Parallelism
-description: "Tailcall revolutionizes data access layer development by automating API call orchestration, ensuring optimal execution strategies through advanced sequencing and parallelism techniques."
+description: "GQLForge revolutionizes data access layer development by automating API call orchestration, ensuring optimal execution strategies through advanced sequencing and parallelism techniques."
 slug: graphql-data-access-parallel-vs-sequence
 sidebar_label: Sequence vs Parallel
 ---
 
-Building data access layers often involves meticulous orchestration of API calls, but Tailcall simplifies this process. By analyzing your defined schema, it automatically determines the optimal execution strategy, deciding when to sequence calls and when to run them in parallel. This allows you to focus on your core application logic, while Tailcall handles the optimization seamlessly. Now, let's get into some real-world examples to illustrate its functionality.
+Building data access layers often involves meticulous orchestration of API calls, but GQLForge simplifies this process. By analyzing your defined schema, it automatically determines the optimal execution strategy, deciding when to sequence calls and when to run them in parallel. This allows you to focus on your core application logic, while GQLForge handles the optimization seamlessly. Now, let's get into some real-world examples to illustrate its functionality.
 
 ## Examples
 
@@ -64,7 +64,7 @@ query getUserAndPosts($userId: Int!) {
 }
 ```
 
-Tailcall understands that retrieving the user's posts depends on knowing the user's ID, which is obtained in the first step. Therefore, it automatically fetches the user first and then uses their ID to retrieve all their posts in a sequential manner.
+GQLForge understands that retrieving the user's posts depends on knowing the user's ID, which is obtained in the first step. Therefore, it automatically fetches the user first and then uses their ID to retrieve all their posts in a sequential manner.
 
 ### Example 2: Searching Multiple Posts and Users by ID
 
@@ -119,7 +119,7 @@ query getUsersWithLatestPosts {
 }
 ```
 
-This query retrieves details of multiple users and their most recent posts based on the provided user IDs. Tailcall recognizes that fetching user details and their individual posts are independent tasks. As a result, it can execute these requests concurrently for each user.
+This query retrieves details of multiple users and their most recent posts based on the provided user IDs. GQLForge recognizes that fetching user details and their individual posts are independent tasks. As a result, it can execute these requests concurrently for each user.
 
 ### Example 3: Fetching Posts with Users
 
@@ -167,6 +167,6 @@ query getPostsWithUsers {
 }
 ```
 
-Tailcall analyzes the schema and recognizes that fetching user details for each post is independent. It can potentially execute these requests to `/users/{{.value.userId}}` concurrently, fetching user data for multiple posts simultaneously.
+GQLForge analyzes the schema and recognizes that fetching user details for each post is independent. It can potentially execute these requests to `/users/{{.value.userId}}` concurrently, fetching user data for multiple posts simultaneously.
 
-In summary, Tailcall automates the management of sequence and parallelism in API calls. It analyzes the defined schema to optimize execution, freeing developers from manual intervention.
+In summary, GQLForge automates the management of sequence and parallelism in API calls. It analyzes the defined schema to optimize execution, freeing developers from manual intervention.

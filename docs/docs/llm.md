@@ -1,11 +1,11 @@
 ---
 title: LLM Integration
 sidebar_position: 3
-description: "List of all the supported LLM models that Tailcall uses"
+description: "List of all the supported LLM models that GQLForge uses"
 slug: llm-integration
 ---
 
-Tailcall leverages LLM to perform a variety of tasks. Here is a list of models that are supported by Tailcall.
+GQLForge leverages LLM to perform a variety of tasks. Here is a list of models that are supported by GQLForge.
 
 ## [OpenAI](https://openai.com/)
 
@@ -51,4 +51,4 @@ Tailcall leverages LLM to perform a variety of tasks. Here is a list of models t
     -	command-light
     -	command-light-nightly
 
-If nothing is configured, Tailcall tries to connect to one of the [Ollama](https://ollama.com/library) models.
+If nothing is configured, GQLForge tries to connect to one of the [Ollama](https://ollama.com/library) models.

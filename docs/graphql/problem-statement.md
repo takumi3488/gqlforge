@@ -3,10 +3,10 @@ title: Problem Statement
 slug: problem-statement
 ---
 
-Tailcall is solving the problem of API orchestration for a microservices architecture. In a microservices architecture, different services are developed and deployed separately. However, when you are building an application, you need to access multiple services to do anything meaningful. Typically you would access these services via APIs using REST, GRPC, or GraphQL protocol.
+GQLForge is solving the problem of API orchestration for a microservices architecture. In a microservices architecture, different services are developed and deployed separately. However, when you are building an application, you need to access multiple services to do anything meaningful. Typically you would access these services via APIs using REST, GRPC, or GraphQL protocol.
 A backend for frontend (BFF) layer is a hand-crafted first-class solution for aggregating data from multiple services, catered towards frontend applications. However similar use-cases exist even for the backend, e.g.service-to-service communication. Developers who are working in the trenches often come across business logic that can’t be part of the services interacting with each other, instead this should be part of an orchestration layer that combines the output of multiple services into one, performs transformations and extends it with the business logic.
 
-Tailcall is that orchestration layer, providing a fine set of primitives to compose APIs without writing any code and create a single unified data layer across all APIs. We are building a high-performance open-source Apache 2.0 API Orchestrator, enabling organizations to build versatile data access layers atop existing APIs.
+GQLForge is that orchestration layer, providing a fine set of primitives to compose APIs without writing any code and create a single unified data layer across all APIs. We are building a high-performance open-source Apache 2.0 API Orchestrator, enabling organizations to build versatile data access layers atop existing APIs.
 
 ## Problem Space
 

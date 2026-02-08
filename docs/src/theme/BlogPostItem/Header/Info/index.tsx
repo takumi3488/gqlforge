@@ -72,7 +72,7 @@ export default function BlogPostItemHeaderInfo({className}: Props): JSX.Element 
             return (
               <Link
                 to={tag.permalink}
-                className="bg-tailCall-light-200 !no-underline text-tailCall-dark-100 px-3 py-2 rounded-full cursor-pointer"
+                className="bg-gqlForge-light-200 !no-underline text-gqlForge-dark-100 px-3 py-2 rounded-full cursor-pointer"
               >
                 {tag.label}
               </Link>

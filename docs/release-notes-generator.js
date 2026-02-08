@@ -3,8 +3,8 @@ const fs = require("fs")
 const path = require("path")
 
 const GITHUB_TOKEN = process.env.GITHUB_TOKEN
-const REPO_OWNER = "tailcallhq"
-const REPO_NAME = "tailcall"
+const REPO_OWNER = "takumi3488"
+const REPO_NAME = "gqlforge"
 
 // Fetch releases using GitHub API
 async function fetchReleases() {

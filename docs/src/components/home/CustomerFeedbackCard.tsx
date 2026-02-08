@@ -22,7 +22,7 @@ const CustomerFeedbackCard: React.FC<CustomerFeedbackCardProps> = ({
 }) => {
   return (
     <div
-      className={`customer-feedback-card md:w-[33%] flex flex-col items-center justify-between bg-tailCall-dark-600 tailcall-light-100 text-white py-SPACE_06 px-SPACE_06 text-center text-content-small gap-y-SPACE_06 pb-10 ${classNames} ${
+      className={`customer-feedback-card md:w-[33%] flex flex-col items-center justify-between bg-gqlForge-dark-600 gqlforge-light-100 text-white py-SPACE_06 px-SPACE_06 text-center text-content-small gap-y-SPACE_06 pb-10 ${classNames} ${
         isCenterCard && "md:!relative md:-top-10"
       }`}
     >
@@ -30,7 +30,7 @@ const CustomerFeedbackCard: React.FC<CustomerFeedbackCardProps> = ({
         <>
           <span className={`sm:text-content-medium lg:text-content-large !font-bold !text-title-large`}>
             {`Loved by `}
-            <span className={isCenterCard ? `text-tailCall-yellow` : ""}>{department}</span>
+            <span className={isCenterCard ? `text-gqlForge-yellow` : ""}>{department}</span>
           </span>
         </>
       )}

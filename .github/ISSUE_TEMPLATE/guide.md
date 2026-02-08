@@ -1,6 +1,6 @@
 ---
 name: Guide
-about: Write a guide for using Tailcall
+about: Write a guide for using GQLForge
 title: "Guide:"
 labels: "type: docs"
 ---

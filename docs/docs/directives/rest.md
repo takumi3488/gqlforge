@@ -25,7 +25,7 @@ directive @rest(
 ) on OPERATION_DEFINITION
 ```
 
-API orchestration is essential, yet not all can adopt GraphQL despite its benefits. The Tailcall DSL feature leverages GraphQL at compile time to generate REST endpoints, aligning with traditional API infrastructure like CDNs and Gateways.
+API orchestration is essential, yet not all can adopt GraphQL despite its benefits. The GQLForge DSL feature leverages GraphQL at compile time to generate REST endpoints, aligning with traditional API infrastructure like CDNs and Gateways.
 
 ## Usage
 

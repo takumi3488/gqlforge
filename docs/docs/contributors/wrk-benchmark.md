@@ -1,18 +1,18 @@
 ---
 title: Macro Benchmarks
-description: "Learn how to benchmark a Tailcall server using `wrk` with this comprehensive guide. Discover the steps for building your project in release mode, starting the server with controlled log output, and using `wrk` with a custom Lua script for precise benchmarking. This tutorial also covers how to verify server responsiveness with `curl` and how to interpret benchmark results to assess server performance under load. Perfect for developers looking to optimize their Rust applications."
+description: "Learn how to benchmark a GQLForge server using `wrk` with this comprehensive guide. Discover the steps for building your project in release mode, starting the server with controlled log output, and using `wrk` with a custom Lua script for precise benchmarking. This tutorial also covers how to verify server responsiveness with `curl` and how to interpret benchmark results to assess server performance under load. Perfect for developers looking to optimize their Rust applications."
 ---
 
-This document outlines the steps to benchmark a Tailcall server using `wrk`, a modern HTTP benchmarking tool. It covers building your Rust project in release mode, starting the server, and performing the benchmark.
+This document outlines the steps to benchmark a GQLForge server using `wrk`, a modern HTTP benchmarking tool. It covers building your Rust project in release mode, starting the server, and performing the benchmark.
 
 ## Prerequisites
 
 - Rust and Cargo ([https://rustup.rs/](https://rustup.rs/))
 - `wrk` benchmarking tool (Installation instructions: [https://github.com/wg/wrk](https://github.com/wg/wrk))
 
-## Step 1: Build Tailcall
+## Step 1: Build GQLForge
 
-Ensure you are on the desired branch you want to benchmark, and then build Tailcall in release mode to optimize performance:
+Ensure you are on the desired branch you want to benchmark, and then build GQLForge in release mode to optimize performance:
 
 ```bash
 cargo build --release
@@ -20,7 +20,7 @@ cargo build --release
 
 ## Step 2: Start the Server
 
-Start the Tailcall server by setting the appropriate environment variable to control log output and using the release binary:
+Start the GQLForge server by setting the appropriate environment variable to control log output and using the release binary:
 
 ```bash
 export TC_LOG_LEVEL=error

@@ -60,7 +60,7 @@ const Quiz: React.FC<QuizProps> = ({questions, title}) => {
     let shareUrl = ""
 
     if (platform === "twitter") {
-      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&via=tailcallhq`
+      shareUrl = `https://twitter.com/intent/tweet?text=${encodeURIComponent(text)}&url=${encodeURIComponent(url)}&via=takumi3488`
     }
 
     window.open(shareUrl, "_blank")

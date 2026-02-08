@@ -18,7 +18,7 @@ upstream:
   connectTimeout: 60
   timeout: 60
   tcpKeepAlive: 60
-  userAgent: "Tailcall/1.0"
+  userAgent: "GQLForge/1.0"
   allowedHeaders:
     - "Authorization"
     - "X-Api-Key"
@@ -124,13 +124,13 @@ The User-Agent header value for HTTP requests.
 
 ```yaml showLineNumbers
 upstream:
-  userAgent: "Tailcall/1.0"
+  userAgent: "GQLForge/1.0"
 ```
 
 ## allowedHeaders
 
 The `allowedHeaders` configuration defines a set of whitelisted HTTP headers that can be forwarded to upstream services during requests.
-Without specifying `allowedHeaders`, the system will not forward any incoming headers to upstream services, offering an extra security layer but potentially limiting necessary data flow. Tailcall compares the provided whitelisted headers in a case-insensitive format.
+Without specifying `allowedHeaders`, the system will not forward any incoming headers to upstream services, offering an extra security layer but potentially limiting necessary data flow. GQLForge compares the provided whitelisted headers in a case-insensitive format.
 
 ```yaml showLineNumbers
 upstream:
@@ -143,7 +143,7 @@ In the example above, the configuration for `allowedHeaders` permits `Authorizat
 
 ## httpCache
 
-When httpCache passed with value greater than 0 it directs Tailcall to use HTTP caching mechanisms, following the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234) to enhance performance by minimizing unnecessary data fetches. If left unspecified, this feature defaults to `0` disabling the caching mechanism.
+When httpCache passed with value greater than 0 it directs GQLForge to use HTTP caching mechanisms, following the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234) to enhance performance by minimizing unnecessary data fetches. If left unspecified, this feature defaults to `0` disabling the caching mechanism.
 
 ```yaml showLineNumbers
 upstream:

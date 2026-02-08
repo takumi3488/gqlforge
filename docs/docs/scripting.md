@@ -1,11 +1,11 @@
 ---
 title: Customizing using Javascript
 sidebar_label: Custom Resolvers
-description: "Discover how to effortlessly manipulate HTTP requests and responses using Tailcall's lightweight JS runtime. Tailcall provides a streamlined JavaScript environment specifically designed for simple yet powerful request/response modifications without the complexity of a full Node.js setup. Ideal for developers looking to implement middleware solutions, Tailcall's runtime does not require file system or network access, ensuring a secure and focused development process."
+description: "Discover how to effortlessly manipulate HTTP requests and responses using GQLForge's lightweight JS runtime. GQLForge provides a streamlined JavaScript environment specifically designed for simple yet powerful request/response modifications without the complexity of a full Node.js setup. Ideal for developers looking to implement middleware solutions, GQLForge's runtime does not require file system or network access, ensuring a secure and focused development process."
 slug: graphql-javascript-customization
 ---
 
-Tailcall provides a light-weight JS runtime to modify requests and resolve with custom responses.
+GQLForge provides a light-weight JS runtime to modify requests and resolve with custom responses.
 The runtime is not a full-fledged Node.js environment and has no access to the file system or the network. It is designed to be used for simple request/response modifications.
 
 ## Getting Started
@@ -47,7 +47,7 @@ You can modify the request by returning a `request` object from the `onRequest` 
 
 ```javascript
 function onRequest({request}) {
-  request.headers["x-custom-header"] = "Hello, Tailcall!"
+  request.headers["x-custom-header"] = "Hello, GQLForge!"
 
   return {request}
 }
@@ -66,7 +66,7 @@ function onRequest({request}) {
         headers: {
           "content-type": "application/json"
         },
-        body: JSON.stringify({message: "Hello, Tailcall!"})
+        body: JSON.stringify({message: "Hello, GQLForge!"})
       }
     }
   }
@@ -77,7 +77,7 @@ function onRequest({request}) {
 
 ## Response Redirect
 
-Sometimes you might want to redirect the request to a different URL. You can do this by returning a `response` object with a `status` of `301` or `302` and a `Location` header. The following example redirects all requests to `https://example.com` to `https://tailcall.com`.
+Sometimes you might want to redirect the request to a different URL. You can do this by returning a `response` object with a `status` of `301` or `302` and a `Location` header. The following example redirects all requests to `https://example.com` to `https://gqlforge.com`.
 
 ```javascript
 function onRequest({request}) {
@@ -86,7 +86,7 @@ function onRequest({request}) {
       response: {
         status: 301,
         headers: {
-          Location: "https://tailcall.com",
+          Location: "https://gqlforge.com",
         },
       },
     }
@@ -125,13 +125,13 @@ type Request = {
 
 By default the headers field will be empty in most cases, unless headers are whitelisted via the [allowedHeaders](./config/upstream.md#allowedheaders) setting.
 
-The http filter doesn't have access to the request's body, hence you can't directly modify the body of an outgoing request. This is more of a design choice than a limitation we have made to ensure that developers don't misuse this API to write all kind of business logic in Tailcall.
+The http filter doesn't have access to the request's body, hence you can't directly modify the body of an outgoing request. This is more of a design choice than a limitation we have made to ensure that developers don't misuse this API to write all kind of business logic in GQLForge.
 
 :::tip
 As an escape hatch you can pass the request body as a query param instead of an actual request body and read in the JS.
 :::
 
-The modified request that's returned from the above `onRequest` function can optionally provide the body. This body is used by Tailcall as the request body while making the upstream request.
+The modified request that's returned from the above `onRequest` function can optionally provide the body. This body is used by GQLForge as the request body while making the upstream request.
 
 ### Response
 

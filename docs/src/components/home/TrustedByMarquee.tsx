@@ -21,7 +21,7 @@ const TrustedByMarquee: React.FC<TrustedByMarqueeProps> = ({
   title = "Deploy Anywhere",
   logos,
   onClick,
-  titleClassName = "text-content-small font-bold sm:text-title-tiny lg:text-title-small text-tailCall-light-500 text-center space-x-1",
+  titleClassName = "text-content-small font-bold sm:text-title-tiny lg:text-title-small text-gqlForge-light-500 text-center space-x-1",
   desktopClassName = "hidden sm:flex space-x-SPACE_16 px-8 mt-SPACE_10 overflow-hidden",
   mobileClassName = "sm:hidden flex items-center justify-around flex-wrap mt-SPACE_06 space-y-SPACE_02",
 }) => {

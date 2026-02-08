@@ -229,7 +229,7 @@ Example use case:
 
 ### Protobuf
 
-The `Protobuf` link type integrates Protocol Buffers definitions by importing .proto files. This integration is crucial for Tailcall to communicate with gRPC services. By including `.proto` definitions, the GraphQL server can directly interact with gRPC services, allowing for efficient and type-safe communication.
+The `Protobuf` link type integrates Protocol Buffers definitions by importing .proto files. This integration is crucial for GQLForge to communicate with gRPC services. By including `.proto` definitions, the GraphQL server can directly interact with gRPC services, allowing for efficient and type-safe communication.
 
 For detailed integration steps and best practices, refer to the [gRPC Integration Guide](/docs/grpc.md).
 

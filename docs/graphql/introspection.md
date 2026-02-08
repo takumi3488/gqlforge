@@ -78,7 +78,7 @@ Introspection allows the creation of smart clients that can adapt to schema chan
 
 ### Enabling Introspection in Your GraphQL Server
 
-Most GraphQL servers have introspection enabled by default. However, it is crucial to ensure that this feature is properly configured and secured, especially in production environments. Here is an example of enabling introspection in Tailcall GraphQL server configuration:
+Most GraphQL servers have introspection enabled by default. However, it is crucial to ensure that this feature is properly configured and secured, especially in production environments. Here is an example of enabling introspection in GQLForge GraphQL server configuration:
 
 ```graphql showLineNumbers
 schema @server(introspection: true) {

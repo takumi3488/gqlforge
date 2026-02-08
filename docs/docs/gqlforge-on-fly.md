@@ -1,11 +1,11 @@
 ---
-title: Deploy Tailcall GraphQL on Fly.io
+title: Deploy GQLForge GraphQL on Fly.io
 sidebar_label: Deploy on Fly
-description: "Learn how to deploy Tailcall GraphQL servers on Fly.io using GitHub Actions quickly and securely."
-slug: deploy-tailcall-graphql-fly-actions
+description: "Learn how to deploy GQLForge GraphQL servers on Fly.io using GitHub Actions quickly and securely."
+slug: deploy-gqlforge-graphql-fly-actions
 ---
 
-To deploy `tailcall` on Fly.io, you first need to generate an API key from Fly.io. If you don't already have an account, you can create one [here](https://fly.io/app/sign-up).
+To deploy `gqlforge` on Fly.io, you first need to generate an API key from Fly.io. If you don't already have an account, you can create one [here](https://fly.io/app/sign-up).
 
 ## Generate API Key for Fly.io
 
@@ -23,11 +23,11 @@ Follow these steps to generate an API key:
 
    ![token.png](../static/images/docs/fly/token.png)
 
-4. Copy the generated token and store it securely. You will need this token as input to the [tailcallhq/gh-action](https://github.com/tailcallhq/gh-action) when deploying to Fly.io.
+4. Copy the generated token and store it securely. You will need this token as input to the [takumi3488/gh-action](https://github.com/takumi3488/gh-action) when deploying to Fly.io.
 
 ## Setting Up the Project Repository
 
-Next, create a new repository on GitHub and use the `tailcallhq/gh-action` GitHub action to deploy it. The easiest way to get started is by using this template repository: [https://github.com/tailcallhq/deploy-tailcall](https://github.com/tailcallhq/deploy-tailcall).
+Next, create a new repository on GitHub and use the `takumi3488/gh-action` GitHub action to deploy it. The easiest way to get started is by using this template repository: [https://github.com/takumi3488/deploy-gqlforge](https://github.com/takumi3488/deploy-gqlforge).
 
 1. Go to the repository and click on `Use this template` to create a new repository.
 
@@ -53,11 +53,11 @@ Next, create a new repository on GitHub and use the `tailcallhq/gh-action` GitHu
 
    ![secret.png](../static/images/docs/fly/secret.png)
 
-You are now ready to deploy your `tailcall` server on Fly.io.
+You are now ready to deploy your `gqlforge` server on Fly.io.
 
 ## Deploy on Fly.io
 
-In this example, we will deploy a simple GraphQL server using `tailcall` on Fly.io, which converts the JSONPlaceholder REST API to a GraphQL API.
+In this example, we will deploy a simple GraphQL server using `gqlforge` on Fly.io, which converts the JSONPlaceholder REST API to a GraphQL API.
 
 Below is the configuration present in the template repository, which will be used for this deployment.
 
@@ -92,27 +92,27 @@ type Post {
 }
 ```
 
-To deploy the server, update the `provider` to `fly` in the `deploy-tailcall` job in the `.github/workflows/main.yml` file, as shown below.
+To deploy the server, update the `provider` to `fly` in the `deploy-gqlforge` job in the `.github/workflows/main.yml` file, as shown below.
 
 ```yaml
 on: [push]
 
 jobs:
-  deploy_tailcall:
+  deploy_gqlforge:
     runs-on: ubuntu-latest
-    name: Deploy Tailcall
+    name: Deploy GQLForge
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Deploy Tailcall
-        id: deploy-tailcall
-        uses: tailcallhq/gh-action@<version> # Replace <version> with the desired version
+      - name: Deploy GQLForge
+        id: deploy-gqlforge
+        uses: takumi3488/gh-action@<version> # Replace <version> with the desired version
         with:
           provider: "fly" # Specifies the cloud provider as 'fly'
           fly-api-token: ${{ secrets.FLY_API_TOKEN }}
           fly-app-name: <app-name> # Replace <app-name> with the desired app name
           fly-region: "lax"
-          tailcall-config: "./config.graphql"
+          gqlforge-config: "./config.graphql"
 ```
 
 :::important
@@ -121,4 +121,4 @@ When specifying the `fly-app-name` in your GitHub Actions workflow for deploying
 
 Fly.io requires each app name to be globally unique. If the name you select is already taken by another user, your deployment will fail. To avoid this issue, consider using a name that includes unique identifiers such as your organization name, project name, etc. If you do not specify the app name, `<orgname>-<reponame>` will be used.
 
-After updating the `main.yml` file, commit the changes and push them to the repository. This will trigger the deployment of the `tailcall` server on Fly.io. Once the deployment is successful, you can access the GraphQL playground at `https://tailcall.run/playground/?u=https://<fly-app-name>.fly.dev/graphql`.
+After updating the `main.yml` file, commit the changes and push them to the repository. This will trigger the deployment of the `gqlforge` server on Fly.io. Once the deployment is successful, you can access the GraphQL playground at `https://gqlforge.pages.dev/playground/?u=https://<fly-app-name>.fly.dev/graphql`.

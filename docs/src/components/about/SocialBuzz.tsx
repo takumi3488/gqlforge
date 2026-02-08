@@ -16,7 +16,7 @@ const SocialBuzz = (): JSX.Element => {
           ${require("@site/static/images/about/tweet-2-2x.jpg").default} 2x
           `}
           alt="tweet 2"
-          className="rounded-3xl m-SPACE_02 lg:hidden border border-solid border-tailCall-border-light-500"
+          className="rounded-3xl m-SPACE_02 lg:hidden border border-solid border-gqlForge-border-light-500"
         />
 
         <img
@@ -24,8 +24,8 @@ const SocialBuzz = (): JSX.Element => {
           srcSet={`${require("@site/static/images/about/tweet-1.jpg").default} 1x,
           ${require("@site/static/images/about/tweet-1-2x.jpg").default} 2x
           `}
-          alt="Devs love tailcall"
-          className="border border-solid border-tailCall-border-light-500 rounded-3xl m-SPACE_02"
+          alt="Devs love gqlforge"
+          className="border border-solid border-gqlForge-border-light-500 rounded-3xl m-SPACE_02"
         />
       </div>
       <img
@@ -34,7 +34,7 @@ const SocialBuzz = (): JSX.Element => {
           ${require("@site/static/images/about/tweet-2-2x.jpg").default} 2x
           `}
         alt="tweet 2"
-        className="border border-solid border-tailCall-border-light-500 rounded-3xl m-SPACE_02 lg:block hidden"
+        className="border border-solid border-gqlForge-border-light-500 rounded-3xl m-SPACE_02 lg:block hidden"
       />
     </section>
   )

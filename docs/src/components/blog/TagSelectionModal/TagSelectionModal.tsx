@@ -66,7 +66,7 @@ const TagSelectionModal: React.FC<TagSelectionModalProps> = ({open, onClose}) =>
           {/* Modal Container */}
           <div
             className={clsx(
-              "absolute w-full lg:w-4/12 h-full overflow-scroll right-0 bg-white rounded-xl lg:rounded-none lg:border lg:border-solid lg:border-tailCall-border-light-500 px-4 py-8 lg:px-10 lg:py-8 flex flex-col gap-8",
+              "absolute w-full lg:w-4/12 h-full overflow-scroll right-0 bg-white rounded-xl lg:rounded-none lg:border lg:border-solid lg:border-gqlForge-border-light-500 px-4 py-8 lg:px-10 lg:py-8 flex flex-col gap-8",
               styles.modalContainer,
             )}
           >
@@ -75,15 +75,15 @@ const TagSelectionModal: React.FC<TagSelectionModalProps> = ({open, onClose}) =>
               <X width={24} height={24} className="cursor-pointer" onClick={handleModalClose} />
             </div>
             <div className="flex flex-col gap-5 pb-36">
-              <div className="flex items-center gap-3 border border-solid border-tailCall-border-light-500 rounded-lg py-3 px-6">
-                <Search width={20} height={20} className="text-tailCall-light-500" />
+              <div className="flex items-center gap-3 border border-solid border-gqlForge-border-light-500 rounded-lg py-3 px-6">
+                <Search width={20} height={20} className="text-gqlForge-light-500" />
                 <input
                   name="tag"
                   type="text"
                   value={query}
                   onChange={handleQueryChange}
                   placeholder="Search Tags"
-                  className="text-black placeholder:text-tailCall-light-500 border-none outline-none text-content-small"
+                  className="text-black placeholder:text-gqlForge-light-500 border-none outline-none text-content-small"
                 />
               </div>
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-x-8 gap-y-8 lg:gap-y-10">
@@ -96,7 +96,7 @@ const TagSelectionModal: React.FC<TagSelectionModalProps> = ({open, onClose}) =>
                           key={tag.label}
                           to={tag.permalink}
                           onClick={handleModalClose}
-                          className="text-content-small text-black px-3 py-1 border border-solid border-tailCall-border-light-500 rounded-3xl w-fit cursor-pointer hover:no-underline"
+                          className="text-content-small text-black px-3 py-1 border border-solid border-gqlForge-border-light-500 rounded-3xl w-fit cursor-pointer hover:no-underline"
                         >
                           {tag.label}
                         </Link>

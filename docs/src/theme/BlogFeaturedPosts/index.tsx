@@ -21,7 +21,7 @@ function BlogFeaturedPosts({items}: {items: Props["items"]}): JSX.Element {
             </div>
             <div className="flex flex-col">
               <span className="text-title-tiny text-black">{post.content.metadata.title}</span>
-              <span className="text-content-small text-tailCall-light-600 line-clamp-1">
+              <span className="text-content-small text-gqlForge-light-600 line-clamp-1">
                 {post.content.metadata.description}
               </span>
             </div>

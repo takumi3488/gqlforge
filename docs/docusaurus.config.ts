@@ -80,18 +80,17 @@ export default {
 
   themeConfig: {
     // Replace with your project's social card
-    image: "icons/companies/tailcall.svg", // TODO: replace with gqlforge logo
+    image: "icons/companies/gqlforge.svg", // TODO: replace with gqlforge logo
     navbar: {
       hideOnScroll: true,
       logo: {
         alt: "My Site Logo",
-        src: "icons/companies/tailcall.svg",
+        src: "icons/companies/gqlforge.svg",
       },
       items: [
         {to: "/", label: "Home", position: "left", activeBaseRegex: "^/$"},
         // {to: "/about", label: "About", position: "left"},
         // {to: "/enterprise", label: "Enterprise", position: "left"},
-        {to: "/blog", label: "Blog", position: "left"},
         {
           label: "Developers",
           position: "left",
@@ -125,35 +124,6 @@ export default {
     tableOfContents: {},
   } satisfies Preset.ThemeConfig,
   plugins: [
-    [
-      "./plugins/custom-blog-plugin.ts",
-      {
-        path: "blog",
-        editLocalizedFiles: false,
-        blogTitle: "Feed of GQLForge blogs",
-        blogDescription: "List of blog posts on GQLForge blog",
-        blogSidebarCount: 10,
-        blogSidebarTitle: "Recent Blog Posts",
-        routeBasePath: "blog",
-        include: ["**/*.{md,mdx}"],
-        exclude: ["**/_*.{js,jsx,ts,tsx,md,mdx}", "**/_*/**", "**/*.test.{js,jsx,ts,tsx}", "**/__tests__/**"],
-        postsPerPage: "ALL",
-        blogListComponent: "@theme/BlogListPage",
-        blogPostComponent: "@theme/BlogPostPage",
-        blogTagsListComponent: "@theme/BlogTagsListPage",
-        blogTagsPostsComponent: "@theme/BlogTagsPostsPage",
-        rehypePlugins: [],
-        beforeDefaultRemarkPlugins: [],
-        beforeDefaultRehypePlugins: [],
-        truncateMarker: /<!--\s*(truncate)\s*-->/,
-        showReadingTime: true,
-        feedOptions: {
-          type: "all",
-          copyright: `Copyright © ${new Date().getFullYear()} GQLForge`,
-        },
-        onInlineAuthors: "throw",
-      },
-    ],
     [
       "@docusaurus/plugin-content-docs",
       {

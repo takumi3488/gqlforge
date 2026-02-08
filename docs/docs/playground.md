@@ -31,7 +31,7 @@ To test it out, append `/showcase/graphql?config=YOUR_CONFIG_URL` to your GraphQ
 
 ![Showcase](/images/docs/showcase.png)
 
-The above example shows loading a schema file from Tailcall's Github repository [examples](https://github.com/tailcallhq/tailcall/tree/main/examples) and querying it.
+The above example shows loading a schema file from GQLForge's Github repository [examples](https://github.com/takumi3488/gqlforge/tree/main/examples) and querying it.
 
 ## Performance and Security
 

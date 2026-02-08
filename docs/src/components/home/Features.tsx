@@ -10,7 +10,7 @@ type FeatureProps = {
 
 const Feature = ({feature}: FeatureProps): JSX.Element => {
   return (
-    <div className="text-tailCall-dark-500 sm:max-w-6xl sm:m-SPACE_10 lg:mx-auto lg:px-SPACE_016 my-0 lg:my-SPACE_20">
+    <div className="text-gqlForge-dark-500 sm:max-w-6xl sm:m-SPACE_10 lg:mx-auto lg:px-SPACE_016 my-0 lg:my-SPACE_20">
       <div className="flex items-center -ml-SPACE_02 sm:space-x-SPACE_02 sm:-ml-SPACE_05 lg:-ml-SPACE_10 mb-SPACE_06">
         <GreaterThanUnderscoreIcon className="h-5 sm:h-7" />
         <Heading as="h5" className="text-title-semi-large sm:text-display-tiny lg:text-display-small mb-0">
@@ -25,7 +25,7 @@ const Feature = ({feature}: FeatureProps): JSX.Element => {
           boxShadow: "0px 0px 0px 3px var(--ifm-color-brand-light-100)",
         }}
       >
-        <div className="bg-gradient-to-b from-tailCall-light-100 from-3% via-[#E4E5E9] via-67% to-tailCall-light-100 absolute -left-SPACE_04 sm:-left-SPACE_06 w-[2px] h-full" />
+        <div className="bg-gradient-to-b from-gqlForge-light-100 from-3% via-[#E4E5E9] via-67% to-gqlForge-light-100 absolute -left-SPACE_04 sm:-left-SPACE_06 w-[2px] h-full" />
         <p className="text-content-tiny sm:text-content-small lg:text-content-medium max-w-md">
           <span>{feature.content}</span>
         </p>

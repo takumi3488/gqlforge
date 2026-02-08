@@ -78,7 +78,7 @@ const sidebars: SidebarsConfig = {
       type: "category",
       label: "Production",
       collapsed: false,
-      items: ["gh-action", "tailcall-on-fly", "tailcall-on-aws", "client-tuning"],
+      items: ["gh-action", "gqlforge-on-fly", "gqlforge-on-aws", "client-tuning"],
     },
     {
       type: "category",

@@ -48,7 +48,7 @@ query {
 }
 ```
 
-Tailcall will make the following query to the upstream server:
+GQLForge will make the following query to the upstream server:
 
 ```graphql showLineNumbers
 query {
@@ -126,7 +126,7 @@ type Mutation {
     @graphQL(
       url: "https://jsonplaceholder.typicode.com"
       name: "users"
-      headers: [{key: "X-Server", value: "Tailcall"}]
+      headers: [{key: "X-Server", value: "GQLForge"}]
     )
 }
 ```

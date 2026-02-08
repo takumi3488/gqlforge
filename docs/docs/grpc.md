@@ -2,7 +2,7 @@
 title: "Step-by-Step Tutorial: Building GraphQL over gRPC"
 sidebar_label: "GraphQL on gRPC"
 description: "Learn how gRPC and GraphQL boost microservices. Discover their benefits and how they work together for better APIs."
-slug: graphql-grpc-tailcall
+slug: graphql-grpc-gqlforge
 image: /images/docs/graphql_on_grpc.png
 ---
 
@@ -14,7 +14,7 @@ image: /images/docs/graphql_on_grpc.png
 ![GraphQL on gRPC](../static/images/docs/graphql_on_grpc.png)
 _Architecture Diagram Showcasing GraphQL as an API Orchestrator for gRPC APIs_
 
-In this guide, we will set up a simple gRPC service and use it inside Tailcall's GraphQL config to fetch some of the data provided by the service. This way Tailcall can provide a single GraphQL schema wrapping any number of gRPC services. Which client side can use to fetch data from multiple services in a single request.
+In this guide, we will set up a simple gRPC service and use it inside GQLForge's GraphQL config to fetch some of the data provided by the service. This way GQLForge can provide a single GraphQL schema wrapping any number of gRPC services. Which client side can use to fetch data from multiple services in a single request.
 
 ## What is gRPC?
 
@@ -30,7 +30,7 @@ Now, let's explore how gRPC can be integrated into our proxy gateway to enhance 
 
 ## gRPC upstream
 
-We need some gRPC service available to be able to execute requests from the Tailcall gateway. For pure example purposes, we will build some simple gRPC services.
+We need some gRPC service available to be able to execute requests from the GQLForge gateway. For pure example purposes, we will build some simple gRPC services.
 
 ### Protobuf definition
 
@@ -81,7 +81,7 @@ service NewsService {
 
 ### Implement gRPC service
 
-Now having the protobuf file you can write a server that implements `NewsService` at any language you want that supports gRPC. Tailcall organization has a sample node.js service inside [this repo](https://github.com/tailcallhq/node-grpc) that you can pull to your local machine. To spin up the sample service run inside the repo and wait for logs about the service running.
+Now having the protobuf file you can write a server that implements `NewsService` at any language you want that supports gRPC. GQLForge organization has a sample node.js service inside [this repo](https://github.com/takumi3488/node-grpc) that you can pull to your local machine. To spin up the sample service run inside the repo and wait for logs about the service running.
 
 ```sh
 npm i
@@ -90,7 +90,7 @@ npm start
 
 ## GraphQL Configuration for GRPC
 
-Now when we have a running gRPC service we're going to write Tailcall's config to make the integration. To do this we need to specify GraphQL types corresponding to gRPC types we have defined in the protobuf file. Let's create a new file `grpc.graphql` file with the following content:
+Now when we have a running gRPC service we're going to write GQLForge's config to make the integration. To do this we need to specify GraphQL types corresponding to gRPC types we have defined in the protobuf file. Let's create a new file `grpc.graphql` file with the following content:
 
 ```graphql
 # The GraphQL representation for News message type
@@ -123,7 +123,7 @@ type Query {
 }
 ```
 
-Also, let's specify options for Tailcall's ingress and egress at the beginning of the config using [`server`](./config/server.md) and [`upstream`](./config/upstream.md) options.
+Also, let's specify options for GQLForge's ingress and egress at the beginning of the config using [`server`](./config/server.md) and [`upstream`](./config/upstream.md) options.
 
 ```graphql
 schema @server(port: 8000) @upstream(httpCache: 42) {
@@ -202,7 +202,7 @@ type NewsData {
 Start the server by pointing it to the config.
 
 ```
-tailcall start ./app.graphql
+gqlforge start ./app.graphql
 ```
 
 And now you can go to the page `http://127.0.0.1:8000/graphql` and execute some GraphQL queries e.g.:
@@ -278,7 +278,7 @@ Those 2 requests will be executed inside a single request to the gRPC method `Ge
 
 ## Reflection
 
-gRPC reflection is a potent feature enabling clients to dynamically discover services and their methods at runtime. Tailcall enhances this capability by obviating the need for developers to link each proto file individually. This feature proves particularly valuable in environments where proto files are continuously evolving or when services dynamically expose varying methods. Here are the steps to follow:
+gRPC reflection is a potent feature enabling clients to dynamically discover services and their methods at runtime. GQLForge enhances this capability by obviating the need for developers to link each proto file individually. This feature proves particularly valuable in environments where proto files are continuously evolving or when services dynamically expose varying methods. Here are the steps to follow:
 
 1. Add the gRPC endpoint as a [link](./config/links.md) with type set to `Grpc`. This enables the GraphQL server to understand that the specified source is a gRPC endpoint that supports reflection.
 
@@ -313,26 +313,26 @@ gRPC reflection is a potent feature enabling clients to dynamically discover ser
 
 ### Can I Automatically Generate GraphQL Schema from `.proto`?
 
-Of course, you can! Tailcall CLI provides a command called `tailcall gen` that can generate a GraphQL config from a proto file. This command can help you to quickly generate a GraphQL config from a `proto`file. You can find more information about
-[Tailcall Config auto generation](/docs/graphql-configuration-generation-with-tailcall/#effortless-grpc-integration).
+Of course, you can! GQLForge CLI provides a command called `gqlforge gen` that can generate a GraphQL config from a proto file. This command can help you to quickly generate a GraphQL config from a `proto`file. You can find more information about
+[GQLForge Config auto generation](/docs/graphql-configuration-generation-with-gqlforge/#effortless-grpc-integration).
 
 ## Conclusion
 
-Well done on integrating a gRPC service with the Tailcall gateway! This tutorial has demonstrated the straightforward and efficient process, showcasing Tailcall's compatibility with advanced communication protocols like gRPC.
+Well done on integrating a gRPC service with the GQLForge gateway! This tutorial has demonstrated the straightforward and efficient process, showcasing GQLForge's compatibility with advanced communication protocols like gRPC.
 
 You can find this working example and test it by yourself by the next links:
 
-- [node-grpc](https://github.com/tailcallhq/node-grpc) - example implementation for gRPC service in node.js
-- [gRPC example config](https://github.com/tailcallhq/tailcall/blob/main/examples/grpc.graphql) - Tailcall's config to integrate with gRPC service above
+- [node-grpc](https://github.com/takumi3488/node-grpc) - example implementation for gRPC service in node.js
+- [gRPC example config](https://github.com/takumi3488/gqlforge/blob/main/examples/grpc.graphql) - GQLForge's config to integrate with gRPC service above
 
 ### Key Takeaways
 
-- **Simplicity of Integration:** The integration of gRPC with Tailcall seamlessly enhances the overall capability of your system to handle high-performance and efficient data composition.
-- **Scalability and Performance:** By leveraging the power of gRPC along with Tailcall, we've laid a foundation for building scalable and high-performing distributed systems.
+- **Simplicity of Integration:** The integration of gRPC with GQLForge seamlessly enhances the overall capability of your system to handle high-performance and efficient data composition.
+- **Scalability and Performance:** By leveraging the power of gRPC along with GQLForge, we've laid a foundation for building scalable and high-performing distributed systems.
 
 ### Next Steps
 
 With the basics in place, we encourage you to explore further:
 
-- **Dive Deeper:** Tailcall gateway offers a lot of other features and configurations that you can utilize. Dive deeper into our documentation to explore more advanced settings and customization options.
-- **Explore Other Guides:** Our documentation includes a variety of guides and tutorials that can help you leverage the full potential of Tailcall in different scenarios. Whether it's adding security layers, load balancing, or detailed logging, there's a lot more to explore.
+- **Dive Deeper:** GQLForge gateway offers a lot of other features and configurations that you can utilize. Dive deeper into our documentation to explore more advanced settings and customization options.
+- **Explore Other Guides:** Our documentation includes a variety of guides and tutorials that can help you leverage the full potential of GQLForge in different scenarios. Whether it's adding security layers, load balancing, or detailed logging, there's a lot more to explore.

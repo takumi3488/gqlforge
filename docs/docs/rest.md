@@ -7,7 +7,7 @@ sidebar_label: REST on GraphQL
 
 In order to handle complicated business problems, modern systems frequently need to work with hundreds or even thousands of APIs. Because of its powerful API composition capabilities, GraphQL has been adopted by numerous organisations. But switching to GraphQL can be difficult. It involves a lot of team training as well as major adjustments to frontend and backend architectures.
 
-That's why Tailcall has developed a directive called `@rest` to streamline this transition and take advantage of GraphQL's power without requiring a complete overhaul. With the help of this directive, Tailcall GraphQL queries and mutations may be made available as REST endpoints.
+That's why GQLForge has developed a directive called `@rest` to streamline this transition and take advantage of GraphQL's power without requiring a complete overhaul. With the help of this directive, GQLForge GraphQL queries and mutations may be made available as REST endpoints.
 
 ## How it works
 
@@ -15,7 +15,7 @@ This guide show you how to expose REST endpoints for your GraphQL operations by 
 
 There are three main steps to this process:
 
-1. Define your Tailcall GraphQL configuration file.
+1. Define your GQLForge GraphQL configuration file.
 2. Define an operation using `@rest` directive in a separate file.
 3. Link the operation to the main config file.
 
@@ -56,7 +56,7 @@ type User {
 }
 ```
 
-for more information on how to define your Tailcall GraphQL configuration file, please refer to the [Tailcall GraphQL Configuration](getting-started.mdx#writing-a-graphql-configuration).
+for more information on how to define your GQLForge GraphQL configuration file, please refer to the [GQLForge GraphQL Configuration](getting-started.mdx#writing-a-graphql-configuration).
 
 ### Step 2: Define an operation using `@rest` directive
 
@@ -77,7 +77,7 @@ query ($id: Int!) @rest(method: GET, path: "/post/$id") {
 }
 ```
 
-to know more about the `@rest` directive, please refer to the [Tailcall GraphQL Directives](./directives/rest.md).
+to know more about the `@rest` directive, please refer to the [GQLForge GraphQL Directives](./directives/rest.md).
 
 ### Step 3: Link the operation to the main config file
 
@@ -98,4 +98,4 @@ To know more about the `links` configuration, please refer [it's documentation](
 
 ![REST Demo](/images/docs/rest.png)
 
-In summary, by utilizing the `@rest` directive, we've seamlessly exposed RESTful services over Tailcall's GraphQL, enhancing the traditional posts API to offer richer functionality without additional code. This approach combines the simplicity and ubiquity of REST with the modularity and flexibility of GraphQL, allowing for easy consumption from any HTTP client while leveraging GraphQL's powerful data querying capabilities.
+In summary, by utilizing the `@rest` directive, we've seamlessly exposed RESTful services over GQLForge's GraphQL, enhancing the traditional posts API to offer richer functionality without additional code. This approach combines the simplicity and ubiquity of REST with the modularity and flexibility of GraphQL, allowing for easy consumption from any HTTP client while leveraging GraphQL's powerful data querying capabilities.

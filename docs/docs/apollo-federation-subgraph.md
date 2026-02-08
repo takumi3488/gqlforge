@@ -1,15 +1,15 @@
 ---
-title: Use Tailcall service as a Federation Subgraph
-description: "Learn how to configure Tailcall to function as an Apollo Federation Subgraph, enabling seamless integration into a federated GraphQL environment."
-slug: integrate-apollo-federation-graphql-tailcall-subgraph
+title: Use GQLForge service as a Federation Subgraph
+description: "Learn how to configure GQLForge to function as an Apollo Federation Subgraph, enabling seamless integration into a federated GraphQL environment."
+slug: integrate-apollo-federation-graphql-gqlforge-subgraph
 sidebar_label: Apollo Federation Subgraph
 ---
 
-This guide shows how to configure tailcall to function as an [Apollo Federation Subgraph](https://www.apollographql.com/docs/federation/building-supergraphs/subgraphs-overview/) in your GraphQL infrastructure.
+This guide shows how to configure gqlforge to function as an [Apollo Federation Subgraph](https://www.apollographql.com/docs/federation/building-supergraphs/subgraphs-overview/) in your GraphQL infrastructure.
 
-## Create the Tailcall config
+## Create the GQLForge config
 
-First, you need to create a basic Tailcall configuration. For reference, check out our [Getting Started](./getting-started.mdx) guide.
+First, you need to create a basic GQLForge configuration. For reference, check out our [Getting Started](./getting-started.mdx) guide.
 
 ## Define Entity Resolvers
 
@@ -17,9 +17,9 @@ First, you need to create a basic Tailcall configuration. For reference, check o
 Skip this step if you don't have entities for now or want to add them later.
 :::
 
-Now you need to add [entity resolvers](https://www.apollographql.com/docs/federation/entities/) to the Tailcall config to make it act as a subgraph.
+Now you need to add [entity resolvers](https://www.apollographql.com/docs/federation/entities/) to the GQLForge config to make it act as a subgraph.
 
-To do this, you need to define resolver on types by using one of the [directives](./directives.md) that resolve the data. Use [`{{.value}}`](https://tailcall.run/docs/graphql-resolver-context-tailcall/#value) to access the fields that act as a federation `@key` and will be provided by the Federation Router when making the request to this subgraph.
+To do this, you need to define resolver on types by using one of the [directives](./directives.md) that resolve the data. Use [`{{.value}}`](https://gqlforge.pages.dev/docs/graphql-resolver-context-gqlforge/#value) to access the fields that act as a federation `@key` and will be provided by the Federation Router when making the request to this subgraph.
 
 ```graphql
 type Post
@@ -35,10 +35,10 @@ type Post
 ```
 
 :::note
-Please, note that you don't need to specify the `@key` directive manually when defining entity resolver with Tailcall. It's because Tailcall can automatically infer the key definitions from the usage of the resolver itself.
+Please, note that you don't need to specify the `@key` directive manually when defining entity resolver with GQLForge. It's because GQLForge can automatically infer the key definitions from the usage of the resolver itself.
 :::
 
-## Enable federation in the Tailcall config
+## Enable federation in the GQLForge config
 
 Federation is controlled by the flag [`enableFederation`](./config/server.md#enablefederation). Define it with `true` value to enable federation support.
 
@@ -48,11 +48,11 @@ Registration of the subgraph depends on what Federation Router you use.
 
 ### GraphOS Router
 
-For the **GraphOS Router** please refer to the [GraphOS documentation](https://www.apollographql.com/docs/graphos/quickstart/cloud). Please note that currently, to fetch subgraph schema from Tailcall instance, you need to use introspection request with the Rover cli instead of providing the Tailcall config as the subgraph schema.
+For the **GraphOS Router** please refer to the [GraphOS documentation](https://www.apollographql.com/docs/graphos/quickstart/cloud). Please note that currently, to fetch subgraph schema from GQLForge instance, you need to use introspection request with the Rover cli instead of providing the GQLForge config as the subgraph schema.
 
 When developing locally, use [Rover CLI](https://www.apollographql.com/docs/rover/) to start the development environment:
 
-1. Start the tailcall server as usual with `tailcall start`.
+1. Start the gqlforge server as usual with `gqlforge start`.
 2. Register the subgraph using introspection with `rover dev --url http://localhost:8001/graphql --name post`.
 3. Go to `http://localhost:4000` to inspect the router schema.
 
@@ -92,7 +92,7 @@ console.log(`🚀  Server ready at ${url}`)
 
 The Federation specification defines [multiple directives](https://www.apollographql.com/docs/federation/federated-schemas/federated-directives) that control how the data is resolved. While the `@key` directive is not necessary to be specified, any other directives should be specified the same way as in any other federation subgraph schema.
 
-Example of using federation directives in the Tailcall config:
+Example of using federation directives in the GQLForge config:
 
 ```graphql
 type User

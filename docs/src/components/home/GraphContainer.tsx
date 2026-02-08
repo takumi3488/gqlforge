@@ -43,11 +43,11 @@ const GraphContainer = ({
   }, [])
 
   return (
-    <div className="border-2 border-solid border-tailCall-border-dark-300 h-[300px] lg:h-[400px] w-full sm:w-[680px] rounded-3xl sm:rounded-[32px] flex flex-col relative overflow-hidden">
+    <div className="border-2 border-solid border-gqlForge-border-dark-300 h-[300px] lg:h-[400px] w-full sm:w-[680px] rounded-3xl sm:rounded-[32px] flex flex-col relative overflow-hidden">
       <div className="flex flex-col px-SPACE_06 py-SPACE_04 lg:px-SPACE_12 lg:py-SPACE_08 z-10">
-        <span className="text-content-small sm:text-content-medium text-tailCall-light-100">{metricTitle}</span>
+        <span className="text-content-small sm:text-content-medium text-gqlForge-light-100">{metricTitle}</span>
 
-        <span className="text-title-medium sm:text-title-large text-tailCall-light-100">
+        <span className="text-title-medium sm:text-title-large text-gqlForge-light-100">
           <TrackVisibility
             style={{
               height: "36px",
@@ -68,7 +68,7 @@ const GraphContainer = ({
           </TrackVisibility>
         </span>
 
-        <span className="text-content-tiny sm:text-content-small text-tailCall-light-400">{metricDesc}</span>
+        <span className="text-content-tiny sm:text-content-small text-gqlForge-light-400">{metricDesc}</span>
       </div>
 
       <div className="absolute right-SPACE_01 bottom-SPACE_01">

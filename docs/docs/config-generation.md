@@ -1,7 +1,7 @@
 ---
-title: Automatic GraphQL Configuration Generation with Tailcall
+title: Automatic GraphQL Configuration Generation with GQLForge
 description: Migrate REST or gRPC APIs to GraphQL automatically
-slug: graphql-configuration-generation-with-tailcall
+slug: graphql-configuration-generation-with-gqlforge
 sidebar_label: Auto Generation
 ---
 
@@ -37,7 +37,7 @@ Writing GraphQL schemas manually presents several challenges that can complicate
 
 These challenges highlight the need for automated tools, which streamline the process of generating GraphQL schemas, ensuring accuracy and efficiency while reducing the manual workload and error potential.
 
-For more insights on why manual GraphQL schema writing is becoming obsolete, you can read this [blog post by Tailcall](https://blog.tailcall.run/writing-a-graphql-backend-by-hand-is-long-gone).
+For more insights on why manual GraphQL schema writing is becoming obsolete, you can read this [blog post by GQLForge](https://gqlforge.pages.dev/blog/writing-a-graphql-backend-by-hand-is-long-gone).
 
 ## Features
 
@@ -45,11 +45,11 @@ For more insights on why manual GraphQL schema writing is becoming obsolete, you
 
 ### Effortless REST Integration
 
-Tailcall simplifies GraphQL schema generation from REST APIs, supporting various request types and scenarios. Let's understand this through various examples.
+GQLForge simplifies GraphQL schema generation from REST APIs, supporting various request types and scenarios. Let's understand this through various examples.
 
 1.  **Simple GET Request:** In the following example, we demonstrate how to generate a GraphQL schema from `https://jsonplaceholder.typicode.com/posts` endpoint.
 
-    This configuration allows Tailcall to fetch data from the specified endpoint and generate a GraphQL schema and save it to output path provided in configuration.
+    This configuration allows GQLForge to fetch data from the specified endpoint and generate a GraphQL schema and save it to output path provided in configuration.
 
     <Tabs>
     <TabItem value="json" label="JSON Config Format">
@@ -139,14 +139,14 @@ To generate the GraphQL configuration run following command
 <TabItem value="yml" label="YML Config Format">
 
 ```bash
-tailcall gen ./config.yml
+gqlforge gen ./config.yml
 ```
 
 </TabItem>
 <TabItem value="json" label="JSON Config Format">
 
 ```bash
-tailcall gen ./config.json
+gqlforge gen ./config.json
 ```
 
 </TabItem>
@@ -177,7 +177,7 @@ type Query {
 
     In the following example, we demonstrate how to generate a GraphQL schema from `https://jsonplaceholder.typicode.com/posts` endpoint which requires some request body in order to produce the response.
 
-    This configuration allows Tailcall to make a POST request to the upstream API and retrieve the response to generate a GraphQL schema, which is then saved to the output path specified in the configuration.
+    This configuration allows GQLForge to make a POST request to the upstream API and retrieve the response to generate a GraphQL schema, which is then saved to the output path specified in the configuration.
 
     <Tabs>
     <TabItem value="json" label="JSON Config Format">
@@ -189,8 +189,8 @@ type Query {
             "src": "https://jsonplaceholder.typicode.com/posts",
             "method": "POST",
             "body": {
-              "title": "Tailcall - Modern GraphQL Runtime",
-              "body": "Tailcall - Modern GraphQL Runtime",
+              "title": "GQLForge - Modern GraphQL Runtime",
+              "body": "GQLForge - Modern GraphQL Runtime",
               "userId": 1
             },
             "headers": {
@@ -224,8 +224,8 @@ type Query {
               method: "POST"
               isMutation: true
               body:
-                title: "Tailcall - Modern GraphQL Runtime"
-                body: "Tailcall - Modern GraphQL Runtime"
+                title: "GQLForge - Modern GraphQL Runtime"
+                body: "GQLForge - Modern GraphQL Runtime"
                 userId: 1
               headers:
                 Accept: "application/json"
@@ -282,13 +282,13 @@ To generate the GraphQL configuration run following command
 <TabItem value="json" label="JSON Config Format">
 
 ```bash
-tailcall gen ./config.json
+gqlforge gen ./config.json
 ```
 
   </TabItem>
   <TabItem value="yml" label="YML Config Format">
     ```bash
-    tailcall gen ./config.yml
+    gqlforge gen ./config.yml
     ```
   </TabItem>
   </Tabs>
@@ -325,17 +325,17 @@ type Post {
 
 :::info
 
-This flexible configuration approach allows you to adapt Tailcall for various HTTP methods by modifying key sections like `method`, `body`, `isMutation` and `headers`. Tailcall will handle generating the appropriate GraphQL schema based on the provided API interactions.
+This flexible configuration approach allows you to adapt GQLForge for various HTTP methods by modifying key sections like `method`, `body`, `isMutation` and `headers`. GQLForge will handle generating the appropriate GraphQL schema based on the provided API interactions.
 
 :::
 
 ### Effortless gRPC Integration
 
-Tailcall simplifies the process of generating GraphQL schemas from gRPC. By specifying the proto file path, Tailcall parses it and generates the corresponding GraphQL types and queries within minutes.
+GQLForge simplifies the process of generating GraphQL schemas from gRPC. By specifying the proto file path, GQLForge parses it and generates the corresponding GraphQL types and queries within minutes.
 
 1. **gRPC Integration**: In the following example, we demonstrate how to generate a GraphQL schema from a `news.proto` file.
 
-   This configuration allows Tailcall to parse the proto file, generate a GraphQL schema and save it to the output path provided in the configuration.
+   This configuration allows GQLForge to parse the proto file, generate a GraphQL schema and save it to the output path provided in the configuration.
 
     <Tabs>
     <TabItem value="json" label="JSON Config Format">
@@ -404,7 +404,7 @@ Let's understand the above configuration file.
 
 - **src**: Specifies the path to the proto file (`./news.proto` in this example).
 - **url**: Specifies the url on which gRPC service is hosted. (`http://localhost:50051` in this example).
-- **connectRPC**: An optional flag indicating whether Tailcall should generate [`Connect-RPC`](https://connectrpc.com/docs/protocol/) compatible configuration.
+- **connectRPC**: An optional flag indicating whether GQLForge should generate [`Connect-RPC`](https://connectrpc.com/docs/protocol/) compatible configuration.
 - **protoPaths**: An optional string array specifies additional directories to search for imported proto files.
 
 **Preset**: We've applied only one tuning parameter for the configuration. let's understand it in short.
@@ -441,7 +441,7 @@ for more insights on how gPRC works with GraphQL, you can read this [GraphQL ove
 
 ### Hybrid Integration (REST + gRPC)
 
-The Configuration Generator with Tailcall supports a hybrid integration of REST and gRPC. This feature allows you to leverage the strengths of both REST APIs and gRPC to create a unified GraphQL schema. By integrating both sources, you can ensure that your GraphQL schema is comprehensive and up-to-date with your existing APIs and data definitions.
+The Configuration Generator with GQLForge supports a hybrid integration of REST and gRPC. This feature allows you to leverage the strengths of both REST APIs and gRPC to create a unified GraphQL schema. By integrating both sources, you can ensure that your GraphQL schema is comprehensive and up-to-date with your existing APIs and data definitions.
 
 #### Example Configuration
 
@@ -526,14 +526,14 @@ To generate the GraphQL configuration run following command
 <TabItem value="yml" label="YML Config Format">
 
 ```bash
-tailcall gen ./config.yml
+gqlforge gen ./config.yml
 ```
 
 </TabItem>
 <TabItem value="json" label="JSON Config Format">
 
 ```bash
-tailcall gen ./config.json
+gqlforge gen ./config.json
 ```
 
 </TabItem>
@@ -720,7 +720,7 @@ This setting merges types in the configuration that satisfy the threshold criter
 
 ### unwrapSingleFieldTypes
 
-This setting instructs Tailcall to flatten out types with single field.
+This setting instructs GQLForge to flatten out types with single field.
 
 for example:
 
@@ -856,7 +856,7 @@ By leveraging field names to derive type names, the schema becomes more intuitiv
 
 ## LLM Powered Inference
 
-This is a more advanced completely opt-in feature. Sometimes it's not possible to infer names correctly based on usage, or a name is not available because its been used already. In such scenarios we leverage LLMs that understand relationships between fields, their schema and other meta information to infer type names. To allow Tailcall to connect to LLMs, you need to provide the API key in the configuration file.
+This is a more advanced completely opt-in feature. Sometimes it's not possible to infer names correctly based on usage, or a name is not available because its been used already. In such scenarios we leverage LLMs that understand relationships between fields, their schema and other meta information to infer type names. To allow GQLForge to connect to LLMs, you need to provide the API key in the configuration file.
 
 <Tabs>
 <TabItem value="json" label="JSON">
@@ -883,12 +883,12 @@ llm:
 </Tabs>
 
 :::tip
-Checkout our [LLM](llm.md) section to get a list of all the LLM models that Tailcall supports.
+Checkout our [LLM](llm.md) section to get a list of all the LLM models that GQLForge supports.
 :::
 
 ## Best Practices
 
-When setting up your configuration file for GraphQL generation with Tailcall, consider these key parameters to optimize and customize your setup:
+When setting up your configuration file for GraphQL generation with GQLForge, consider these key parameters to optimize and customize your setup:
 
 1. **[Merge Type](config-generation.md#mergetype)**:
    Controls the merging of similar GraphQL types to reduce duplication. Adjust the threshold (0.0 to 1.0) based on how strictly you want types to match for merging.

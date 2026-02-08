@@ -1,7 +1,7 @@
 ---
 title: GraphQL Server Watch Mode
 description: "Learn how to enhance your development workflow by running servers in watch mode with the versatile file-watcher tool, entr. This guide provides installation instructions for different operating systems, usage tips, and best practices to optimize your development process."
-slug: graphql-watch-mode-tailcall
+slug: graphql-watch-mode-gqlforge
 sidebar_label: Watch Mode
 ---
 
@@ -96,10 +96,10 @@ If you install it, it will show the latest version of the `entr`
 To run your server in watch mode with `entr`, use the `ls` command to list the files you want to track. The general syntax is as follows:
 
 ```graphql
-ls *.graphql | entr -r tailcall start ./jsonplaceholder.graphql
+ls *.graphql | entr -r gqlforge start ./jsonplaceholder.graphql
 ```
 
-This command uses `entr` to continuously track the `jsonplaceholder.graphql` file and when it changes, It runs the `tailcall start` command with the file as an argument
+This command uses `entr` to continuously track the `jsonplaceholder.graphql` file and when it changes, It runs the `gqlforge start` command with the file as an argument
 
 Detailing the above command as follows:
 
@@ -107,13 +107,13 @@ Detailing the above command as follows:
 
 2. `|` : The pipe symbol ('|') takes the output of the preceding command (the file listing) and feeds it as input to the following command (entr).
 
-3. `entr -r tc start ./jsonplaceholder.graphql` : Whenever the file "jsonplaceholder.graphql" changes, this command executes.
+3. `entr -r gqlforge start ./jsonplaceholder.graphql` : Whenever the file "jsonplaceholder.graphql" changes, this command executes.
 
 - `entr` is a command-line tool for running arbitrary commands whenever files change. It tracks the files specified in the previous command (`ls ./jsonplaceholder.graphql`)
 
 - `r` : This flag instructs entr to persist in running the command through errors, ensuring continuous operation.
 
-- `tc start ./jsonplaceholder.graphql` : This command runs upon detecting changes, executing `tc start` with the file path
+- `gqlforge start ./jsonplaceholder.graphql` : This command runs upon detecting changes, executing `gqlforge start` with the file path
   `./jsonplaceholder.graphql` as an argument
 
 ## Some Best Practices

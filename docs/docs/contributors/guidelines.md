@@ -1,10 +1,10 @@
 ---
 title: "Guidelines"
-description: "Explore how to contribute to the Tailcall project with this SEO-optimized guide. Learn the best practices for collaborating effectively, from forking and setting up your environment with tools like Rust and Prettier, to making incremental changes and engaging in community discussions. This document outlines key steps like creating new branches, submitting pull requests, and ensuring high code quality. Whether you're discussing on Discord or pushing changes, these guidelines ensure a smooth process. Perfect for developers looking to contribute to a thriving, respectful, and inclusive community. Join and enhance the Tailcall project today!"
+description: "Explore how to contribute to the GQLForge project with this SEO-optimized guide. Learn the best practices for collaborating effectively, from forking and setting up your environment with tools like Rust and Prettier, to making incremental changes and engaging in community discussions. This document outlines key steps like creating new branches, submitting pull requests, and ensuring high code quality. Whether you're discussing on Discord or pushing changes, these guidelines ensure a smooth process. Perfect for developers looking to contribute to a thriving, respectful, and inclusive community. Join and enhance the GQLForge project today!"
 slug: "/contribution-guidelines"
 ---
 
-Welcome to the **Tailcall** project! If you haven't stared us yet, make sure you do by clicking [here](https://github.com/tailcallhq/tailcall).
+Welcome to the **GQLForge** project! If you haven't stared us yet, make sure you do by clicking [here](https://github.com/takumi3488/gqlforge).
 This document provides an overview of the best practices for contributing effectively. Follow these guidelines to ensure a smooth collaboration process.
 
 ## The Basics
@@ -12,14 +12,14 @@ This document provides an overview of the best practices for contributing effect
 1. **Fork and Clone:** Fork the repository on GitHub and clone your fork locally.
 
    ```bash
-   git clone https://github.com/yourusername/tailcall.git
+   git clone https://github.com/yourusername/gqlforge.git
    ```
 
 2. **Set Up Your Environment:**
    - **Install Rust:** Use [rustup](https://rustup.rs/) to install Rust and the `nightly` toolchain.
    - **Install Prettier:** Required for linting, install [Prettier](https://prettier.io/).
    - **Build the Application:** Navigate to the project directory and execute `cargo build`.
-   - **Start the Server:** Run `cargo run -- start ./examples/jsonplaceholder.graphql` to start the server and access the GraphiQL interface at [https://tailcall.run/playground](https://tailcall.run/playground).
+   - **Start the Server:** Run `cargo run -- start ./examples/jsonplaceholder.graphql` to start the server and access the GraphiQL interface at [https://gqlforge.pages.dev/playground](https://gqlforge.pages.dev/playground).
 
 ## Making and Discussing Changes
 
@@ -45,8 +45,8 @@ This document provides an overview of the best practices for contributing effect
 
 ## Community Engagement
 
-- **Star and Share:** Star the repository if you find it helpful and share your contributions on social media using `#tailcall` and tagging [@tailcallhq](https://twitter.com/tailcallhq).
+- **Star and Share:** Star the repository if you find it helpful and share your contributions on social media using `#gqlforge` and tagging [@takumi3488](https://twitter.com/takumi3488).
 
 ## Final Notes
 
-Tailcall thrives through your contributions. We aim to maintain a respectful and inclusive community. Thank you for helping to enhance Tailcall for everyone!
+GQLForge thrives through your contributions. We aim to maintain a respectful and inclusive community. Thank you for helping to enhance GQLForge for everyone!

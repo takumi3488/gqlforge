@@ -93,14 +93,14 @@ const CookieConsentModal: React.FC<CookieConsentModalProps> = ({open, onAccept, 
               styles.cookieConsentModal,
             )}
           >
-            <div className="flex flex-col gap-4 text-tailCall-light-300">
+            <div className="flex flex-col gap-4 text-gqlForge-light-300">
               <div className="flex flex-col gap-2">
                 <span className="text-content-small font-bold xl:text-title-small">We Value Your Privacy</span>
                 <span className="text-content-tiny xl:text-content-small">
                   This website uses cookies to ensure you receive the best possible experience.{" "}
                   <Link
                     href={pageLinks.privacyPolicy}
-                    className="text-tailCall-light-300 hover:text-tailCall-light-300 underline"
+                    className="text-gqlForge-light-300 hover:text-gqlForge-light-300 underline"
                   >
                     Learn More
                   </Link>
@@ -114,7 +114,7 @@ const CookieConsentModal: React.FC<CookieConsentModalProps> = ({open, onAccept, 
                         key={index}
                         className={clsx(
                           "flex cursor-pointer text-content-tiny xl:text-content-small gap-2",
-                          preference.selected ? "text-tailCall-light-600" : "",
+                          preference.selected ? "text-gqlForge-light-600" : "",
                         )}
                         onClick={() => handlePreferenceToggle(index)}
                       >
@@ -138,7 +138,7 @@ const CookieConsentModal: React.FC<CookieConsentModalProps> = ({open, onAccept, 
                     <span
                       key={index}
                       className={clsx(
-                        "sm:whitespace-nowrap py-1 px-3 text-title-tiny bg-tailCall-dark-400 border border-solid border-tailCall-dark-300 cursor-pointer text-center",
+                        "sm:whitespace-nowrap py-1 px-3 text-title-tiny bg-gqlForge-dark-400 border border-solid border-gqlForge-dark-300 cursor-pointer text-center",
                         styles.consentOption,
                       )}
                       onClick={btn.onClick}

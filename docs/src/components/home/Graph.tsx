@@ -2,18 +2,18 @@ import React from "react"
 import Heading from "@theme/Heading"
 
 import LinkButton from "../shared/LinkButton"
-import ChooseTailcall from "./ChooseTailcall"
+import ChooseGQLForge from "./ChooseGQLForge"
 import GraphContainer from "./GraphContainer"
 import githubLogo from "@site/static/icons/companies/github-light.svg"
 import RequestVisual from "@site/static/animations/request-visual.json"
 import LatencyVisual from "@site/static/animations/latency-visual.json"
 import {analyticsHandler} from "@site/src/utils"
-import {Theme, tailCallBenchmarkUrl} from "@site/src/constants"
+import {Theme, gqlForgeBenchmarkUrl} from "@site/src/constants"
 import Section from "../shared/Section"
 
 const Graph = (): JSX.Element => {
   return (
-    <Section className="bg-tailCall-dark-600 h-full w-full text-tailCall-light-100 lg:pt-48 lg:pb-36">
+    <Section className="bg-gqlForge-dark-600 h-full w-full text-gqlForge-light-100 lg:pt-48 lg:pb-36">
       <div className="flex items-center justify-between lg:mb-12">
         <Heading
           as="h5"
@@ -24,7 +24,7 @@ const Graph = (): JSX.Element => {
         <div className="hidden sm:block">
           <LinkButton
             title="View on Github"
-            href={tailCallBenchmarkUrl}
+            href={gqlForgeBenchmarkUrl}
             theme={Theme.Gray}
             Icon={githubLogo}
             onClick={() => analyticsHandler("Home Page", "Click", "View on Github")}
@@ -55,7 +55,7 @@ const Graph = (): JSX.Element => {
         <div className="sm:hidden">
           <LinkButton
             title="View on Github"
-            href={tailCallBenchmarkUrl}
+            href={gqlForgeBenchmarkUrl}
             theme={Theme.Gray}
             Icon={githubLogo}
             onClick={() => analyticsHandler("Home Page", "Click", "View on Github")}
@@ -63,7 +63,7 @@ const Graph = (): JSX.Element => {
         </div>
       </div>
 
-      <ChooseTailcall />
+      <ChooseGQLForge />
     </Section>
   )
 }

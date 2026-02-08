@@ -13,7 +13,7 @@ const Pricing = (): JSX.Element => {
         as="h4"
         className="text-title-large sm:text-display-tiny lg:text-display-small mx-SPACE_02 text-center mb-SPACE_06 sm:mb-SPACE_10"
       >
-        <span className="rounded sm:rounded-lg bg-tailCall-yellow px-SPACE_01">Plans</span> that fit your scale.
+        <span className="rounded sm:rounded-lg bg-gqlForge-yellow px-SPACE_01">Plans</span> that fit your scale.
       </Heading>
 
       <div className="flex flex-col mx-SPACE_04 sm:mx-0 lg:flex-row items-center justify-center gap-SPACE_06 md:px-SPACE_16">
@@ -21,11 +21,11 @@ const Pricing = (): JSX.Element => {
           <div
             key={plan.id}
             className={`${
-              plan.mostPopular ? "border-tailCall-border-dark-700" : "border-tailCall-border-light-400"
+              plan.mostPopular ? "border-gqlForge-border-dark-700" : "border-gqlForge-border-light-400"
             } border border-solid rounded-2xl flex flex-col items-center justify-between gap-y-SPACE_07 sm:gap-y-0 py-SPACE_04 sm:py-SPACE_06 relative w-full h-auto sm:w-[384px] md:h-[520px] lg:h-[584px]`}
           >
             {plan.mostPopular && (
-              <p className="absolute -top-3.5 left-[50%] transform -translate-x-[50%] bg-tailCall-dark-600 text-tailCall-light-100 p-SPACE_01 rounded text-content-tiny font-bold">
+              <p className="absolute -top-3.5 left-[50%] transform -translate-x-[50%] bg-gqlForge-dark-600 text-gqlForge-light-100 p-SPACE_01 rounded text-content-tiny font-bold">
                 Most popular
               </p>
             )}

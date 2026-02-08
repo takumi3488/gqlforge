@@ -16,7 +16,7 @@ const Benefits = (): JSX.Element => {
               as="h3"
               className="text-title-large sm:text-display-tiny lg:text-display-small text-white md:w-[65%]"
             >
-              Tailcall gives you a best-practice GraphQL backend that checks all the boxes.
+              GQLForge gives you a best-practice GraphQL backend that checks all the boxes.
             </Heading>
           </div>
         </div>

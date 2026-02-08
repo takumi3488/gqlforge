@@ -1,6 +1,6 @@
 ---
 title: Frequently Asked Questions
-description: Get answers to the most frequently asked questions about Tailcall, including performance, features, installation, and more.
+description: Get answers to the most frequently asked questions about GQLForge, including performance, features, installation, and more.
 slug: faq
 ---
 
@@ -12,32 +12,32 @@ Here are answers to some of the most frequently asked questions. If you don't se
 
 **What sort of throughput and latency can we expect?**
 
-Check out our [benchmarks page](https://github.com/tailcallhq/graphql-benchmarks) for detailed information.
+Check out our [benchmarks page](https://github.com/takumi3488/graphql-benchmarks) for detailed information.
 
-**What is the maximum capacity that Tailcall can manage effectively?**
+**What is the maximum capacity that GQLForge can manage effectively?**
 
-Tailcall is designed to scale horizontally and can handle billions of requests per second.
+GQLForge is designed to scale horizontally and can handle billions of requests per second.
 
 ## Features
 
-**I use REST APIs. How can I use Tailcall if I don’t currently use GraphQL?**
+**I use REST APIs. How can I use GQLForge if I don’t currently use GraphQL?**
 
-You can use Tailcall in two ways:
+You can use GQLForge in two ways:
 
-1. You can use Tailcall to build a GraphQL server atop your existing REST APIs and Tailcall's `@http` directive. And you can replace your REST APIs with GraphQL over time.
-2. In case you don't want to use GraphQL, Tailcall has a directive called `@rest` that lets you use the composition capabilities of GraphQL without needing you to adopt GraphQL for your endpoints. This directive makes Tailcall GraphQL queries and mutations available as REST endpoints.
+1. You can use GQLForge to build a GraphQL server atop your existing REST APIs and GQLForge's `@http` directive. And you can replace your REST APIs with GraphQL over time.
+2. In case you don't want to use GraphQL, GQLForge has a directive called `@rest` that lets you use the composition capabilities of GraphQL without needing you to adopt GraphQL for your endpoints. This directive makes GQLForge GraphQL queries and mutations available as REST endpoints.
 
-**Can Tailcall generate GraphQL from gRPC APIs?**
+**Can GQLForge generate GraphQL from gRPC APIs?**
 
-Absolutely! Tailcall automatically generates GraphQL configurations from REST, gRPC, and existing GraphQL configuration files. We even support a hybrid integration of REST and gRPC. You can learn more about generating GraphQL configuration from gRPC APIs [here](https://tailcall.run/docs/graphql-grpc-tailcall/).
+Absolutely! GQLForge automatically generates GraphQL configurations from REST, gRPC, and existing GraphQL configuration files. We even support a hybrid integration of REST and gRPC. You can learn more about generating GraphQL configuration from gRPC APIs [here](https://gqlforge.pages.dev/docs/graphql-grpc-gqlforge/).
 
-**Is authentication built-in with Tailcall? If yes, how?**
+**Is authentication built-in with GQLForge? If yes, how?**
 
-Yes, Tailcall offers a simple way to add entity-level authentication to your GraphQL schema. You can read more about it [here](https://tailcall.run/docs/field-level-access-control-graphql-authentication/).
+Yes, GQLForge offers a simple way to add entity-level authentication to your GraphQL schema. You can read more about it [here](https://gqlforge.pages.dev/docs/field-level-access-control-graphql-authentication/).
 
-**Does Tailcall work with HTTP/2?**
+**Does GQLForge work with HTTP/2?**
 
-Yes, Tailcall supports HTTP/2 for both server (ingress) and client (egress) operations, enabling the protocol for incoming and outgoing server requests. For egress, no special settings are needed Tailcall will automatically upgrade the connection to HTTP/2 whenever possible.
+Yes, GQLForge supports HTTP/2 for both server (ingress) and client (egress) operations, enabling the protocol for incoming and outgoing server requests. For egress, no special settings are needed GQLForge will automatically upgrade the connection to HTTP/2 whenever possible.
 
 **Do you follow the Federation specification?**
 
@@ -51,25 +51,25 @@ Yes, it’s in the works! Please [contact us](https://discord.com/invite/kRZBPpk
 
 **What observability integrations do you support?**
 
-Tailcall integrates with Apollo Studio, Data Dog, New Relic, and Honeycomb for telemetry.
+GQLForge integrates with Apollo Studio, Data Dog, New Relic, and Honeycomb for telemetry.
 
-**Where can I deploy Tailcall apps?**
+**Where can I deploy GQLForge apps?**
 
-Tailcall is built using Rust and when you compile Rust, it gets compiled to an executable. You can then run the binary from anywhere - including your own self-hosted server!
-You can also run them as serverless functions through supported platforms like AWS Lambda. Each of these deployment methods have their own tradeoffs. You can also deploy Tailcall apps on Kubernetes, Docker, or any other container orchestration platform.
-Tailcall can also be compiled to WebAssembly and run in the browser/js based server .
+GQLForge is built using Rust and when you compile Rust, it gets compiled to an executable. You can then run the binary from anywhere - including your own self-hosted server!
+You can also run them as serverless functions through supported platforms like AWS Lambda. Each of these deployment methods have their own tradeoffs. You can also deploy GQLForge apps on Kubernetes, Docker, or any other container orchestration platform.
+GQLForge can also be compiled to WebAssembly and run in the browser/js based server .
 
 ## Trivia
 
-**Why did you start Tailcall?**
+**Why did you start GQLForge?**
 
-Tailcall was inspired by our experiences at Dream11, a fast-growing fantasy sports platform with over 200 million users. As the platform grew rapidly, we needed to make frequent UI changes and maintain type safety on the backend. We adopted GraphQL on the frontend’s recommendation, which reduced our workload, but as the platform expanded, infrastructure costs skyrocketed. Handwriting GraphQL servers also became cumbersome and error-prone.
+GQLForge was inspired by our experiences at Dream11, a fast-growing fantasy sports platform with over 200 million users. As the platform grew rapidly, we needed to make frequent UI changes and maintain type safety on the backend. We adopted GraphQL on the frontend’s recommendation, which reduced our workload, but as the platform expanded, infrastructure costs skyrocketed. Handwriting GraphQL servers also became cumbersome and error-prone.
 
-We developed a Domain Specific Language (DSL) to address GraphQL’s performance issues and other concerns, which helped us cut infrastructure costs by 90%. Our key takeaway was that APIs should be independently built and operated, and GraphQL should be used as a client-side abstraction closer to the client, not the server. This knowledge shaped the way we architected Tailcall today! You can read more about our GraphQL journey at Dream11 [here](https://tailcall.run/blog/dream11-graphql-case-study/).
+We developed a Domain Specific Language (DSL) to address GraphQL’s performance issues and other concerns, which helped us cut infrastructure costs by 90%. Our key takeaway was that APIs should be independently built and operated, and GraphQL should be used as a client-side abstraction closer to the client, not the server. This knowledge shaped the way we architected GQLForge today! You can read more about our GraphQL journey at Dream11 [here](https://gqlforge.pages.dev/blog/dream11-graphql-case-study/).
 
-**What specific problem does Tailcall solve and for whom? Who is your ideal customer?**
+**What specific problem does GQLForge solve and for whom? Who is your ideal customer?**
 
-Tailcall is perfect for growing companies that need efficient API management and are currently using REST APIs. Imagine you have a REST API and run an e-commerce store. The UI must make three separate requests:
+GQLForge is perfect for growing companies that need efficient API management and are currently using REST APIs. Imagine you have a REST API and run an e-commerce store. The UI must make three separate requests:
 
 - One to get the list of products.
 - Another to get the seller details for each product.
@@ -81,20 +81,20 @@ Tailcall is perfect for growing companies that need efficient API management and
 
 With GraphQL, a single query can be crafted to fetch exactly what the UI needs in one request. The GraphQL schema defines the relationships, simplifying data retrieval. However, setting this up usually involves writing backend code.
 
-Tailcall takes it a step further, enabling you to build an efficient GraphQL server using only a configuration file—no code required. This significantly speeds up the development process.
+GQLForge takes it a step further, enabling you to build an efficient GraphQL server using only a configuration file—no code required. This significantly speeds up the development process.
 
 **Is GraphQL dead? Why do you use GraphQL when so many in the industry think it’s dead?**
 
-Handwriting GraphQL can solve certain problems but also introduces new challenges. While manual GraphQL might fade away, combining GraphQL with a powerful runtime like Tailcall has a bright future!
+Handwriting GraphQL can solve certain problems but also introduces new challenges. While manual GraphQL might fade away, combining GraphQL with a powerful runtime like GQLForge has a bright future!
 
-**We already have a GraphQL API ready and don't have a reason to change. Why should we use Tailcall?**
+**We already have a GraphQL API ready and don't have a reason to change. Why should we use GQLForge?**
 
-While GraphQL is great for querying, manually writing backend code introduces complexity and potential errors. Tailcall simplifies this by letting you build a fast GraphQL server with just a configuration file, greatly speeding up your development. We encourage you to [try it](https://tailcall.run/docs/) out, and if you have questions, we’re here to help!
+While GraphQL is great for querying, manually writing backend code introduces complexity and potential errors. GQLForge simplifies this by letting you build a fast GraphQL server with just a configuration file, greatly speeding up your development. We encourage you to [try it](https://gqlforge.pages.dev/docs/) out, and if you have questions, we’re here to help!
 
-**What does the name Tailcall mean?**
+**What does the name GQLForge mean?**
 
 Our name was inspired by "tail call optimization" (TCO), a concept in programming that perfectly reflects our mission to optimize performance and turbocharge developers' productivity!
 
-**I am ready for Tailcall. What next?**
+**I am ready for GQLForge. What next?**
 
-Awesome! Check out our [Getting Started](https://tailcall.run/docs/) page to begin your journey. For any questions or to chat with us, join us on [Discord](https://discord.com/invite/kRZBPpkgwq).
+Awesome! Check out our [Getting Started](https://gqlforge.pages.dev/docs/) page to begin your journey. For any questions or to chat with us, join us on [Discord](https://discord.com/invite/kRZBPpkgwq).

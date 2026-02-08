@@ -1,10 +1,10 @@
 ---
 title: "Getting Started"
-description: Detailed guide on the runtime configuration for Tailcall.
+description: Detailed guide on the runtime configuration for GQLForge.
 slug: runtime-configuration
 ---
 
-The runtime configuration in Tailcall is designed to handle all runtime-related settings, such as server settings, upstream configurations, telemetry, and links to other resources. This configuration is written exclusively in `.json` or `.yml` format.
+The runtime configuration in GQLForge is designed to handle all runtime-related settings, such as server settings, upstream configurations, telemetry, and links to other resources. This configuration is written exclusively in `.json` or `.yml` format.
 
 ## Introduction
 
@@ -34,10 +34,10 @@ links:
 
 ## Example Usage
 
-To start the Tailcall server with the runtime configuration, use the following command:
+To start the GQLForge server with the runtime configuration, use the following command:
 
 ```sh
-tailcall start ./main.yaml
+gqlforge start ./main.yaml
 ```
 
 This command will start the server using the settings defined in main.yml.
@@ -46,7 +46,7 @@ This command will start the server using the settings defined in main.yml.
 
 | Option                               | Description                                                                   |
 | ------------------------------------ | ----------------------------------------------------------------------------- |
-| [`server`](./config/server.md)       | Configuration settings for the Tailcall server, including port and host.      |
+| [`server`](./config/server.md)       | Configuration settings for the GQLForge server, including port and host.      |
 | [`upstream`](./config/upstream.md)   | Settings for upstream services, such as batching and timeouts.                |
 | [`telemetry`](./config/telemetry.md) | Configuration for telemetry export options, including format and endpoints.   |
 | [`links`](./config/links.md)         | Links to other resources or schema files to be included in the configuration. |

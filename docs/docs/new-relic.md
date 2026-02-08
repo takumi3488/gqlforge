@@ -1,6 +1,6 @@
 ---
 title: New Relic Telemetry Integration
-description: "Discover how to enhance application performance with our guide on enabling and analyzing telemetry data in Tailcall. Learn to configure observability support using OpenTelemetry for insights into logs, metrics, and traces, with practical integration examples for platforms like Honeycomb.io, New Relic, and Datadog."
+description: "Discover how to enhance application performance with our guide on enabling and analyzing telemetry data in GQLForge. Learn to configure observability support using OpenTelemetry for insights into logs, metrics, and traces, with practical integration examples for platforms like Honeycomb.io, New Relic, and Datadog."
 slug: graphql-newrelic-guide-telemetry
 sidebar_label: New Relic
 ---
@@ -29,7 +29,7 @@ The guide is based on [official doc](https://docs.newrelic.com/docs/more-integra
      query: Query
    }
    ```
-5. Set the api key you've copied before to the environment variable named `NEWRELIC_API_KEY` and start tailcall with updated config
+5. Set the api key you've copied before to the environment variable named `NEWRELIC_API_KEY` and start gqlforge with updated config
 
 Now make some requests to running service and wait a little bit until New Relic proceeds the data. After that you can go to `Traces` locate `request` trace, click on it, then pick one of the available traces and click on it. You should see something like the screenshot below:
 

@@ -11,7 +11,7 @@ const BenefitsCard = (): JSX.Element => {
         {benefits.map((item, index) => (
           <Link
             className={clsx(
-              "group border-2 border-solid border-tailCall-border-dark-300 rounded-3xl p-6 flex flex-col md:flex-row items-start hover:border-[#FDEA2E] cursor-pointer hover:no-underline benefits-drop-shadow",
+              "group border-2 border-solid border-gqlForge-border-dark-300 rounded-3xl p-6 flex flex-col md:flex-row items-start hover:border-[#FDEA2E] cursor-pointer hover:no-underline benefits-drop-shadow",
               benefits.length % 2 !== 0 &&
                 index === benefits.length - 1 &&
                 "md:col-span-2 md:max-w-[calc(50%-20px)] md:mx-auto",
@@ -20,7 +20,7 @@ const BenefitsCard = (): JSX.Element => {
             href={item.redirection_url}
           >
             <div className="flex-shrink-0 mb-4 md:mb-0 md:mr-6">
-              <img src={item.image} alt="Image Describing Why Tailcall" className="w-16 h-16 object-contain" />
+              <img src={item.image} alt="Image Describing Why GQLForge" className="w-16 h-16 object-contain" />
             </div>
             <div className="flex-grow">
               <p className="text-title-small sm:text-title-large text-white mb-2 flex items-center justify-between">
@@ -29,7 +29,7 @@ const BenefitsCard = (): JSX.Element => {
                   <ArrowRight size={20} />
                 </span>
               </p>
-              <p className="text-content-tiny sm:text-content-small text-tailCall-light-600">{item.description}</p>
+              <p className="text-content-tiny sm:text-content-small text-gqlForge-light-600">{item.description}</p>
             </div>
           </Link>
         ))}

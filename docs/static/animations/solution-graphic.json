@@ -5,7 +5,7 @@
   "op": 175,
   "w": 1400,
   "h": 667,
-  "nm": "tailcall-solution-visual 2",
+  "nm": "gqlforge-solution-visual 2",
   "ddd": 0,
   "assets": [
     {
@@ -63,7 +63,7 @@
           "ddd": 0,
           "ind": 4,
           "ty": 4,
-          "nm": "tailcall-logo",
+          "nm": "gqlforge-logo",
           "parent": 3,
           "sr": 1,
           "ks": {
@@ -462,7 +462,7 @@
           "ddd": 0,
           "ind": 5,
           "ty": 4,
-          "nm": "tailcall-text",
+          "nm": "gqlforge-text",
           "parent": 3,
           "sr": 1,
           "ks": {
@@ -1278,7 +1278,7 @@
                   "nm": "Transform"
                 }
               ],
-              "nm": "tailcall",
+              "nm": "gqlforge",
               "np": 13,
               "cix": 2,
               "bm": 0,

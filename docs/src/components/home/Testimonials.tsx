@@ -26,14 +26,14 @@ const Testimonials = () => {
   }
 
   return (
-    <Section className="customer-container !bg-tailCall-dark-600 h-full w-full text-tailCall-light-100 !bg-contain md:!bg-center md:!bg-top py-16 md:py-20 lg:pt-48 lg:pb-24">
+    <Section className="customer-container !bg-gqlForge-dark-600 h-full w-full text-gqlForge-light-100 !bg-contain md:!bg-center md:!bg-top py-16 md:py-20 lg:pt-48 lg:pb-24">
       <div className="flex flex-row items-center justify-center">
         <Heading
           as="h5"
           className="text-title-large sm:text-display-tiny lg:text-display-medium flex flex-col items-center md:flex-row lg:mb-20"
         >
           <span>Developers</span>
-          <span className="bg-tailCall-yellow rounded-lg text-black px-SPACE_01 ml-SPACE_02">love us!</span>
+          <span className="bg-gqlForge-yellow rounded-lg text-black px-SPACE_01 ml-SPACE_02">love us!</span>
         </Heading>
       </div>
       <div className="flex flex-col space-y-SPACE_10 md:flex-row md:space-x-SPACE_02 md:space-y-0 mt-SPACE_18">

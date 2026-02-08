@@ -48,21 +48,21 @@ const LinkButton = ({
     const themes = {
       [Theme.Light]: {
         classes:
-          "border border-solid border-tailCall-border-dark-100 text-tailCall-dark-500 bg-transparent hover:text-tailCall-dark-500",
+          "border border-solid border-gqlForge-border-dark-100 text-gqlForge-dark-500 bg-transparent hover:text-gqlForge-dark-500",
         gridClasses: "",
       },
       [Theme.Dark]: {
         classes:
-          "border-2 border-solid border-tailCall-border-dark-100 text-tailCall-light-100 bg-white hover:text-tailCall-light-100",
+          "border-2 border-solid border-gqlForge-border-dark-100 text-gqlForge-light-100 bg-white hover:text-gqlForge-light-100",
         gridClasses: "",
       },
       [Theme.Gray]: {
         classes:
-          "border-2 border-solid border-tailCall-light-100 text-tailCall-light-100 bg-transparent hover:text-tailCall-light-100",
+          "border-2 border-solid border-gqlForge-light-100 text-gqlForge-light-100 bg-transparent hover:text-gqlForge-light-100",
         gridClasses: "hidden",
       },
-      [Theme.Tailcall]: {
-        classes: "bg-yellow-300 border border-solid text-tailCall-dark-500 bg-transparent hover:text-tailCall-dark-500",
+      [Theme.GQLForge]: {
+        classes: "bg-yellow-300 border border-solid text-gqlForge-dark-500 bg-transparent hover:text-gqlForge-dark-500",
         gridClasses: "",
       },
     }
@@ -76,7 +76,7 @@ const LinkButton = ({
         <>
           {/* Dark theme background */}
           <div
-            className={`lg:block rounded-md lg:rounded-lg absolute inset-0 w-full bg-tailCall-dark-500 group-hover:lg:scale-x-[0.98] group-hover:lg:scale-y-[0.95] transform transition-all ease-out duration-250`}
+            className={`lg:block rounded-md lg:rounded-lg absolute inset-0 w-full bg-gqlForge-dark-500 group-hover:lg:scale-x-[0.98] group-hover:lg:scale-y-[0.95] transform transition-all ease-out duration-250`}
           />
           {!disabled && (
             // Dark theme grid background (only if not disabled)

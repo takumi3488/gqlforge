@@ -12,15 +12,15 @@ A. Advantages/benefits of using GraphiQL
 
 For this guide, accessing GraphiQL can be done using any of the methods below:
 
-A. Simply head over to [https://tailcall.run/playground/](https://tailcall.run/playground/) and give your graphql server url in input. Note, make sure your graphql server allows cors for Tailcall domain
+A. Simply head over to [https://gqlforge.pages.dev/playground/](https://gqlforge.pages.dev/playground/) and give your graphql server url in input. Note, make sure your graphql server allows cors for GQLForge domain
 
-B. After starting your [GraphQL server](https://tailcall.run/docs/#starting-the-graphql-server), head over to the GraphiQL playground link you get
+B. After starting your [GraphQL server](https://gqlforge.pages.dev/docs/#starting-the-graphql-server), head over to the GraphiQL playground link you get
 
 ## Setting up GraphiQL
 
 A. Configuring GraphiQL
 
-B. Connecting GraphiQL to your Tailcall GraphQL server
+B. Connecting GraphiQL to your GQLForge GraphQL server
 
 ## How to add Headers in GraphiQL
 

@@ -1,7 +1,7 @@
 ---
 title: Data Dog Telemetry Integration
-description: "Discover how to enhance application performance with our guide on enabling and analyzing telemetry data in Tailcall. Learn to configure observability support using OpenTelemetry for insights into logs, metrics, and traces, with practical integration examples for platforms like Honeycomb.io, New Relic, and Datadog."
-slug: graphql-data-dog-telemetry-tailcall
+description: "Discover how to enhance application performance with our guide on enabling and analyzing telemetry data in GQLForge. Learn to configure observability support using OpenTelemetry for insights into logs, metrics, and traces, with practical integration examples for platforms like Honeycomb.io, New Relic, and Datadog."
+slug: graphql-data-dog-telemetry-gqlforge
 sidebar_label: Data Dog
 ---
 
@@ -9,7 +9,7 @@ This guide is based on the [official doc](https://docs.datadoghq.com/getting_sta
 
 ---
 
-### Steps to Integrate Datadog with Tailcall
+### Steps to Integrate Datadog with GQLForge
 
 1. **Log in to Datadog:**
 
@@ -88,8 +88,8 @@ This guide is based on the [official doc](https://docs.datadoghq.com/getting_sta
 - **Verify the Collector:**
   Confirm that it is running by checking the terminal logs. It should indicate that the collector is listening on the `OTLP` endpoint (`0.0.0.0:4317`).
 
-5. **Update Tailcall Configuration:**
-   Add telemetry support to your Tailcall configuration as follows:
+5. **Update GQLForge Configuration:**
+   Add telemetry support to your GQLForge configuration as follows:
 
    ```graphql
    schema
@@ -100,10 +100,10 @@ This guide is based on the [official doc](https://docs.datadoghq.com/getting_sta
    }
    ```
 
-6. **Set the Environment Variable for Tailcall:**
+6. **Set the Environment Variable for GQLForge:**
 
 - Ensure that the `DATADOG_API_KEY` environment variable is set.
-- Start both the OpenTelemetry Collector and Tailcall with the updated configuration.
+- Start both the OpenTelemetry Collector and GQLForge with the updated configuration.
 
 7. **Send and Analyze Data:**
 

@@ -7,7 +7,7 @@ slug: graphql-directives
 
 ## Introduction to GraphQL Directives
 
-GraphQL directives are a vital component of the GraphQL specification. These powerful tools may be less familiar due to their limited mandatory usage in API compliance. However, their ability to extend the functionality of a GraphQL API and server is crucial, especially in advanced tools like [Tailcall](/docs/tailcall-dsl-graphql-custom-directives) Graph Server.
+GraphQL directives are a vital component of the GraphQL specification. These powerful tools may be less familiar due to their limited mandatory usage in API compliance. However, their ability to extend the functionality of a GraphQL API and server is crucial, especially in advanced tools like [GQLForge](/docs/gqlforge-dsl-graphql-custom-directives) Graph Server.
 
 This article will explore the nature of GraphQL directives, their applications, and provide examples of their usage.
 
@@ -33,7 +33,7 @@ As GraphQL evolves, new directives like @defer and @stream may be introduced by 
 
 Custom directives enhance GraphQL's functionality, allowing the addition of bespoke behaviors to a GraphQL API. Various GraphQL server and client implementations use custom directives to extend functionality.
 
-For instance, Tailcall uses custom directives like `@http`, `@grpc` and, `@graphql` to connect with data sources. These directives enable interfacing with REST APIs, gRPC APIs, and other GraphQL APIs. Directives like `@call` help combine data from multiple sources into a single type.
+For instance, GQLForge uses custom directives like `@http`, `@grpc` and, `@graphql` to connect with data sources. These directives enable interfacing with REST APIs, gRPC APIs, and other GraphQL APIs. Directives like `@call` help combine data from multiple sources into a single type.
 
 ### Directive Locations in GraphQL
 
@@ -76,7 +76,7 @@ The @deprecated directive provides a reason for deprecation, which is available 
 
 ### Example of `@http` Directive
 
-The `@http` directive, a custom directive in Tailcall Graph Server, fetches data for the User type from a REST API:
+The `@http` directive, a custom directive in GQLForge Graph Server, fetches data for the User type from a REST API:
 
 ```graphql
 type User {
@@ -93,7 +93,7 @@ type Query {
 }
 ```
 
-When executing an operation that includes the user field, the Tailcall GraphQL API fetches data from the REST API and returns it to the client. The `@http` directive, applied to a type system location, annotates the user field and defines how data should be fetched.
+When executing an operation that includes the user field, the GQLForge GraphQL API fetches data from the REST API and returns it to the client. The `@http` directive, applied to a type system location, annotates the user field and defines how data should be fetched.
 
 ### Execution Directives
 
@@ -132,4 +132,4 @@ The @include directive conditionally includes the firstName and lastName fields 
 
 GraphQL directives, though initially complex, are a powerful tool within the GraphQL ecosystem. This article explained built-in and custom directives and their application across type system and executable locations in GraphQL. Type system directives apply to GraphQL SDL, while executable directives modify GraphQL responses during runtime execution.
 
-Understanding directives is crucial when working with GraphQL APIs, whether using tools like Tailcall GraphQL server or manually implementing.
+Understanding directives is crucial when working with GraphQL APIs, whether using tools like GQLForge GraphQL server or manually implementing.

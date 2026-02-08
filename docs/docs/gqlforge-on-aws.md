@@ -1,10 +1,10 @@
 ---
-title: Deploy Tailcall on AWS Lambda
+title: Deploy GQLForge on AWS Lambda
 sidebar_label: Deploy on AWS
-description: "Deploy `tailcall` on AWS Lambda using the github action `tailcallhq/gh-action`"
+description: "Deploy `gqlforge` on AWS Lambda using the github action `takumi3488/gh-action`"
 ---
 
-Before deploying `tailcall` on AWS Lambda, you need to generate the AWS Access Key ID and Secret Access Key. If you don't have an AWS account, you can create one [here](https://aws.amazon.com/).
+Before deploying `gqlforge` on AWS Lambda, you need to generate the AWS Access Key ID and Secret Access Key. If you don't have an AWS account, you can create one [here](https://aws.amazon.com/).
 
 ## Generate Access Keys for AWS
 
@@ -56,7 +56,7 @@ Follow these steps to generate the Terraform API token:
 
    ![create-org.png](../static/images/aws/create-org.png)
 
-3. Now that you have created an organization, you will be presented with the following page for creating a workspace. Click on `CLI-Driven Workflow`, since the github action which we will be using for deployment, [tailcallhq/gh-action](https://github.com/tailcallhq/gh-action), uses the terraform CLI.
+3. Now that you have created an organization, you will be presented with the following page for creating a workspace. Click on `CLI-Driven Workflow`, since the github action which we will be using for deployment, [takumi3488/gh-action](https://github.com/takumi3488/gh-action), uses the terraform CLI.
 
    ![workflow.png](../static/images/aws/workflow.png)
 
@@ -64,11 +64,11 @@ Follow these steps to generate the Terraform API token:
 
    ![create-workspace.png](../static/images/aws/create-workspace.png)
 
-You now have everything required for a successful deployment of your `tailcall` server on AWS Lambda.
+You now have everything required for a successful deployment of your `gqlforge` server on AWS Lambda.
 
 ## Setting up the project repo
 
-Now you need to create a new repository on Github and use the Github action `tailcallhq/gh-action` to deploy it. The easiest way to get started is to create a new repository using this template repo [https://github.com/tailcallhq/deploy-tailcall](https://github.com/tailcallhq/deploy-tailcall).
+Now you need to create a new repository on Github and use the Github action `takumi3488/gh-action` to deploy it. The easiest way to get started is to create a new repository using this template repo [https://github.com/takumi3488/deploy-gqlforge](https://github.com/takumi3488/deploy-gqlforge).
 
 1. Go to the repo and click on `Use this template` and create a new repository.
 
@@ -98,11 +98,11 @@ Now you need to create a new repository on Github and use the Github action `tai
 
    ![other-secrets.png](../static/images/aws/other-secrets.png)
 
-You are now ready to deploy your `tailcall` server on AWS Lambda using terraform.
+You are now ready to deploy your `gqlforge` server on AWS Lambda using terraform.
 
 ## Deploy on AWS Lambda using terraform
 
-In this example, we will deploy a simple `graphQL` server using `tailcall`, on AWS Lambda using terraform, which will convert the JSONPlaceholder REST API to a GraphQL API.
+In this example, we will deploy a simple `graphQL` server using `gqlforge`, on AWS Lambda using terraform, which will convert the JSONPlaceholder REST API to a GraphQL API.
 
 Below is the config present in the template repo, that will be used for this deployment. You can learn more about this [here](getting-started.mdx#writing-a-graphql-configuration).
 
@@ -137,31 +137,31 @@ type Post {
 }
 ```
 
-To deploy the server, just update the `provider` to `aws` in the `deploy-tailcall` job in the `.github/workflows/main.yml` file, similar to the example below. Also, update the `terraform-workspace` and `terraform-org` as well as the other inputs based on your requirements.
+To deploy the server, just update the `provider` to `aws` in the `deploy-gqlforge` job in the `.github/workflows/main.yml` file, similar to the example below. Also, update the `terraform-workspace` and `terraform-org` as well as the other inputs based on your requirements.
 
 ```yaml
 on: [push]
 
 jobs:
-  deploy_tailcall:
+  deploy_gqlforge:
     runs-on: ubuntu-latest
-    name: Deploy Tailcall
+    name: Deploy GQLForge
     steps:
       - name: Checkout repository
         uses: actions/checkout@v2
-      - name: Deploy Tailcall
-        id: deploy-tailcall
-        uses: tailcallhq/gh-action@v0.2
+      - name: Deploy GQLForge
+        id: deploy-gqlforge
+        uses: takumi3488/gh-action@v0.2
         with:
           provider: "aws"
           aws-access-key-id: ${{ secrets.AWS_ACCESS_KEY_ID }}
           aws-secret-access-key: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
           aws-region: "us-east-1"
-          aws-iam-role: "iam_for_tailcall"
+          aws-iam-role: "iam_for_gqlforge"
           terraform-api-token: ${{ secrets.TERRAFORM_API_TOKEN }}
-          terraform-org: "tailcall-demo"
-          terraform-workspace: "tailcall"
-          tailcall-config: "config.graphql"
+          terraform-org: "gqlforge-demo"
+          terraform-workspace: "gqlforge"
+          gqlforge-config: "config.graphql"
 ```
 
-After updating the `main.yml` file, commit the changes and push them to the repository. This will trigger the deployment of the `tailcall` server on AWS Lambda.
+After updating the `main.yml` file, commit the changes and push them to the repository. This will trigger the deployment of the `gqlforge` server on AWS Lambda.

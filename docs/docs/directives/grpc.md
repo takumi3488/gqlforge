@@ -80,7 +80,7 @@ schema @link(src: "./users.proto", type: Protobuf) {
 }
 ```
 
-Tailcall automatically resolves the protobuf file for any methods referenced in the `@grpc` directive.
+GQLForge automatically resolves the protobuf file for any methods referenced in the `@grpc` directive.
 
 ## Directive Arguments
 
@@ -164,7 +164,7 @@ Refer to [N + 1 Problem](../N+1.md) to learn how to use the `batchKey` setting.
 
 ### onResponseBody
 
-This hook allows you to intercept and modify the response body from upstream services before it's processed by Tailcall. Like [onRequest](./http.md#onrequest), it accepts a string value representing a middleware function defined in a JavaScript file. This function can be used to transform or validate the response data.
+This hook allows you to intercept and modify the response body from upstream services before it's processed by GQLForge. Like [onRequest](./http.md#onrequest), it accepts a string value representing a middleware function defined in a JavaScript file. This function can be used to transform or validate the response data.
 
 ```graphql showLineNumbers
 type Query {

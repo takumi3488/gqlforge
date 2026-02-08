@@ -257,7 +257,7 @@
       "ddd": 0,
       "ind": 5,
       "ty": 4,
-      "nm": "Tailcall-logomark-white Outlines",
+      "nm": "GQLForge-logomark-white Outlines",
       "sr": 1,
       "ks": {
         "o": {"a": 0, "k": 100, "ix": 11},
@@ -1530,7 +1530,7 @@
       "ddd": 0,
       "ind": 13,
       "ty": 4,
-      "nm": "tailcall bar",
+      "nm": "gqlforge bar",
       "sr": 1,
       "ks": {
         "o": {"a": 0, "k": 100, "ix": 11},

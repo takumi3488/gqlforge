@@ -5,7 +5,7 @@ slug: field-level-access-control-graphql-authentication
 sidebar_label: Authentication
 ---
 
-This guide will walk you through entity level authentication in GraphQL and how it could be achieved with Tailcall.
+This guide will walk you through entity level authentication in GraphQL and how it could be achieved with GQLForge.
 
 ## What is Authentication?
 
@@ -36,7 +36,7 @@ Advantages of this approach:
 
 ## GraphQL Authentication
 
-Tailcall provides a straightforward way to implement entity level authentication in your GraphQL schema. By leveraging custom directives, you can define which entities or fields require authentication to access their data. Tailcall supports multiple authentication providers, such as Basic Auth and JWT, allowing you to choose the authentication mechanism that best suits your application's requirements.
+GQLForge provides a straightforward way to implement entity level authentication in your GraphQL schema. By leveraging custom directives, you can define which entities or fields require authentication to access their data. GQLForge supports multiple authentication providers, such as Basic Auth and JWT, allowing you to choose the authentication mechanism that best suits your application's requirements.
 to know more about how to use it, read the following articles:
 
 1. [Basic Auth](#basic-authentication)
@@ -44,7 +44,7 @@ to know more about how to use it, read the following articles:
 
 ## GraphQL Configuration
 
-Enabling support for authentication in Tailcall could be done in two steps:
+Enabling support for authentication in GQLForge could be done in two steps:
 
 1. With the help of [`@link` directive](./config/links.md) connect multiple authentication files as you need for different provides. To connect it use either [`Htpasswd`](./config/links.md#htpasswd) or [`Jwks`](./config/links.md#jwks) link type
 2. Mark that some type of field requires authentication to be fetched with the help of [`@protected` directive](./directives/protected.md)
@@ -246,11 +246,11 @@ type User {
 
 ### Multiple auth providers
 
-In case you linked multiple authentication files all of them will be used to execute validation process. In that case, by default, Tailcall will validate all of them in parallel and succeed if at least one of them succeed.
+In case you linked multiple authentication files all of them will be used to execute validation process. In that case, by default, GQLForge will validate all of them in parallel and succeed if at least one of them succeed.
 
 ### Authentication headers
 
-To validate authentication for user request the specific headers are used (like `Authorization` header). In case auth is enabled for tailcall those headers will be also added to the [`allowedHeaders` list](./config/upstream.md#allowedheaders) and therefore they will be forwarded to the upstream requests implicitly.
+To validate authentication for user request the specific headers are used (like `Authorization` header). In case auth is enabled for gqlforge those headers will be also added to the [`allowedHeaders` list](./config/upstream.md#allowedheaders) and therefore they will be forwarded to the upstream requests implicitly.
 
 ## Basic Authentication
 
@@ -308,7 +308,7 @@ type User @protected {
 
 ### Making test request
 
-Now you can run the example file with Tailcall and try to make a query for data with specifying credentials.
+Now you can run the example file with GQLForge and try to make a query for data with specifying credentials.
 
 To make the request first create base64 encoded string from the `testuser:mypassword` string and then append the result to the `Authorization: Basic` header.
 
@@ -402,7 +402,7 @@ type User @protected {
 
 ### Making test request
 
-Now you can run the example file with Tailcall and try to make a query for data with specifying credentials.
+Now you can run the example file with GQLForge and try to make a query for data with specifying credentials.
 
 To make the request first obtain JWT token compatible with JWKS file you've linked before (if you've used the example `jwks.json` file from above then you can use the token from the example below).
 

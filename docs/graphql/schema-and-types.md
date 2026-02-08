@@ -13,7 +13,7 @@ image: /images/graphql/graphql-schema-structure.png
 
 We learned "What is GraphQL?" in the previous [article](/graphql/what-is-graphql.md).
 
-Tailcall is The modern way to build GraphQL APIs. All you need to do is install Tailcall and use the [gen command](/docs/tailcall-graphql-cli#gen) to automatically generate the GraphQL API.
+GQLForge is The modern way to build GraphQL APIs. All you need to do is install GQLForge and use the [gen command](/docs/gqlforge-graphql-cli#gen) to automatically generate the GraphQL API.
 
 There are many processes happening behind the scenes that scaffold those APIs for you, such as defining the GraphQL schema, and creating resolvers for queries and mutations. This article will cover the basics of GraphQL schemas and types.
 

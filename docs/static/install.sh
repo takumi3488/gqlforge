@@ -5,10 +5,10 @@ set -e
 # Get version argument from command line
 VERSION=${1:-"latest"}
 
-BASE_URL="https://github.com/tailcallhq/tailcall/releases/download"
+BASE_URL="https://github.com/takumi3488/gqlforge/releases/download"
 
 if [ "$VERSION" = "latest" ]; then
-  VERSION=$(curl --silent "https://api.github.com/repos/tailcallhq/tailcall/releases/latest" | jq -r '.tag_name')
+  VERSION=$(curl --silent "https://api.github.com/repos/takumi3488/gqlforge/releases/latest" | jq -r '.tag_name')
 fi
 
 # Determine OS and architecture to get the correct URL
@@ -39,19 +39,19 @@ if [[ "$OS" == "unknown" ]] || [[ "$ARCH" == "unknown" ]]; then
 fi
 
 # Derive download URL based on detected OS and architecture
-URL="$BASE_URL/$VERSION/tailcall-${ARCH}-${OS}"
+URL="$BASE_URL/$VERSION/gqlforge-${ARCH}-${OS}"
 
 # Prepare versioned directory for download
-INSTALL_DIR="$HOME/.tailcall/lib/$VERSION"
+INSTALL_DIR="$HOME/.gqlforge/lib/$VERSION"
 mkdir -p "$INSTALL_DIR"
 
 # Download the executable directly into the versioned directory
-curl -#Lo "$INSTALL_DIR/tailcall-${OS}-${ARCH}" "$URL"
-chmod +x "$INSTALL_DIR/tailcall-${OS}-${ARCH}"
+curl -#Lo "$INSTALL_DIR/gqlforge-${OS}-${ARCH}" "$URL"
+chmod +x "$INSTALL_DIR/gqlforge-${OS}-${ARCH}"
 
-# Create symlinks in ~/.tailcall/bin
-mkdir -p "$HOME/.tailcall/bin"
-ln -sf "$INSTALL_DIR/tailcall-${OS}-${ARCH}" "$HOME/.tailcall/bin/tailcall"
+# Create symlinks in ~/.gqlforge/bin
+mkdir -p "$HOME/.gqlforge/bin"
+ln -sf "$INSTALL_DIR/gqlforge-${OS}-${ARCH}" "$HOME/.gqlforge/bin/gqlforge"
 
 # Determine which shell the user is running and which profile file to update
 if [[ "$SHELL" == *"zsh"* ]]; then
@@ -64,6 +64,6 @@ elif [[ "$SHELL" == *"bash"* ]]; then
   fi
 fi
 
-# Provide instructions to add ~/.tailcall/bin to PATH in shell profile
+# Provide instructions to add ~/.gqlforge/bin to PATH in shell profile
 echo "Installation complete. Please add the following line to your $SHELL_PROFILE:"
-echo 'export PATH="$HOME/.tailcall/bin:$PATH"'
+echo 'export PATH="$HOME/.gqlforge/bin:$PATH"'

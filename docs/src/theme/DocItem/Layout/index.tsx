@@ -39,7 +39,7 @@ export default function DocItemLayout({children}: DocItemLayoutProps) {
       <br />
       <Giscus
         id="comments"
-        repo="tailcallhq/tailcallhq.github.io"
+        repo="takumi3488/gqlforge"
         repoId="R_kgDOH8lUfQ"
         category="General"
         categoryId="DIC_kwDOH8lUfc4Ceff2"
@@ -47,7 +47,7 @@ export default function DocItemLayout({children}: DocItemLayoutProps) {
         reactionsEnabled="1"
         emitMetadata="1"
         inputPosition="top"
-        theme={"https://tailcall.run/css/giscus-theme.css"}
+        theme={"https://gqlforge.pages.dev/css/giscus-theme.css"}
         lang="en"
         strict="0"
         loading="lazy"

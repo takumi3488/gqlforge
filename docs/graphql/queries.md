@@ -158,7 +158,7 @@ Fragments are reusable units of query logic that help maintain a DRY approach in
 
 ### Can I use GraphQL with existing REST APIs?
 
-Yes, you can use GraphQL as a layer on top of existing REST APIs to provide a more flexible and efficient way to query your data. For quickly creating a GraphQL server that converts REST APIs to GraphQL, check out [Getting Started with Tailcall](/docs).
+Yes, you can use GraphQL as a layer on top of existing REST APIs to provide a more flexible and efficient way to query your data. For quickly creating a GraphQL server that converts REST APIs to GraphQL, check out [Getting Started with GQLForge](/docs).
 
 ### What are GraphQL directives?
 

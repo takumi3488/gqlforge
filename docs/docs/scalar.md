@@ -1,12 +1,12 @@
 ---
 title: Simplifying GraphQL Scalars
-description: Explore GraphQL's core and Tailcall's custom scalars, including `Int`, `Float`, `String`, `Boolean`, `ID`, `Email`, and more, in our guide that simplifies data handling with clear definitions and examples. Enhance your applications with our comprehensive scalar support, designed for precise data validation and efficiency.
+description: Explore GraphQL's core and GQLForge's custom scalars, including `Int`, `Float`, `String`, `Boolean`, `ID`, `Email`, and more, in our guide that simplifies data handling with clear definitions and examples. Enhance your applications with our comprehensive scalar support, designed for precise data validation and efficiency.
 slug: graphql-scalars-guide
 sidebar_label: GraphQL Scalars
 ---
 
 The GraphQL specification includes default scalar types `Int`, `Float`, `String`, `Boolean`, and `ID`. Although these scalars cover the majority of use cases, some applications need to support other atomic data types such as `Date` or an `Email`.
-Tailcall provides these predefined scalars, with built-in validations, eliminating the need for you to do so.
+GQLForge provides these predefined scalars, with built-in validations, eliminating the need for you to do so.
 
 ## Default Scalars
 
@@ -22,7 +22,7 @@ Here is a list of default scalars that are built into the GraphQL Spec:
 
 ## GraphQL Scalars
 
-These are the current set of custom scalars supported by Tailcall:
+These are the current set of custom scalars supported by GQLForge:
 
 |        Scalar | Description                                                                                                                                                                           | Specification                                                                                                           |
 | ------------: | ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------- | ----------------------------------------------------------------------------------------------------------------------- |
@@ -33,7 +33,7 @@ These are the current set of custom scalars supported by Tailcall:
 |        `JSON` | A lightweight data interchange format based on the ECMAScript Programming Language Standard, designed for human-readable data representation.                                         | [RFC 7159 The JavaScript Object Notation (JSON) Data Interchange Format](https://datatracker.ietf.org/doc/html/rfc7159) |
 |       `Empty` | A type that represents no value or is used as a placeholder in contexts where no other data is expected or returned. It's equivalent to unit or void in other programming languages.  |                                                                                                                         |
 
-If none of the scalars make sense for your use case, consider opening an issue on the Tailcall [github repository](https://github.com/tailcallhq/tailcall).
+If none of the scalars make sense for your use case, consider opening an issue on the GQLForge [github repository](https://github.com/takumi3488/gqlforge).
 
 ## Custom Scalars
 

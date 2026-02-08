@@ -1,17 +1,17 @@
 ---
 title: GraphQL over HTTP/2
-description: Boost web performance and secure your communications by utilizing HTTP/2 with Tailcall GraphQL.
-slug: graphql-http2-guide-tailcall
+description: Boost web performance and secure your communications by utilizing HTTP/2 with GQLForge GraphQL.
+slug: graphql-http2-guide-gqlforge
 sidebar_label: HTTP/2
 ---
 
 [HTTP/2](https://www.cloudflare.com/en-in/learning/performance/http2-vs-http1.1/) represents a significant advancement in web protocols, offering enhancements such as multiplexing, header compression, and streamlined connection handling, all designed to improve web performance.
 
-Tailcall enables support for HTTP/2 for both server (ingress) and client (egress) operations, facilitating the protocol's adoption for both incoming and outgoing server requests. For egress, there is no special setting that's required, Tailcall will automatically upgrade the connection to HTTP/2 whenever possible. To configure ingress properly, you need to provide the following settings
+GQLForge enables support for HTTP/2 for both server (ingress) and client (egress) operations, facilitating the protocol's adoption for both incoming and outgoing server requests. For egress, there is no special setting that's required, GQLForge will automatically upgrade the connection to HTTP/2 whenever possible. To configure ingress properly, you need to provide the following settings
 
 ## SSL
 
-For Tailcall to serve GraphQL over HTTP/2 we need to first enable SSL for which we need to generate a certificate and a key. To generate the required certificates (cert.pem and key.pem) [OpenSSL](https://www.openssl.org/source/) is a widely used option. Here are the steps to get started with SSL:
+For GQLForge to serve GraphQL over HTTP/2 we need to first enable SSL for which we need to generate a certificate and a key. To generate the required certificates (cert.pem and key.pem) [OpenSSL](https://www.openssl.org/source/) is a widely used option. Here are the steps to get started with SSL:
 
 1. **Install OpenSSL**: Download and install OpenSSL from its official [website](https://www.openssl.org/source/) if it's not already installed on your system.
 
@@ -109,6 +109,6 @@ That's pretty much all that's required. Now you can go ahead and [launch](/docs/
 ```bash
 INFO File read: ./jsonplaceholder.graphql ... ok
 INFO N + 1 detected: 0
-INFO 🚀 Tailcall launched at [0.0.0.0:8000] over HTTP/2.0
-INFO 🌍 Playground: https://tailcall.run/playground/?u=http://127.0.0.1:8000/graphql
+INFO 🚀 GQLForge launched at [0.0.0.0:8000] over HTTP/2.0
+INFO 🌍 Playground: https://gqlforge.pages.dev/playground/?u=http://127.0.0.1:8000/graphql
 ```

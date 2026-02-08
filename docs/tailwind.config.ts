@@ -4,7 +4,7 @@ module.exports = {
   theme: {
     extend: {
       colors: {
-        tailCall: {
+        gqlForge: {
           border: {
             light: {
               100: "#f3f4f7",

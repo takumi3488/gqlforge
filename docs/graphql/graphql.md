@@ -6,7 +6,7 @@ slug: /
 ---
 
 <Head>
-  <title>GraphQL | Tailcall</title>
+  <title>GraphQL | GQLForge</title>
 </Head>
 
 ## Introduction to GraphQL
@@ -148,7 +148,7 @@ Clients can subscribe to the `newMessage` event to receive real-time updates whe
 
 In summary, the fundamental concepts of GraphQL—schema, queries, mutations, and subscriptions—provide a powerful framework for building flexible and efficient APIs that meet the diverse needs of modern applications.
 
-This GraphQL configuration is enough for starting a GraphQL server using Tailcall. You can start the server using the [`start`](/docs/tailcall-graphql-cli/#start) command.
+This GraphQL configuration is enough for starting a GraphQL server using GQLForge. You can start the server using the [`start`](/docs/gqlforge-graphql-cli/#start) command.
 
 ## Advantages of Using GraphQL
 
@@ -183,21 +183,21 @@ Before diving into GraphQL development, it's essential to understand the basic s
 ### 1. Setting up a GraphQL Server
 
 Setting up a GraphQL server involves configuring a server environment capable of processing GraphQL requests and responses.
-You can set up a GraphQL Server using Tailcall by following the steps below:
+You can set up a GraphQL Server using GQLForge by following the steps below:
 
-1. Install Tailcall's GraphQL CLI by running the following command:
+1. Install GQLForge's GraphQL CLI by running the following command:
 
 ```bash
-npm install -g @tailcallhq/tailcall
+npm install -g @takumi3488/gqlforge
 ```
 
 2. Set up a new GraphQL project by running the following command on a new project directory:
 
 ```bash
-tailcall init
+gqlforge init
 ```
 
-Using Tailcall's GraphQL CLI, you can quickly set up a GraphQL server with minimal configuration. The CLI provides a streamlined development environment for building GraphQL APIs.
+Using GQLForge's GraphQL CLI, you can quickly set up a GraphQL server with minimal configuration. The CLI provides a streamlined development environment for building GraphQL APIs.
 
 ### 2. Defining a Schema
 
@@ -229,7 +229,7 @@ When a client sends a GraphQL query, the server resolves each field in the query
 
 By setting up a GraphQL server, defining a schema, and attaching resolvers, you can begin building powerful and flexible APIs that provide clients with the precise data they need. This foundational knowledge forms the basis for more advanced GraphQL development, including integrating GraphQL with existing APIs, handling complex data relationships, and optimizing API performance.
 
-Lets attach resolvers to the schema we defined in the previous section using Tailcall's GraphQL Configuration:
+Lets attach resolvers to the schema we defined in the previous section using GQLForge's GraphQL Configuration:
 We will add the resolvers with [`@http`](/docs/http-directive) directive:
 
 ```graphql
@@ -259,12 +259,12 @@ In this example:
 We have used the `@http` directive to attach resolvers to the `post` field in the `Query`.
 and `@upstream` directive to define the base URL for the upstream server.
 
-This configuration is enough for starting a GraphQL server using Tailcall. You can start the server using the [`start`](/docs/tailcall-graphql-cli/#start) command.
+This configuration is enough for starting a GraphQL server using GQLForge. You can start the server using the [`start`](/docs/gqlforge-graphql-cli/#start) command.
 
 For starting the server, you can use the following command:
 
 ```bash
-tailcall start path/to/your-graphql-configuration
+gqlforge start path/to/your-graphql-configuration
 ```
 
 ### 4. Handling Data Relationships
@@ -333,7 +333,7 @@ Utilizing the right tools and libraries can significantly streamline the develop
 
 **Apollo Studio Explorer**: Part of the Apollo Studio platform, Apollo Studio Explorer offers a visual GraphQL editor and testing environment for exploring GraphQL schemas, executing queries, and analyzing query performance. It integrates seamlessly with Apollo Client and provides insights into schema usage and query execution metrics.
 
-**Tailcall Playground**: [Tailcall Playground](https://tailcall.run/playground) is a web-based IDE for testing and debugging GraphQL servers,and analyze the behavior of your GraphQL server.
+**GQLForge Playground**: [GQLForge Playground](https://gqlforge.pages.dev/playground) is a web-based IDE for testing and debugging GraphQL servers,and analyze the behavior of your GraphQL server.
 
 ### 3. Community Resources and Support
 

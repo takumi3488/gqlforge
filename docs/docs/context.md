@@ -1,11 +1,11 @@
 ---
 title: GraphQL Resolver Context
-description: "Explore Tailcall's dynamic Context mechanism for schema field resolution, enabling access to arguments, values, and environment variables for efficient GraphQL queries. Enhance your query handling with Tailcall's advanced Context features for optimized schema field resolution."
-slug: graphql-resolver-context-tailcall
+description: "Explore GQLForge's dynamic Context mechanism for schema field resolution, enabling access to arguments, values, and environment variables for efficient GraphQL queries. Enhance your query handling with GQLForge's advanced Context features for optimized schema field resolution."
+slug: graphql-resolver-context-gqlforge
 sidebar_label: Resolver Context
 ---
 
-Within Tailcall, `Context` is a pivotal component that allows for dynamic retrieval of values during the resolution of fields for a given type within the schema.
+Within GQLForge, `Context` is a pivotal component that allows for dynamic retrieval of values during the resolution of fields for a given type within the schema.
 
 ## Schema Definition
 

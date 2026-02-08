@@ -90,7 +90,7 @@ type Query {
 3. **skipEmpty** : When set to `true` the query parameter is skipped if the value of the parameter is null, defaults to false.
 
 :::important
-When `batchKey` is present, Tailcall considers the first `query` parameter to be the batch query key, so remember to adjust the order of the items accordingly.
+When `batchKey` is present, GQLForge considers the first `query` parameter to be the batch query key, so remember to adjust the order of the items accordingly.
 :::
 
 ### body
@@ -121,16 +121,16 @@ type Mutation {
   createUser(input: UserInput!): User
     @http(
       url: "https://jsonplaceholder.typicode.com/users"
-      headers: [{key: "X-Server", value: "Tailcall"}]
+      headers: [{key: "X-Server", value: "GQLForge"}]
     )
 }
 ```
 
-In this example, a request to `/users` will include a HTTP header `X-Server` with the value `Tailcall`.
+In this example, a request to `/users` will include a HTTP header `X-Server` with the value `GQLForge`.
 
 You can make use of mustache templates to provide dynamic values for headers, derived from the arguments or [context] provided in the request. For example:
 
-[context]: /docs/graphql-resolver-context-tailcall
+[context]: /docs/graphql-resolver-context-gqlforge
 
 ```graphql showLineNumbers
 type Mutation {
@@ -138,7 +138,7 @@ type Mutation {
     @http(
       url: "https://jsonplaceholder.typicode.com/users"
       headers: [
-        {key: "X-Server", value: "Tailcall"}
+        {key: "X-Server", value: "GQLForge"}
         {key: "User-Name", value: "{{.args.name}}"}
       ]
     )
@@ -152,7 +152,7 @@ In this scenario, the `User-Name` header's value will dynamically adjust accordi
 Groups data requests into a single call, enhancing efficiency. Refer to our [n + 1 guide](../N+1.md) for more details.
 
 :::important
-When `batchKey` is present, Tailcall considers the first `query` parameter to be the batch query key, so remember to adjust the order of the items accordingly. Whereas, the last item from `batchKey` is used to instruct which field is the ID of an object. In case that the returned result is a nested property `batchKey` can be used as a path to extract and group the items for the returned result.
+When `batchKey` is present, GQLForge considers the first `query` parameter to be the batch query key, so remember to adjust the order of the items accordingly. Whereas, the last item from `batchKey` is used to instruct which field is the ID of an object. In case that the returned result is a nested property `batchKey` can be used as a path to extract and group the items for the returned result.
 :::
 
 ```graphql showLineNumbers
@@ -169,7 +169,7 @@ type Post {
 }
 ```
 
-- `query: {key: "user_id", value: "{{.value.userId}}"}]`: Instructs Tailcall CLI to generate a URL aligning the user id with `userId` from the parent `Post`, compiling a single URL for a batch of posts, such as `/users?user_id=1&user_id=2&user_id=3...user_id=10`, consolidating requests into one.
+- `query: {key: "user_id", value: "{{.value.userId}}"}]`: Instructs GQLForge CLI to generate a URL aligning the user id with `userId` from the parent `Post`, compiling a single URL for a batch of posts, such as `/users?user_id=1&user_id=2&user_id=3...user_id=10`, consolidating requests into one.
 
 ### onRequest
 
@@ -192,7 +192,7 @@ type Query {
 
 ### onResponseBody
 
-This hook allows you to intercept and modify the response body from upstream services before it's processed by Tailcall. Like [onRequest](#onrequest), it accepts a string value representing a middleware function defined in a JavaScript file. This function can be used to transform or validate the response data.
+This hook allows you to intercept and modify the response body from upstream services before it's processed by GQLForge. Like [onRequest](#onrequest), it accepts a string value representing a middleware function defined in a JavaScript file. This function can be used to transform or validate the response data.
 
 ```graphql showLineNumbers
 type Query {
@@ -248,11 +248,11 @@ A boolean flag, if set to `true`, will enable deduplication of IO operations to 
 
 ## Batching with POST Requests
 
-In some cases, your batch API might use a POST request that accepts a list of items for processing. Tailcall can batch these requests similarly to how it handles GET requests, but instead of sending the input in query parameters, it sends them in the request body.
+In some cases, your batch API might use a POST request that accepts a list of items for processing. GQLForge can batch these requests similarly to how it handles GET requests, but instead of sending the input in query parameters, it sends them in the request body.
 
 ### Mechanism
 
-When Tailcall receives multiple POST requests that share the same endpoint but have different parameters, it:
+When GQLForge receives multiple POST requests that share the same endpoint but have different parameters, it:
 
 1. Collects these requests
 2. Transforms them into a single POST request with an array of objects in the body
@@ -324,7 +324,7 @@ The posts endpoint returns:
 ]
 ```
 
-Instead of making separate POST requests for each user, Tailcall will batch them into a single request:
+Instead of making separate POST requests for each user, GQLForge will batch them into a single request:
 
 ```bash
 POST https://jsonplaceholder.typicode.com/users

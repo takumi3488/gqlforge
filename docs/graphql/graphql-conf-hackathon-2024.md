@@ -1,6 +1,6 @@
 ---
 title: "GraphQL Conf Hackathon 2024"
-description: "Get ready for an adrenaline-pumping, 3-day coding marathon where your mission is clear: Build the fastest, most resilient GraphQL server and prove you can beat Tailcall's performance!"
+description: "Get ready for an adrenaline-pumping, 3-day coding marathon where your mission is clear: Build the fastest, most resilient GraphQL server and prove you can beat GQLForge's performance!"
 slug: /graphql-conf-hackathon-2024
 image: /images/graphql/hackathon-2024.png
 ---
@@ -8,7 +8,7 @@ image: /images/graphql/hackathon-2024.png
 # 🚀 GraphQL Conf Hackathon 2024
 
 ![img.png](../static/images/graphql/hackathon-2024.png)
-Get ready for an adrenaline-pumping, 3-day coding marathon where your mission is clear: **Build the fastest, most resilient GraphQL server** and prove you can **beat Tailcall's performance!**
+Get ready for an adrenaline-pumping, 3-day coding marathon where your mission is clear: **Build the fastest, most resilient GraphQL server** and prove you can **beat GQLForge's performance!**
 
 Winner takes home a **$5,000 cash prize** and the bragging rights of being the fastest GraphQL server in the galaxy. Are you up for the challenge?
 
@@ -66,7 +66,7 @@ type Geo {
 
 ## Technical Requirements
 
-1. Repository should be forked from [Tailcall's GraphQL Conf Hackathon 2024](https://github.com/tailcallhq/hackathon)
+1. Repository should be forked from [GQLForge's GraphQL Conf Hackathon 2024](https://github.com/takumi3488/hackathon)
 2. All CI tests should pass.
 3. Your implementation should be under the `/projects` directory.
 4. Should support any query that is supported by the schema.
@@ -74,7 +74,7 @@ type Geo {
 ## And Some More...
 
 - We might add new tests and modify the existing ones to ensure there is no hardcoding and it's a level playing field for all.
-- If you have questions or doubts about the hackathon, connect with us on [Discord](https://discord.gg/GJHMeZup8m) or [X](https://x.com/tailcallhq) or the only two people in that bright yellow T-shirt they'd be glad to say 👋.
+- If you have questions or doubts about the hackathon, connect with us on [Discord](https://discord.gg/GJHMeZup8m) or [X](https://x.com/takumi3488) or the only two people in that bright yellow T-shirt they'd be glad to say 👋.
 
 ## Scoring
 
@@ -83,13 +83,13 @@ type Geo {
 2. **Throughput Normalization:**
 
    - Your performance is measured in terms of requests per second (RPS) for each query.
-   - This performance is then compared to Tailcall's RPS for the same query.
-   - The comparison is done by dividing your RPS by Tailcall's RPS. This gives a normalized score for each query.
+   - This performance is then compared to GQLForge's RPS for the same query.
+   - The comparison is done by dividing your RPS by GQLForge's RPS. This gives a normalized score for each query.
 
      **Example:**
 
      - For the `posts-title` query:
-       - If your RPS is `100` and Tailcall's RPS is `50`, the normalized score for this query would be `100/50 = 2.0`.
+       - If your RPS is `100` and GQLForge's RPS is `50`, the normalized score for this query would be `100/50 = 2.0`.
 
 3. **Final Score Calculation:**
 
@@ -99,7 +99,7 @@ type Geo {
      **Example:**
 
      - Given the following scores:
-       | Query | Your RPS | Tailcall RPS | Normalized |
+       | Query | Your RPS | GQLForge RPS | Normalized |
        | ----------------- | -------- | ------------ | ---------- |
        | `posts-nested` | 100 | 50 | 2.0 |
        | `posts-title` | 200 | 350 | 0.8 |
@@ -117,7 +117,7 @@ Submit your solution as a pull request (PR) from your forked repo to the main re
 Your PR should only include file additions inside `/projects/${participant_name}`. Don't change any other files or code belonging to other participants.
 
 **Can I use any language or tools?**
-Yes, you can use any language, framework, or tools as long as they're within the scope of the licenses. However, the [tailcall](https://github.com/tailcallhq/tailcall/) tool is not allowed.
+Yes, you can use any language, framework, or tools as long as they're within the scope of the licenses. However, the [gqlforge](https://github.com/takumi3488/gqlforge/) tool is not allowed.
 
 **What should be included in the solution?**
 Your solution should include all the source code and setup instructions necessary to understand how you achieved the solution and how to run it.
@@ -215,7 +215,7 @@ cargo run
 If you need to run only specific project, specify this project as option with name of the directory of the project:
 
 ```sh
-cargo run -- --project tailcall
+cargo run -- --project gqlforge
 ```
 
 ## How implementation is checked
@@ -244,20 +244,20 @@ Ran many requests in parallel to the server with tools like `wrk` or `k6` to col
 <details>
   <summary>Terms and Conditions</summary>
 
-1. **Final Decision**: Tailcall reserves the exclusive right to determine the winner of the GraphQL Conf Hackathon 2024. The decision made by Tailcall is final and binding. No disputes, appeals, or challenges to the outcome will be entertained, either during the event or after its conclusion.
+1. **Final Decision**: GQLForge reserves the exclusive right to determine the winner of the GraphQL Conf Hackathon 2024. The decision made by GQLForge is final and binding. No disputes, appeals, or challenges to the outcome will be entertained, either during the event or after its conclusion.
 
-2. **Right to Disqualify**: Tailcall retains the right to disqualify any participant or team at any stage of the hackathon for reasons including, but not limited to, violations of the rules, inappropriate conduct, attempts to manipulate or cheat the scoring system, or any activity deemed unethical or unfair. Such disqualification decisions are at the sole discretion of Tailcall and will not be subject to review or reversal.
+2. **Right to Disqualify**: GQLForge retains the right to disqualify any participant or team at any stage of the hackathon for reasons including, but not limited to, violations of the rules, inappropriate conduct, attempts to manipulate or cheat the scoring system, or any activity deemed unethical or unfair. Such disqualification decisions are at the sole discretion of GQLForge and will not be subject to review or reversal.
 
 3. **Intellectual Property**: By submitting your solution, you agree that all work is your own or properly licensed. Any form of plagiarism, submission of duplicate solutions, or unauthorized use of third-party intellectual property will result in immediate disqualification. Participants are responsible for ensuring that their work complies with all applicable intellectual property laws and licenses.
 
-4. **No Legal Recourse**: Participants acknowledge that they are participating in the hackathon at their own risk and discretion. Tailcall’s decision regarding winners, disqualifications, or any aspect of the competition will not be subject to any form of legal recourse, challenge, or litigation. Participants waive any rights to seek compensation, damages, or legal action against Tailcall or its affiliates.
+4. **No Legal Recourse**: Participants acknowledge that they are participating in the hackathon at their own risk and discretion. GQLForge’s decision regarding winners, disqualifications, or any aspect of the competition will not be subject to any form of legal recourse, challenge, or litigation. Participants waive any rights to seek compensation, damages, or legal action against GQLForge or its affiliates.
 
-5. **Tiebreaker and Scoring**: In the event of a tie, Tailcall will decide the winner based on a tiebreaker determined by the timestamp of the last valid commit. Tailcall also reserves the right to alter or adjust scoring criteria to ensure fairness and integrity. These changes will be communicated, but participants agree that such changes will not be a basis for challenge.
+5. **Tiebreaker and Scoring**: In the event of a tie, GQLForge will decide the winner based on a tiebreaker determined by the timestamp of the last valid commit. GQLForge also reserves the right to alter or adjust scoring criteria to ensure fairness and integrity. These changes will be communicated, but participants agree that such changes will not be a basis for challenge.
 
-6. **Modification of Rules**: Tailcall reserves the right to modify or amend the rules, guidelines, or requirements of the hackathon at any time to ensure a fair and transparent competition. Any changes will be announced promptly, and participants are expected to comply with updated rules. Failure to adhere to the modified rules may result in disqualification.
+6. **Modification of Rules**: GQLForge reserves the right to modify or amend the rules, guidelines, or requirements of the hackathon at any time to ensure a fair and transparent competition. Any changes will be announced promptly, and participants are expected to comply with updated rules. Failure to adhere to the modified rules may result in disqualification.
 
-7. **Collaboration and Multiple Entries**: While collaboration is allowed, only one individual from a team may submit the final entry. Tailcall will not accept any disputes arising from team collaborations. Any identical or highly similar solutions submitted by different participants will be investigated, and Tailcall reserves the right to disqualify participants if plagiarism or collusion is suspected.
+7. **Collaboration and Multiple Entries**: While collaboration is allowed, only one individual from a team may submit the final entry. GQLForge will not accept any disputes arising from team collaborations. Any identical or highly similar solutions submitted by different participants will be investigated, and GQLForge reserves the right to disqualify participants if plagiarism or collusion is suspected.
 
-8. **Use of Submissions**: By submitting your entry, you grant Tailcall the right to use, display, and promote your submission for purposes related to the hackathon or future events, including marketing or showcasing your work. However, all intellectual property rights to the original code remain with the participants, unless explicitly stated otherwise.
+8. **Use of Submissions**: By submitting your entry, you grant GQLForge the right to use, display, and promote your submission for purposes related to the hackathon or future events, including marketing or showcasing your work. However, all intellectual property rights to the original code remain with the participants, unless explicitly stated otherwise.
 
 </details>

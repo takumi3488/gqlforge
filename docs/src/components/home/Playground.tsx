@@ -8,7 +8,7 @@ const Playground = (): JSX.Element => {
         Playground
       </Heading>
       <iframe
-        title="Tailcall GraphQL Playground"
+        title="GQLForge GraphQL Playground"
         style={{
           width: "90%",
           height: 700,
@@ -20,7 +20,7 @@ const Playground = (): JSX.Element => {
           scale: 0.95,
         }}
         className="max-w-7xl"
-        src="https://codesandbox.io/p/github/tailcallhq/tailcall-sandbox/main?file=%2Fexercises%2Fexercise_1.graphql"
+        src="https://codesandbox.io/p/github/takumi3488/gqlforge-sandbox/main?file=%2Fexercises%2Fexercise_1.graphql"
       ></iframe>
     </div>
   )

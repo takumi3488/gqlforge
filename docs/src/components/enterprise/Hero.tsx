@@ -15,7 +15,7 @@ const Hero = (): JSX.Element => {
       >
         <div>Extend the power</div>
         <div>
-          of <span className="bg-tailCall-yellow rounded-md sm:rounded-2xl px-SPACE_02">GraphQL</span>
+          of <span className="bg-gqlForge-yellow rounded-md sm:rounded-2xl px-SPACE_02">GraphQL</span>
         </div>
         <div>to your organization.</div>
       </Heading>

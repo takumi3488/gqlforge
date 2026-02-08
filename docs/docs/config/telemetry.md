@@ -29,7 +29,7 @@ telemetry:
     - string
 ```
 
-The `telemetry` configuration facilitates seamless integration with [OpenTelemetry](https://open-telemetry.io), enhancing the observability of your GraphQL services powered by Tailcall. By leveraging this configuration, developers gain access to valuable insights into the performance and behavior of their applications.
+The `telemetry` configuration facilitates seamless integration with [OpenTelemetry](https://open-telemetry.io), enhancing the observability of your GraphQL services powered by GQLForge. By leveraging this configuration, developers gain access to valuable insights into the performance and behavior of their applications.
 
 ## Traces
 
@@ -42,7 +42,7 @@ Here are the traces that are captured by the `telemetry` configuration:
 | `REST <http_method> <http_route>` | _Only for REST ingress_. Span for processing REST API call                                                                                                                                      |
 |                    `<field_name>` | Denotes spans for fields with defined resolvers, offering insights into field names and execution times for resolver logic.                                                                     |
 |                     `<expr_name>` | Nested within the `<field_name>` spans, these granulated spans detail the execution of expressions in resolving a field, highlighting the hierarchical execution pattern of nested expressions. |
-|                  upstream_request | Request that were made from tailcall service to upstream                                                                                                                                        |
+|                  upstream_request | Request that were made from gqlforge service to upstream                                                                                                                                        |
 
 ## Metrics
 
@@ -73,7 +73,7 @@ telemetry:
         - key: "x-honeycomb-team"
           value: "{{.env.HONEYCOMB_API_KEY}}"
         - key: "x-honeycomb-dataset"
-          value: "tailcall"
+          value: "gqlforge"
 ```
 
 You can configure the OTLP exporter with the following options:

@@ -75,4 +75,4 @@ It depends on your use case. Since there is more efficiency associated with work
 
 ### How can I convert my REST APIs to GraphQL?
 
-You can use tools like Tailcall, which is the simplest way to convert your REST APIs to GraphQL APIs. You can find more details [here](https://tailcall.run/docs).
+You can use tools like GQLForge, which is the simplest way to convert your REST APIs to GraphQL APIs. You can find more details [here](https://gqlforge.pages.dev/docs).

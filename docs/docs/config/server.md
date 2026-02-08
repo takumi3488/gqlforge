@@ -42,7 +42,7 @@ server:
       value: "YOUR_API_KEY_HERE"
 ```
 
-The `server` configuration provides a comprehensive set of server configurations. It dictates server behavior and helps tune Tailcall for a range of use-cases.
+The `server` configuration provides a comprehensive set of server configurations. It dictates server behavior and helps tune GQLForge for a range of use-cases.
 
 The options and their details appear below.
 
@@ -59,14 +59,14 @@ This example sets the `workers` to `32`, meaning the GraphQL server will use 32 
 
 ## port
 
-Setting the `port` to `8090` means that Tailcall will be accessible at `http://localhost:8000`.
+Setting the `port` to `8090` means that GQLForge will be accessible at `http://localhost:8000`.
 
 ```yaml showLineNumbers
 server:
   port: 8090
 ```
 
-This example sets the `port` to `8090`, making Tailcall accessible at `http://localhost:8090`.
+This example sets the `port` to `8090`, making GQLForge accessible at `http://localhost:8090`.
 
 :::tip
 Always choose non-standard ports, avoiding typical ones like 80 or 8080. Make sure your chosen port is free.
@@ -74,11 +74,11 @@ Always choose non-standard ports, avoiding typical ones like 80 or 8080. Make su
 
 ## headers
 
-Allows intelligent configuration of the final response headers that's produced by Tailcall.
+Allows intelligent configuration of the final response headers that's produced by GQLForge.
 
 ## cacheControl
 
-Activating the `cacheControl` configuration directs Tailcall to send [Cache-Control] headers in its responses. The `max-age` value in the header matches the lowest of the values in the responses that Tailcall receives from its upstream. By default, this is `false`, which means Tailcall does not set any header.
+Activating the `cacheControl` configuration directs GQLForge to send [Cache-Control] headers in its responses. The `max-age` value in the header matches the lowest of the values in the responses that GQLForge receives from its upstream. By default, this is `false`, which means GQLForge does not set any header.
 
 [cache-control]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/Cache-Control
 
@@ -102,7 +102,7 @@ server:
 
 ## experimental
 
-When the `experimental` configuration is enabled, Tailcall can include headers starting with `X-` in its responses, which are sourced from its upstream. By default, this feature is disabled (`[]`), meaning Tailcall does not forward any such headers unless explicitly configured to do so.
+When the `experimental` configuration is enabled, GQLForge can include headers starting with `X-` in its responses, which are sourced from its upstream. By default, this feature is disabled (`[]`), meaning GQLForge does not forward any such headers unless explicitly configured to do so.
 
 ```yaml showLineNumbers
 server:
@@ -113,7 +113,7 @@ server:
 
 ## setCookies
 
-Enabling the `setCookies` option instructs Tailcall to include `set-cookie` headers in its responses, which are obtained from the headers of upstream responses.
+Enabling the `setCookies` option instructs GQLForge to include `set-cookie` headers in its responses, which are obtained from the headers of upstream responses.
 
 [set-cookie]: https://developer.mozilla.org/en-US/docs/Web/HTTP/Headers/set-cookie
 
@@ -125,7 +125,7 @@ server:
 
 ## cors
 
-The `cors` configuration allows you to enable [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) on Tailcall. This is useful when you want to access Tailcall in the browser. Here is a simple configuration to get started with cors:
+The `cors` configuration allows you to enable [CORS](https://developer.mozilla.org/en-US/docs/Web/HTTP/CORS) on GQLForge. This is useful when you want to access GQLForge in the browser. Here is a simple configuration to get started with cors:
 
 ```yaml showLineNumbers
 server:
@@ -190,7 +190,7 @@ type Query {
 }
 ```
 
-In the provided example, setting a variable named `apiKey` with a placeholder value of "YOUR_API_KEY_HERE" implies that whenever Tailcall fetches data from the `externalData` endpoint, it includes the `apiKey` in the Authorization header of the HTTP request.
+In the provided example, setting a variable named `apiKey` with a placeholder value of "YOUR_API_KEY_HERE" implies that whenever GQLForge fetches data from the `externalData` endpoint, it includes the `apiKey` in the Authorization header of the HTTP request.
 
 :::tip
 Local variables, like `apiKey`, are instrumental in securing access to external services or providing a unified place for configurations. Ensure that sensitive information stored this way is well protected and not exposed unintentionally, if your GraphQL configuration is publicly accessible.
@@ -226,7 +226,7 @@ Enable this in the development environment to ensure the queries sent are correc
 
 ## responseValidation
 
-Tailcall can automatically infer the schema of the HTTP endpoints for you. This information can check responses received from the upstream services. Enabling this setting allows you to do that. If not specified, the default setting for `responseValidation` is `false`.
+GQLForge can automatically infer the schema of the HTTP endpoints for you. This information can check responses received from the upstream services. Enabling this setting allows you to do that. If not specified, the default setting for `responseValidation` is `false`.
 
 ```yaml showLineNumbers
 server:
@@ -324,15 +324,15 @@ This optional field allows you to customize the server's endpoint paths, enablin
 ```yaml showLineNumbers
 server:
   routes:
-    graphQL: "/tailcall-gql"
+    graphQL: "/gqlforge-gql"
     status: "/health"
 ```
 
-In this example, the GraphQL endpoint is changed to `/tailcall-gql` and the status endpoint to `/health`.
+In this example, the GraphQL endpoint is changed to `/gqlforge-gql` and the status endpoint to `/health`.
 
 ## enableFederation
 
-A boolean flag, if set to `true` the Tailcall server will additionally act as federation subgraph. By default, it's disabled.
+A boolean flag, if set to `true` the GQLForge server will additionally act as federation subgraph. By default, it's disabled.
 
 ```yaml showLineNumbers
 server:

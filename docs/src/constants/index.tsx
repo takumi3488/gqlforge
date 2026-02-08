@@ -1,10 +1,10 @@
 import React from "react"
 import {pageLinks} from "./routes"
 
-export const githubRepoURL = "https://github.com/tailcallhq/tailcall"
-export const tailCallBenchmarkUrl = "https://github.com/tailcallhq/graphql-benchmarks#benchmark-results"
-export const tailCallBlogUrl = "https://blog.tailcall.run/"
-export const codeSandboxUrl = "https://codesandbox.io/p/github/tailcallhq/tailcall-sandbox/main"
+export const githubRepoURL = "https://github.com/takumi3488/gqlforge"
+export const gqlForgeBenchmarkUrl = "https://github.com/takumi3488/graphql-benchmarks#benchmark-results"
+export const gqlForgeBlogUrl = "https://gqlforge.pages.dev/blog/"
+export const codeSandboxUrl = "https://codesandbox.io/p/github/takumi3488/gqlforge-sandbox/main"
 export const zapierLink = "https://hooks.zapier.com/hooks/catch/2793322/3a1gxp2/"
 export const playgroundAdsConversionId = "AW-16578154380/3FH_CJrawsgZEIyfiuE9"
 
@@ -52,7 +52,7 @@ export const partnerImages: PartnerImage[] = [
 
 const Highlight = ({text}: {text: string}) => (
   <>
-    <span className="text-content-tiny font-bold sm:text-title-tiny lg:text-title-small bg-tailCall-yellow rounded-[4px] sm:rounded-md px-SPACE_01">
+    <span className="text-content-tiny font-bold sm:text-title-tiny lg:text-title-small bg-gqlForge-yellow rounded-[4px] sm:rounded-md px-SPACE_01">
       {text}
     </span>
   </>
@@ -64,7 +64,7 @@ export const features: Feature[] = [
     title: "Orchestration",
     content: (
       <>
-        Tailcall provides first-class primitives to perform API Orchestration across protocols such as{" "}
+        GQLForge provides first-class primitives to perform API Orchestration across protocols such as{" "}
         <Highlight text="gRPC, REST, GraphQL," />. This allow developers to enrich existing APIs with more data, perform
         transformations or build a completely new set of aggregation APIs.
       </>
@@ -76,8 +76,8 @@ export const features: Feature[] = [
     title: "Governance",
     content: (
       <>
-        With Tailcall, your focus shifts to the 'what'—such as entities, their relationships, access control, security,
-        authentication, caching, and more—rather than the 'how'. This shift is enabled by the Tailcall DSL, embodying a
+        With GQLForge, your focus shifts to the 'what'—such as entities, their relationships, access control, security,
+        authentication, caching, and more—rather than the 'how'. This shift is enabled by the GQLForge DSL, embodying a
         true <Highlight text="declarative approach" /> to managing APIs.
       </>
     ),
@@ -88,7 +88,7 @@ export const features: Feature[] = [
     title: "Efficiency",
     content: (
       <>
-        Tailcall can introspect all orchestration requirements <Highlight text="ahead of time" /> and automatically
+        GQLForge can introspect all orchestration requirements <Highlight text="ahead of time" /> and automatically
         generate a highly efficient data access layer. This results in achieving much lower resource utilization and
         opens up opportunities to use in ultra-low latency workloads.
       </>
@@ -100,9 +100,9 @@ export const features: Feature[] = [
   //   title: "Resiliency",
   //   content: (
   //     <>
-  //       Tailcall offers advanced resiliency primitives including automatic failover, rate limiting and circuit breakers,
+  //       GQLForge offers advanced resiliency primitives including automatic failover, rate limiting and circuit breakers,
   //       ensuring high availability and stability across any distributed systems. It maintains optimal performance and
-  //       reliability under varying loads and potential threats. Engineered for enterprise resilience, Tailcall guarantees
+  //       reliability under varying loads and potential threats. Engineered for enterprise resilience, GQLForge guarantees
   //       robust performance under any conditions. Our platform is designed for{" "}
   //       <Highlight text="high availability and fault tolerance," /> ensuring uninterrupted service and reliability at
   //       scale.
@@ -115,9 +115,9 @@ export const features: Feature[] = [
     content: (
       <>
         At times, the built-in primitives may not fully satisfy specific orchestration needs. In such instances,
-        Tailcall offers a lightweight embedded <Highlight text="JavaScript" /> runtime. This feature enables you to
-        attach custom hooks for monitoring events within Tailcall, allowing you to directly issue commands for the
-        subsequent actions Tailcall should execute.
+        GQLForge offers a lightweight embedded <Highlight text="JavaScript" /> runtime. This feature enables you to
+        attach custom hooks for monitoring events within GQLForge, allowing you to directly issue commands for the
+        subsequent actions GQLForge should execute.
       </>
     ),
     alt: "Extendability",
@@ -192,7 +192,7 @@ export const socials: Social[] = [
     id: 1,
     name: "github",
     image: require("@site/static/icons/companies/github-footer.svg").default,
-    href: "https://github.com/tailcallhq/tailcall",
+    href: "https://github.com/takumi3488/gqlforge",
   },
   {
     id: 2,
@@ -204,18 +204,18 @@ export const socials: Social[] = [
     id: 3,
     name: "linkedin",
     image: require("@site/static/icons/companies/linkedin-gray.svg").default,
-    href: "https://www.linkedin.com/company/tailcall",
+    href: "https://www.linkedin.com/company/gqlforge",
   },
 
   {
     id: 4,
     name: "twitter",
     image: require("@site/static/icons/companies/x-gray.svg").default,
-    href: "https://twitter.com/tailcallhq",
+    href: "https://twitter.com/takumi3488",
   },
 ]
 
-export const chooseTailcall: ChooseTailcall[] = [
+export const chooseGQLForge: ChooseGQLForge[] = [
   {
     id: 1,
     title: "Top developer experience",
@@ -236,54 +236,54 @@ export const chooseTailcall: ChooseTailcall[] = [
   },
 ]
 
-export const tailcallFeatures: TailcallFeatures[] = [
+export const gqlforgeFeatures: GQLForgeFeatures[] = [
   {
     id: 1,
     title: "Powerful Batching Primitive",
-    image: require("@site/static/images/choose-tailcall/rocket.png").default,
-    redirection_url: "/docs/graphql-n-plus-one-problem-solved-tailcall/#using-batch-apis",
+    image: require("@site/static/images/choose-gqlforge/rocket.png").default,
+    redirection_url: "/docs/graphql-n-plus-one-problem-solved-gqlforge/#using-batch-apis",
   },
   {
     id: 2,
     title: "Extensions with plugins and JS support",
-    image: require("@site/static/images/choose-tailcall/grid.png").default,
+    image: require("@site/static/images/choose-gqlforge/grid.png").default,
     redirection_url: "/docs/graphql-javascript-customization/",
   },
   {
     id: 3,
     title: "Field based Authentication & Authorisation",
-    image: require("@site/static/images/choose-tailcall/shield-tick.png").default,
+    image: require("@site/static/images/choose-gqlforge/shield-tick.png").default,
     redirection_url: "/docs/field-level-access-control-graphql-authentication/",
   },
   {
     id: 4,
     title: "Protocol agnostic",
-    image: require("@site/static/images/choose-tailcall/check-done.png").default,
-    redirection_url: "/docs/graphql-grpc-tailcall/",
+    image: require("@site/static/images/choose-gqlforge/check-done.png").default,
+    redirection_url: "/docs/graphql-grpc-gqlforge/",
   },
   {
     id: 5,
     title: "Performance",
-    image: require("@site/static/images/choose-tailcall/line-chart-up.png").default,
-    redirection_url: "https://github.com/tailcallhq/graphql-benchmarks",
+    image: require("@site/static/images/choose-gqlforge/line-chart-up.png").default,
+    redirection_url: "https://github.com/takumi3488/graphql-benchmarks",
   },
   {
     id: 6,
     title: "Security",
-    image: require("@site/static/images/choose-tailcall/lock.png").default,
+    image: require("@site/static/images/choose-gqlforge/lock.png").default,
     redirection_url: "/docs/field-level-access-control-graphql-authentication/",
   },
   {
     id: 7,
     title: "Edge Compatible",
-    image: require("@site/static/images/choose-tailcall/puzzle-piece.png").default,
+    image: require("@site/static/images/choose-gqlforge/puzzle-piece.png").default,
     redirection_url: "/docs/deploy-graphql-github-actions/",
   },
   {
     id: 8,
     title: "Compile time checks",
-    image: require("@site/static/images/choose-tailcall/clock-stopwatch.png").default,
-    redirection_url: "/docs/tailcall-graphql-cli/#check",
+    image: require("@site/static/images/choose-gqlforge/clock-stopwatch.png").default,
+    redirection_url: "/docs/gqlforge-graphql-cli/#check",
   },
 ]
 
@@ -292,7 +292,7 @@ export const benefits: Benefits[] = [
     id: 1,
     title: "Secure",
     description:
-      "Tailcall has been validated against a comprehensive database of GraphQL vulnerabilities. Rest easy knowing your GraphQL backends are secure.",
+      "GQLForge has been validated against a comprehensive database of GraphQL vulnerabilities. Rest easy knowing your GraphQL backends are secure.",
     image: require("@site/static/images/home/secure-icon.png").default,
     redirection_url: "/docs/field-level-access-control-graphql-authentication/",
   },
@@ -300,25 +300,25 @@ export const benefits: Benefits[] = [
     id: 2,
     title: "High-Performance",
     description:
-      "Tailcall performs ahead-of-time optimizations based on analysis of the schema and data dependencies. Deploy GraphQL without compromises.",
+      "GQLForge performs ahead-of-time optimizations based on analysis of the schema and data dependencies. Deploy GraphQL without compromises.",
     image: require("@site/static/images/home/performance.png").default,
-    redirection_url: "https://github.com/tailcallhq/graphql-benchmarks",
+    redirection_url: "https://github.com/takumi3488/graphql-benchmarks",
   },
   {
     id: 3,
     title: "Statically Verified",
     description:
-      "Tailcall statically verifies that GraphQL schemas match resolvers and warns about N + 1 issues. Deploy new APIs with confidence.",
+      "GQLForge statically verifies that GraphQL schemas match resolvers and warns about N + 1 issues. Deploy new APIs with confidence.",
     image: require("@site/static/images/home/statically-verified-icon.png").default,
-    redirection_url: "/docs/graphql-n-plus-one-problem-solved-tailcall/",
+    redirection_url: "/docs/graphql-n-plus-one-problem-solved-gqlforge/",
   },
   {
     id: 4,
     title: "Simple",
     description:
-      "Tailcall configuration generator can integrate thousands of APIs in a matter of minutes. Configure with ease and deploy with confidence.",
+      "GQLForge configuration generator can integrate thousands of APIs in a matter of minutes. Configure with ease and deploy with confidence.",
     image: require("@site/static/images/home/simple-icon.png").default,
-    redirection_url: "/docs/tailcall-dsl-graphql-custom-directives/",
+    redirection_url: "/docs/gqlforge-dsl-graphql-custom-directives/",
   },
   {
     id: 5,
@@ -340,9 +340,9 @@ export const benefits: Benefits[] = [
     id: 7,
     title: "Open Source",
     description:
-      "Tailcall is developed and released under the Apache 2 open source license, the gold standard for OSS. Embrace a vendor-neutral solution.",
+      "GQLForge is developed and released under the Apache 2 open source license, the gold standard for OSS. Embrace a vendor-neutral solution.",
     image: require("@site/static/images/home/open-source-icon.png").default,
-    redirection_url: "https://github.com/tailcallhq/tailcall",
+    redirection_url: "https://github.com/takumi3488/gqlforge",
   },
 ]
 
@@ -526,7 +526,7 @@ export enum Theme {
   Light = "light",
   Dark = "dark",
   Gray = "gray",
-  Tailcall = "tailcall",
+  GQLForge = "gqlforge",
 }
 
 export const testimonials: CustomerFeedback[] = [
@@ -539,7 +539,7 @@ export const testimonials: CustomerFeedback[] = [
   },
   {
     id: 2,
-    citation: `By eliminating the need to manage GraphQL for frontend teams, you can focus on your core responsibilities—optimizing microservices and streamlining backend operations. The clear separation of concerns enhances collaboration, while Tailcall's static verification ensures you can expose APIs with confidence and reliability.`,
+    citation: `By eliminating the need to manage GraphQL for frontend teams, you can focus on your core responsibilities—optimizing microservices and streamlining backend operations. The clear separation of concerns enhances collaboration, while GQLForge's static verification ensures you can expose APIs with confidence and reliability.`,
     designation: `Sr. Backend Engineer - Big Co. Inc.`,
     name: "John Doe",
     department: "Backend",

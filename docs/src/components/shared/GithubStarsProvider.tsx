@@ -2,7 +2,7 @@ import React, {createContext, useEffect, useState, ReactNode} from "react"
 
 declare global {
   interface Window {
-    __tc_data__?: {
+    __gqlforge_data__?: {
       [key: string]: any
     }
   }
@@ -17,16 +17,16 @@ export const GithubStarsContext = createContext<GithubStarsContextType>(null)
 // Storage utility to get and set data
 const storage = {
   get(key: string) {
-    if (typeof window !== "undefined" && window["__tc_data__"]) {
-      return window["__tc_data__"][key]
+    if (typeof window !== "undefined" && window["__gqlforge_data__"]) {
+      return window["__gqlforge_data__"][key]
     }
     return null
   },
 
   set(key: string, val: number) {
     if (typeof window !== "undefined") {
-      window["__tc_data__"] = window["__tc_data__"] || {}
-      window["__tc_data__"][key] = val
+      window["__gqlforge_data__"] = window["__gqlforge_data__"] || {}
+      window["__gqlforge_data__"][key] = val
     }
   },
 }
@@ -40,7 +40,7 @@ const GithubStarsProvider = ({children}: GithubStarsProviderProps) => {
 
   // Fetch Github stars count
   const fetchGithubStars = () => {
-    return fetch("https://api.github.com/repos/tailcallhq/tailcall")
+    return fetch("https://api.github.com/repos/takumi3488/gqlforge")
       .then((resp) => resp.json())
       .then((resp) => {
         const respStarsCount: number = resp.stargazers_count

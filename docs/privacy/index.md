@@ -1,15 +1,15 @@
 ---
 title: Privacy Policy
-description: "Tailcall Privacy Policy"
+description: "GQLForge Privacy Policy"
 sidebar_label: Privacy Policy
 last_updated: 2024-10-29
 ---
 
 ## 1. Purpose and Scope of this Privacy Policy
 
-Tailcall ("we", "us" or "our") provides this Privacy Policy to inform you of our policies and procedures regarding the collection, processing and disclosure of information about you, and what rights you have with respect to your information.
+GQLForge ("we", "us" or "our") provides this Privacy Policy to inform you of our policies and procedures regarding the collection, processing and disclosure of information about you, and what rights you have with respect to your information.
 
-This Privacy Policy describes our practices regarding personal data we collect from users of our publicly available website located at https://tailcall.run as well as any other pages that link to this Privacy Policy (the "Sites"), and in connection with our Command Line Interface tool ("Tailcall") and related services (collectively, the "Services"). We use the terms "personal data" and "personal information" interchangeably to mean information that identifies or reasonably identifies an individual.
+This Privacy Policy describes our practices regarding personal data we collect from users of our publicly available website located at https://gqlforge.pages.dev as well as any other pages that link to this Privacy Policy (the "Sites"), and in connection with our Command Line Interface tool ("GQLForge") and related services (collectively, the "Services"). We use the terms "personal data" and "personal information" interchangeably to mean information that identifies or reasonably identifies an individual.
 
 If you reside in California, please also see our California-Specific Disclosures at Section 9 below. If you are located in the European Economic Area (EEA) or United Kingdom (UK), please also see our EEA- and UK-Specific Disclosures at Section 10 below.
 
@@ -20,7 +20,7 @@ If you reside in California, please also see our California-Specific Disclosures
 In the course of using our Sites and Services you may provide us with certain information about you, such as when you:
 
 - Create an account or register for the Services
-- Use the Tailcall CLI
+- Use the GQLForge CLI
 - Participate in any interactive features of the Sites
 - Fill out a form
 - Subscribe to our newsletter or documentation updates
@@ -34,7 +34,7 @@ The types of information we may collect include:
 - GitHub username
 - Company name (if applicable)
 - Job title (if applicable)
-- Technical information related to your use of Tailcall CLI
+- Technical information related to your use of GQLForge CLI
 
 ### 2.2 Automatically Collected Information
 
@@ -83,7 +83,7 @@ We use information we collect about you to:
 - Process and complete transactions
 - Send technical notices and support communications
 - Respond to your comments and questions
-- Send you technical updates about the Tailcall CLI
+- Send you technical updates about the GQLForge CLI
 - Communicate about products, services, offers, and events
 - Monitor and analyze trends, usage, and activities
 - Detect, investigate and prevent security incidents
@@ -105,7 +105,7 @@ We may share information about you as follows:
 
 ## 5. Data Security
 
-We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction. The Tailcall CLI employs industry standard security practices and all sensitive data is encrypted in transit.
+We take reasonable measures to help protect information about you from loss, theft, misuse and unauthorized access, disclosure, alteration and destruction. The GQLForge CLI employs industry standard security practices and all sensitive data is encrypted in transit.
 
 ## 6. Data Retention
 
@@ -127,7 +127,7 @@ Most web browsers are set to accept cookies by default. You can usually modify y
 
 ### 8.3 CLI Data Collection
 
-You can opt out of non-essential data collection in the Tailcall CLI by modifying your configuration settings. Essential operational data may still be collected for security and functionality purposes.
+You can opt out of non-essential data collection in the GQLForge CLI by modifying your configuration settings. Essential operational data may still be collected for security and functionality purposes.
 
 ### 8.4 Communications
 
@@ -168,6 +168,6 @@ We may change this Privacy Policy from time to time. If we make changes, we will
 
 If you have any questions about this Privacy Policy or our privacy practices, please contact us at:
 
-Email: [support@tailcall.run](mailto:support@tailcall.run)
+Email: [support@gqlforge.pages.dev](mailto:support@gqlforge.pages.dev)
 
-Website: https://tailcall.run
+Website: https://gqlforge.pages.dev

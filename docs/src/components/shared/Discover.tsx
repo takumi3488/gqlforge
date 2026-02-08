@@ -1,7 +1,7 @@
 import React from "react"
 import Heading from "@theme/Heading"
 
-import BgTailcall from "@site/static/icons/basic/bg-tailcall.svg"
+import BgGQLForge from "@site/static/icons/basic/bg-gqlforge.svg"
 import LinkButton from "./LinkButton"
 import {analyticsHandler} from "@site/src/utils"
 import {Theme} from "@site/src/constants"
@@ -10,8 +10,8 @@ import {pageLinks} from "@site/src/constants/routes"
 const Discover = (): JSX.Element => {
   return (
     <section>
-      <div className="bg-tailCall-yellow relative flex items-center justify-center h-[208px] sm:h-[452px]">
-        <BgTailcall />
+      <div className="bg-gqlForge-yellow relative flex items-center justify-center h-[208px] sm:h-[452px]">
+        <BgGQLForge />
 
         <div className="flex flex-col items-center absolute max-w-3xl space-y-SPACE_04 sm:space-y-SPACE_06">
           <Heading as="h5" className="text-title-semi-large sm:text-display-medium text-center mb-0">

@@ -58,7 +58,7 @@ const Hello = (): JSX.Element => {
           as="h2"
           className="text-title-large text-center sm:text-left sm:text-display-medium lg:text-display-large lg:max-w-md"
         >
-          Say <span className="bg-tailCall-yellow rounded sm:rounded-2xl px-SPACE_01 sm:px-SPACE_02">hello</span> to us!
+          Say <span className="bg-gqlForge-yellow rounded sm:rounded-2xl px-SPACE_01 sm:px-SPACE_02">hello</span> to us!
         </Heading>
 
         <div className="flex flex-col justify-between space-y-SPACE_07 w-full md:w-fit">

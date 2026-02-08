@@ -1,8 +1,8 @@
 ---
 title: Command Line Reference
 sidebar_position: 3
-description: "Discover the Tailcall CLI, a crucial tool for developers to manage and optimize GraphQL configurations from the command line. Learn commands like 'check', 'start', 'init', and 'gen' to validate specs, launch servers, bootstrap projects, and generate configurations. Detect N+1 issues, display schemas, format inputs, and more. Simplify GraphQL composition and enhance your development workflow with Tailcall CLI."
-slug: tailcall-graphql-cli
+description: "Discover the GQLForge CLI, a crucial tool for developers to manage and optimize GraphQL configurations from the command line. Learn commands like 'check', 'start', 'init', and 'gen' to validate specs, launch servers, bootstrap projects, and generate configurations. Detect N+1 issues, display schemas, format inputs, and more. Simplify GraphQL composition and enhance your development workflow with GQLForge CLI."
+slug: gqlforge-graphql-cli
 sidebar_label: Command Line
 ---
 
@@ -11,14 +11,14 @@ import TabItem from "@theme/TabItem"
 
 <!-- ❕❕❕ Don't forget to update Fig auto complete spec upon adding of new sub-commands or modifying existing ones. https://fig.io/docs/getting-started -->
 
-The Tailcall CLI (Command Line Interface) allows developers to manage and optimize GraphQL configurations directly from the command line.
+The GQLForge CLI (Command Line Interface) allows developers to manage and optimize GraphQL configurations directly from the command line.
 
 ## check
 
 The `check` command validates a composition spec. Notably, this command can detect potential N+1 issues. To use the `check` command, follow this format:
 
 ```
-tailcall check [OPTIONS] <FILE_PATHS>...
+gqlforge check [OPTIONS] <FILE_PATHS>...
 ```
 
 The `check` command offers options that control settings such as the display of the generated schema, n + 1 issues etc.
@@ -31,7 +31,7 @@ This flag triggers the detection of N+1 issues.
 - Default: false
 
 ```
-tailcall check --n-plus-one-queries <FILE_PATHS> ...
+gqlforge check --n-plus-one-queries <FILE_PATHS> ...
 ```
 
 ### --schema
@@ -42,7 +42,7 @@ This option enables the display of the schema of the composition spec.
 - Default: false
 
 ```bash
-tailcall check --schema <file1> <file2> ... <fileN>
+gqlforge check --schema <file1> <file2> ... <fileN>
 ```
 
 The `check` command allows for files. Specify each file path, separated by a space, after the options.
@@ -50,7 +50,7 @@ The `check` command allows for files. Specify each file path, separated by a spa
 **Example:**
 
 ```bash
-tailcall check --schema ./path/to/file1.graphql ./path/to/file2.graphql
+gqlforge check --schema ./path/to/file1.graphql ./path/to/file2.graphql
 ```
 
 ### --verify-ssl
@@ -61,7 +61,7 @@ Controls SSL/TLS certificate verification when loading remote configuration file
 - Default: `true`
 
 ```bash
-tailcall check --verify-ssl false < FILE_PATHS > ...
+gqlforge check --verify-ssl false < FILE_PATHS > ...
 ```
 
 :::warning
@@ -75,7 +75,7 @@ The `start` command launches the GraphQL Server for the specific configuration.
 To start the server, use the following command:
 
 ```bash
-tailcall start <file1> <file2> ... <fileN> <http_path1> <http_path2> .. <http_pathN>
+gqlforge start <file1> <file2> ... <fileN> <http_path1> <http_path2> .. <http_pathN>
 ```
 
 The `start` command allows for files and supports loading configurations over HTTP. You can mix file system paths with HTTP paths. Specify each path, separated by a space, after the options.
@@ -83,7 +83,7 @@ The `start` command allows for files and supports loading configurations over HT
 **Example:**
 
 ```bash
-tailcall start ./path/to/file1.graphql ./path/to/file2.graphql http://example.com/file2.graphql
+gqlforge start ./path/to/file1.graphql ./path/to/file2.graphql http://example.com/file2.graphql
 ```
 
 ### --verify-ssl
@@ -94,7 +94,7 @@ Controls SSL/TLS certificate verification when loading remote configuration file
 - Default: `true`
 
 ```bash
-tailcall start --verify-ssl false < FILE_PATHS > ...
+gqlforge start --verify-ssl false < FILE_PATHS > ...
 ```
 
 :::warning
@@ -103,10 +103,10 @@ Disabling SSL verification is not recommended for production environments as it 
 
 ## init
 
-The `init` command bootstraps a new Tailcall project. It creates the necessary GraphQL schema files in the provided file path.
+The `init` command bootstraps a new GQLForge project. It creates the necessary GraphQL schema files in the provided file path.
 
 ```bash
-tailcall init <file_path>
+gqlforge init <file_path>
 ```
 
 This command prompts for file creation and configuration, creating the following files:
@@ -115,27 +115,27 @@ This command prompts for file creation and configuration, creating the following
 | --------: | ----------- |
 
 <!-- TODO: uncomment when the Taillcall configuration will in separate file -->
-<!-- | [.tailcallrc.schema.json] | Provides autocomplete in your editor for the tailcall configuration written in `json` or `yml` format.                                       | -->
+<!-- | [.gqlforgerc.schema.json] | Provides autocomplete in your editor for the gqlforge configuration written in `json` or `yml` format.                                       | -->
 
-| [.graphqlrc.yml] | An IDE configuration that references your GraphQL schema and the following `.tailcallrc.graphql`. |
-| [.tailcallrc.graphql] | Contains Tailcall specific auto-completions for `.graphql` format. |
+| [.graphqlrc.yml] | An IDE configuration that references your GraphQL schema and the following `.gqlforgerc.graphql`. |
+| [.gqlforgerc.graphql] | Contains GQLForge specific auto-completions for `.graphql` format. |
 
-<!-- [.tailcallrc.schema.json]: https://github.com/tailcallhq/tailcall/blob/main/generated/.tailcallrc.schema.json -->
+<!-- [.gqlforgerc.schema.json]: https://github.com/takumi3488/gqlforge/blob/main/generated/.gqlforgerc.schema.json -->
 
 [.graphqlrc.yml]: https://the-guild.dev/graphql/config/docs
-[.tailcallrc.graphql]: https://github.com/tailcallhq/tailcall/blob/main/generated/.tailcallrc.graphql
+[.gqlforgerc.graphql]: https://github.com/takumi3488/gqlforge/blob/main/generated/.gqlforgerc.graphql
 
 ## gen
 
-The `gen` command in the Tailcall CLI is designed to generate GraphQL configurations from various sources, such as protobuf files and REST endpoints.
+The `gen` command in the GQLForge CLI is designed to generate GraphQL configurations from various sources, such as protobuf files and REST endpoints.
 
 **usage:**
 
 ```bash
-tailcall gen path_to_configuration_file.json
+gqlforge gen path_to_configuration_file.json
 ```
 
-To generate a Tailcall GraphQL configuration, provide a configuration file to the `gen` command like done above. This configuration file should be in JSON or YAML format, as illustrated in the example below:
+To generate a GQLForge GraphQL configuration, provide a configuration file to the `gen` command like done above. This configuration file should be in JSON or YAML format, as illustrated in the example below:
 
 <Tabs>
 <TabItem value="json" label="JSON">
@@ -163,8 +163,8 @@ To generate a Tailcall GraphQL configuration, provide a configuration file to th
         "src": "https://jsonplaceholder.typicode.com/posts",
         "method": "POST",
         "body": {
-          "title": "Tailcall - Modern GraphQL Runtime",
-          "body": "Tailcall - Modern GraphQL Runtime",
+          "title": "GQLForge - Modern GraphQL Runtime",
+          "body": "GQLForge - Modern GraphQL Runtime",
           "userId": 1
         },
         "headers": {
@@ -218,8 +218,8 @@ inputs:
       src: "https://jsonplaceholder.typicode.com/posts"
       method: "POST"
       body:
-        title: "Tailcall - Modern GraphQL Runtime"
-        body: "Tailcall - Modern GraphQL Runtime"
+        title: "GQLForge - Modern GraphQL Runtime"
+        body: "GQLForge - Modern GraphQL Runtime"
         userId: 1
       headers:
         Content-Type: "application/json"
@@ -318,8 +318,8 @@ The `inputs` section specifies the sources from which the GraphQL configuration 
         "src": "https://jsonplaceholder.typicode.com/posts",
         "method": "POST",
         "body": {
-          "title": "Tailcall - Modern GraphQL Runtime",
-          "body": "Tailcall - Modern GraphQL Runtime",
+          "title": "GQLForge - Modern GraphQL Runtime",
+          "body": "GQLForge - Modern GraphQL Runtime",
           "userId": 1
         },
         "headers": {
@@ -339,8 +339,8 @@ The `inputs` section specifies the sources from which the GraphQL configuration 
           src: "https://jsonplaceholder.typicode.com/posts"
           method: "POST"
           body:
-            title: "Tailcall - Modern GraphQL Runtime"
-            body: "Tailcall - Modern GraphQL Runtime"
+            title: "GQLForge - Modern GraphQL Runtime"
+            body: "GQLForge - Modern GraphQL Runtime"
             userId: 1
           headers:
             Content-Type: "application/json"
@@ -372,9 +372,9 @@ The `inputs` section specifies the sources from which the GraphQL configuration 
 
 4.  **Proto:**
 
-    - Specify the **path to the proto file** (`src`) to help Tailcall create a schema and understand the gRPC methods to call when a field is queried.
+    - Specify the **path to the proto file** (`src`) to help GQLForge create a schema and understand the gRPC methods to call when a field is queried.
     - Specify the **gRPC URL** (`url`) where the gRPC service is hosted.
-    - Include a **boolean parameter** `connectRPC` (optional). If set to `true`, the proto file will be used to generate the schema, but the communication between Tailcall and the upstream will happen using the [Connect-RPC protocol](https://connectrpc.com/docs/protocol/).
+    - Include a **boolean parameter** `connectRPC` (optional). If set to `true`, the proto file will be used to generate the schema, but the communication between GQLForge and the upstream will happen using the [Connect-RPC protocol](https://connectrpc.com/docs/protocol/).
     - Specify **a set of directories** `protoPaths` (optional) to search for imported proto files. Works like the `--proto_path` flag in the [protocol compiler](https://protobuf.dev/programming-guides/proto3/#importing).
 
         <Tabs>
@@ -495,7 +495,7 @@ preset:
    }
    ```
 
-3. **unwrapSingleFieldTypes:** This setting instructs Tailcall to flatten out types with single field.
+3. **unwrapSingleFieldTypes:** This setting instructs GQLForge to flatten out types with single field.
 
    ```graphql showLineNumbers title="Before applying the setting"
    type Query {
@@ -575,16 +575,16 @@ preset:
 
 ### LLM
 
-Tailcall leverages LLM to improve the quality of configuration files by suggesting better names for types, fields, and more. The `llm` section in the configuration allows you to specify the [LLM model](./llm.md) and secret (API key) that will be used for generating the configuration.
+GQLForge leverages LLM to improve the quality of configuration files by suggesting better names for types, fields, and more. The `llm` section in the configuration allows you to specify the [LLM model](./llm.md) and secret (API key) that will be used for generating the configuration.
 
 Example:
 
-- Using Gemini. Set TAILCALL_LLM_API_KEY to your Gemini API key.
+- Using Gemini. Set GQLFORGE_LLM_API_KEY to your Gemini API key.
 
   ```json
   "llm": {
       "model": "gemini-1.5-flash-latest",
-      "secret": "{{.env.TAILCALL_LLM_API_KEY}}"
+      "secret": "{{.env.GQLFORGE_LLM_API_KEY}}"
   }
   ```
 
@@ -597,5 +597,5 @@ Example:
   ```
 
 :::important
-Ensure that secrets are not stored directly in the configuration file. Instead, use templates to securely reference secrets from environment variables. For example, you can write secret as `{{.env.TAILCALL_SECRET}}`, where `TAILCALL_SECRET` is referenced from the running environment.
+Ensure that secrets are not stored directly in the configuration file. Instead, use templates to securely reference secrets from environment variables. For example, you can write secret as `{{.env.GQLFORGE_SECRET}}`, where `GQLFORGE_SECRET` is referenced from the running environment.
 :::

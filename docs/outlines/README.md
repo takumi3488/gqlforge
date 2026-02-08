@@ -8,18 +8,18 @@ This folder is dedicated to collecting and organizing outlines for blog posts. I
 
 1. **Fork this Repository**
 
-- Go to the [repository page](https://github.com/tailcallhq/tailcallhq.github.io) and click on the "Fork" button at the top-right corner of the page.
+- Go to the [repository page](https://github.com/takumi3488/gqlforge) and click on the "Fork" button at the top-right corner of the page.
 - This will create a copy of the repository in your GitHub account.
 
 2. **Clone the Forked Repository**
 
 - Open your terminal and run the following command to clone the forked repository:
   ```sh
-  git clone https://github.com/your-username/tailcallhq.github.io.git
+  git clone https://github.com/your-username/takumi3488.github.io.git
   ```
 - Navigate to the cloned repository:
   ```sh
-  cd tailcallhq.github.io
+  cd takumi3488.github.io
   ```
 
 3. **Create a New File for Your Outline**

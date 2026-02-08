@@ -37,8 +37,8 @@ const Playground = () => {
   const cookieConsent = getCookieConsent()
 
   const debouncedApiEndpoint = useDebouncedValue(inputValue, 500)
-  const apiEndpointInputClasses = `border border-solid border-tailCall-border-light-500 rounded-lg font-space-grotesk h-11 w-[100%]
-    p-SPACE_04 text-content-small outline-none focus:border-x-tailCall-light-700`
+  const apiEndpointInputClasses = `border border-solid border-gqlForge-border-light-500 rounded-lg font-space-grotesk h-11 w-[100%]
+    p-SPACE_04 text-content-small outline-none focus:border-x-gqlForge-light-700`
 
   useEffect(() => {
     if (isValidURL(debouncedApiEndpoint)) {
@@ -50,7 +50,7 @@ const Playground = () => {
     if (apiEndpoint.toString().trim() === "") {
       return Promise.resolve({})
     }
-    analyticsHandler("GraphQL", "tc_fetch_query", apiEndpoint.toString())
+    analyticsHandler("GraphQL", "gqlforge_fetch_query", apiEndpoint.toString())
     sendConversionEvent(playgroundAdsConversionId)
 
     const fetcher = createGraphiQLFetcher({url: apiEndpoint.toString()})

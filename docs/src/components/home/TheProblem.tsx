@@ -13,23 +13,23 @@ const LegacyGateway = (): JSX.Element => {
         <div className="flex flex-col sm:flex-row sm:items-center sm:space-x-SPACE_10 lg:space-x-SPACE_20">
           <Heading
             as="h3"
-            className="text-title-large sm:text-display-tiny lg:text-display-small text-tailCall-dark-500 min-w-fit"
+            className="text-title-large sm:text-display-tiny lg:text-display-small text-gqlForge-dark-500 min-w-fit"
           >
             REST APIs are <br />
-            <span className="bg-tailCall-yellow px-SPACE_02 rounded-md sm:rounded-2xl">not composable</span> <br />
+            <span className="bg-gqlForge-yellow px-SPACE_02 rounded-md sm:rounded-2xl">not composable</span> <br />
           </Heading>
 
-          <p className="text-content-tiny font-normal sm:text-content-small lg:text-content-medium text-tailCall-dark-500">
+          <p className="text-content-tiny font-normal sm:text-content-small lg:text-content-medium text-gqlForge-dark-500">
             API composition is pivotal for building rich user experiences, but REST APIs are not inherently composable,
             often leading to awkward, unmaintainable hand-written Backend for Frontends. On the other hand, GraphQL is a
-            highly composable protocol, giving clients the power to express exactly what they need, and Tailcall makes
+            highly composable protocol, giving clients the power to express exactly what they need, and GQLForge makes
             GraphQL easy, secure, and fast.
           </p>
         </div>
       </div>
 
       <div className="w-full flex items-center justify-center px-0 mt-SPACE_07">
-        <LottieContainer animationData={SolutionGraphic} loop className="bg-tailCall-dark-500 sm:bg-transparent" />
+        <LottieContainer animationData={SolutionGraphic} loop className="bg-gqlForge-dark-500 sm:bg-transparent" />
       </div>
     </section>
   )
