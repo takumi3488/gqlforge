@@ -95,7 +95,6 @@ items = [
 [[extra.sidebar]]
 label = "Deployment"
 items = [
-  { path = "gqlforge-on-fly", title = "Deploy on Fly.io" },
   { path = "gqlforge-on-aws", title = "Deploy on AWS" },
   { path = "gh-action", title = "GitHub Action" },
   { path = "client-tuning", title = "Client Tuning" },
