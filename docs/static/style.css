@@ -78,7 +78,7 @@ a:hover {
 }
 
 .navbar-logo {
-  height: 28px;
+  height: 36px;
   width: auto;
 }
 
@@ -135,9 +135,9 @@ a:hover {
 
 /* === Hero Logo === */
 .hero-logo {
-  width: 120px;
+  width: 320px;
   height: auto;
-  margin-bottom: 1.5rem;
+  margin-bottom: 2rem;
 }
 
 /* === Features === */
