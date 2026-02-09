@@ -572,7 +572,8 @@ mod test {
     fn test_required_types() {
         // Proto2 `required` label test.
         // Proto3 singular fields without `optional` keyword are now mapped as required
-        // in GraphQL. This test uses proto2 to verify the proto2-specific `required` label.
+        // in GraphQL. This test uses proto2 to verify the proto2-specific `required`
+        // label.
 
         assert_gen!(protobuf::PERSON);
     }
