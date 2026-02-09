@@ -69,6 +69,11 @@ pub enum IO {
         req_template: grpc::RequestTemplate,
         hook: Option<WorkerHooks>,
     },
+    GraphQLStream {
+        req_template: graphql::RequestTemplate,
+        field_name: String,
+        stream_url: String,
+    },
     Js {
         name: String,
     },
@@ -81,6 +86,7 @@ impl IO {
             IO::GraphQL { dedupe, .. } => *dedupe,
             IO::Grpc { dedupe, .. } => *dedupe,
             IO::GrpcStream { .. } => false,
+            IO::GraphQLStream { .. } => false,
             IO::Js { .. } => false,
         }
     }
@@ -219,6 +225,7 @@ impl<'a, Ctx: ResolverContextLike + Sync> CacheKey<EvalContext<'a, Ctx>> for IO 
             IO::Http { req_template, .. } => req_template.cache_key(ctx),
             IO::Grpc { req_template, .. } => req_template.cache_key(ctx),
             IO::GrpcStream { .. } => None,
+            IO::GraphQLStream { .. } => None,
             IO::GraphQL { req_template, .. } => req_template.cache_key(ctx),
             IO::Js { .. } => None,
         }

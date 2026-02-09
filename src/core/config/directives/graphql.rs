@@ -56,4 +56,9 @@ pub struct GraphQL {
     /// with APIs that expect unique results for identical inputs, such as
     /// nonce-based APIs.
     pub dedupe: bool,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    /// The URL of the upstream server's SSE subscription endpoint.
+    /// Defaults to `{url}/stream` when omitted.
+    pub stream_url: Option<String>,
 }

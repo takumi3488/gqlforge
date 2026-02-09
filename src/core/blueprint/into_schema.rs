@@ -6,6 +6,7 @@ use futures_util::{StreamExt, TryFutureExt};
 use tracing::Instrument;
 
 use crate::core::blueprint::{Blueprint, Definition, ObjectTypeDefinition};
+use crate::core::graphql::execute_graphql_streaming_request;
 use crate::core::grpc::request::execute_grpc_streaming_request;
 use crate::core::http::RequestContext;
 use crate::core::ir::model::{IO, IR};
@@ -210,18 +211,9 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
                 dynamic::SubscriptionFieldFuture::new(async move {
                     let req_ctx = ctx.ctx.data::<Arc<RequestContext>>().unwrap().clone();
 
-                    // Extract the GrpcStream IO from the resolver
-                    let (req_template, _hook) = match &field.resolver {
-                        Some(IR::IO(io)) => match io.as_ref() {
-                            IO::GrpcStream { req_template, hook } => {
-                                (req_template.clone(), hook.clone())
-                            }
-                            _ => {
-                                return Err(async_graphql::Error::new(
-                                    "Subscription field does not have a streaming resolver",
-                                ));
-                            }
-                        },
+                    // Extract the streaming IO from the resolver
+                    let io = match &field.resolver {
+                        Some(IR::IO(io)) => io.as_ref().clone(),
                         _ => {
                             return Err(async_graphql::Error::new(
                                 "Subscription field missing resolver",
@@ -231,23 +223,63 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
 
                     let ctx: ResolverContext = ctx.into();
                     let eval_ctx = EvalContext::new(&req_ctx, &ctx);
-                    let rendered = req_template.render(&eval_ctx).map_err(|e| {
-                        async_graphql::Error::new(format!("Failed to render gRPC request: {e}"))
-                    })?;
 
-                    let request = rendered.to_request().map_err(|e| {
-                        async_graphql::Error::new(format!("Failed to build gRPC request: {e}"))
-                    })?;
+                    let stream: std::pin::Pin<
+                        Box<
+                            dyn futures_util::Stream<
+                                    Item = Result<ConstValue, crate::core::ir::Error>,
+                                > + Send,
+                        >,
+                    > = match io {
+                        IO::GrpcStream { req_template, hook: _hook } => {
+                            let rendered = req_template.render(&eval_ctx).map_err(|e| {
+                                async_graphql::Error::new(format!(
+                                    "Failed to render gRPC request: {e}"
+                                ))
+                            })?;
 
-                    let stream = execute_grpc_streaming_request(
-                        &req_ctx.runtime,
-                        &req_template.operation,
-                        request,
-                    )
-                    .await
-                    .map_err(|e| {
-                        async_graphql::Error::new(format!("gRPC streaming failed: {e}"))
-                    })?;
+                            let request = rendered.to_request().map_err(|e| {
+                                async_graphql::Error::new(format!(
+                                    "Failed to build gRPC request: {e}"
+                                ))
+                            })?;
+
+                            execute_grpc_streaming_request(
+                                &req_ctx.runtime,
+                                &req_template.operation,
+                                request,
+                            )
+                            .await
+                            .map_err(|e| {
+                                async_graphql::Error::new(format!("gRPC streaming failed: {e}"))
+                            })?
+                        }
+                        IO::GraphQLStream { req_template, field_name, stream_url } => {
+                            let request = req_template.to_request(&eval_ctx).map_err(|e| {
+                                async_graphql::Error::new(format!(
+                                    "Failed to build GraphQL request: {e}"
+                                ))
+                            })?;
+
+                            execute_graphql_streaming_request(
+                                &req_ctx.runtime,
+                                &stream_url,
+                                request,
+                                &field_name,
+                            )
+                            .await
+                            .map_err(|e| {
+                                async_graphql::Error::new(format!(
+                                    "GraphQL SSE streaming failed: {e}"
+                                ))
+                            })?
+                        }
+                        _ => {
+                            return Err(async_graphql::Error::new(
+                                "Subscription field does not have a streaming resolver",
+                            ));
+                        }
+                    };
 
                     Ok(stream.map(
                         |result: Result<ConstValue, crate::core::ir::Error>| match result {
