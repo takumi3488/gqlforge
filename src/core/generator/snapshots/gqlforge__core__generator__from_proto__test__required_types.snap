@@ -13,7 +13,7 @@ type GEN__person__Person {
   email: String
   id: Int!
   name: String!
-  phone: [person__PhoneNumber]
+  phone: [person__PhoneNumber!]!
   stringMap: JSON
 }
 

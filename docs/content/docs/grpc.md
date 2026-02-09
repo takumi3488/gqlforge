@@ -75,9 +75,53 @@ In proto3, fields without the `optional` keyword are generated as non-null (`!`)
 | `string name = 2;`          | `String!`    |
 | `optional string name = 2;` | `String`     |
 | `MyMessage msg = 3;`        | `MyMessage`  |
-| `repeated int32 ids = 4;`   | `[Int!]`     |
+| `repeated int32 ids = 4;`   | `[Int!]!`    |
 
 Note: Message-type fields are always nullable because they have inherent presence semantics in proto3.
+
+### Repeated Fields
+
+Protobuf `repeated` fields are always present (defaulting to an empty list) and cannot contain null elements. GQLForge maps them as non-null lists of non-null elements:
+
+| Proto Declaration               | GraphQL Type    |
+| ------------------------------- | --------------- |
+| `repeated int32 ids = 1;`       | `[Int!]!`       |
+| `repeated string names = 2;`    | `[String!]!`    |
+| `repeated MyMessage items = 3;` | `[MyMessage!]!` |
+
+Example — given this proto definition:
+
+```protobuf
+syntax = "proto3";
+
+message Movie {
+  string name = 1;
+  repeated string cast = 2;
+  repeated Review reviews = 3;
+}
+
+message Review {
+  int32 score = 1;
+  string comment = 2;
+}
+```
+
+GQLForge generates:
+
+```graphql
+type Movie {
+  name: String!
+  cast: [String!]!
+  reviews: [Review!]!
+}
+
+type Review {
+  score: Int!
+  comment: String!
+}
+```
+
+This applies to both proto3 and proto2 `repeated` fields.
 
 ### Scalar Types
 

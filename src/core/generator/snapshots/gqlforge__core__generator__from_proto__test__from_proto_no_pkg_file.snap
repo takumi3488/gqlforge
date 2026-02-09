@@ -14,7 +14,7 @@ type GEN__News {
 }
 
 type GEN__NewsList {
-  news: [GEN__News]
+  news: [GEN__News!]!
 }
 
 type Query {

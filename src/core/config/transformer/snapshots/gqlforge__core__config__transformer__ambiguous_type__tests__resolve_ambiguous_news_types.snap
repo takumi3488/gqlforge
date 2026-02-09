@@ -7,7 +7,7 @@ schema @server @upstream {
 }
 
 input GEN__news__MultipleNewsId {
-  ids: [GEN__news__NewsId]
+  ids: [GEN__news__NewsId!]!
 }
 
 input GEN__news__NewsId {
@@ -37,7 +37,7 @@ type GEN__news__News {
 }
 
 type GEN__news__NewsList {
-  news: [GEN__news__News]
+  news: [GEN__news__News!]!
 }
 
 type Query {

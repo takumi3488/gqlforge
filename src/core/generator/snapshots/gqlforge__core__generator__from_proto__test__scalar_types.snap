@@ -43,7 +43,7 @@ type GEN__scalars__Item {
 }
 
 type GEN__scalars__Result {
-  result: [GEN__scalars__Item]
+  result: [GEN__scalars__Item!]!
 }
 
 type Query {

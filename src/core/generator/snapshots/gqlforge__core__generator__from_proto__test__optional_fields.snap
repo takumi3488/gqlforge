@@ -11,8 +11,8 @@ input GEN__type__TypeInput {
   idOpt: Int
   nested: GEN__type__Type__NestedInput
   nestedOpt: GEN__type__Type__NestedInput
-  nestedRep: [GEN__type__Type__NestedInput]
-  num: [Float]
+  nestedRep: [GEN__type__Type__NestedInput!]!
+  num: [Float!]!
   str: String!
   strOpt: String
 }
@@ -20,7 +20,7 @@ input GEN__type__TypeInput {
 input GEN__type__Type__NestedInput {
   id: Int!
   idOpt: Int
-  num: [Float]
+  num: [Float!]!
   str: String!
   strOpt: String
 }
@@ -36,8 +36,8 @@ type GEN__type__Type {
   idOpt: Int
   nested: GEN__type__Type__Nested
   nestedOpt: GEN__type__Type__Nested
-  nestedRep: [GEN__type__Type__Nested]
-  num: [Float]
+  nestedRep: [GEN__type__Type__Nested!]!
+  num: [Float!]!
   str: String!
   strOpt: String
 }
@@ -45,7 +45,7 @@ type GEN__type__Type {
 type GEN__type__Type__Nested {
   id: Int!
   idOpt: Int
-  num: [Float]
+  num: [Float!]!
   str: String!
   strOpt: String
 }

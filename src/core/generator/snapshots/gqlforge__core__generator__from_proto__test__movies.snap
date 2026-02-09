@@ -31,7 +31,7 @@ input GEN__movies__MovieInput {
   """
   list of cast
   """
-  cast: [String]
+  cast: [String!]!
   duration: GEN__google__protobuf__DurationInput
   genre: GEN__movies__Genre!
   name: String!
@@ -112,7 +112,7 @@ type GEN__movies__Movie {
   """
   list of cast
   """
-  cast: [String]
+  cast: [String!]!
   duration: GEN__google__protobuf__Duration
   genre: GEN__movies__Genre!
   name: String!
@@ -146,7 +146,7 @@ type GEN__movies__MoviesResult {
   """
   list of movies
   """
-  result: [GEN__movies__Movie]
+  result: [GEN__movies__Movie!]!
 }
 
 type Query {
