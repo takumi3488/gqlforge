@@ -124,8 +124,7 @@ fn validate_group_by(
             // TODO: add validation for input schema - should compare result grpc.body to
             // schema considering repeated message type
             let fields = &field_schema.field;
-            // we're treating List types for gRPC as optional.
-            let fields = JsonSchema::Opt(Box::new(JsonSchema::Arr(Box::new(fields.to_owned()))));
+            let fields = JsonSchema::Arr(Box::new(fields.to_owned()));
             match output_schema
                 .is_a(&fields, group_by[0].as_str())
                 .to_result()

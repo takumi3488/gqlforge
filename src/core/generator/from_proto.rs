@@ -278,7 +278,7 @@ impl Context {
                 let mut cfg_field = Field::default();
 
                 cfg_field.type_of = match field.label() {
-                    Label::Repeated => cfg_field.type_of.into_list(),
+                    Label::Repeated => cfg_field.type_of.into_required().into_list().into_required(),
                     Label::Required => cfg_field.type_of.into_required(),
                     Label::Optional => {
                         if self.is_proto3
