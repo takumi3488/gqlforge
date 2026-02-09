@@ -3,7 +3,7 @@ use std::collections::{BTreeSet, HashSet};
 use anyhow::{Result, bail};
 use derive_setters::Setters;
 use gqlforge_valid::Validator;
-use prost_reflect::prost_types::field_descriptor_proto::Label;
+use prost_reflect::prost_types::field_descriptor_proto::{Label, Type as ProtoType};
 use prost_reflect::prost_types::{
     DescriptorProto, EnumDescriptorProto, FileDescriptorSet, ServiceDescriptorProto, SourceCodeInfo,
 };
@@ -34,6 +34,9 @@ struct Context {
     /// Set of visited map types
     map_types: HashSet<String>,
 
+    /// Whether the current file uses proto3 syntax.
+    is_proto3: bool,
+
     /// Optional field to store source code information, including comments, for
     /// each entity.
     comments_builder: CommentsBuilder,
@@ -46,6 +49,7 @@ impl Context {
             namespace: Default::default(),
             config: Default::default(),
             map_types: Default::default(),
+            is_proto3: false,
             comments_builder: CommentsBuilder::new(None),
         }
     }
@@ -274,10 +278,20 @@ impl Context {
                 let mut cfg_field = Field::default();
 
                 cfg_field.type_of = match field.label() {
-                    Label::Optional => cfg_field.type_of,
-                    // required only applicable for proto2
-                    Label::Required => cfg_field.type_of.into_required(),
                     Label::Repeated => cfg_field.type_of.into_list(),
+                    Label::Required => cfg_field.type_of.into_required(),
+                    Label::Optional => {
+                        if self.is_proto3
+                            && !field.proto3_optional.unwrap_or(false)
+                            && field.r#type() != ProtoType::Message
+                        {
+                            // Proto3: non-explicit-optional scalar/enum fields are required
+                            cfg_field.type_of.into_required()
+                        } else {
+                            // Proto2 optional / proto3 explicit optional / message type
+                            cfg_field.type_of
+                        }
+                    }
                 };
 
                 if let Some(type_name) = &field.type_name {
@@ -462,6 +476,7 @@ pub fn from_proto(descriptor_sets: &[FileDescriptorSet], query: &str, url: &str)
     for descriptor_set in descriptor_sets.iter() {
         for file_descriptor in descriptor_set.file.iter() {
             ctx.namespace = vec![file_descriptor.package().to_string()];
+            ctx.is_proto3 = file_descriptor.syntax() == "proto3";
 
             if let Some(source_code_info) = &file_descriptor.source_code_info {
                 ctx = ctx.with_source_code_info(source_code_info.clone());
@@ -555,11 +570,9 @@ mod test {
 
     #[test]
     fn test_required_types() {
-        // required fields are deprecated in proto3 (https://protobuf.dev/programming-guides/dos-donts/#add-required)
-        // this example uses proto2 to test the same.
-        // for proto3 it's guaranteed to have a default value (https://protobuf.dev/programming-guides/proto3/#default)
-        // and our implementation (https://github.com/takumi3488/gqlforge/pull/1537) supports default values by default.
-        // so we do not need to explicitly mark fields as required.
+        // Proto2 `required` label test.
+        // Proto3 singular fields without `optional` keyword are now mapped as required
+        // in GraphQL. This test uses proto2 to verify the proto2-specific `required` label.
 
         assert_gen!(protobuf::PERSON);
     }

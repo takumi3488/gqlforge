@@ -7,21 +7,21 @@ schema @server @upstream {
 }
 
 input GEN__google__protobuf__DurationInput {
-  nanos: Int
-  seconds: Int64
+  nanos: Int!
+  seconds: Int64!
 }
 
 input GEN__google__protobuf__Int32ValueInput {
-  value: Int
+  value: Int!
 }
 
 input GEN__google__protobuf__StringValue {
-  value: String
+  value: String!
 }
 
 input GEN__google__protobuf__TimestampInput {
-  nanos: Int
-  seconds: Int64
+  nanos: Int!
+  seconds: Int64!
 }
 
 """
@@ -33,9 +33,9 @@ input GEN__movies__MovieInput {
   """
   cast: [String]
   duration: GEN__google__protobuf__DurationInput
-  genre: GEN__movies__Genre
-  name: String
-  rating: Float
+  genre: GEN__movies__Genre!
+  name: String!
+  rating: Float!
   """
   SubMovie reference
   """
@@ -55,11 +55,11 @@ input GEN__movies__Movie__SubMovieInput {
   """
   This is a comment for movie format in submovie
   """
-  format: GEN__movies__Movie__MovieFormat
+  format: GEN__movies__Movie__MovieFormat!
   """
   This is a comment for sub_rating
   """
-  subRating: Float
+  subRating: Float!
 }
 
 input GEN__movies__SearchByCastRequest {
@@ -92,17 +92,17 @@ enum GEN__movies__Movie__MovieFormat {
 }
 
 type GEN__google__protobuf__Duration {
-  nanos: Int
-  seconds: Int64
+  nanos: Int!
+  seconds: Int64!
 }
 
 type GEN__google__protobuf__Int32Value {
-  value: Int
+  value: Int!
 }
 
 type GEN__google__protobuf__Timestamp {
-  nanos: Int
-  seconds: Int64
+  nanos: Int!
+  seconds: Int64!
 }
 
   """
@@ -114,9 +114,9 @@ type GEN__movies__Movie {
   """
   cast: [String]
   duration: GEN__google__protobuf__Duration
-  genre: GEN__movies__Genre
-  name: String
-  rating: Float
+  genre: GEN__movies__Genre!
+  name: String!
+  rating: Float!
   """
   SubMovie reference
   """
@@ -132,11 +132,11 @@ type GEN__movies__Movie__SubMovie {
   """
   This is a comment for movie format in submovie
   """
-  format: GEN__movies__Movie__MovieFormat
+  format: GEN__movies__Movie__MovieFormat!
   """
   This is a comment for sub_rating
   """
-  subRating: Float
+  subRating: Float!
 }
 
   """

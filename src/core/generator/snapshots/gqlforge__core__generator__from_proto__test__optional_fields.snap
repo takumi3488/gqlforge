@@ -7,21 +7,21 @@ schema @server @upstream {
 }
 
 input GEN__type__TypeInput {
-  id: Int
+  id: Int!
   idOpt: Int
   nested: GEN__type__Type__NestedInput
   nestedOpt: GEN__type__Type__NestedInput
   nestedRep: [GEN__type__Type__NestedInput]
   num: [Float]
-  str: String
+  str: String!
   strOpt: String
 }
 
 input GEN__type__Type__NestedInput {
-  id: Int
+  id: Int!
   idOpt: Int
   num: [Float]
-  str: String
+  str: String!
   strOpt: String
 }
 
@@ -32,21 +32,21 @@ enum GEN__type__Status {
 }
 
 type GEN__type__Type {
-  id: Int
+  id: Int!
   idOpt: Int
   nested: GEN__type__Type__Nested
   nestedOpt: GEN__type__Type__Nested
   nestedRep: [GEN__type__Type__Nested]
   num: [Float]
-  str: String
+  str: String!
   strOpt: String
 }
 
 type GEN__type__Type__Nested {
-  id: Int
+  id: Int!
   idOpt: Int
   num: [Float]
-  str: String
+  str: String!
   strOpt: String
 }
 

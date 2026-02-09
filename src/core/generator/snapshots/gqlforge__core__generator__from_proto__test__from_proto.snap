@@ -7,14 +7,14 @@ schema @server @upstream {
 }
 
 input GEN__greetings__HelloRequest {
-  name: String
+  name: String!
 }
 
 """
 The request message containing the user's name.
 """
 input GEN__greetings_a__b__HelloRequest {
-  name: String
+  name: String!
 }
 
 input GEN__news__MultipleNewsId {
@@ -22,15 +22,15 @@ input GEN__news__MultipleNewsId {
 }
 
 input GEN__news__NewsId {
-  id: Int
+  id: Int!
 }
 
 input GEN__news__NewsInput {
-  body: String
-  id: Int
-  postImage: String
-  status: GEN__news__Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: GEN__news__Status!
+  title: String!
 }
 
 enum GEN__news__Status {
@@ -40,22 +40,22 @@ enum GEN__news__Status {
 }
 
 type GEN__greetings__HelloReply {
-  message: String
+  message: String!
 }
 
   """
   The response message containing the greetings
   """
 type GEN__greetings_a__b__HelloReply {
-  message: String
+  message: String!
 }
 
 type GEN__news__News {
-  body: String
-  id: Int
-  postImage: String
-  status: GEN__news__Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: GEN__news__Status!
+  title: String!
 }
 
 type GEN__news__NewsList {

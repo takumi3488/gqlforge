@@ -11,15 +11,15 @@ input GEN__news__MultipleNewsId {
 }
 
 input GEN__news__NewsInput {
-  body: String
-  id: Int
-  postImage: String
-  status: Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: Status!
+  title: String!
 }
 
 input Id {
-  id: Int
+  id: Int!
 }
 
 enum Status {
@@ -53,11 +53,11 @@ type InCompatibleProperty {
 }
 
 type News {
-  body: String
-  id: Int
-  postImage: String
-  status: Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: Status!
+  title: String!
 }
 
 type Photo {

@@ -1,5 +1,4 @@
 ---
-error: true
 ---
 
 # test-grpc-nested-optional

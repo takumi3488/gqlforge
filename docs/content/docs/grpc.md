@@ -62,7 +62,26 @@ type GreetingResponse {
 
 ## Type Mapping
 
-GQLForge automatically generates GraphQL types from your protobuf messages. Protobuf scalar types map to their GraphQL equivalents:
+GQLForge automatically generates GraphQL types from your protobuf messages.
+
+### Field Optionality (proto3)
+
+In proto3, fields without the `optional` keyword are generated as non-null (`!`) GraphQL types, while explicitly `optional` fields are nullable:
+
+| Proto3 Declaration | GraphQL Type |
+|--------------------|-------------|
+| `int32 id = 1;` | `Int!` |
+| `optional int32 id = 1;` | `Int` |
+| `string name = 2;` | `String!` |
+| `optional string name = 2;` | `String` |
+| `MyMessage msg = 3;` | `MyMessage` |
+| `repeated int32 ids = 4;` | `[Int!]` |
+
+Note: Message-type fields are always nullable because they have inherent presence semantics in proto3.
+
+### Scalar Types
+
+Protobuf scalar types map to their GraphQL equivalents:
 
 - `string` maps to `String`
 - `int32` / `int64` maps to `Int`

@@ -11,15 +11,15 @@ input GEN__news__MultipleNewsId {
 }
 
 input GEN__news__NewsId {
-  id: Int
+  id: Int!
 }
 
 input GEN__news__NewsInput {
-  body: String
-  id: Int
-  postImage: String
-  status: GEN__news__Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: GEN__news__Status!
+  title: String!
 }
 
 enum GEN__news__Status {
@@ -29,11 +29,11 @@ enum GEN__news__Status {
 }
 
 type GEN__news__News {
-  body: String
-  id: Int
-  postImage: String
-  status: GEN__news__Status
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  status: GEN__news__Status!
+  title: String!
 }
 
 type GEN__news__NewsList {
