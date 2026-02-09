@@ -39,6 +39,13 @@ impl Transform for SchemaGenerator<'_> {
                         .to_case(Case::Pascal),
                 );
             }
+            GraphQLOperationType::Subscription => {
+                config.schema.subscription = Some(
+                    GraphQLOperationType::Subscription
+                        .to_string()
+                        .to_case(Case::Pascal),
+                );
+            }
         }
 
         // Add allowed headers setting on upstream

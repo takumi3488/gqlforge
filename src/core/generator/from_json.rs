@@ -106,6 +106,12 @@ impl Transform for FromJsonGenerator<'_> {
                         .to_case(Case::Pascal),
                     self.mutation_name.clone().unwrap_or("Mutation".to_owned()),
                 ),
+                GraphQLOperationType::Subscription => (
+                    GraphQLOperationType::Subscription
+                        .to_string()
+                        .to_case(Case::Pascal),
+                    "Subscription".to_owned(),
+                ),
             };
 
             // collect the required header keys

@@ -119,6 +119,10 @@ impl AppContext {
 
                                     result
                                 }
+                                IO::GrpcStream { .. } => {
+                                    // GrpcStream is used in subscriptions, no data loader needed
+                                    None
+                                }
                                 IO::Js { name: method } => {
                                     Some(IR::IO(Box::new(IO::Js { name: method.clone() })))
                                 }

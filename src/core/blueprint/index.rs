@@ -83,6 +83,10 @@ impl Index {
         self.schema.mutation.as_deref()
     }
 
+    pub fn get_subscription(&self) -> Option<&str> {
+        self.schema.subscription.as_deref()
+    }
+
     pub fn is_type_implements(&self, type_name: &str, type_or_interface: &str) -> bool {
         if type_name == type_or_interface {
             return true;

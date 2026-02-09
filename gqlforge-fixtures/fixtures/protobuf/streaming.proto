@@ -1,0 +1,16 @@
+syntax = "proto3";
+package streaming;
+
+message Event {
+  int32 id = 1;
+  string data = 2;
+}
+
+message EventRequest {
+  string topic = 1;
+}
+
+service EventService {
+  rpc GetEvent(EventRequest) returns (Event) {}
+  rpc WatchEvents(EventRequest) returns (stream Event) {}
+}

@@ -100,6 +100,10 @@ where
 
             Ok(res.body)
         }
+        IO::GrpcStream { .. } => {
+            // GrpcStream is handled by the subscription layer, not eval_io
+            Err(Error::IO("GrpcStream should be resolved via subscription stream, not eval_io".to_string()))
+        }
         IO::Js { name } => {
             match ctx
                 .request_ctx

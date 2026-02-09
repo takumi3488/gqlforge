@@ -225,7 +225,9 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
             let on_response = grpc.on_response_body.clone();
             let hook = WorkerHooks::try_new(None, on_response).ok();
 
-            let io = if !grpc.batch_key.is_empty() {
+            let io = if matches!(operation_type, GraphQLOperationType::Subscription) {
+                IR::IO(Box::new(IO::GrpcStream { req_template, hook }))
+            } else if !grpc.batch_key.is_empty() {
                 IR::IO(Box::new(IO::Grpc {
                     req_template,
                     group_by: Some(GroupBy::new(grpc.batch_key.clone(), None)),

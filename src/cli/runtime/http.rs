@@ -181,6 +181,22 @@ impl HttpIO for NativeHttp {
 
         Response::from_reqwest_with_error_handling(response).await
     }
+
+    async fn execute_raw(&self, mut request: reqwest::Request) -> Result<reqwest::Response> {
+        if self.http2_only {
+            *request.version_mut() = reqwest::Version::HTTP_2;
+        }
+
+        tracing::info!(
+            "streaming {} {} {:?}",
+            request.method(),
+            request.url(),
+            request.version()
+        );
+
+        let response = self.client.execute(request).await?;
+        Ok(response)
+    }
 }
 
 #[cfg(test)]

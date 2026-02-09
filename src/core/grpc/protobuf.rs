@@ -232,6 +232,22 @@ impl ProtobufOperation {
         Ok(json)
     }
 
+    /// Decode a raw protobuf payload (without the 5-byte gRPC frame header).
+    pub fn convert_output_raw<T: serde::de::DeserializeOwned>(&self, bytes: &[u8]) -> Result<T> {
+        let message =
+            DynamicMessage::decode(self.output_type.clone(), bytes).with_context(|| {
+                format!(
+                    "Failed to parse response for type {}",
+                    self.output_type.full_name()
+                )
+            })?;
+
+        let mut serializer = serde_json::Serializer::new(vec![]);
+        message.serialize_with_options(&mut serializer, &self.serialize_options)?;
+        let json = serde_json::from_slice::<T>(serializer.into_inner().as_ref())?;
+        Ok(json)
+    }
+
     pub fn find_message(&self, name: &str) -> Option<ProtobufMessage> {
         let message_descriptor = self.method.parent_pool().get_message_by_name(name)?;
 

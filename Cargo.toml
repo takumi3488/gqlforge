@@ -71,6 +71,7 @@ tokio-rustls = { version = "0.26", optional = true }
 
 anyhow = { workspace = true }
 async-recursion = "1.1.1"
+async-stream = "0.3"
 async-std = { version = "1.13.2", features = [
   "wasm-bindgen-futures",
   "unstable",
