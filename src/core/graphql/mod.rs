@@ -1,6 +1,6 @@
 mod data_loader;
 mod request_template;
-mod sse_client;
+pub mod sse_client;
 mod streaming;
 
 pub use data_loader::*;

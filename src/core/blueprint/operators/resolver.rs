@@ -21,9 +21,8 @@ pub fn compile_resolver(
     let CompileResolver { config_module, field, operation_type, object_name } = inputs;
 
     match resolver {
-        Resolver::Http(http) => {
-            compile_http(config_module, http, field).trace(config::Http::trace_name().as_str())
-        }
+        Resolver::Http(http) => compile_http(config_module, http, field, operation_type)
+            .trace(config::Http::trace_name().as_str()),
         Resolver::Grpc(grpc) => compile_grpc(super::CompileGrpc {
             config_module,
             operation_type,

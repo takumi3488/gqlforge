@@ -127,6 +127,10 @@ impl AppContext {
                                     // GraphQLStream is used in subscriptions, no data loader needed
                                     None
                                 }
+                                IO::HttpStream { .. } => {
+                                    // HttpStream is used in subscriptions, no data loader needed
+                                    None
+                                }
                                 IO::Js { name: method } => {
                                     Some(IR::IO(Box::new(IO::Js { name: method.clone() })))
                                 }

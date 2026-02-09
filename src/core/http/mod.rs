@@ -20,6 +20,8 @@ mod request_template;
 mod response;
 pub mod showcase;
 pub mod sse;
+mod streaming;
+pub use streaming::*;
 mod telemetry;
 mod transformations;
 

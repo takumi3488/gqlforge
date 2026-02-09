@@ -3,6 +3,7 @@ use template_validation::validate_argument;
 
 use crate::core::blueprint::*;
 use crate::core::config::Field;
+use crate::core::config::GraphQLOperationType;
 use crate::core::config::group_by::GroupBy;
 use crate::core::endpoint::Endpoint;
 use crate::core::http::{Method, RequestTemplate};
@@ -14,6 +15,7 @@ pub fn compile_http(
     config_module: &config::ConfigModule,
     http: &config::Http,
     field: &Field,
+    operation_type: &GraphQLOperationType,
 ) -> Valid<IR, BlueprintError> {
     let is_list = field.type_of.is_list();
     let dedupe = http.dedupe.unwrap_or_default();
@@ -22,11 +24,19 @@ pub fn compile_http(
         Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
     };
 
+    let is_subscription = matches!(operation_type, GraphQLOperationType::Subscription);
+
     Valid::<(), BlueprintError>::fail(BlueprintError::IncorrectBatchingUsage)
         .when(|| {
             (config_module.upstream.get_delay() < 1 || config_module.upstream.get_max_size() < 1)
                 && !http.batch_key.is_empty()
         })
+        .and(
+            Valid::<(), BlueprintError>::fail(BlueprintError::Error(anyhow::anyhow!(
+                "batch_key is not supported for HTTP streaming subscriptions"
+            )))
+            .when(|| is_subscription && !http.batch_key.is_empty()),
+        )
         .and(
             Valid::from_iter(http.query.iter(), |query| {
                 validate_argument(config_module, Mustache::parse(query.value.as_str()), field)
@@ -94,7 +104,12 @@ pub fn compile_http(
             let on_response_body = http.on_response_body.clone();
             let hook = WorkerHooks::try_new(on_request, on_response_body).ok();
 
-            let io = if !http.batch_key.is_empty() {
+            let io = if is_subscription {
+                IR::IO(Box::new(IO::HttpStream {
+                    req_template: Box::new(req_template),
+                    hook,
+                }))
+            } else if !http.batch_key.is_empty() {
                 // Find a query parameter that contains a reference to the {{.value}} key
                 let key = if http.method == Method::GET {
                     http.query.iter().find_map(|q| {
