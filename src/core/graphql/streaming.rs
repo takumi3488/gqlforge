@@ -18,7 +18,9 @@ pub async fn execute_graphql_streaming_request(
     field_name: &str,
 ) -> Result<Pin<Box<dyn Stream<Item = Result<ConstValue, Error>> + Send>>> {
     // Replace the URL with the SSE stream endpoint
-    *request.url_mut() = stream_url.parse().map_err(|e| anyhow::anyhow!("Invalid stream URL: {e}"))?;
+    *request.url_mut() = stream_url
+        .parse()
+        .map_err(|e| anyhow::anyhow!("Invalid stream URL: {e}"))?;
 
     // Add SSE accept header
     request.headers_mut().insert(
@@ -87,13 +89,11 @@ fn parse_sse_graphql_event(event_data: &str, field_name: &str) -> Result<ConstVa
         .get("data")
         .ok_or_else(|| Error::IO("SSE event missing 'data' field in GraphQL response".into()))?;
 
-    let field_value = data
-        .get(field_name)
-        .ok_or_else(|| {
-            Error::IO(format!(
-                "SSE event missing field '{field_name}' in GraphQL response data"
-            ))
-        })?;
+    let field_value = data.get(field_name).ok_or_else(|| {
+        Error::IO(format!(
+            "SSE event missing field '{field_name}' in GraphQL response data"
+        ))
+    })?;
 
     let const_value = ConstValue::from_json(field_value.clone())
         .map_err(|e| Error::IO(format!("Failed to convert to ConstValue: {e}")))?;

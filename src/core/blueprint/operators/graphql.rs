@@ -87,9 +87,7 @@ pub fn compile_graphql(
                 let stream_url = graphql
                     .stream_url
                     .clone()
-                    .unwrap_or_else(|| {
-                        format!("{}/stream", graphql.url.trim_end_matches('/'))
-                    });
+                    .unwrap_or_else(|| format!("{}/stream", graphql.url.trim_end_matches('/')));
                 IR::IO(Box::new(IO::GraphQLStream {
                     req_template,
                     field_name,

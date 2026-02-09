@@ -9,15 +9,15 @@ The `@graphQL` directive resolves a field by forwarding the query to a remote Gr
 
 ## Fields
 
-| Field        | Type     | Default          | Description                                                              |
-| ------------ | -------- | ---------------- | ------------------------------------------------------------------------ |
-| `url`        | String   | Required         | The remote GraphQL endpoint URL.                                         |
-| `name`       | String   | `null`           | The remote field name if it differs from the local field name.           |
-| `args`       | [Arg]    | `[]`             | Arguments to pass to the remote query.                                   |
-| `headers`    | [Header] | `[]`             | HTTP headers sent to the remote server.                                  |
-| `batch`      | Boolean  | `false`          | Enable request batching for this remote endpoint.                        |
-| `dedupe`     | Boolean  | `false`          | Deduplicate identical in-flight requests to the remote.                  |
-| `stream_url` | String   | `{url}/stream`   | SSE endpoint URL for upstream subscriptions. Only used for Subscription fields. |
+| Field        | Type     | Default        | Description                                                                     |
+| ------------ | -------- | -------------- | ------------------------------------------------------------------------------- |
+| `url`        | String   | Required       | The remote GraphQL endpoint URL.                                                |
+| `name`       | String   | `null`         | The remote field name if it differs from the local field name.                  |
+| `args`       | [Arg]    | `[]`           | Arguments to pass to the remote query.                                          |
+| `headers`    | [Header] | `[]`           | HTTP headers sent to the remote server.                                         |
+| `batch`      | Boolean  | `false`        | Enable request batching for this remote endpoint.                               |
+| `dedupe`     | Boolean  | `false`        | Deduplicate identical in-flight requests to the remote.                         |
+| `stream_url` | String   | `{url}/stream` | SSE endpoint URL for upstream subscriptions. Only used for Subscription fields. |
 
 ## Example
 
