@@ -303,9 +303,8 @@ impl TryFrom<&FieldDescriptor> for JsonSchema {
             Kind::Message(msg) => JsonSchema::try_from(&msg)?,
             Kind::Enum(enm) => JsonSchema::try_from(&enm)?,
         };
-        let field_schema = if value
-            .cardinality()
-            .eq(&prost_reflect::Cardinality::Optional)
+        let field_schema = if value.supports_presence()
+            && value.cardinality() != prost_reflect::Cardinality::Required
         {
             JsonSchema::Opt(Box::new(field_schema))
         } else {
@@ -461,23 +460,17 @@ mod tests {
         assert_eq!(
             schema,
             JsonSchema::Obj(BTreeMap::from_iter([
-                (
-                    "postImage".to_owned(),
-                    JsonSchema::Opt(JsonSchema::Str.into())
-                ),
-                ("title".to_owned(), JsonSchema::Opt(JsonSchema::Str.into())),
-                ("id".to_owned(), JsonSchema::Opt(JsonSchema::Num.into())),
-                ("body".to_owned(), JsonSchema::Opt(JsonSchema::Str.into())),
+                ("postImage".to_owned(), JsonSchema::Str),
+                ("title".to_owned(), JsonSchema::Str),
+                ("id".to_owned(), JsonSchema::Num),
+                ("body".to_owned(), JsonSchema::Str),
                 (
                     "status".to_owned(),
-                    JsonSchema::Opt(
-                        JsonSchema::Enum(BTreeSet::from_iter([
-                            "DELETED".to_owned(),
-                            "DRAFT".to_owned(),
-                            "PUBLISHED".to_owned()
-                        ]))
-                        .into()
-                    )
+                    JsonSchema::Enum(BTreeSet::from_iter([
+                        "DELETED".to_owned(),
+                        "DRAFT".to_owned(),
+                        "PUBLISHED".to_owned()
+                    ]))
                 )
             ]))
         );

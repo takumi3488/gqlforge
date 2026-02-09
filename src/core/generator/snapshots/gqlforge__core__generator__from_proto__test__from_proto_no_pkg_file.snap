@@ -7,10 +7,10 @@ schema @server @upstream {
 }
 
 type GEN__News {
-  body: String
-  id: Int
-  postImage: String
-  title: String
+  body: String!
+  id: Int!
+  postImage: String!
+  title: String!
 }
 
 type GEN__NewsList {

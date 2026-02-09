@@ -84,9 +84,6 @@ fn validate_schema(
             // TODO: add validation for input schema - should compare result grpc.body to
             // schema
             let super_type = field_schema.field;
-            // TODO: all of the fields in protobuf are optional actually
-            // and if we want to mark some fields as required in GraphQL
-            // JsonSchema won't match and the validation will fail
             match sub_type.is_a(&super_type, name).to_result() {
                 Ok(res) => Valid::succeed(res),
                 Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
@@ -129,8 +126,8 @@ fn validate_group_by(
             let fields = &field_schema.field;
             // we're treating List types for gRPC as optional.
             let fields = JsonSchema::Opt(Box::new(JsonSchema::Arr(Box::new(fields.to_owned()))));
-            match fields
-                .is_a(&output_schema, group_by[0].as_str())
+            match output_schema
+                .is_a(&fields, group_by[0].as_str())
                 .to_result()
             {
                 Ok(res) => Valid::succeed(res),
