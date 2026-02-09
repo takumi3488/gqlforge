@@ -117,4 +117,4 @@ data: {"data":{"newMessage":{"id":"1","text":"hello","sender":"alice"}}}
 data: {"data":{"newMessage":{"id":"2","text":"world","sender":"bob"}}}
 ```
 
-> **See also**: For gRPC server-streaming subscriptions, see [gRPC Support — Streaming Subscriptions](/docs/grpc/#streaming-subscriptions).
+> **See also**: For consuming REST SSE endpoints as subscriptions, see [@http Directive — Subscriptions](/docs/directives/http/#subscriptions-sse-streaming). For gRPC server-streaming subscriptions, see [gRPC Support — Streaming Subscriptions](/docs/grpc/#streaming-subscriptions).
