@@ -84,7 +84,7 @@ Note: Message-type fields are always nullable because they have inherent presenc
 Protobuf `repeated` fields are always present (defaulting to an empty list) and cannot contain null elements. GQLForge maps them as non-null lists of non-null elements:
 
 | Proto Declaration               | GraphQL Type    |
-| -------------------------------- | --------------- |
+| ------------------------------- | --------------- |
 | `repeated int32 ids = 1;`       | `[Int!]!`       |
 | `repeated string names = 2;`    | `[String!]!`    |
 | `repeated MyMessage items = 3;` | `[MyMessage!]!` |
