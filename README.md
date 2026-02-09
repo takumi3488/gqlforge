@@ -59,12 +59,6 @@ Head out to [docs] to learn about other powerful gqlforge features.
 
 [docs]: https://gqlforge.pages.dev/docs
 
-### Contributing
-
-Your contributions are invaluable! Kindly go through our [contribution guidelines] if you are a first time contributor.
-
-[contribution guidelines]: https://gqlforge.pages.dev/docs/contribution-guidelines
-
 ### Support Us
 
 ⭐️ Give us a star.
