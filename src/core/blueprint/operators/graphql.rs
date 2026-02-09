@@ -83,14 +83,26 @@ pub fn compile_graphql(
         })
         .map(|req_template| {
             let field_name = graphql.name.clone();
-            let batch = graphql.batch;
-            let dedupe = graphql.dedupe;
-            IR::IO(Box::new(IO::GraphQL {
-                req_template,
-                field_name,
-                batch,
-                dl_id: None,
-                dedupe,
-            }))
+            if matches!(operation_type, GraphQLOperationType::Subscription) {
+                let stream_url = graphql
+                    .stream_url
+                    .clone()
+                    .unwrap_or_else(|| format!("{}/stream", graphql.url.trim_end_matches('/')));
+                IR::IO(Box::new(IO::GraphQLStream {
+                    req_template,
+                    field_name,
+                    stream_url,
+                }))
+            } else {
+                let batch = graphql.batch;
+                let dedupe = graphql.dedupe;
+                IR::IO(Box::new(IO::GraphQL {
+                    req_template,
+                    field_name,
+                    batch,
+                    dl_id: None,
+                    dedupe,
+                }))
+            }
         })
 }

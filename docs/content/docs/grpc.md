@@ -196,3 +196,5 @@ curl -N -X POST http://localhost:8000/graphql/stream \
 Each event is delivered as an SSE `data:` line containing a JSON GraphQL response.
 
 > **Note**: Client-streaming and bidirectional-streaming methods are currently skipped during schema generation.
+
+> **See also**: For proxying subscriptions from an upstream GraphQL server via SSE, see [@graphQL Directive — Subscriptions](/docs/directives/graphql/#subscriptions-sse-streaming).

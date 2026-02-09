@@ -74,7 +74,7 @@ pub trait HttpIO: Sync + Send + 'static {
     async fn execute(&self, request: reqwest::Request) -> anyhow::Result<Response<bytes::Bytes>>;
 
     /// Execute a request and return the raw streaming response.
-    /// Used for gRPC server-streaming subscriptions.
+    /// Used for streaming subscriptions (gRPC server-streaming, GraphQL SSE).
     async fn execute_raw(&self, request: reqwest::Request) -> anyhow::Result<reqwest::Response> {
         // Default implementation: not supported
         let _ = request;
