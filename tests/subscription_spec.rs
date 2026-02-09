@@ -41,9 +41,7 @@ pub mod test {
                 .tcp_keepalive(Some(Duration::from_secs(upstream.tcp_keep_alive)))
                 .timeout(Duration::from_secs(upstream.timeout))
                 .connect_timeout(Duration::from_secs(upstream.connect_timeout))
-                .http2_keep_alive_interval(Some(Duration::from_secs(
-                    upstream.keep_alive_interval,
-                )))
+                .http2_keep_alive_interval(Some(Duration::from_secs(upstream.keep_alive_interval)))
                 .http2_keep_alive_timeout(Duration::from_secs(upstream.keep_alive_timeout))
                 .http2_keep_alive_while_idle(upstream.keep_alive_while_idle)
                 .pool_idle_timeout(Some(Duration::from_secs(upstream.pool_idle_timeout)))
@@ -172,8 +170,9 @@ mod subscription_spec {
 
     /// Start a mock SSE upstream server that sends the given JSON events.
     ///
-    /// Returns `(port, join_handle)`. The server accepts exactly one connection,
-    /// sends all events as `data: {json}\n\n`, then closes the connection.
+    /// Returns `(port, join_handle)`. The server accepts exactly one
+    /// connection, sends all events as `data: {json}\n\n`, then closes the
+    /// connection.
     async fn start_mock_sse_server(events: Vec<serde_json::Value>) -> (u16, JoinHandle<()>) {
         let listener = TcpListener::bind("127.0.0.1:0").await.unwrap();
         let port = listener.local_addr().unwrap().port();
@@ -355,10 +354,7 @@ type SensorData {{
             response.headers().get("content-type").unwrap(),
             "text/event-stream"
         );
-        assert_eq!(
-            response.headers().get("cache-control").unwrap(),
-            "no-cache"
-        );
+        assert_eq!(response.headers().get("cache-control").unwrap(), "no-cache");
     }
 
     #[tokio::test(flavor = "multi_thread", worker_threads = 2)]
