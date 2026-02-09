@@ -152,3 +152,47 @@ type Query {
 ```
 
 GQLForge reads the proto definition, generates the `User` type, and routes incoming GraphQL queries to the gRPC backend.
+
+## Streaming Subscriptions
+
+GQLForge automatically maps gRPC server-streaming methods to GraphQL Subscriptions, delivered via SSE (Server-Sent Events).
+
+When a proto RPC method returns a `stream` response, GQLForge places it under the `Subscription` root type instead of `Query`:
+
+```protobuf
+service EventService {
+  rpc GetEvent(EventRequest) returns (Event) {}           // → Query
+  rpc WatchEvents(EventRequest) returns (stream Event) {} // → Subscription
+}
+```
+
+This generates the following GraphQL schema:
+
+```graphql
+schema {
+  query: Query
+  subscription: Subscription
+}
+
+type Query {
+  EventServiceGetEvent(eventRequest: EventRequestInput!): Event!
+}
+
+type Subscription {
+  EventServiceWatchEvents(eventRequest: EventRequestInput!): Event!
+}
+```
+
+### Subscribing via SSE
+
+Send a POST request to `/graphql/stream` to subscribe:
+
+```bash
+curl -N -X POST http://localhost:8000/graphql/stream \
+  -H "Content-Type: application/json" \
+  -d '{"query": "subscription { EventServiceWatchEvents(eventRequest: {topic: \"updates\"}) { id data } }"}'
+```
+
+Each event is delivered as an SSE `data:` line containing a JSON GraphQL response.
+
+> **Note**: Client-streaming and bidirectional-streaming methods are currently skipped during schema generation.

@@ -55,48 +55,6 @@ Now, run the following command to start the server with the full path to the jso
 gqlforge start ./jsonplaceholder.graphql
 ```
 
-## gRPC Streaming Subscriptions
-
-Gqlforge automatically maps gRPC server-streaming methods to GraphQL Subscriptions, delivered via SSE (Server-Sent Events).
-
-Given a proto file:
-
-```protobuf
-service EventService {
-  rpc GetEvent(EventRequest) returns (Event) {}           // → Query
-  rpc WatchEvents(EventRequest) returns (stream Event) {} // → Subscription
-}
-```
-
-Gqlforge generates:
-
-```graphql
-schema {
-  query: Query
-  subscription: Subscription
-}
-
-type Query {
-  EventServiceGetEvent(eventRequest: EventRequestInput!): Event!
-}
-
-type Subscription {
-  EventServiceWatchEvents(eventRequest: EventRequestInput!): Event!
-}
-```
-
-Subscribe via SSE by sending a POST request to `/graphql/stream`:
-
-```bash
-curl -N -X POST http://localhost:8000/graphql/stream \
-  -H "Content-Type: application/json" \
-  -d '{"query": "subscription { EventServiceWatchEvents(eventRequest: {topic: \"updates\"}) { id data } }"}'
-```
-
-Each event is delivered as an SSE `data:` line containing a JSON GraphQL response.
-
-> **Note**: Client-streaming and bidirectional-streaming methods are currently skipped during schema generation.
-
 Head out to [docs] to learn about other powerful gqlforge features.
 
 [docs]: https://gqlforge.pages.dev/docs
