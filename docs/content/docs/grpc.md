@@ -197,4 +197,4 @@ Each event is delivered as an SSE `data:` line containing a JSON GraphQL respons
 
 > **Note**: Client-streaming and bidirectional-streaming methods are currently skipped during schema generation.
 
-> **See also**: For proxying subscriptions from an upstream GraphQL server via SSE, see [@graphQL Directive — Subscriptions](/docs/directives/graphql/#subscriptions-sse-streaming).
+> **See also**: For consuming REST SSE endpoints as subscriptions, see [@http Directive — Subscriptions](/docs/directives/http/#subscriptions-sse-streaming). For proxying subscriptions from an upstream GraphQL server via SSE, see [@graphQL Directive — Subscriptions](/docs/directives/graphql/#subscriptions-sse-streaming).

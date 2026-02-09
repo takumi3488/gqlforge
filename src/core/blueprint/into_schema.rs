@@ -8,7 +8,7 @@ use tracing::Instrument;
 use crate::core::blueprint::{Blueprint, Definition, ObjectTypeDefinition};
 use crate::core::graphql::execute_graphql_streaming_request;
 use crate::core::grpc::request::execute_grpc_streaming_request;
-use crate::core::http::RequestContext;
+use crate::core::http::{RequestContext, execute_http_streaming_request};
 use crate::core::ir::model::{IO, IR};
 use crate::core::ir::{EvalContext, ResolverContext, TypedValue};
 use crate::core::jit::graphql_error::ErrorExtensions;
@@ -273,6 +273,24 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
                                     "GraphQL SSE streaming failed: {e}"
                                 ))
                             })?
+                        }
+                        IO::HttpStream { req_template, hook: _hook } => {
+                            let request = req_template
+                                .to_request(&eval_ctx)
+                                .map_err(|e| {
+                                    async_graphql::Error::new(format!(
+                                        "Failed to build HTTP request: {e}"
+                                    ))
+                                })?
+                                .into_request();
+
+                            execute_http_streaming_request(&req_ctx.runtime, request)
+                                .await
+                                .map_err(|e| {
+                                    async_graphql::Error::new(format!(
+                                        "HTTP SSE streaming failed: {e}"
+                                    ))
+                                })?
                         }
                         _ => {
                             return Err(async_graphql::Error::new(

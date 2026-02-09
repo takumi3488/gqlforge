@@ -109,6 +109,9 @@ where
         IO::GraphQLStream { .. } => Err(Error::IO(
             "GraphQLStream should be resolved via subscription stream, not eval_io".to_string(),
         )),
+        IO::HttpStream { .. } => Err(Error::IO(
+            "HttpStream should be resolved via subscription stream, not eval_io".to_string(),
+        )),
         IO::Js { name } => {
             match ctx
                 .request_ctx
