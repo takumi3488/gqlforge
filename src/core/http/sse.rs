@@ -10,10 +10,7 @@ use crate::core::app_context::AppContext;
 use crate::core::http::RequestContext;
 
 pub type SseBody = StreamBody<
-    futures_util::stream::BoxStream<
-        'static,
-        Result<Frame<Bytes>, std::convert::Infallible>,
-    >,
+    futures_util::stream::BoxStream<'static, Result<Frame<Bytes>, std::convert::Infallible>>,
 >;
 
 /// Handle an SSE subscription request.
@@ -39,13 +36,11 @@ pub async fn handle_sse_request(
         Ok(Frame::data(Bytes::from(event)))
     });
 
-    let body = StreamBody::new(
-        Box::pin(sse_stream)
-            as futures_util::stream::BoxStream<
-                'static,
-                Result<Frame<Bytes>, std::convert::Infallible>,
-            >,
-    );
+    let body = StreamBody::new(Box::pin(sse_stream)
+        as futures_util::stream::BoxStream<
+            'static,
+            Result<Frame<Bytes>, std::convert::Infallible>,
+        >);
 
     let response = Response::builder()
         .status(StatusCode::OK)

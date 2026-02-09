@@ -204,10 +204,8 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
         let type_ref = TypeRef::from(&field.of_type);
         let field_for_closure = field.clone();
 
-        let mut sub_field = dynamic::SubscriptionField::new(
-            field.name.clone(),
-            type_ref,
-            move |ctx| {
+        let mut sub_field =
+            dynamic::SubscriptionField::new(field.name.clone(), type_ref, move |ctx| {
                 let field = field_for_closure.clone();
                 dynamic::SubscriptionFieldFuture::new(async move {
                     let req_ctx = ctx.ctx.data::<Arc<RequestContext>>().unwrap().clone();
@@ -258,8 +256,7 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
                         },
                     ))
                 })
-            },
-        );
+            });
 
         if let Some(description) = &field.description {
             sub_field = sub_field.description(description);

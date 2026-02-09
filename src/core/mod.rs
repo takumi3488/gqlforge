@@ -75,13 +75,12 @@ pub trait HttpIO: Sync + Send + 'static {
 
     /// Execute a request and return the raw streaming response.
     /// Used for gRPC server-streaming subscriptions.
-    async fn execute_raw(
-        &self,
-        request: reqwest::Request,
-    ) -> anyhow::Result<reqwest::Response> {
+    async fn execute_raw(&self, request: reqwest::Request) -> anyhow::Result<reqwest::Response> {
         // Default implementation: not supported
         let _ = request;
-        Err(anyhow::anyhow!("Streaming not supported by this HttpIO implementation"))
+        Err(anyhow::anyhow!(
+            "Streaming not supported by this HttpIO implementation"
+        ))
     }
 }
 

@@ -88,7 +88,12 @@ fn validate_subscription(config: &Config) -> Valid<(), BlueprintError> {
                 .trace(subscription_type_name);
         };
         let mut set = HashSet::new();
-        validate_type_has_resolvers(subscription_type_name, subscription, &config.types, &mut set)
+        validate_type_has_resolvers(
+            subscription_type_name,
+            subscription,
+            &config.types,
+            &mut set,
+        )
     } else {
         Valid::succeed(())
     }

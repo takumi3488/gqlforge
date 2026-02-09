@@ -45,8 +45,8 @@ pub async fn start_http_1(
                 let sc = sc.clone();
                 let graphql_stream_path = graphql_stream_path.clone();
                 async move {
-                    let is_sse = req.method() == Method::POST
-                        && req.uri().path() == graphql_stream_path;
+                    let is_sse =
+                        req.method() == Method::POST && req.uri().path() == graphql_stream_path;
 
                     let (parts, body) = req.into_parts();
                     let bytes = body.collect().await?.to_bytes();
@@ -57,9 +57,10 @@ pub async fn start_http_1(
                             Ok(resp) => Ok(resp.map(Either::Right)),
                             Err(e) => {
                                 tracing::error!("SSE handler error: {}", e);
-                                let body = Full::new(bytes::Bytes::from(
-                                    format!(r#"{{"error": "{}"}}"#, e),
-                                ));
+                                let body = Full::new(bytes::Bytes::from(format!(
+                                    r#"{{"error": "{}"}}"#,
+                                    e
+                                )));
                                 Ok(http::Response::builder()
                                     .status(500)
                                     .body(Either::<Full<bytes::Bytes>, SseBody>::Left(body))

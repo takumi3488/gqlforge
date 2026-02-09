@@ -45,7 +45,8 @@ pub async fn execute_grpc_request(
     bail!("Failed to execute request");
 }
 
-/// Execute a gRPC server-streaming request and return a stream of decoded values.
+/// Execute a gRPC server-streaming request and return a stream of decoded
+/// values.
 pub async fn execute_grpc_streaming_request(
     runtime: &TargetRuntime,
     operation: &ProtobufOperation,
@@ -54,7 +55,10 @@ pub async fn execute_grpc_streaming_request(
     let response = runtime.http2_only.execute_raw(request).await?;
 
     if !response.status().is_success() {
-        bail!("gRPC streaming request failed with status: {}", response.status());
+        bail!(
+            "gRPC streaming request failed with status: {}",
+            response.status()
+        );
     }
 
     let operation = operation.clone();
