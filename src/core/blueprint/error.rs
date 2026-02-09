@@ -148,6 +148,9 @@ pub enum BlueprintError {
     #[error("Mutation type is not defined")]
     MutationTypeNotDefined,
 
+    #[error("Subscription type is not defined")]
+    SubscriptionTypeNotDefined,
+
     #[error("Certificate is required for HTTP2")]
     CertificateIsRequiredForHTTP2,
 

@@ -2,11 +2,13 @@ use std::sync::Arc;
 
 use async_graphql::dynamic::{self, FieldFuture, FieldValue, SchemaBuilder, TypeRef};
 use async_graphql_value::ConstValue;
-use futures_util::TryFutureExt;
+use futures_util::{StreamExt, TryFutureExt};
 use tracing::Instrument;
 
-use crate::core::blueprint::{Blueprint, Definition};
+use crate::core::blueprint::{Blueprint, Definition, ObjectTypeDefinition};
+use crate::core::grpc::request::execute_grpc_streaming_request;
 use crate::core::http::RequestContext;
+use crate::core::ir::model::{IO, IR};
 use crate::core::ir::{EvalContext, ResolverContext, TypedValue};
 use crate::core::jit::graphql_error::ErrorExtensions;
 use crate::core::scalar::Scalar;
@@ -194,15 +196,105 @@ fn to_type(def: &Definition) -> dynamic::Type {
     }
 }
 
+fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
+    let mut subscription = dynamic::Subscription::new(def.name.clone());
+
+    for field in def.fields.iter() {
+        let field = field.clone();
+        let type_ref = TypeRef::from(&field.of_type);
+        let field_for_closure = field.clone();
+
+        let mut sub_field =
+            dynamic::SubscriptionField::new(field.name.clone(), type_ref, move |ctx| {
+                let field = field_for_closure.clone();
+                dynamic::SubscriptionFieldFuture::new(async move {
+                    let req_ctx = ctx.ctx.data::<Arc<RequestContext>>().unwrap().clone();
+
+                    // Extract the GrpcStream IO from the resolver
+                    let (req_template, _hook) = match &field.resolver {
+                        Some(IR::IO(io)) => match io.as_ref() {
+                            IO::GrpcStream { req_template, hook } => {
+                                (req_template.clone(), hook.clone())
+                            }
+                            _ => {
+                                return Err(async_graphql::Error::new(
+                                    "Subscription field does not have a streaming resolver",
+                                ));
+                            }
+                        },
+                        _ => {
+                            return Err(async_graphql::Error::new(
+                                "Subscription field missing resolver",
+                            ));
+                        }
+                    };
+
+                    let ctx: ResolverContext = ctx.into();
+                    let eval_ctx = EvalContext::new(&req_ctx, &ctx);
+                    let rendered = req_template.render(&eval_ctx).map_err(|e| {
+                        async_graphql::Error::new(format!("Failed to render gRPC request: {e}"))
+                    })?;
+
+                    let request = rendered.to_request().map_err(|e| {
+                        async_graphql::Error::new(format!("Failed to build gRPC request: {e}"))
+                    })?;
+
+                    let stream = execute_grpc_streaming_request(
+                        &req_ctx.runtime,
+                        &req_template.operation,
+                        request,
+                    )
+                    .await
+                    .map_err(|e| {
+                        async_graphql::Error::new(format!("gRPC streaming failed: {e}"))
+                    })?;
+
+                    Ok(stream.map(
+                        |result: Result<ConstValue, crate::core::ir::Error>| match result {
+                            Ok(value) => Ok(FieldValue::from(value)),
+                            Err(e) => Err(async_graphql::Error::new(e.to_string())),
+                        },
+                    ))
+                })
+            });
+
+        if let Some(description) = &field.description {
+            sub_field = sub_field.description(description);
+        }
+        for arg in field.args.iter() {
+            sub_field = sub_field.argument(set_default_value(
+                dynamic::InputValue::new(arg.name.clone(), TypeRef::from(&arg.of_type)),
+                arg.default_value.clone(),
+            ));
+        }
+        subscription = subscription.field(sub_field);
+    }
+
+    if let Some(description) = &def.description {
+        subscription = subscription.description(description);
+    }
+
+    dynamic::Type::Subscription(subscription)
+}
+
 impl From<&Blueprint> for SchemaBuilder {
     fn from(blueprint: &Blueprint) -> Self {
         let query = blueprint.query();
         let mutation = blueprint.mutation();
-        let mut schema = dynamic::Schema::build(query.as_str(), mutation.as_deref(), None);
+        let subscription = blueprint.subscription();
+        let mut schema =
+            dynamic::Schema::build(query.as_str(), mutation.as_deref(), subscription.as_deref());
 
         schema = inject_custom_scalars(schema, blueprint);
 
         for def in blueprint.definitions.iter() {
+            // Register subscription type definitions as Subscription, not Object
+            if let Definition::Object(obj_def) = def
+                && subscription.as_deref() == Some(&obj_def.name)
+            {
+                schema = schema.register(to_subscription_type(obj_def));
+                continue;
+            }
             schema = schema.register(to_type(def));
         }
 

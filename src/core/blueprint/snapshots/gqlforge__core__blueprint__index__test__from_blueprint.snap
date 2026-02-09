@@ -1207,6 +1207,7 @@ Index {
         mutation: Some(
             "Mutation",
         ),
+        subscription: None,
         directives: [
             Directive {
                 name: "server",

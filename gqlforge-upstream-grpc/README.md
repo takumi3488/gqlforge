@@ -18,6 +18,10 @@ Start the server with:
 cargo run
 ```
 
+## Streaming Support
+
+Gqlforge supports gRPC server-streaming methods. When a proto service defines a server-streaming RPC (e.g., `rpc WatchEvents(...) returns (stream ...)`), it is automatically mapped to a GraphQL Subscription field. Clients can subscribe via SSE at the `POST /graphql/stream` endpoint.
+
 ## Reflection api
 
 The server supports reflection api by default

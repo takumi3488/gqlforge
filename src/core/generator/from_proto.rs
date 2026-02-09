@@ -31,6 +31,9 @@ struct Context {
     /// Root GraphQL query type
     query: String,
 
+    /// Root GraphQL subscription type
+    subscription: String,
+
     /// Set of visited map types
     map_types: HashSet<String>,
 
@@ -43,9 +46,10 @@ struct Context {
 }
 
 impl Context {
-    fn new(query: &str) -> Self {
+    fn new(query: &str, subscription: &str) -> Self {
         Self {
             query: query.to_string(),
+            subscription: subscription.to_string(),
             namespace: Default::default(),
             config: Default::default(),
             map_types: Default::default(),
@@ -356,6 +360,19 @@ impl Context {
             let path = parent_path.extend(PathField::Service, index as i32);
 
             for (method_index, method) in service.method.iter().enumerate() {
+                let is_server_streaming = method.server_streaming.unwrap_or(false);
+                let is_client_streaming = method.client_streaming.unwrap_or(false);
+
+                // client-streaming and bidi-streaming are not supported
+                if is_client_streaming {
+                    tracing::warn!(
+                        "Skipping client/bidi-streaming method: {}.{}",
+                        service_name,
+                        method.name()
+                    );
+                    continue;
+                }
+
                 let field_name = GraphQLType::new(method.name())
                     .extend(self.namespace.as_slice())
                     .push(service_name)
@@ -401,12 +418,22 @@ impl Context {
                     PathBuilder::new(&path).extend(PathField::Method, method_index as i32);
                 cfg_field.doc = self.comments_builder.get_comments(&method_path);
 
+                let root_type_name = if is_server_streaming {
+                    &self.subscription
+                } else {
+                    &self.query
+                };
+
                 let ty = self
                     .config
                     .types
-                    .entry(self.query.clone())
+                    .entry(root_type_name.clone())
                     .or_insert_with(|| {
-                        self.config.schema.query = Some(self.query.clone());
+                        if is_server_streaming {
+                            self.config.schema.subscription = Some(root_type_name.clone());
+                        } else {
+                            self.config.schema.query = Some(root_type_name.clone());
+                        }
                         config::Type::default()
                     });
 
@@ -476,7 +503,7 @@ fn get_input_type(input_ty: &str) -> Result<Option<GraphQLType<Unparsed>>> {
 
 /// The main entry point that builds a Config object from proto descriptor sets.
 pub fn from_proto(descriptor_sets: &[FileDescriptorSet], query: &str, url: &str) -> Result<Config> {
-    let mut ctx = Context::new(query);
+    let mut ctx = Context::new(query, "Subscription");
     for descriptor_set in descriptor_sets.iter() {
         for file_descriptor in descriptor_set.file.iter() {
             ctx.namespace = vec![file_descriptor.package().to_string()];
@@ -610,5 +637,10 @@ mod test {
     #[test]
     fn test_oneof_types() {
         assert_gen!(protobuf::ONEOF);
+    }
+
+    #[test]
+    fn test_streaming_proto_file() {
+        assert_gen!(protobuf::STREAMING);
     }
 }

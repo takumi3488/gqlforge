@@ -19,6 +19,7 @@ mod request_handler;
 mod request_template;
 mod response;
 pub mod showcase;
+pub mod sse;
 mod telemetry;
 mod transformations;
 

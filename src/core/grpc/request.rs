@@ -1,10 +1,16 @@
+use std::pin::Pin;
+
 use anyhow::{Result, bail};
+use async_graphql_value::ConstValue;
+use futures_util::{Stream, StreamExt};
 use http::{HeaderMap, Method};
 use reqwest::Request;
 use url::Url;
 
 use super::protobuf::ProtobufOperation;
+use super::stream::GrpcFrameDecoder;
 use crate::core::http::Response;
+use crate::core::ir::Error;
 use crate::core::runtime::TargetRuntime;
 
 pub static GRPC_STATUS: &str = "grpc-status";
@@ -37,6 +43,51 @@ pub async fn execute_grpc_request(
         };
     }
     bail!("Failed to execute request");
+}
+
+/// Execute a gRPC server-streaming request and return a stream of decoded
+/// values.
+pub async fn execute_grpc_streaming_request(
+    runtime: &TargetRuntime,
+    operation: &ProtobufOperation,
+    request: Request,
+) -> Result<Pin<Box<dyn Stream<Item = Result<ConstValue, Error>> + Send>>> {
+    let response = runtime.http2_only.execute_raw(request).await?;
+
+    if !response.status().is_success() {
+        bail!(
+            "gRPC streaming request failed with status: {}",
+            response.status()
+        );
+    }
+
+    let operation = operation.clone();
+    let byte_stream = response.bytes_stream();
+
+    let stream = async_stream::stream! {
+        let mut decoder = GrpcFrameDecoder::new();
+
+        futures_util::pin_mut!(byte_stream);
+        while let Some(chunk_result) = byte_stream.next().await {
+            match chunk_result {
+                Ok(chunk) => {
+                    let frames = decoder.decode(chunk);
+                    for frame in frames {
+                        match operation.convert_output_raw(&frame) {
+                            Ok(value) => yield Ok(value),
+                            Err(e) => yield Err(Error::IO(format!("Failed to decode gRPC frame: {e}"))),
+                        }
+                    }
+                }
+                Err(e) => {
+                    yield Err(Error::IO(format!("Stream error: {e}")));
+                    break;
+                }
+            }
+        }
+    };
+
+    Ok(Box::pin(stream))
 }
 
 #[cfg(test)]

@@ -402,6 +402,13 @@ fn to_fields(
         .eq(&Some(object_name))
     {
         GraphQLOperationType::Mutation
+    } else if config_module
+        .schema
+        .subscription
+        .as_deref()
+        .eq(&Some(object_name))
+    {
+        GraphQLOperationType::Subscription
     } else {
         GraphQLOperationType::Query
     };
