@@ -65,6 +65,10 @@ Head out to [docs] to learn about other powerful gqlforge features.
 
 👀 Watch us for updates.
 
+### Acknowledgements
+
+This project is based on [Tailcall](https://github.com/tailcallhq/tailcall).
+
 ### License
 
 This initiative is protected under the Apache 2.0 License.
