@@ -39,8 +39,7 @@ pub async fn try_serve_spa(
         }
         Ok(response)
     } else {
-        let service =
-            ServeDir::new(spa_dir).fallback(ServeFile::new(spa_dir.join("index.html")));
+        let service = ServeDir::new(spa_dir).fallback(ServeFile::new(spa_dir.join("index.html")));
         let response = service.oneshot(build_serve_request(req)?).await?;
         let (parts, body) = response.into_parts();
         let bytes = body.collect().await?.to_bytes();

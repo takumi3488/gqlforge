@@ -128,7 +128,15 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
             ))
             .fuse(validate_spa_dir(config_server.get_spa_dir()))
             .map(
-                |(hostname, http, response_headers, script, experimental_headers, cors, spa_dir)| Server {
+                |(
+                    hostname,
+                    http,
+                    response_headers,
+                    script,
+                    experimental_headers,
+                    cors,
+                    spa_dir,
+                )| Server {
                     enable_apollo_tracing: (config_server).enable_apollo_tracing(),
                     enable_cache_control_header: (config_server).enable_cache_control(),
                     enable_set_cookie_header: (config_server).enable_set_cookies(),
