@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet, HashSet};
 use std::net::{AddrParseError, IpAddr};
+use std::path::PathBuf;
 use std::str::FromStr;
 use std::time::Duration;
 
@@ -37,6 +38,7 @@ pub struct Server {
     pub limit_complexity: usize,
     pub limit_depth: usize,
     pub limit_directives: usize,
+    pub spa_dir: Option<PathBuf>,
 }
 
 /// Mimic of mini_v8::Script that's wasm compatible
@@ -124,8 +126,9 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
                     .as_ref()
                     .and_then(|headers| headers.get_cors()),
             ))
+            .fuse(validate_spa_dir(config_server.get_spa_dir()))
             .map(
-                |(hostname, http, response_headers, script, experimental_headers, cors)| Server {
+                |(hostname, http, response_headers, script, experimental_headers, cors, spa_dir)| Server {
                     enable_apollo_tracing: (config_server).enable_apollo_tracing(),
                     enable_cache_control_header: (config_server).enable_cache_control(),
                     enable_set_cookie_header: (config_server).enable_set_cookies(),
@@ -161,6 +164,7 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
                         "GQLFORGE_LIMIT_DIRECTIVES",
                         50,
                     ),
+                    spa_dir,
                 },
             )
             .to_result()
@@ -239,6 +243,30 @@ fn handle_response_headers(
     .trace("headers")
     .trace("@server")
     .trace("schema")
+}
+
+fn validate_spa_dir(spa_dir: Option<&str>) -> Valid<Option<PathBuf>, BlueprintError> {
+    match spa_dir {
+        None => Valid::succeed(None),
+        Some(dir) => {
+            let path = PathBuf::from(dir);
+            if !path.is_dir() {
+                return Valid::fail(BlueprintError::SpaDirNotFound(dir.to_string()))
+                    .trace("dir")
+                    .trace("spa")
+                    .trace("@server")
+                    .trace("schema");
+            }
+            if !path.join("index.html").is_file() {
+                return Valid::fail(BlueprintError::SpaDirMissingIndexHtml(dir.to_string()))
+                    .trace("dir")
+                    .trace("spa")
+                    .trace("@server")
+                    .trace("schema");
+            }
+            Valid::succeed(Some(path))
+        }
+    }
 }
 
 fn handle_experimental_headers(

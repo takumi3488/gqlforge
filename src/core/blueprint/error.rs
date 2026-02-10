@@ -151,6 +151,12 @@ pub enum BlueprintError {
     #[error("Subscription type is not defined")]
     SubscriptionTypeNotDefined,
 
+    #[error("SPA directory '{0}' does not exist")]
+    SpaDirNotFound(String),
+
+    #[error("SPA directory '{0}' does not contain index.html")]
+    SpaDirMissingIndexHtml(String),
+
     #[error("Certificate is required for HTTP2")]
     CertificateIsRequiredForHTTP2,
 

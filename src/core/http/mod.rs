@@ -19,6 +19,8 @@ mod request_handler;
 mod request_template;
 mod response;
 pub mod showcase;
+#[cfg(feature = "cli")]
+pub mod spa;
 pub mod sse;
 mod streaming;
 pub use streaming::*;
