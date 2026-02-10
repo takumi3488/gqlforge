@@ -24,6 +24,7 @@ The `@server` directive configures core behavior of the GQLForge GraphQL server,
 | `response_validation`     | Boolean       | `false`     | Validate resolver responses against the expected return types.               |
 | `script`                  | ScriptOptions | `null`      | Configuration for the embedded JavaScript runtime.                           |
 | `showcase`                | Boolean       | `false`     | Enable the built-in GraphQL playground UI at the server root.                |
+| `spa`                     | Spa           | `null`      | Single-page application hosting configuration.                               |
 
 ## Example
 
@@ -48,3 +49,33 @@ type Query {
 ```
 
 This configuration starts the server on port 4000, enables batching, and exposes the playground UI.
+
+## SPA Hosting
+
+The `spa` field enables single-page application hosting from a specified directory with client-side routing support.
+
+### Spa Fields
+
+| Field | Type   | Required | Description                                                                    |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------ |
+| `dir` | String | Yes      | Path to the directory containing SPA static assets. Must contain `index.html`. |
+
+### Routing Behavior
+
+- **File-like paths** (`/assets/app.js`, `/style.css`): Served if the file exists, otherwise 404.
+- **Non-file paths** (`/dashboard`, `/users/123`): Return `index.html` for client-side routing.
+- **API / GraphQL routes**: Take priority over SPA (`/graphql`, `/api/*`, `/status`, etc. are unaffected).
+
+### Example
+
+```graphql
+schema
+@server(
+  port: 4000
+  spa: { dir: "./dist" }
+) {
+  query: Query
+}
+```
+
+This serves the SPA from the `./dist` directory. Requests like `/dashboard` return `index.html`, while `/assets/app.js` serves the actual file.

@@ -142,6 +142,13 @@ pub struct Server {
     /// Queries exceeding this limit are rejected during validation.
     /// @default `50`. Set to `0` to disable.
     pub limit_directives: Option<usize>,
+
+    #[serde(default, skip_serializing_if = "is_default")]
+    /// `spa` configures single-page application hosting.
+    /// Static files are served from the specified directory.
+    /// Requests without file extensions that don't match any known route
+    /// will serve `index.html` for client-side routing.
+    pub spa: Option<Spa>,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Serialize, Deserialize, MergeRight, JsonSchema, Getters)]
@@ -174,6 +181,15 @@ impl Routes {
     pub fn with_graphql<T: Into<String>>(self, graphql: T) -> Self {
         Self { status: self.status, graphql: graphql.into() }
     }
+}
+
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, MergeRight, JsonSchema)]
+#[serde(deny_unknown_fields)]
+#[serde(rename_all = "camelCase")]
+pub struct Spa {
+    /// Path to the directory containing SPA static assets.
+    /// The directory must contain an `index.html` file.
+    pub dir: String,
 }
 
 fn merge_right_vars(mut left: Vec<KeyValue>, right: Vec<KeyValue>) -> Vec<KeyValue> {
@@ -297,6 +313,10 @@ impl Server {
 
     pub fn get_limit_directives(&self) -> usize {
         self.limit_directives.unwrap_or(50)
+    }
+
+    pub fn get_spa_dir(&self) -> Option<&str> {
+        self.spa.as_ref().map(|s| s.dir.as_str())
     }
 }
 

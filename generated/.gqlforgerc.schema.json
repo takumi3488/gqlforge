@@ -552,6 +552,17 @@
             "null"
           ]
         },
+        "spa": {
+          "description": "`spa` configures single-page application hosting. Static files are served from the specified directory. Requests without file extensions that don't match any known route will serve `index.html` for client-side routing.",
+          "anyOf": [
+            {
+              "$ref": "#/definitions/Spa"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
         "vars": {
           "description": "This configuration defines local variables for server operations. Useful for storing constant configurations, secrets, or shared information.",
           "type": "array",
@@ -578,6 +589,19 @@
           ],
           "format": "uint",
           "minimum": 0.0
+        }
+      },
+      "additionalProperties": false
+    },
+    "Spa": {
+      "type": "object",
+      "required": [
+        "dir"
+      ],
+      "properties": {
+        "dir": {
+          "description": "Path to the directory containing SPA static assets. The directory must contain an `index.html` file.",
+          "type": "string"
         }
       },
       "additionalProperties": false

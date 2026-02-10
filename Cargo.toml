@@ -66,6 +66,8 @@ rustls = { version = "0.23.36", optional = true, features = [
 ], default-features = false }
 rustls-pki-types = "1.14.0"
 tokio-rustls = { version = "0.26", optional = true }
+tower = { version = "0.5", features = ["util"], optional = true, default-features = false }
+tower-http = { version = "0.6", features = ["fs"], optional = true, default-features = false }
 
 # dependencies safe for wasm:
 
@@ -250,6 +252,8 @@ cli = [
   "dep:gqlforge-http-cache",
   "dep:gqlforge-version",
   "dep:ctrlc",
+  "dep:tower",
+  "dep:tower-http",
 ]
 
 # Feature flag to enable all default features.

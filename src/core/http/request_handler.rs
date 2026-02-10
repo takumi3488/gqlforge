@@ -331,6 +331,12 @@ async fn handle_request_inner<T: DeserializeOwned + GraphQLRequestLike>(
             {
                 return prometheus_metrics(prometheus);
             };
+
+            #[cfg(feature = "cli")]
+            if let Some(ref spa_dir) = app_ctx.blueprint.server.spa_dir {
+                return super::spa::try_serve_spa(&req, spa_dir).await;
+            }
+
             not_found()
         }
         _ => not_found(),
