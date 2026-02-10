@@ -56,8 +56,8 @@ The `spa` field enables single-page application hosting from a specified directo
 
 ### Spa Fields
 
-| Field | Type   | Required | Description                                                        |
-| ----- | ------ | -------- | ------------------------------------------------------------------ |
+| Field | Type   | Required | Description                                                                    |
+| ----- | ------ | -------- | ------------------------------------------------------------------------------ |
 | `dir` | String | Yes      | Path to the directory containing SPA static assets. Must contain `index.html`. |
 
 ### Routing Behavior
