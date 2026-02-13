@@ -11,7 +11,7 @@ use tokio::sync::oneshot;
 
 use super::server_config::ServerConfig;
 use crate::core::Errata;
-use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest};
+use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest, GraphQLRequestLike};
 use crate::core::http::handle_request;
 use crate::core::http::sse::{SseBody, handle_sse_request};
 
@@ -32,24 +32,28 @@ pub async fn start_http_1(
             .or(Err(anyhow::anyhow!("Failed to send message")))?;
     }
 
-    let graphql_stream_path = format!("{}/stream", sc.blueprint.server.routes.graphql());
+    let graphql_endpoint = sc.blueprint.server.routes.graphql().to_string();
 
     loop {
         let (stream, _addr) = listener.accept().await?;
         let io = TokioIo::new(stream);
         let sc = sc.clone();
-        let graphql_stream_path = graphql_stream_path.clone();
+        let graphql_endpoint = graphql_endpoint.clone();
 
         tokio::spawn(async move {
             let svc = service_fn(move |req: http::Request<Incoming>| {
                 let sc = sc.clone();
-                let graphql_stream_path = graphql_stream_path.clone();
+                let graphql_endpoint = graphql_endpoint.clone();
                 async move {
-                    let is_sse =
-                        req.method() == Method::POST && req.uri().path() == graphql_stream_path;
-
                     let (parts, body) = req.into_parts();
                     let bytes = body.collect().await?.to_bytes();
+
+                    let is_sse = parts.method == Method::POST
+                        && parts.uri.path() == graphql_endpoint
+                        && serde_json::from_slice::<GraphQLRequest>(&bytes)
+                            .map(|mut r| r.is_subscription())
+                            .unwrap_or(false);
+
                     let req = http::Request::from_parts(parts, Full::new(bytes));
 
                     if is_sse {

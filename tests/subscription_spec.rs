@@ -299,7 +299,7 @@ type SensorData {{
         });
 
         let response = client
-            .post("http://127.0.0.1:8810/graphql/stream")
+            .post("http://127.0.0.1:8810/graphql")
             .json(&query)
             .send()
             .await
@@ -343,7 +343,7 @@ type SensorData {{
         });
 
         let response = client
-            .post("http://127.0.0.1:8811/graphql/stream")
+            .post("http://127.0.0.1:8811/graphql")
             .json(&query)
             .send()
             .await
@@ -371,7 +371,7 @@ type SensorData {{
         });
 
         let response = client
-            .post("http://127.0.0.1:8812/graphql/stream")
+            .post("http://127.0.0.1:8812/graphql")
             .json(&query)
             .send()
             .await

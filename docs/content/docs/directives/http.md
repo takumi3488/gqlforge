@@ -89,7 +89,7 @@ type SensorData {
 Subscribe via SSE:
 
 ```bash
-curl -N -X POST http://localhost:8000/graphql/stream \
+curl -N -X POST http://localhost:8000/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "subscription { sensorData { temperature humidity timestamp } }"}'
 ```

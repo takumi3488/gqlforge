@@ -185,10 +185,10 @@ type Subscription {
 
 ### Subscribing via SSE
 
-Send a POST request to `/graphql/stream` to subscribe:
+Send a POST request to `/graphql` with a subscription query:
 
 ```bash
-curl -N -X POST http://localhost:8000/graphql/stream \
+curl -N -X POST http://localhost:8000/graphql \
   -H "Content-Type: application/json" \
   -d '{"query": "subscription { EventServiceWatchEvents(eventRequest: {topic: \"updates\"}) { id data } }"}'
 ```
