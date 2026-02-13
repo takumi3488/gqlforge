@@ -43,6 +43,8 @@ struct JsonFixture {
     response: APIResponse,
     #[serde(default)]
     is_mutation: Option<bool>,
+    #[serde(default)]
+    is_subscription: Option<bool>,
     field_name: String,
 }
 
@@ -63,7 +65,7 @@ fn load_json(path: &Path) -> anyhow::Result<JsonFixture> {
 }
 
 fn test_spec(path: &Path, json_data: JsonFixture) -> anyhow::Result<()> {
-    let JsonFixture { request, response, is_mutation, field_name } = json_data;
+    let JsonFixture { request, response, is_mutation, is_subscription, field_name } = json_data;
 
     let req_body = request.body.unwrap_or_default();
     let resp_body = response.body.unwrap_or_default();
@@ -75,15 +77,18 @@ fn test_spec(path: &Path, json_data: JsonFixture) -> anyhow::Result<()> {
         res_body: resp_body,
         field_name,
         is_mutation: is_mutation.unwrap_or_default(),
+        is_subscription: is_subscription.unwrap_or_default(),
         headers: request.headers,
     }]);
 
-    let cfg = if is_mutation.unwrap_or_default() {
-        generator.mutation(Some("Mutation".into()))
-    } else {
-        generator
+    let mut config_gen = generator;
+    if is_mutation.unwrap_or_default() {
+        config_gen = config_gen.mutation(Some("Mutation".into()));
     }
-    .generate(true)?;
+    if is_subscription.unwrap_or_default() {
+        config_gen = config_gen.subscription(Some("Subscription".into()));
+    }
+    let cfg = config_gen.generate(true)?;
 
     let snapshot_name = path
         .file_name()

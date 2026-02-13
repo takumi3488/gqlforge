@@ -60,6 +60,13 @@ impl RequestSample {
         self.operation_type = operation_type;
         self
     }
+
+    pub fn with_is_subscription(mut self, is_subscription: bool) -> Self {
+        if is_subscription {
+            self.operation_type = GraphQLOperationType::Subscription;
+        }
+        self
+    }
 }
 
 pub struct FromJsonGenerator<'a> {
@@ -67,20 +74,24 @@ pub struct FromJsonGenerator<'a> {
     type_name_generator: &'a NameGenerator,
     query_name: &'a str,
     mutation_name: &'a Option<String>,
+    subscription_name: &'a Option<String>,
 }
 
 impl<'a> FromJsonGenerator<'a> {
+    #[allow(clippy::too_many_arguments)]
     pub fn new(
         request_samples: &'a [RequestSample],
         type_name_generator: &'a NameGenerator,
         query_name: &'a str,
         mutation_name: &'a Option<String>,
+        subscription_name: &'a Option<String>,
     ) -> Self {
         Self {
             request_samples,
             type_name_generator,
             query_name,
             mutation_name,
+            subscription_name,
         }
     }
 }
@@ -110,7 +121,9 @@ impl Transform for FromJsonGenerator<'_> {
                     GraphQLOperationType::Subscription
                         .to_string()
                         .to_case(Case::Pascal),
-                    "Subscription".to_owned(),
+                    self.subscription_name
+                        .clone()
+                        .unwrap_or("Subscription".to_owned()),
                 ),
             };
 
@@ -162,8 +175,13 @@ mod tests {
             "src/core/generator/tests/fixtures/json/incompatible_root_object.json",
         ];
         for fixture in fixtures {
-            let JsonFixture { request, response, is_mutation, field_name } =
-                JsonFixture::read(fixture).await?;
+            let JsonFixture {
+                request,
+                response,
+                is_mutation,
+                is_subscription: _,
+                field_name,
+            } = JsonFixture::read(fixture).await?;
             let req_sample = RequestSample::new(request.url, response, field_name)
                 .with_method(request.method)
                 .with_headers(request.headers)
@@ -173,11 +191,16 @@ mod tests {
             request_samples.push(req_sample);
         }
 
-        let config =
-            FromJsonGenerator::new(&request_samples, &NameGenerator::new("T"), "Query", &None)
-                .pipe(Preset::default())
-                .generate()
-                .to_result()?;
+        let config = FromJsonGenerator::new(
+            &request_samples,
+            &NameGenerator::new("T"),
+            "Query",
+            &None,
+            &None,
+        )
+        .pipe(Preset::default())
+        .generate()
+        .to_result()?;
 
         insta::assert_snapshot!(config.to_sdl());
         Ok(())

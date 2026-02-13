@@ -23,6 +23,7 @@ use crate::core::transform::{Transform, TransformerOps};
 pub struct Generator {
     query: String,
     mutation: Option<String>,
+    subscription: Option<String>,
     inputs: Vec<Input>,
     type_name_prefix: String,
     transformers: Vec<Box<dyn Transform<Value = Config, Error = String>>>,
@@ -38,6 +39,7 @@ pub enum Input {
         res_body: Value,
         field_name: String,
         is_mutation: bool,
+        is_subscription: bool,
         headers: Option<BTreeMap<String, String>>,
     },
     Proto {
@@ -62,6 +64,7 @@ impl Generator {
         Generator {
             query: "Query".into(),
             mutation: None,
+            subscription: None,
             inputs: Vec::new(),
             type_name_prefix: PREFIX.into(),
             transformers: Default::default(),
@@ -79,6 +82,7 @@ impl Generator {
             type_name_generator,
             &self.query,
             &self.mutation,
+            &self.subscription,
         )
         .generate()
         .to_result()?)
@@ -121,6 +125,7 @@ impl Generator {
                     res_body,
                     field_name,
                     is_mutation,
+                    is_subscription,
                     headers,
                 } => {
                     let req_sample = RequestSample::new(
@@ -131,6 +136,7 @@ impl Generator {
                     .with_method(method.to_owned())
                     .with_headers(headers.to_owned())
                     .with_is_mutation(is_mutation.to_owned())
+                    .with_is_subscription(is_subscription.to_owned())
                     .with_req_body(req_body.to_owned());
 
                     config = config
@@ -209,6 +215,7 @@ pub mod test {
         pub request: Request,
         pub response: Value,
         pub is_mutation: bool,
+        pub is_subscription: bool,
         pub field_name: String,
     }
 
@@ -245,6 +252,11 @@ pub mod test {
                 .and_then(|is_mutation| is_mutation.as_bool().to_owned())
                 .unwrap_or_default();
 
+            let is_subscription = json_content
+                .get("is_subscription")
+                .and_then(|v| v.as_bool())
+                .unwrap_or_default();
+
             let field_name = json_content
                 .get("fieldName")
                 .ok_or_else(|| serde::de::Error::missing_field("fieldName"))?
@@ -255,6 +267,7 @@ pub mod test {
                 request,
                 response,
                 is_mutation,
+                is_subscription,
                 field_name: field_name.to_owned(),
             })
         }
@@ -295,10 +308,11 @@ pub mod test {
 
     #[tokio::test]
     async fn should_generate_config_from_json() -> anyhow::Result<()> {
-        let JsonFixture { request, response, field_name, is_mutation } = JsonFixture::read(
-            "src/core/generator/tests/fixtures/json/incompatible_properties.json",
-        )
-        .await?;
+        let JsonFixture { request, response, field_name, is_mutation, is_subscription } =
+            JsonFixture::read(
+                "src/core/generator/tests/fixtures/json/incompatible_properties.json",
+            )
+            .await?;
         let cfg_module = Generator::default()
             .inputs(vec![Input::Json {
                 url: request.url,
@@ -307,6 +321,7 @@ pub mod test {
                 res_body: response,
                 field_name,
                 is_mutation,
+                is_subscription,
                 headers: request.headers,
             }])
             .transformers(vec![Box::new(Preset::default())])
@@ -336,10 +351,11 @@ pub mod test {
         };
 
         // Json Input
-        let JsonFixture { request, response, field_name, is_mutation } = JsonFixture::read(
-            "src/core/generator/tests/fixtures/json/incompatible_properties.json",
-        )
-        .await?;
+        let JsonFixture { request, response, field_name, is_mutation, is_subscription } =
+            JsonFixture::read(
+                "src/core/generator/tests/fixtures/json/incompatible_properties.json",
+            )
+            .await?;
         let json_input = Input::Json {
             url: request.url,
             method: request.method,
@@ -347,6 +363,7 @@ pub mod test {
             res_body: response,
             field_name,
             is_mutation,
+            is_subscription,
             headers: request.headers,
         };
 
@@ -370,7 +387,7 @@ pub mod test {
             "src/core/generator/tests/fixtures/json/list.json",
         ];
         for json_path in json_fixtures {
-            let JsonFixture { request, response, field_name, is_mutation } =
+            let JsonFixture { request, response, field_name, is_mutation, is_subscription } =
                 JsonFixture::read(json_path).await?;
             inputs.push(Input::Json {
                 url: request.url,
@@ -379,6 +396,7 @@ pub mod test {
                 res_body: response,
                 field_name,
                 is_mutation,
+                is_subscription,
                 headers: request.headers,
             });
         }
