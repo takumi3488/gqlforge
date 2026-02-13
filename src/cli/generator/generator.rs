@@ -101,11 +101,26 @@ impl Generator {
 
         for input in config.inputs {
             match input.source {
-                Source::Curl { src, field_name, headers, body, method, is_mutation } => {
+                Source::Curl {
+                    src,
+                    field_name,
+                    headers,
+                    body,
+                    method,
+                    is_mutation,
+                    is_subscription,
+                } => {
                     let url = src.0;
                     let req_body = body.unwrap_or_default();
                     let method = method.unwrap_or_default();
                     let is_mutation = is_mutation.unwrap_or_default();
+                    let is_subscription = is_subscription.unwrap_or_default();
+
+                    if is_mutation && is_subscription {
+                        return Err(anyhow!(
+                            "A field cannot be both a mutation and a subscription"
+                        ));
+                    }
 
                     let request_method = method.clone().to_hyper();
                     let mut request = reqwest::Request::new(request_method, url.parse()?);
@@ -131,6 +146,7 @@ impl Generator {
                         res_body: serde_json::from_str(&response.content)?,
                         field_name,
                         is_mutation,
+                        is_subscription,
                         headers: headers.into_btree_map(),
                     });
                 }
@@ -162,6 +178,7 @@ impl Generator {
         let path = config.output.path.0.to_owned();
         let query_type = config.schema.query.clone();
         let mutation_type_name = config.schema.mutation.clone();
+        let subscription_type_name = config.schema.subscription.clone();
 
         let preset = config.preset.clone().unwrap_or_default();
         let preset: Preset = preset.validate_into().to_result()?;
@@ -174,7 +191,10 @@ impl Generator {
             config_gen = config_gen.query(query_name);
         }
 
-        let config = config_gen.mutation(mutation_type_name).generate(true)?;
+        let config = config_gen
+            .mutation(mutation_type_name)
+            .subscription(subscription_type_name)
+            .generate(true)?;
 
         self.write(&config, &path).await?;
         Ok(config)

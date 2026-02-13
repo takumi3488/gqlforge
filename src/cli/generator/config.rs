@@ -66,6 +66,8 @@ pub enum Source<Status = UnResolved> {
         body: Option<serde_json::Value>,
         #[serde(skip_serializing_if = "Option::is_none")]
         is_mutation: Option<bool>,
+        #[serde(skip_serializing_if = "Option::is_none")]
+        is_subscription: Option<bool>,
         field_name: String,
     },
     #[serde(rename_all = "camelCase")]
@@ -105,6 +107,8 @@ pub struct Schema {
     pub query: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub mutation: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub subscription: Option<String>,
 }
 
 fn between(threshold: f32, min: f32, max: f32) -> Valid<(), String> {
@@ -194,7 +198,15 @@ impl Output<UnResolved> {
 impl Source<UnResolved> {
     pub fn resolve(self, parent_dir: Option<&Path>) -> anyhow::Result<Source<Resolved>> {
         match self {
-            Source::Curl { src, field_name, headers, body, method, is_mutation } => {
+            Source::Curl {
+                src,
+                field_name,
+                headers,
+                body,
+                method,
+                is_mutation,
+                is_subscription,
+            } => {
                 let resolved_path = src.into_resolved(parent_dir);
                 Ok(Source::Curl {
                     src: resolved_path,
@@ -203,6 +215,7 @@ impl Source<UnResolved> {
                     body,
                     method,
                     is_mutation,
+                    is_subscription,
                 })
             }
             Source::Proto { src, url, proto_paths, connect_rpc } => {
@@ -307,6 +320,7 @@ mod tests {
                 field_name: "test".to_string(),
                 method: Some(Method::GET),
                 is_mutation: None,
+                is_subscription: None,
             },
         }]);
         let actual = serde_json::to_string_pretty(&config).unwrap();
@@ -386,7 +400,7 @@ mod tests {
                 }
             }]}
         "#;
-        let expected_error = "unknown field `headerss`, expected one of `src`, `headers`, `method`, `body`, `isMutation`, `fieldName` at line 9 column 13";
+        let expected_error = "unknown field `headerss`, expected one of `src`, `headers`, `method`, `body`, `isMutation`, `isSubscription`, `fieldName` at line 9 column 13";
         assert_deserialization_error(json, expected_error);
 
         let json = r#"
@@ -433,8 +447,7 @@ mod tests {
               "querys": "Query",
           }}
         "#;
-        let expected_error =
-            "unknown field `querys`, expected `query` or `mutation` at line 3 column 22";
+        let expected_error = "unknown field `querys`, expected one of `query`, `mutation`, `subscription` at line 3 column 22";
         assert_deserialization_error(json, expected_error);
     }
 }
