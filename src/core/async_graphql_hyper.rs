@@ -40,6 +40,16 @@ pub trait GraphQLRequestLike: Hash + Send {
             .unwrap_or(false)
     }
 
+    fn is_subscription(&mut self) -> bool {
+        self.parse_query()
+            .map(|doc| {
+                doc.operations
+                    .iter()
+                    .any(|(_, op)| op.node.ty == OperationType::Subscription)
+            })
+            .unwrap_or(false)
+    }
+
     fn operation_id(&self, headers: &HeaderMap) -> OperationId {
         let mut hasher = GqlforgeHasher::default();
         let state = &mut hasher;

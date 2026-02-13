@@ -1,7 +1,8 @@
 #![allow(clippy::too_many_arguments)]
 use std::sync::Arc;
 
-use http_body_util::{BodyExt, Full};
+use http::Method;
+use http_body_util::{BodyExt, Either, Full};
 use hyper::body::Incoming;
 use hyper::service::service_fn;
 use hyper_util::rt::{TokioExecutor, TokioIo};
@@ -13,9 +14,10 @@ use tokio_rustls::TlsAcceptor;
 
 use super::server_config::ServerConfig;
 use crate::core::Errata;
-use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest};
+use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest, GraphQLRequestLike};
 use crate::core::config::PrivateKey;
 use crate::core::http::handle_request;
+use crate::core::http::sse::{SseBody, handle_sse_request};
 
 pub async fn start_http_2(
     sc: Arc<ServerConfig>,
@@ -45,10 +47,13 @@ pub async fn start_http_2(
             .or(Err(anyhow::anyhow!("Failed to send message")))?;
     }
 
+    let graphql_endpoint = sc.blueprint.server.routes.graphql().to_string();
+
     loop {
         let (stream, _addr) = listener.accept().await?;
         let tls_acceptor = tls_acceptor.clone();
         let sc = sc.clone();
+        let graphql_endpoint = graphql_endpoint.clone();
 
         tokio::spawn(async move {
             let tls_stream = match tls_acceptor.accept(stream).await {
@@ -62,14 +67,41 @@ pub async fn start_http_2(
 
             let svc = service_fn(move |req: http::Request<Incoming>| {
                 let sc = sc.clone();
+                let graphql_endpoint = graphql_endpoint.clone();
                 async move {
                     let (parts, body) = req.into_parts();
                     let bytes = body.collect().await?.to_bytes();
+
+                    let is_sse = parts.method == Method::POST
+                        && parts.uri.path() == graphql_endpoint
+                        && serde_json::from_slice::<GraphQLRequest>(&bytes)
+                            .map(|mut r| r.is_subscription())
+                            .unwrap_or(false);
+
                     let req = http::Request::from_parts(parts, Full::new(bytes));
-                    if enable_batch {
-                        handle_request::<GraphQLBatchRequest>(req, sc.app_ctx.clone()).await
+
+                    if is_sse {
+                        match handle_sse_request(req, sc.app_ctx.clone()).await {
+                            Ok(resp) => Ok(resp.map(Either::Right)),
+                            Err(e) => {
+                                tracing::error!("SSE handler error: {}", e);
+                                let body = Full::new(bytes::Bytes::from(format!(
+                                    r#"{{"error": "{}"}}"#,
+                                    e
+                                )));
+                                Ok(http::Response::builder()
+                                    .status(500)
+                                    .body(Either::<Full<bytes::Bytes>, SseBody>::Left(body))
+                                    .unwrap())
+                            }
+                        }
                     } else {
-                        handle_request::<GraphQLRequest>(req, sc.app_ctx.clone()).await
+                        let result = if enable_batch {
+                            handle_request::<GraphQLBatchRequest>(req, sc.app_ctx.clone()).await
+                        } else {
+                            handle_request::<GraphQLRequest>(req, sc.app_ctx.clone()).await
+                        };
+                        result.map(|resp| resp.map(Either::Left))
                     }
                 }
             });
