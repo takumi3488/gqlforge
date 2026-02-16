@@ -11,14 +11,14 @@ use crate::core::auth::verify::Verify;
 use crate::core::blueprint;
 use crate::core::http::RequestContext;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, serde::Serialize)]
 #[serde(untagged)]
 pub enum OneOrMany<T> {
     One(T),
     Vec(Vec<T>),
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, serde::Serialize)]
 pub struct JwtClaim {
     pub aud: Option<OneOrMany<String>>,
     pub iss: Option<String>,
@@ -29,34 +29,7 @@ pub struct JwtClaim {
 
 impl JwtClaim {
     pub fn to_json_value(&self) -> serde_json::Value {
-        let mut map = serde_json::Map::new();
-        if let Some(ref aud) = self.aud {
-            match aud {
-                OneOrMany::One(s) => {
-                    map.insert("aud".to_owned(), serde_json::Value::String(s.clone()));
-                }
-                OneOrMany::Vec(v) => {
-                    map.insert(
-                        "aud".to_owned(),
-                        serde_json::Value::Array(
-                            v.iter()
-                                .map(|s| serde_json::Value::String(s.clone()))
-                                .collect(),
-                        ),
-                    );
-                }
-            }
-        }
-        if let Some(ref iss) = self.iss {
-            map.insert("iss".to_owned(), serde_json::Value::String(iss.clone()));
-        }
-        if let Some(ref sub) = self.sub {
-            map.insert("sub".to_owned(), serde_json::Value::String(sub.clone()));
-        }
-        for (k, v) in &self.extra {
-            map.insert(k.clone(), v.clone());
-        }
-        serde_json::Value::Object(map)
+        serde_json::to_value(self).unwrap_or_default()
     }
 }
 

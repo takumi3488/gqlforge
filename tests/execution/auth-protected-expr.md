@@ -65,7 +65,20 @@ type Dashboard {
         }
       }
 
-# Test 3: Basic protected without expr still works with valid token
+# Test 3: Access admin dashboard with JWT containing role=admin - should succeed (expr passes)
+- method: POST
+  url: http://localhost:8080/graphql
+  headers:
+    Authorization: Bearer eyJhbGciOiJSUzI1NiIsImtpZCI6Ikk0OHFNSnA1NjZTU0tRb2dZWFl0SEJvOXE2WmNFS0hpeE5QZU5veFYxYzgiLCJ0eXAiOiJKV1QifQ.eyJleHAiOjIwMTkwNTY0NDEuMCwiaXNzIjoibWUiLCJzdWIiOiJ5b3UiLCJhdWQiOlsidGhlbSJdLCJyb2xlIjoiYWRtaW4ifQ.YueWLPyGFQWJ0FEwF3erUE1ue0cpdPSXzCpaQs_BHTmDord7LH4XqWTwZfaWsk2W6ErkYPQLZ6La5_3vBGk2xgwY68pieZC2wCdlrfy13cTby6By0GjuiFN7Fk65R-QGuTDwvFmmKaM60InIQOHG70PIR1z9zRjf_q1U6HkiyekZBjjWTCvBaPn7uD7scWZxdGjIqlV_Bt7dWh6fvj-xGwaH9JLU4QZWv6mYAA2E0uY9ZSWgYgC4nVs_vcQVNVAdv8cifyaidsyJnQVcD-SrCkVsrBnIj8R8UmTPj2eKyqcL4u9TX2mkYoOw8jdK563eoT7Y8nd6BPqDFpQRBrsuM1y5fmTlYxif7ZBWHaMARyI6DiDlfvHZCBnaevAdt_HzyX4leq8iY4sVjNI2f8LmpA5or-A-1yVRF6r4-Ca9D0yRJ9xDk9_KaKPptAJyacwmbeSdLceho8exkNfBZqau_F5Mtm3qeRkkJtB3M-S_hPoDgwEP2tx8ZaSTncXPtV4NCfjk2X5Iq0IZsiKbqE_V893LfMn__TuHJyTNZWtVzhK8tg0sXL-La0TDqux5JCFWSrR8ESa6QggKiB59L7sZTvePj6N7m5qGCb-j8B8MTnvme0iKBCcIVLzhBnRdxkZrYUbIiiWFnH-zarkjL4rJb9yznRWwv0LoNSTHIZIXm10
+  body:
+    query: |
+      query {
+        adminDashboard {
+          stats
+        }
+      }
+
+# Test 4: Basic @protected without expr still works with valid token
 - method: POST
   url: http://localhost:8080/graphql
   headers:
@@ -76,7 +89,7 @@ type Dashboard {
         protectedBasic
       }
 
-# Test 4: Public data accessible without any token
+# Test 5: Public data accessible without any token
 - method: POST
   url: http://localhost:8080/graphql
   body:

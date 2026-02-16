@@ -62,12 +62,26 @@ impl AccessExpr {
 fn resolve_operand<Ctx: ResolverContextLike + Sync>(
     operand: &Operand,
     ctx: &EvalContext<'_, Ctx>,
-) -> Option<String> {
+) -> Option<serde_json::Value> {
     match operand {
-        Operand::Path(segments) => ctx.path_string(segments).map(|s| s.into_owned()),
-        Operand::StringLiteral(s) => Some(s.clone()),
-        Operand::NumberLiteral(n) => Some(n.to_string()),
-        Operand::BoolLiteral(b) => Some(b.to_string()),
+        Operand::Path(segments) => {
+            // For claims paths, resolve directly from serde_json::Value to preserve types
+            if segments.first().map(|s| s.as_str()) == Some("claims") && segments.len() > 1 {
+                let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+                let claims = guard.as_ref()?;
+                let mut current = claims;
+                for segment in &segments[1..] {
+                    current = current.get(segment.as_str())?;
+                }
+                Some(current.clone())
+            } else {
+                ctx.path_string(segments)
+                    .map(|s| serde_json::Value::String(s.into_owned()))
+            }
+        }
+        Operand::StringLiteral(s) => Some(serde_json::Value::String(s.clone())),
+        Operand::NumberLiteral(n) => Some(serde_json::json!(*n)),
+        Operand::BoolLiteral(b) => Some(serde_json::Value::Bool(*b)),
     }
 }
 
@@ -86,20 +100,31 @@ fn parse_path(input: &str) -> IResult<&str, Operand> {
 
 fn parse_string_literal(input: &str) -> IResult<&str, Operand> {
     let (input, _) = char('\'')(input)?;
-    let mut end = 0;
     let bytes = input.as_bytes();
-    while end < bytes.len() && bytes[end] != b'\'' {
-        end += 1;
+    let mut result = String::new();
+    let mut i = 0;
+    while i < bytes.len() {
+        if bytes[i] == b'\\' && i + 1 < bytes.len() {
+            match bytes[i + 1] {
+                b'\'' => result.push('\''),
+                b'\\' => result.push('\\'),
+                other => {
+                    result.push('\\');
+                    result.push(other as char);
+                }
+            }
+            i += 2;
+        } else if bytes[i] == b'\'' {
+            return Ok((&input[i + 1..], Operand::StringLiteral(result)));
+        } else {
+            result.push(bytes[i] as char);
+            i += 1;
+        }
     }
-    if end >= bytes.len() {
-        return Err(nom::Err::Error(nom::error::Error::new(
-            input,
-            nom::error::ErrorKind::Char,
-        )));
-    }
-    let s = &input[..end];
-    let remaining = &input[end + 1..];
-    Ok((remaining, Operand::StringLiteral(s.to_owned())))
+    Err(nom::Err::Error(nom::error::Error::new(
+        input,
+        nom::error::ErrorKind::Char,
+    )))
 }
 
 fn parse_number_literal(input: &str) -> IResult<&str, Operand> {
@@ -113,10 +138,22 @@ fn parse_number_literal(input: &str) -> IResult<&str, Operand> {
 }
 
 fn parse_bool_literal(input: &str) -> IResult<&str, Operand> {
-    alt((
+    let (remaining, op) = alt((
         value(Operand::BoolLiteral(true), tag("true")),
         value(Operand::BoolLiteral(false), tag("false")),
-    ))(input)
+    ))(input)?;
+    // Ensure the keyword is not a prefix of a longer identifier
+    if remaining
+        .chars()
+        .next()
+        .is_some_and(|c| is_ident_char(c) || c == '.')
+    {
+        return Err(nom::Err::Error(nom::error::Error::new(
+            input,
+            nom::error::ErrorKind::Tag,
+        )));
+    }
+    Ok((remaining, op))
 }
 
 fn parse_operand(input: &str) -> IResult<&str, Operand> {
@@ -369,7 +406,7 @@ mod tests {
         let req_ctx = RequestContext::new(runtime);
         req_ctx.set_auth_claims(serde_json::json!({
             "role": "admin",
-            "active": "true",
+            "active": true,
         }));
 
         let res_ctx = EmptyResolverContext {};
@@ -382,6 +419,61 @@ mod tests {
         assert!(expr.evaluate(&eval_ctx).unwrap());
 
         let expr = AccessExpr::parse("claims.role == 'user' && claims.active == true").unwrap();
+        assert!(!expr.evaluate(&eval_ctx).unwrap());
+    }
+
+    #[test]
+    fn test_parse_bool_boundary() {
+        // "trueValue" should parse as a path, not bool literal "true" + leftover "Value"
+        let expr = AccessExpr::parse("claims.trueValue == 'yes'").unwrap();
+        assert_eq!(
+            expr,
+            AccessExpr::Eq(
+                Operand::Path(vec!["claims".into(), "trueValue".into()]),
+                Operand::StringLiteral("yes".into()),
+            )
+        );
+
+        let expr = AccessExpr::parse("claims.falsePositive == 'no'").unwrap();
+        assert_eq!(
+            expr,
+            AccessExpr::Eq(
+                Operand::Path(vec!["claims".into(), "falsePositive".into()]),
+                Operand::StringLiteral("no".into()),
+            )
+        );
+    }
+
+    #[test]
+    fn test_evaluate_type_aware_comparison() {
+        use crate::core::http::RequestContext;
+        use crate::core::ir::EmptyResolverContext;
+
+        let runtime = crate::core::runtime::test::init(None);
+        let req_ctx = RequestContext::new(runtime);
+        req_ctx.set_auth_claims(serde_json::json!({
+            "level": 42,
+            "active": true,
+            "role": "admin",
+        }));
+
+        let res_ctx = EmptyResolverContext {};
+        let eval_ctx = EvalContext::new(&req_ctx, &res_ctx);
+
+        // Integer claim vs integer literal
+        let expr = AccessExpr::parse("claims.level == 42").unwrap();
+        assert!(expr.evaluate(&eval_ctx).unwrap());
+
+        // Boolean claim vs boolean literal
+        let expr = AccessExpr::parse("claims.active == true").unwrap();
+        assert!(expr.evaluate(&eval_ctx).unwrap());
+
+        // Boolean claim vs string literal should NOT match
+        let expr = AccessExpr::parse("claims.active == 'true'").unwrap();
+        assert!(!expr.evaluate(&eval_ctx).unwrap());
+
+        // Integer claim vs string literal should NOT match
+        let expr = AccessExpr::parse("claims.level == '42'").unwrap();
         assert!(!expr.evaluate(&eval_ctx).unwrap());
     }
 }

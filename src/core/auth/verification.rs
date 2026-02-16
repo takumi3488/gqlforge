@@ -32,6 +32,7 @@ impl Verification {
         }
     }
 
+    #[allow(dead_code)]
     pub fn fold(self, on_success: Self, on_error: impl Fn(Error) -> Self) -> Self {
         match self {
             Verification::Succeed(_) => on_success,
@@ -42,9 +43,10 @@ impl Verification {
     pub fn or(&self, other: Self) -> Self {
         match self {
             Verification::Succeed(claims) => Verification::Succeed(claims.clone()),
-            Verification::Fail(this) => other.fold(Verification::succeed(), |that| {
-                Verification::Fail(max(this.clone(), that))
-            }),
+            Verification::Fail(this) => match other {
+                Verification::Succeed(claims) => Verification::Succeed(claims),
+                Verification::Fail(that) => Verification::Fail(max(this.clone(), that)),
+            },
         }
     }
 
@@ -103,6 +105,13 @@ fn merge_claims(
         (None, Some(r)) => Some(r),
         (None, None) => None,
         // If either side is not an object, prefer the left side
-        (Some(l), Some(_)) => Some(l),
+        (Some(l), Some(r)) => {
+            tracing::warn!(
+                "merge_claims: non-object claims detected, dropping right side. left={}, right={}",
+                l,
+                r
+            );
+            Some(l)
+        }
     }
 }

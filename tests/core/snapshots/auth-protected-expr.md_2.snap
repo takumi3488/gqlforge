@@ -9,7 +9,9 @@ expression: response
   },
   "body": {
     "data": {
-      "protectedBasic": "protected data"
+      "adminDashboard": {
+        "stats": "admin stats"
+      }
     }
   }
 }
