@@ -105,12 +105,8 @@ fn merge_claims(
         (None, Some(r)) => Some(r),
         (None, None) => None,
         // If either side is not an object, prefer the left side
-        (Some(l), Some(r)) => {
-            tracing::warn!(
-                "merge_claims: non-object claims detected, dropping right side. left={}, right={}",
-                l,
-                r
-            );
+        (Some(l), Some(_)) => {
+            tracing::warn!("merge_claims: non-object claims detected, dropping right side");
             Some(l)
         }
     }
