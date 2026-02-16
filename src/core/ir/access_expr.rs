@@ -424,7 +424,8 @@ mod tests {
 
     #[test]
     fn test_parse_bool_boundary() {
-        // "trueValue" should parse as a path, not bool literal "true" + leftover "Value"
+        // "trueValue" should parse as a path, not bool literal "true" + leftover
+        // "Value"
         let expr = AccessExpr::parse("claims.trueValue == 'yes'").unwrap();
         assert_eq!(
             expr,
