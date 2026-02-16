@@ -37,10 +37,23 @@ impl IR {
                         .clone())
                 }
                 IR::Dynamic(value) => Ok(value.render_value(ctx)),
-                IR::Protect(auth, expr) => {
+                IR::Protect(auth, access_expr, expr) => {
                     let verifier = AuthVerifier::from(auth.clone());
-                    verifier.verify(ctx.request_ctx).await.to_result()?;
-
+                    let verification = verifier.verify(ctx.request_ctx).await;
+                    let claims = verification.to_result_with_claims()?;
+                    // TODO: auth_claims is stored in request-global shared state
+                    // (Arc<Mutex>). When multiple @protected fields with access_expr
+                    // are evaluated concurrently (e.g., via IR::Merge or IR::Entity),
+                    // claims from one field can overwrite another's. To fix properly,
+                    // scope claims to EvalContext instead of RequestContext.
+                    if let Some(claims) = claims {
+                        ctx.request_ctx.set_auth_claims(claims);
+                    }
+                    if let Some(access_expr) = access_expr
+                        && !access_expr.evaluate(ctx).map_err(Error::ExprEval)?
+                    {
+                        return Err(Error::ExprEval("Access denied".into()));
+                    }
                     expr.eval(ctx).await
                 }
                 IR::IO(io) => eval_io(io, ctx).await,

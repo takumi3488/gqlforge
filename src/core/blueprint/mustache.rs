@@ -89,9 +89,9 @@ impl<'a> MustachePartsValidator<'a> {
                     return Valid::fail(BlueprintError::VarNotSetInServerConfig(tail.to_string()));
                 }
             }
-            "headers" | "env" => {
-                // "headers" and "env" refers to values known at runtime, which
-                // we can't validate here
+            "headers" | "env" | "claims" => {
+                // "headers", "env", and "claims" refer to values known at
+                // runtime, which we can't validate here
             }
             _ => {
                 return Valid::fail(BlueprintError::UnknownTemplateDirective(head.to_string()));

@@ -33,4 +33,8 @@ pub struct Protected {
     /// - Include multiple IDs to require authorization from each one.
     #[serde(skip_serializing_if = "Option::is_none")]
     pub id: Option<Vec<String>>,
+    /// An access control expression evaluated against the request context.
+    /// Example: `claims.role == 'admin'` or `claims.sub == args.userId`
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub expr: Option<String>,
 }

@@ -1,0 +1,16 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Profile {
+  id: String!
+  name: String!
+}
+
+type Query {
+  myProfile: Profile
+}
+
+schema {
+  query: Query
+}

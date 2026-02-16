@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use headers::authorization::Bearer;
 use headers::{Authorization, HeaderMapExt};
 use serde::Deserialize;
@@ -9,17 +11,26 @@ use crate::core::auth::verify::Verify;
 use crate::core::blueprint;
 use crate::core::http::RequestContext;
 
-#[derive(Debug, Deserialize)]
+#[derive(Debug, Deserialize, serde::Serialize)]
 #[serde(untagged)]
 pub enum OneOrMany<T> {
     One(T),
     Vec(Vec<T>),
 }
 
-#[derive(Debug, Default, Deserialize)]
+#[derive(Debug, Default, Deserialize, serde::Serialize)]
 pub struct JwtClaim {
     pub aud: Option<OneOrMany<String>>,
     pub iss: Option<String>,
+    pub sub: Option<String>,
+    #[serde(flatten)]
+    pub extra: HashMap<String, serde_json::Value>,
+}
+
+impl JwtClaim {
+    pub fn to_json_value(&self) -> serde_json::Value {
+        serde_json::to_value(self).unwrap_or_default()
+    }
 }
 
 pub struct JwtVerifier {
@@ -59,7 +70,7 @@ impl JwtVerifier {
             return Verification::fail(Error::Invalid);
         }
 
-        Verification::succeed()
+        Verification::succeed_with_claims(claims.to_json_value())
     }
 }
 
@@ -173,6 +184,15 @@ pub mod tests {
         req_context
     }
 
+    fn assert_succeed_with_claims(v: &Verification) {
+        match v {
+            Verification::Succeed(Some(claims)) => {
+                assert!(claims.is_object(), "claims should be an object");
+            }
+            other => panic!("expected Succeed with claims, got {:?}", other),
+        }
+    }
+
     #[tokio::test]
     async fn validate_token_iss() {
         let jwt_options = blueprint::Jwt::test_value();
@@ -182,7 +202,9 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
+        let claims = valid.claims().unwrap();
+        assert_eq!(claims["sub"], serde_json::json!("you"));
 
         let jwt_options = blueprint::Jwt {
             issuer: Some("me".to_owned()),
@@ -194,7 +216,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             issuer: Some("another".to_owned()),
@@ -218,7 +240,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             audiences: HashSet::from_iter(["them".to_string()]),
@@ -230,7 +252,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             audiences: HashSet::from_iter(["anothem".to_string()]),

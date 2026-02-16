@@ -2,6 +2,7 @@ use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::{Auth, BlueprintError, FieldDefinition, Provider};
 use crate::core::config::{self, ConfigModule, Field};
+use crate::core::ir::access_expr::AccessExpr;
 use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
@@ -56,32 +57,55 @@ pub fn update_protected<'a>(
                         .unwrap_or_default(),
                 );
 
-                Valid::from_iter(protection.iter(), |id| {
-                    if let Some(provider) = providers.get(id) {
-                        Valid::succeed(Auth::Provider(provider.clone()))
-                    } else {
-                        Valid::fail(BlueprintError::AuthProviderNotFound(id.clone()))
-                    }
-                })
-                .map(|provider| {
-                    let mut auth = provider.into_iter().reduce(|left, right| left.and(right));
+                // Collect the access expression from all protected directives
+                let expr_str = field
+                    .protected
+                    .as_ref()
+                    .and_then(|p| p.expr.as_ref())
+                    .or_else(|| type_.protected.as_ref().and_then(|p| p.expr.as_ref()));
 
-                    // If no protection is defined, use all providers
-                    if auth.is_none() {
-                        auth = Auth::from_config(config);
+                let parsed_expr = if let Some(expr_str) = expr_str {
+                    match AccessExpr::parse(expr_str) {
+                        Ok(expr) => Valid::succeed(Some(expr)),
+                        Err(e) => Valid::fail(BlueprintError::InvalidAccessExpression(e)),
                     }
+                } else {
+                    Valid::succeed(None)
+                };
 
-                    if let Some(auth) = auth {
-                        b_field.resolver = match &b_field.resolver {
-                            None => Some(IR::Protect(
-                                auth,
-                                Box::new(IR::ContextPath(vec![b_field.name.clone()])),
-                            )),
-                            Some(resolver) => Some(IR::Protect(auth, Box::new(resolver.clone()))),
+                parsed_expr.and_then(|access_expr| {
+                    Valid::from_iter(protection.iter(), |id| {
+                        if let Some(provider) = providers.get(id) {
+                            Valid::succeed(Auth::Provider(provider.clone()))
+                        } else {
+                            Valid::fail(BlueprintError::AuthProviderNotFound(id.clone()))
                         }
-                    }
+                    })
+                    .map(|provider| {
+                        let mut auth = provider.into_iter().reduce(|left, right| left.and(right));
 
-                    b_field
+                        // If no protection is defined, use all providers
+                        if auth.is_none() {
+                            auth = Auth::from_config(config);
+                        }
+
+                        if let Some(auth) = auth {
+                            b_field.resolver = match &b_field.resolver {
+                                None => Some(IR::Protect(
+                                    auth,
+                                    access_expr.clone(),
+                                    Box::new(IR::ContextPath(vec![b_field.name.clone()])),
+                                )),
+                                Some(resolver) => Some(IR::Protect(
+                                    auth,
+                                    access_expr.clone(),
+                                    Box::new(resolver.clone()),
+                                )),
+                            }
+                        }
+
+                        b_field
+                    })
                 })
             } else {
                 Valid::succeed(b_field)

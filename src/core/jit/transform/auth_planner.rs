@@ -31,7 +31,7 @@ impl<A: Debug> Transform for AuthPlanner<A> {
         plan.before = auth
             .into_iter()
             .reduce(|a, b| a.and(b))
-            .map(|auth| IR::Protect(auth, Box::new(IR::Dynamic(DynamicValue::default()))));
+            .map(|auth| IR::Protect(auth, None, Box::new(IR::Dynamic(DynamicValue::default()))));
 
         Valid::succeed(plan)
     }
@@ -65,11 +65,15 @@ pub fn update_ir(ir: &mut IR, vec: &mut Vec<Auth>) {
         IR::Path(ir, _) => {
             update_ir(ir, vec);
         }
-        IR::Protect(auth, ir_0) => {
-            vec.push(auth.clone());
-
-            update_ir(ir_0, vec);
-            *ir = *ir_0.clone();
+        IR::Protect(auth, access_expr, ir_0) => {
+            if access_expr.is_none() {
+                vec.push(auth.clone());
+                update_ir(ir_0, vec);
+                *ir = *ir_0.clone();
+            } else {
+                // Expression-based access rules stay in place (field-level evaluation)
+                update_ir(ir_0, vec);
+            }
         }
         IR::Pipe(ir1, ir2) => {
             update_ir(ir1, vec);
