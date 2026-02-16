@@ -5,6 +5,7 @@ use std::num::NonZeroU64;
 use async_graphql::Value;
 use strum_macros::Display;
 
+use super::access_expr::AccessExpr;
 use super::discriminator::Discriminator;
 use super::{EvalContext, ResolverContextLike};
 use crate::core::blueprint::{Auth, DynamicValue};
@@ -22,7 +23,7 @@ pub enum IR {
     // TODO: Path can be implement using Pipe
     Path(Box<IR>, Vec<String>),
     ContextPath(Vec<String>),
-    Protect(Auth, Box<IR>),
+    Protect(Auth, Option<AccessExpr>, Box<IR>),
     Map(Map),
     Pipe(Box<IR>, Box<IR>),
     /// Merges the result of multiple IRs together
@@ -152,7 +153,7 @@ impl IR {
         match self {
             IR::IO(io) => io_modifier(io),
             IR::Cache(cache) => io_modifier(&mut cache.io),
-            IR::Discriminate(_, ir) | IR::Protect(_, ir) | IR::Path(ir, _) => {
+            IR::Discriminate(_, ir) | IR::Protect(_, _, ir) | IR::Path(ir, _) => {
                 ir.modify_io(io_modifier)
             }
             IR::Pipe(ir1, ir2) => {
@@ -202,7 +203,9 @@ impl IR {
                         }
                     }
                     IR::Path(expr, path) => IR::Path(expr.modify_box(modifier), path),
-                    IR::Protect(auth, expr) => IR::Protect(auth, expr.modify_box(modifier)),
+                    IR::Protect(auth, access_expr, expr) => {
+                        IR::Protect(auth, access_expr, expr.modify_box(modifier))
+                    }
                     IR::Map(Map { input, map }) => {
                         IR::Map(Map { input: input.modify_box(modifier), map })
                     }

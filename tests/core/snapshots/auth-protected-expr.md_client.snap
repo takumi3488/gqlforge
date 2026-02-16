@@ -1,0 +1,17 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Dashboard {
+  stats: String!
+}
+
+type Query {
+  adminDashboard: Dashboard
+  protectedBasic: String!
+  publicData: String!
+}
+
+schema {
+  query: Query
+}

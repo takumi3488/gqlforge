@@ -73,6 +73,9 @@ pub enum BlueprintError {
     #[error("Auth provider {0} not found")]
     AuthProviderNotFound(String),
 
+    #[error("Invalid access expression: {0}")]
+    InvalidAccessExpression(String),
+
     #[error("syntax error when parsing `{0}`")]
     SyntaxErrorWhenParsing(String),
 

@@ -35,6 +35,7 @@ pub struct RequestContext {
     pub runtime: TargetRuntime,
     pub cache: DedupeResult<IoId, ConstValue, Error>,
     pub dedupe_handler: Arc<DedupeResult<IoId, ConstValue, Error>>,
+    pub auth_claims: Arc<Mutex<Option<serde_json::Value>>>,
 }
 
 impl RequestContext {
@@ -53,6 +54,7 @@ impl RequestContext {
             cache: DedupeResult::new(true),
             dedupe_handler: Arc::new(DedupeResult::new(false)),
             allowed_headers: HeaderMap::new(),
+            auth_claims: Arc::new(Mutex::new(None)),
         }
     }
     fn set_min_max_age_conc(&self, min_max_age: i32) {
@@ -148,6 +150,14 @@ impl RequestContext {
         self.runtime.cache.set(key, value, ttl).await
     }
 
+    pub fn set_auth_claims(&self, claims: serde_json::Value) {
+        *self.auth_claims.lock().unwrap() = Some(claims);
+    }
+
+    pub fn get_auth_claims(&self) -> Option<serde_json::Value> {
+        self.auth_claims.lock().unwrap().clone()
+    }
+
     pub fn is_batching_enabled(&self) -> bool {
         self.upstream.is_batching_enabled()
     }
@@ -201,6 +211,7 @@ impl From<&AppContext> for RequestContext {
             runtime: app_ctx.runtime.clone(),
             cache: DedupeResult::new(true),
             dedupe_handler: app_ctx.dedupe_handler.clone(),
+            auth_claims: Arc::new(Mutex::new(None)),
         }
     }
 }

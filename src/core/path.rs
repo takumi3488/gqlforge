@@ -79,6 +79,11 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                 "vars" => Some(ValueString::String(Cow::Owned(
                     json!(ctx.vars()).to_string(),
                 ))),
+                "claims" => {
+                    let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+                    let claims = guard.clone()?;
+                    Some(ValueString::String(Cow::Owned(claims.to_string())))
+                }
                 _ => None,
             };
         }
@@ -94,6 +99,22 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                     ctx.var(tail[0].as_ref())?,
                 ))),
                 "env" => Some(ValueString::String(ctx.env_var(tail[0].as_ref())?)),
+                "claims" => {
+                    let claims_value = {
+                        let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+                        guard.clone()?
+                    };
+                    let mut current = &claims_value;
+                    for segment in tail.iter() {
+                        current = current.get(segment.as_ref())?;
+                    }
+                    match current {
+                        serde_json::Value::String(s) => {
+                            Some(ValueString::String(Cow::Owned(s.clone())))
+                        }
+                        other => Some(ValueString::String(Cow::Owned(other.to_string()))),
+                    }
+                }
                 _ => None,
             })
     }
@@ -245,6 +266,14 @@ mod tests {
             req_ctx.server.vars = TEST_VARS.clone();
             req_ctx.runtime.env = Arc::new(Env::init(TEST_ENV_VARS.clone()));
 
+            req_ctx.set_auth_claims(serde_json::json!({
+                "sub": "user123",
+                "role": "admin",
+                "nested": {
+                    "key": "value"
+                }
+            }));
+
             req_ctx
         });
 
@@ -373,6 +402,24 @@ mod tests {
             );
             assert_eq!(EVAL_CTX.raw_value(&["env", "x-missing"]), None);
 
+            // claims
+            assert_eq!(
+                EVAL_CTX.raw_value(&["claims", "sub"]),
+                Some(ValueString::String(Cow::Owned("user123".to_owned())))
+            );
+            assert_eq!(
+                EVAL_CTX.raw_value(&["claims", "role"]),
+                Some(ValueString::String(Cow::Owned("admin".to_owned())))
+            );
+            assert_eq!(
+                EVAL_CTX.raw_value(&["claims", "nested", "key"]),
+                Some(ValueString::String(Cow::Owned("value".to_owned())))
+            );
+            assert_eq!(EVAL_CTX.raw_value(&["claims", "missing"]), None);
+            assert_eq!(EVAL_CTX.raw_value(&["claims", "nested", "missing"]), None);
+            // claims as whole JSON
+            assert!(EVAL_CTX.raw_value(&["claims"]).is_some());
+
             // other value types
             assert_eq!(EVAL_CTX.raw_value(&["foo", "key"]), None);
             assert_eq!(EVAL_CTX.raw_value(&["bar", "key"]), None);
@@ -450,6 +497,21 @@ mod tests {
             );
             assert_eq!(EVAL_CTX.path_string(&["env", "x-missing"]), None);
 
+            // claims
+            assert_eq!(
+                EVAL_CTX.path_string(&["claims", "sub"]),
+                Some(Cow::Owned("user123".to_owned()))
+            );
+            assert_eq!(
+                EVAL_CTX.path_string(&["claims", "role"]),
+                Some(Cow::Owned("admin".to_owned()))
+            );
+            assert_eq!(
+                EVAL_CTX.path_string(&["claims", "nested", "key"]),
+                Some(Cow::Owned("value".to_owned()))
+            );
+            assert_eq!(EVAL_CTX.path_string(&["claims", "missing"]), None);
+
             // other value types
             assert_eq!(EVAL_CTX.path_string(&["foo", "key"]), None);
             assert_eq!(EVAL_CTX.path_string(&["bar", "key"]), None);
@@ -510,6 +572,17 @@ mod tests {
                 Some("\"env\"".to_owned())
             );
             assert_eq!(EVAL_CTX.path_graphql(&["env", "x-missing"]), None);
+
+            // claims
+            assert_eq!(
+                EVAL_CTX.path_graphql(&["claims", "sub"]),
+                Some("\"user123\"".to_owned())
+            );
+            assert_eq!(
+                EVAL_CTX.path_graphql(&["claims", "role"]),
+                Some("\"admin\"".to_owned())
+            );
+            assert_eq!(EVAL_CTX.path_graphql(&["claims", "missing"]), None);
 
             // other value types
             assert_eq!(EVAL_CTX.path_graphql(&["foo", "key"]), None);

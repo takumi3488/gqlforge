@@ -272,6 +272,11 @@ leave it empty to require authorization from all available providers.
 """
 directive @protected(
   """
+  An access control expression evaluated against the request context. Example: `claims.role 
+  == 'admin'` or `claims.sub == args.userId`
+  """
+  expr: String
+  """
   List of authentication provider IDs that can access this field or type. - Leave empty 
   to require authorization from all providers. - Include multiple IDs to require authorization 
   from each one.

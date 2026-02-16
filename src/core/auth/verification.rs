@@ -4,10 +4,10 @@ use super::error::Error;
 
 ///
 /// Represents the result of the auth verification process. It can either
-/// succeed or fail with an Error.
+/// succeed or fail with an Error. On success, it may carry JWT claims.
 #[derive(Clone, PartialEq, Debug)]
 pub enum Verification {
-    Succeed,
+    Succeed(Option<serde_json::Value>),
     Fail(Error),
 }
 
@@ -17,19 +17,31 @@ impl Verification {
     }
 
     pub fn succeed() -> Self {
-        Verification::Succeed
+        Verification::Succeed(None)
+    }
+
+    pub fn succeed_with_claims(claims: serde_json::Value) -> Self {
+        Verification::Succeed(Some(claims))
+    }
+
+    #[allow(dead_code)]
+    pub fn claims(&self) -> Option<&serde_json::Value> {
+        match self {
+            Verification::Succeed(claims) => claims.as_ref(),
+            Verification::Fail(_) => None,
+        }
     }
 
     pub fn fold(self, on_success: Self, on_error: impl Fn(Error) -> Self) -> Self {
         match self {
-            Verification::Succeed => on_success,
+            Verification::Succeed(_) => on_success,
             Verification::Fail(err) => on_error(err),
         }
     }
 
     pub fn or(&self, other: Self) -> Self {
         match self {
-            Verification::Succeed => Verification::Succeed,
+            Verification::Succeed(claims) => Verification::Succeed(claims.clone()),
             Verification::Fail(this) => other.fold(Verification::succeed(), |that| {
                 Verification::Fail(max(this.clone(), that))
             }),
@@ -38,7 +50,13 @@ impl Verification {
 
     pub fn and(self, other: Self) -> Self {
         match self {
-            Verification::Succeed => other,
+            Verification::Succeed(left_claims) => match other {
+                Verification::Succeed(right_claims) => {
+                    let merged = merge_claims(left_claims, right_claims);
+                    Verification::Succeed(merged)
+                }
+                fail => fail,
+            },
             Verification::Fail(_) => self,
         }
     }
@@ -54,10 +72,37 @@ impl Verification {
         }
     }
 
+    #[allow(dead_code)]
     pub fn to_result(&self) -> Result<(), Error> {
         match self {
-            Verification::Succeed => Ok(()),
+            Verification::Succeed(_) => Ok(()),
             Verification::Fail(err) => Err(err.clone()),
         }
+    }
+
+    pub fn to_result_with_claims(&self) -> Result<Option<serde_json::Value>, Error> {
+        match self {
+            Verification::Succeed(claims) => Ok(claims.clone()),
+            Verification::Fail(err) => Err(err.clone()),
+        }
+    }
+}
+
+fn merge_claims(
+    left: Option<serde_json::Value>,
+    right: Option<serde_json::Value>,
+) -> Option<serde_json::Value> {
+    match (left, right) {
+        (Some(serde_json::Value::Object(mut l)), Some(serde_json::Value::Object(r))) => {
+            for (k, v) in r {
+                l.insert(k, v);
+            }
+            Some(serde_json::Value::Object(l))
+        }
+        (Some(l), None) => Some(l),
+        (None, Some(r)) => Some(r),
+        (None, None) => None,
+        // If either side is not an object, prefer the left side
+        (Some(l), Some(_)) => Some(l),
     }
 }

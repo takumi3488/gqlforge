@@ -1,3 +1,4 @@
+pub mod access_expr;
 mod discriminator;
 mod error;
 mod eval;

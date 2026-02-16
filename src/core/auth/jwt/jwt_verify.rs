@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use headers::authorization::Bearer;
 use headers::{Authorization, HeaderMapExt};
 use serde::Deserialize;
@@ -20,6 +22,42 @@ pub enum OneOrMany<T> {
 pub struct JwtClaim {
     pub aud: Option<OneOrMany<String>>,
     pub iss: Option<String>,
+    pub sub: Option<String>,
+    #[serde(flatten)]
+    pub extra: HashMap<String, serde_json::Value>,
+}
+
+impl JwtClaim {
+    pub fn to_json_value(&self) -> serde_json::Value {
+        let mut map = serde_json::Map::new();
+        if let Some(ref aud) = self.aud {
+            match aud {
+                OneOrMany::One(s) => {
+                    map.insert("aud".to_owned(), serde_json::Value::String(s.clone()));
+                }
+                OneOrMany::Vec(v) => {
+                    map.insert(
+                        "aud".to_owned(),
+                        serde_json::Value::Array(
+                            v.iter()
+                                .map(|s| serde_json::Value::String(s.clone()))
+                                .collect(),
+                        ),
+                    );
+                }
+            }
+        }
+        if let Some(ref iss) = self.iss {
+            map.insert("iss".to_owned(), serde_json::Value::String(iss.clone()));
+        }
+        if let Some(ref sub) = self.sub {
+            map.insert("sub".to_owned(), serde_json::Value::String(sub.clone()));
+        }
+        for (k, v) in &self.extra {
+            map.insert(k.clone(), v.clone());
+        }
+        serde_json::Value::Object(map)
+    }
 }
 
 pub struct JwtVerifier {
@@ -59,7 +97,7 @@ impl JwtVerifier {
             return Verification::fail(Error::Invalid);
         }
 
-        Verification::succeed()
+        Verification::succeed_with_claims(claims.to_json_value())
     }
 }
 
@@ -173,6 +211,15 @@ pub mod tests {
         req_context
     }
 
+    fn assert_succeed_with_claims(v: &Verification) {
+        match v {
+            Verification::Succeed(Some(claims)) => {
+                assert!(claims.is_object(), "claims should be an object");
+            }
+            other => panic!("expected Succeed with claims, got {:?}", other),
+        }
+    }
+
     #[tokio::test]
     async fn validate_token_iss() {
         let jwt_options = blueprint::Jwt::test_value();
@@ -182,7 +229,9 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
+        let claims = valid.claims().unwrap();
+        assert_eq!(claims["sub"], serde_json::json!("you"));
 
         let jwt_options = blueprint::Jwt {
             issuer: Some("me".to_owned()),
@@ -194,7 +243,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             issuer: Some("another".to_owned()),
@@ -218,7 +267,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             audiences: HashSet::from_iter(["them".to_string()]),
@@ -230,7 +279,7 @@ pub mod tests {
             .verify(&create_jwt_auth_request(JWT_VALID_TOKEN_WITH_KID))
             .await;
 
-        assert_eq!(valid, Verification::succeed());
+        assert_succeed_with_claims(&valid);
 
         let jwt_options = blueprint::Jwt {
             audiences: HashSet::from_iter(["anothem".to_string()]),
