@@ -373,7 +373,8 @@ mod tests {
         // Should not panic; the ADD CONSTRAINT is warned but gracefully ignored.
         let schema = parse_migrations(&[m1, m2]).unwrap();
         let table = schema.find_table("orders").unwrap();
-        // The FK is not applied via ALTER (not yet supported), so foreign_keys stays empty.
+        // The FK is not applied via ALTER (not yet supported), so foreign_keys stays
+        // empty.
         assert!(table.foreign_keys.is_empty());
     }
 }
