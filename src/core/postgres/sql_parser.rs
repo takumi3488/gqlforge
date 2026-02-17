@@ -153,6 +153,12 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
         AlterTableOperation::DropColumn { column_name, .. } => {
             table.columns.retain(|c| c.name != column_name.value);
         }
+        AlterTableOperation::AddConstraint { .. } => {
+            tracing::warn!(
+                "ALTER TABLE ADD CONSTRAINT is not yet supported in DDL parsing; \
+                 constraint will be ignored"
+            );
+        }
         _ => {}
     }
     Ok(())
@@ -170,12 +176,13 @@ fn column_from_def(col: &ColumnDef) -> Column {
                     | ColumnOptionDef { option: ColumnOption::Unique { is_primary: true, .. }, .. }
             )
         });
-    let has_default = col.options.iter().any(|opt| {
-        matches!(
-            opt,
-            ColumnOptionDef { option: ColumnOption::Default(_), .. }
-        )
-    });
+    let has_default = is_serial
+        || col.options.iter().any(|opt| {
+            matches!(
+                opt,
+                ColumnOptionDef { option: ColumnOption::Default(_), .. }
+            )
+        });
     let is_generated = col.options.iter().any(|opt| {
         matches!(
             opt,
@@ -294,6 +301,10 @@ mod tests {
         let id_col = table.find_column("id").unwrap();
         assert_eq!(id_col.pg_type, PgType::Integer);
         assert!(!id_col.is_nullable);
+        assert!(
+            id_col.has_default,
+            "SERIAL column should have has_default = true"
+        );
 
         let name_col = table.find_column("name").unwrap();
         assert_eq!(name_col.pg_type, PgType::Varchar);
@@ -341,5 +352,28 @@ mod tests {
         let table = schema.find_table("users").unwrap();
         assert_eq!(table.columns.len(), 3);
         assert!(table.find_column("email").is_some());
+    }
+
+    #[test]
+    fn parse_alter_table_add_constraint_does_not_panic() {
+        let m1 = r#"
+            CREATE TABLE orders (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL
+            );
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY
+            );
+        "#
+        .to_string();
+        let m2 =
+            "ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);"
+                .to_string();
+
+        // Should not panic; the ADD CONSTRAINT is warned but gracefully ignored.
+        let schema = parse_migrations(&[m1, m2]).unwrap();
+        let table = schema.find_table("orders").unwrap();
+        // The FK is not applied via ALTER (not yet supported), so foreign_keys stays empty.
+        assert!(table.foreign_keys.is_empty());
     }
 }
