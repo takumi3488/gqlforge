@@ -13,8 +13,8 @@ find "$CONTENT_DIR" -name '*.md' | while read -r src; do
 
   # _index.md handling
   if [ "$base" = "_index.md" ]; then
-    # Skip redirect-only _index.md files
-    if grep -q 'redirect_to' "$src" && ! awk 'BEGIN{s=0} /^[+]{3}$/{s++;next} s>=2{found=1; exit} END{exit !found}' "$src"; then
+    # Skip redirect-only _index.md files (check redirect_to in front matter only, and no body content)
+    if awk 'NR==1 && /^[+]{3}$/{s=1;next} s==1 && /^[+]{3}$/{s=2;next} s==1 && /redirect_to/{r=1} s>=2{b=1; exit} END{exit !(r && !b)}' "$src"; then
       continue
     fi
     # _index.md with content → parent dir name .md  (directives/_index.md → directives.md)
@@ -29,7 +29,7 @@ find "$CONTENT_DIR" -name '*.md' | while read -r src; do
   mkdir -p "$(dirname "$dest")"
 
   # Strip TOML front matter (+++…+++) and transform links
-  awk 'BEGIN{s=0} /^[+]{3}$/{s++;next} s>=2' "$src" \
+  awk 'NR==1 && /^[+]{3}$/{s=1;next} s==1 && /^[+]{3}$/{s=2;next} s>=2' "$src" \
     | sed -E 's|@/docs/([^)]+)/_index\.md|/docs/\1.md|g' \
     | sed -E 's|@(/docs/[^)]+)|\1|g' \
     | sed -E 's|\]\(/docs/([^)#]+)/#|\](/docs/\1.md#|g' \
