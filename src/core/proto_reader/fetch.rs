@@ -18,17 +18,26 @@ use crate::core::grpc::request_template::RequestBody;
 use crate::core::mustache::Mustache;
 use crate::core::runtime::TargetRuntime;
 
+/// gRPC reflection v1 package name
+pub const GRPC_REFLECTION_V1: &str = "grpc.reflection.v1";
+/// gRPC reflection v1alpha package name
+pub const GRPC_REFLECTION_V1ALPHA: &str = "grpc.reflection.v1alpha";
+
 ///
-/// Loading reflection proto
-/// https://github.com/grpc/grpc/blob/master/src/proto/grpc/reflection/v1alpha/reflection.proto
+/// Loading reflection proto (used as a template, package name is replaced
+/// dynamically)
 const REFLECTION_PROTO: &str = include_str!(concat!(
     env!("CARGO_MANIFEST_DIR"),
     "/src/core/proto_reader/proto/reflection.proto"
 ));
 
 /// This function is just used for better exception handling
-fn get_protobuf_set() -> Result<ProtobufSet> {
-    let descriptor = protox_parse::parse("reflection", REFLECTION_PROTO)?;
+fn get_protobuf_set(package: &str) -> Result<ProtobufSet> {
+    let proto_content = REFLECTION_PROTO.replace(
+        "package grpc.reflection.v1alpha;",
+        &format!("package {};", package),
+    );
+    let descriptor = protox_parse::parse("reflection", &proto_content)?;
     let mut descriptor_set = FileDescriptorSet::default();
     descriptor_set.file.push(descriptor);
     ProtobufSet::from_proto_file(descriptor_set)
@@ -83,9 +92,10 @@ impl GrpcReflection {
         url: T,
         headers: Option<Vec<KeyValue>>,
         target_runtime: TargetRuntime,
+        package: &str,
     ) -> Self {
         let server_reflection_method = GrpcMethod {
-            package: "grpc.reflection.v1alpha".to_string(),
+            package: package.to_string(),
             service: "ServerReflection".to_string(),
             name: "ServerReflectionInfo".to_string(),
         };
@@ -130,7 +140,7 @@ impl GrpcReflection {
 
     async fn execute(&self, body: serde_json::Value) -> Result<ReflectionResponse> {
         let server_reflection_method = &self.server_reflection_method;
-        let protobuf_set = get_protobuf_set()?;
+        let protobuf_set = get_protobuf_set(&server_reflection_method.package)?;
         let reflection_service = protobuf_set.find_service(server_reflection_method)?;
         let operation = reflection_service.find_operation(server_reflection_method)?;
         let mut url: url::Url = self.url.parse()?;
@@ -248,6 +258,7 @@ mod grpc_fetch {
             format!("http://localhost:{}", server.port()),
             None,
             crate::core::runtime::test::init(None),
+            GRPC_REFLECTION_V1ALPHA,
         );
 
         let runtime = crate::core::runtime::test::init(None);
@@ -277,6 +288,7 @@ mod grpc_fetch {
             format!("http://localhost:{}", server.port()),
             None,
             crate::core::runtime::test::init(None),
+            GRPC_REFLECTION_V1ALPHA,
         );
 
         let runtime = crate::core::runtime::test::init(None);
@@ -307,8 +319,12 @@ mod grpc_fetch {
 
         let runtime = crate::core::runtime::test::init(None);
 
-        let grpc_reflection =
-            GrpcReflection::new(format!("http://localhost:{}", server.port()), None, runtime);
+        let grpc_reflection = GrpcReflection::new(
+            format!("http://localhost:{}", server.port()),
+            None,
+            runtime,
+            GRPC_REFLECTION_V1ALPHA,
+        );
 
         let resp = grpc_reflection.list_all_files().await?;
 
@@ -339,8 +355,12 @@ mod grpc_fetch {
 
         let runtime = crate::core::runtime::test::init(None);
 
-        let grpc_reflection =
-            GrpcReflection::new(format!("http://localhost:{}", server.port()), None, runtime);
+        let grpc_reflection = GrpcReflection::new(
+            format!("http://localhost:{}", server.port()),
+            None,
+            runtime,
+            GRPC_REFLECTION_V1ALPHA,
+        );
 
         let resp = grpc_reflection.list_all_files().await;
 
@@ -366,13 +386,45 @@ mod grpc_fetch {
 
         let runtime = crate::core::runtime::test::init(None);
 
-        let grpc_reflection =
-            GrpcReflection::new(format!("http://localhost:{}", server.port()), None, runtime);
+        let grpc_reflection = GrpcReflection::new(
+            format!("http://localhost:{}", server.port()),
+            None,
+            runtime,
+            GRPC_REFLECTION_V1ALPHA,
+        );
 
         let result = grpc_reflection.get_by_service("nonexistent.Service").await;
         assert!(result.is_err());
 
         http_reflection_service_not_found.assert();
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn test_v1_reflection_list_all() -> Result<()> {
+        let server = start_mock_server();
+
+        let http_reflection_list_all = server.mock(|when, then| {
+            when.method(httpmock::Method::POST)
+                .path("/grpc.reflection.v1.ServerReflection/ServerReflectionInfo")
+                .body("\0\0\0\0\x02:\0");
+            then.status(200).body(get_fake_resp());
+        });
+
+        let runtime = crate::core::runtime::test::init(None);
+
+        let grpc_reflection = GrpcReflection::new(
+            format!("http://localhost:{}", server.port()),
+            None,
+            runtime,
+            GRPC_REFLECTION_V1,
+        );
+
+        let resp = grpc_reflection.list_all_files().await?;
+        assert!(!resp.is_empty());
+
+        http_reflection_list_all.assert();
 
         Ok(())
     }
@@ -397,6 +449,7 @@ mod grpc_fetch {
                 value: "Bearer 123".to_string(),
             }]),
             runtime,
+            GRPC_REFLECTION_V1ALPHA,
         );
 
         let resp = grpc_reflection.list_all_files().await?;
