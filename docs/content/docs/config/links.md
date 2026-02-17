@@ -71,6 +71,19 @@ schema
 }
 ```
 
+### Linking multiple PostgreSQL databases
+
+When connecting to multiple databases, each `@link(type: Postgres)` must have a unique `id`. Use the `db` field on `@postgres` to specify which connection to query.
+
+```graphql
+schema
+@link(id: "main", type: Postgres, src: "postgres://localhost:5432/main_db")
+@link(id: "analytics", type: Postgres, src: "postgres://localhost:5432/analytics_db")
+@server(port: 8000) {
+  query: Query
+}
+```
+
 ### Linking a JWKS provider for authentication
 
 ```graphql

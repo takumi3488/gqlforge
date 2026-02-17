@@ -148,7 +148,8 @@ impl ConfigReader {
                     {
                         let db_schema =
                             crate::core::postgres::introspector::introspect(&link.src).await?;
-                        extensions.set_database_schema(db_schema);
+                        let id = link.id.clone().or_else(|| Some("default".to_string()));
+                        extensions.add_database_schema(id, db_schema);
                     }
                     #[cfg(not(feature = "postgres"))]
                     {

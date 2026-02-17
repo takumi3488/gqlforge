@@ -9,17 +9,18 @@ The `@postgres` directive resolves a field by executing a SQL operation against 
 
 ## Fields
 
-| Field       | Type              | Default  | Description                                                             |
-| ----------- | ----------------- | -------- | ----------------------------------------------------------------------- |
-| `table`     | String            | Required | Target table name (optionally schema-qualified, e.g. `"public.users"`). |
-| `operation` | PostgresOperation | `SELECT` | The CRUD operation to perform. See below.                               |
-| `filter`    | JSON              | `null`   | A JSON object describing the WHERE clause. Supports Mustache templates. |
-| `input`     | String            | `null`   | Input data source for INSERT/UPDATE. Typically `"{{.args.input}}"`.     |
-| `batchKey`  | [String]          | `[]`     | Columns used for DataLoader batch keys (N+1 prevention).                |
-| `dedupe`    | Boolean           | `false`  | Deduplicate identical in-flight database calls.                         |
-| `limit`     | String            | `null`   | Mustache template for the LIMIT clause, e.g. `"{{.args.limit}}"`.       |
-| `offset`    | String            | `null`   | Mustache template for the OFFSET clause, e.g. `"{{.args.offset}}"`.     |
-| `orderBy`   | String            | `null`   | Mustache template for the ORDER BY clause, e.g. `"{{.args.orderBy}}"`.  |
+| Field       | Type              | Default  | Description                                                                             |
+| ----------- | ----------------- | -------- | --------------------------------------------------------------------------------------- |
+| `db`        | String            | `null`   | The `@link(type: Postgres)` id to use. Optional when only one Postgres link is defined. |
+| `table`     | String            | Required | Target table name (optionally schema-qualified, e.g. `"public.users"`).                 |
+| `operation` | PostgresOperation | `SELECT` | The CRUD operation to perform. See below.                                               |
+| `filter`    | JSON              | `null`   | A JSON object describing the WHERE clause. Supports Mustache templates.                 |
+| `input`     | String            | `null`   | Input data source for INSERT/UPDATE. Typically `"{{.args.input}}"`.                     |
+| `batchKey`  | [String]          | `[]`     | Columns used for DataLoader batch keys (N+1 prevention).                                |
+| `dedupe`    | Boolean           | `false`  | Deduplicate identical in-flight database calls.                                         |
+| `limit`     | String            | `null`   | Mustache template for the LIMIT clause, e.g. `"{{.args.limit}}"`.                       |
+| `offset`    | String            | `null`   | Mustache template for the OFFSET clause, e.g. `"{{.args.offset}}"`.                     |
+| `orderBy`   | String            | `null`   | Mustache template for the ORDER BY clause, e.g. `"{{.args.orderBy}}"`.                  |
 
 ## PostgresOperation
 
@@ -87,6 +88,28 @@ type Post {
   )
 }
 ```
+
+### Multiple databases
+
+When multiple `@link(type: Postgres)` are defined, use the `db` field to specify which connection to query:
+
+```graphql
+schema
+@server(port: 8000)
+@link(id: "main", type: Postgres, src: "postgres://localhost:5432/main_db")
+@link(id: "analytics", type: Postgres, src: "postgres://localhost:5432/analytics_db") {
+  query: Query
+}
+
+type Query {
+  userById(id: Int!): User @postgres(db: "main", table: "users", operation: SELECT_ONE, filter: { id: "{{.args.id}}" })
+
+  pageViews(limit: Int): [PageView!]!
+  @postgres(db: "analytics", table: "page_views", operation: SELECT, limit: "{{.args.limit}}")
+}
+```
+
+When only one `@link(type: Postgres)` is defined, the `db` field can be omitted.
 
 ## Security
 

@@ -2,6 +2,7 @@ mod env;
 mod file;
 mod http;
 
+use std::collections::HashMap;
 use std::fs;
 use std::hash::Hash;
 use std::sync::Arc;
@@ -73,6 +74,21 @@ pub fn init(blueprint: &Blueprint) -> TargetRuntime {
     #[cfg(not(feature = "js"))]
     tracing::warn!("JS capabilities are disabled in this build");
 
+    #[allow(unused_mut)]
+    let mut postgres: HashMap<String, Arc<dyn crate::core::postgres::PostgresIO>> = HashMap::new();
+
+    #[cfg(feature = "postgres")]
+    for (id, url) in &blueprint.postgres_connections {
+        match crate::cli::postgres::pool::PostgresPool::new(url) {
+            Ok(pool) => {
+                postgres.insert(id.clone(), Arc::new(pool));
+            }
+            Err(e) => {
+                tracing::error!("Failed to create Postgres pool '{}': {}", id, e);
+            }
+        }
+    }
+
     TargetRuntime {
         http: init_http(blueprint),
         http2_only: init_http2_only(blueprint),
@@ -82,7 +98,7 @@ pub fn init(blueprint: &Blueprint) -> TargetRuntime {
         extensions: Arc::new(vec![]),
         cmd_worker: init_http_worker_io(blueprint.server.script.clone()),
         worker: init_resolver_worker_io(blueprint.server.script.clone()),
-        postgres: None,
+        postgres,
     }
 }
 

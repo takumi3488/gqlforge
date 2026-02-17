@@ -112,6 +112,9 @@ pub enum BlueprintError {
     #[error("Only one key link is allowed")]
     OnlyOneKeyLinkAllowed,
 
+    #[error("Multiple @link(type: Postgres) require explicit 'id' on each link")]
+    PostgresMultipleLinksRequireId,
+
     #[error("no value '{0}' found")]
     NoValueFound(String),
 

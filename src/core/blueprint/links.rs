@@ -53,6 +53,18 @@ impl TryFrom<Vec<Link>> for Links {
                 Valid::succeed(links)
             }
         })
+        .and_then(|links| {
+            let pg_links: Vec<&Link> = links
+                .iter()
+                .filter(|l| l.type_of == LinkType::Postgres)
+                .collect();
+
+            if pg_links.len() > 1 && pg_links.iter().any(|l| l.id.is_none()) {
+                Valid::fail(BlueprintError::PostgresMultipleLinksRequireId)
+            } else {
+                Valid::succeed(links)
+            }
+        })
         .trace(Link::trace_name().as_str())
         .trace("schema")
         .map_to(Links)

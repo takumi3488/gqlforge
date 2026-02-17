@@ -15,9 +15,33 @@ pub struct CompilePostgres<'a> {
 pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
     let pg = inputs.postgres;
     let dedupe = pg.dedupe.unwrap_or_default();
+    let schemas = &inputs.config_module.extensions().database_schemas;
+
+    // Resolve the connection id.
+    let connection_id = match &pg.db {
+        Some(id) => id.clone(),
+        None => {
+            if schemas.len() == 1 {
+                schemas[0]
+                    .id
+                    .clone()
+                    .unwrap_or_else(|| "default".to_string())
+            } else if schemas.is_empty() {
+                "default".to_string()
+            } else {
+                return Valid::fail(BlueprintError::Cause(
+                    "@postgres requires 'db' when multiple Postgres connections are defined"
+                        .to_string(),
+                ));
+            }
+        }
+    };
 
     // Validate that the table exists in the database schema (if available).
-    let db_schema = inputs.config_module.extensions().database_schema.as_ref();
+    let db_schema = inputs
+        .config_module
+        .extensions()
+        .find_database_schema(Some(&connection_id));
 
     let table_valid = if let Some(schema) = db_schema {
         if schema.find_table(&pg.table).is_some() {
@@ -64,9 +88,16 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
                 group_by: Some(GroupBy::new(pg.batch_key.clone(), None)),
                 dl_id: None,
                 dedupe,
+                connection_id,
             }
         } else {
-            IO::Postgres { req_template, group_by: None, dl_id: None, dedupe }
+            IO::Postgres {
+                req_template,
+                group_by: None,
+                dl_id: None,
+                dedupe,
+                connection_id,
+            }
         };
 
         IR::IO(Box::new(io))

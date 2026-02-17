@@ -32,6 +32,32 @@ schema
 }
 ```
 
+## Multiple Database Connections
+
+You can connect to multiple PostgreSQL databases by defining multiple `@link(type: Postgres)` directives. Each link must have a unique `id`:
+
+```graphql
+schema
+@server(port: 8000)
+@link(id: "main", type: Postgres, src: "postgres://localhost:5432/main_db")
+@link(id: "analytics", type: Postgres, src: "postgres://localhost:5432/analytics_db") {
+  query: Query
+}
+```
+
+Use the `db` field in `@postgres` to specify which connection to use:
+
+```graphql
+type Query {
+  userById(id: Int!): User @postgres(db: "main", table: "users", operation: SELECT_ONE, filter: { id: "{{.args.id}}" })
+
+  pageViews(limit: Int): [PageView!]!
+  @postgres(db: "analytics", table: "page_views", operation: SELECT, limit: "{{.args.limit}}")
+}
+```
+
+When only a single `@link(type: Postgres)` is defined, both `id` on the link and `db` on the directive can be omitted for backward compatibility.
+
 ## Type Mapping
 
 PostgreSQL column types are automatically mapped to GraphQL scalars:

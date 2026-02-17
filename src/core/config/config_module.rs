@@ -152,8 +152,10 @@ pub struct Extensions {
     /// Raw SQL migration contents, applied in order to build a DatabaseSchema.
     pub sql_migrations: Vec<String>,
 
-    /// Resolved database schema for `@postgres` directives.
-    pub database_schema: Option<DatabaseSchema>,
+    /// Resolved database schemas for `@postgres` directives.
+    /// Each entry corresponds to a `@link(type: Postgres)` and carries an
+    /// optional `id` for multi-database setups.
+    pub database_schemas: Vec<Content<DatabaseSchema>>,
 }
 
 impl Extensions {
@@ -176,8 +178,30 @@ impl Extensions {
         self.sql_migrations.push(content);
     }
 
-    pub fn set_database_schema(&mut self, schema: DatabaseSchema) {
-        self.database_schema = Some(schema);
+    pub fn add_database_schema(&mut self, id: Option<String>, schema: DatabaseSchema) {
+        self.database_schemas.push(Content { id, content: schema });
+    }
+
+    /// Find a database schema by connection id.
+    ///
+    /// - If `id` is `Some`, returns the matching schema.
+    /// - If `id` is `None` and there is exactly one schema, returns it.
+    /// - Otherwise returns `None`.
+    pub fn find_database_schema(&self, id: Option<&str>) -> Option<&DatabaseSchema> {
+        match id {
+            Some(id) => self
+                .database_schemas
+                .iter()
+                .find(|c| c.id.as_deref() == Some(id))
+                .map(|c| &c.content),
+            None => {
+                if self.database_schemas.len() == 1 {
+                    Some(&self.database_schemas[0].content)
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 
