@@ -124,6 +124,18 @@ impl RequestTemplate {
         if entries.is_empty() {
             anyhow::bail!("INSERT requires at least one field in input");
         }
+
+        if !self.columns.is_empty() {
+            let unknown: Vec<&str> = entries
+                .iter()
+                .filter(|(k, _)| !self.columns.iter().any(|c| c == k))
+                .map(|(k, _)| k.as_str())
+                .collect();
+            if !unknown.is_empty() {
+                anyhow::bail!("Unknown column(s) in INSERT input: {}", unknown.join(", "));
+            }
+        }
+
         let cols: Vec<String> = entries.iter().map(|(k, _)| quote_ident(k)).collect();
         let mut params: Vec<String> = Vec::new();
         let mut placeholders = Vec::new();
@@ -144,6 +156,10 @@ impl RequestTemplate {
     }
 
     fn render_update<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
+        if self.filter.is_none() {
+            anyhow::bail!("UPDATE without a filter is not allowed (would affect all rows)");
+        }
+
         let input_json = self
             .input
             .as_ref()
@@ -154,6 +170,18 @@ impl RequestTemplate {
         if entries.is_empty() {
             anyhow::bail!("UPDATE requires at least one field in input");
         }
+
+        if !self.columns.is_empty() {
+            let unknown: Vec<&str> = entries
+                .iter()
+                .filter(|(k, _)| !self.columns.iter().any(|c| c == k))
+                .map(|(k, _)| k.as_str())
+                .collect();
+            if !unknown.is_empty() {
+                anyhow::bail!("Unknown column(s) in UPDATE input: {}", unknown.join(", "));
+            }
+        }
+
         let mut params: Vec<String> = Vec::new();
         let mut set_clauses = Vec::new();
 
@@ -178,6 +206,10 @@ impl RequestTemplate {
     }
 
     fn render_delete<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
+        if self.filter.is_none() {
+            anyhow::bail!("DELETE without a filter is not allowed (would affect all rows)");
+        }
+
         let table = quote_ident(&self.table);
         let mut sql = format!("DELETE FROM {table}");
         let mut params = Vec::new();
@@ -376,5 +408,91 @@ mod tests {
 
         assert_eq!(rendered.sql, r#"DELETE FROM "users" WHERE "id" = $1"#);
         assert_eq!(rendered.params, vec!["42"]);
+    }
+
+    #[test]
+    fn insert_unknown_column_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Insert,
+            filter: None,
+            input: Some(Mustache::parse(r#"{"name": "Alice", "bogus": "bad"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec!["id".into(), "name".into(), "email".into()],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Unknown column(s) in INSERT input"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn update_unknown_column_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Update,
+            filter: Some(Mustache::parse(r#"{"id": "1"}"#)),
+            input: Some(Mustache::parse(r#"{"bogus": "bad"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec!["id".into(), "name".into(), "email".into()],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Unknown column(s) in UPDATE input"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn update_without_filter_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Update,
+            filter: None,
+            input: Some(Mustache::parse(r#"{"name": "Alice"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec![],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string().contains("UPDATE without a filter"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn delete_without_filter_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Delete,
+            filter: None,
+            input: None,
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec![],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string().contains("DELETE without a filter"),
+            "unexpected error: {err}"
+        );
     }
 }
