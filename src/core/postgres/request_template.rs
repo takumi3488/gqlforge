@@ -68,7 +68,10 @@ impl RequestTemplate {
         if let Some(order_by) = &self.order_by {
             let rendered = order_by.render(ctx);
             if !rendered.is_empty() {
-                sql.push_str(&format!(" ORDER BY {rendered}"));
+                let sanitized = sanitize_order_by(&rendered, &self.columns);
+                if !sanitized.is_empty() {
+                    sql.push_str(&format!(" ORDER BY {sanitized}"));
+                }
             }
         }
 
@@ -118,6 +121,9 @@ impl RequestTemplate {
             .unwrap_or_default();
 
         let entries = parse_json_object(&input_json)?;
+        if entries.is_empty() {
+            anyhow::bail!("INSERT requires at least one field in input");
+        }
         let cols: Vec<String> = entries.iter().map(|(k, _)| quote_ident(k)).collect();
         let mut params: Vec<String> = Vec::new();
         let mut placeholders = Vec::new();
@@ -145,6 +151,9 @@ impl RequestTemplate {
             .unwrap_or_default();
 
         let entries = parse_json_object(&input_json)?;
+        if entries.is_empty() {
+            anyhow::bail!("UPDATE requires at least one field in input");
+        }
         let mut params: Vec<String> = Vec::new();
         let mut set_clauses = Vec::new();
 
@@ -200,7 +209,12 @@ impl RequestTemplate {
             clauses.push(format!("{} = ${}", quote_ident(&k), offset + params.len()));
         }
 
-        Ok((clauses.join(" AND "), params))
+        let clause = if clauses.is_empty() {
+            "TRUE".to_string()
+        } else {
+            clauses.join(" AND ")
+        };
+        Ok((clause, params))
     }
 
     fn select_columns(&self) -> String {
@@ -223,6 +237,33 @@ impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
         rendered.hash(&mut hasher);
         Some(IoId::new(hasher.finish()))
     }
+}
+
+/// Sanitise an ORDER BY clause by validating column names against a whitelist
+/// and only allowing `ASC` / `DESC` direction keywords.
+fn sanitize_order_by(rendered: &str, columns: &[String]) -> String {
+    rendered
+        .split(',')
+        .filter_map(|part| {
+            let part = part.trim();
+            if part.is_empty() {
+                return None;
+            }
+            let mut tokens = part.split_whitespace();
+            let col = tokens.next()?;
+            if !columns.iter().any(|c| c == col) {
+                return None;
+            }
+            let dir = tokens.next().map(|d| d.to_uppercase()).unwrap_or_default();
+            match dir.as_str() {
+                "ASC" => Some(format!("{} ASC", quote_ident(col))),
+                "DESC" => Some(format!("{} DESC", quote_ident(col))),
+                "" => Some(quote_ident(col)),
+                _ => None,
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// Parse a simple JSON object `{"k":"v", ...}` into key-value pairs.
@@ -289,7 +330,7 @@ mod tests {
 
         assert_eq!(
             rendered.sql,
-            r#"SELECT "id", "name", "email" FROM "users" WHERE "active" = $1 ORDER BY name ASC LIMIT $2 OFFSET $3"#
+            r#"SELECT "id", "name", "email" FROM "users" WHERE "active" = $1 ORDER BY "name" ASC LIMIT $2 OFFSET $3"#
         );
         assert_eq!(rendered.params, vec!["true", "10", "0"]);
     }

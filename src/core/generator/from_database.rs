@@ -40,7 +40,18 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
         // --- FK relationship fields ---
         for fk in &table.foreign_keys {
             let ref_type_name = table_to_type_name(&fk.referenced_table);
-            let field_name = fk.referenced_table.to_case(Case::Camel);
+            let base_name = fk.referenced_table.to_case(Case::Camel);
+            let field_name = if output_type.fields.contains_key(&base_name) {
+                let suffix = fk
+                    .columns
+                    .iter()
+                    .map(|c| c.to_case(Case::Camel))
+                    .collect::<Vec<_>>()
+                    .join("And");
+                format!("{base_name}By{suffix}")
+            } else {
+                base_name
+            };
 
             let filter_obj: serde_json::Value = fk
                 .referenced_columns
