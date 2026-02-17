@@ -27,6 +27,7 @@ mod lift;
 pub mod merge_right;
 pub mod mustache;
 pub mod path;
+pub mod postgres;
 pub mod primitive;
 pub mod print_schema;
 pub mod proto_reader;

@@ -3,6 +3,7 @@ use std::sync::Arc;
 use async_graphql_value::ConstValue;
 
 use super::ir::model::IoId;
+use crate::core::postgres::PostgresIO;
 use crate::core::schema_extension::SchemaExtension;
 use crate::core::worker::{Command, Event};
 use crate::core::{Cache, EnvIO, FileIO, HttpIO, WorkerIO};
@@ -32,6 +33,8 @@ pub struct TargetRuntime {
     pub cmd_worker: Option<Arc<dyn WorkerIO<Event, Command>>>,
     /// Worker middleware for resolving data.
     pub worker: Option<Arc<dyn WorkerIO<ConstValue, ConstValue>>>,
+    /// PostgreSQL connection pool for `@postgres` directives.
+    pub postgres: Option<Arc<dyn PostgresIO>>,
 }
 
 impl TargetRuntime {
@@ -191,6 +194,7 @@ pub mod test {
                 Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
                 None => None,
             },
+            postgres: None,
         }
     }
 }

@@ -41,7 +41,7 @@ enum Status {
 ```yml @mock
 - request:
     method: POST
-    url: http://localhost:50051/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+    url: http://localhost:50051/grpc.reflection.v1.ServerReflection/ServerReflectionInfo
     textBody: \0\0\0\0\x02:\0
   response:
     status: 200
@@ -49,7 +49,7 @@ enum Status {
 
 - request:
     method: POST
-    url: http://localhost:50051/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+    url: http://localhost:50051/grpc.reflection.v1.ServerReflection/ServerReflectionInfo
     textBody: \0\0\0\0\x12\"\x10news.NewsService
   response:
     status: 200
@@ -57,7 +57,7 @@ enum Status {
 
 - request:
     method: POST
-    url: http://localhost:50051/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+    url: http://localhost:50051/grpc.reflection.v1.ServerReflection/ServerReflectionInfo
     textBody: \0\0\0\0\x1d\x1a\x1bgoogle/protobuf/empty.proto
   expectedHits: 2
   response:
@@ -66,7 +66,7 @@ enum Status {
 
 - request:
     method: POST
-    url: http://localhost:50051/grpc.reflection.v1alpha.ServerReflection/ServerReflectionInfo
+    url: http://localhost:50051/grpc.reflection.v1.ServerReflection/ServerReflectionInfo
     textBody: \0\0\0\0\x10\x1a\x0enews_dto.proto
   response:
     status: 200

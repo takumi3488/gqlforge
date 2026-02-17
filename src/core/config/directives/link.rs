@@ -53,6 +53,14 @@ pub enum LinkType {
     /// Points to a reflection endpoint. The imported reflection endpoint will
     /// be used by the `@grpc` directive to resolve data from gRPC services.
     Grpc,
+
+    /// Points to a SQL migration file. Used to build a database schema for
+    /// the `@postgres` directive offline (without a live database connection).
+    Sql,
+
+    /// Points to a PostgreSQL connection string. The database will be
+    /// introspected at startup to build a schema for the `@postgres` directive.
+    Postgres,
 }
 
 /// The @link directive allows you to import external resources, such as

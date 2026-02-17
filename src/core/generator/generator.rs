@@ -7,12 +7,14 @@ use prost_reflect::prost_types::FileDescriptorSet;
 use serde_json::Value;
 use url::Url;
 
+use super::from_database::from_database;
 use super::from_proto::from_proto;
 use super::proto::connect_rpc::ConnectRPC;
 use super::{FromJsonGenerator, NameGenerator, PREFIX, RequestSample};
 use crate::core::config::{self, Config, ConfigModule, Link, LinkType};
 use crate::core::http::Method;
 use crate::core::merge_right::MergeRight;
+use crate::core::postgres::schema::DatabaseSchema;
 use crate::core::proto_reader::ProtoMetadata;
 use crate::core::transform::{Transform, TransformerOps};
 
@@ -50,6 +52,10 @@ pub enum Input {
     Config {
         schema: String,
         source: config::Source,
+    },
+    Postgres {
+        database_schema: DatabaseSchema,
+        connection_url: String,
     },
 }
 
@@ -150,6 +156,10 @@ impl Generator {
                         proto_config
                     };
                     config = config.merge_right(proto_config);
+                }
+                Input::Postgres { database_schema, connection_url } => {
+                    let pg_config = from_database(database_schema, connection_url)?;
+                    config = config.merge_right(pg_config);
                 }
             }
         }

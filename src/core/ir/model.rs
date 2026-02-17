@@ -12,7 +12,7 @@ use crate::core::blueprint::{Auth, DynamicValue};
 use crate::core::config::group_by::GroupBy;
 use crate::core::graphql::{self};
 use crate::core::worker_hooks::WorkerHooks;
-use crate::core::{grpc, http};
+use crate::core::{grpc, http, postgres};
 
 #[derive(Clone, Debug, Display)]
 pub enum IR {
@@ -82,6 +82,12 @@ pub enum IO {
     Js {
         name: String,
     },
+    Postgres {
+        req_template: postgres::RequestTemplate,
+        group_by: Option<GroupBy>,
+        dl_id: Option<DataLoaderId>,
+        dedupe: bool,
+    },
 }
 
 impl IO {
@@ -94,6 +100,7 @@ impl IO {
             IO::GraphQLStream { .. } => false,
             IO::HttpStream { .. } => false,
             IO::Js { .. } => false,
+            IO::Postgres { dedupe, .. } => *dedupe,
         }
     }
 }
@@ -237,6 +244,7 @@ impl<'a, Ctx: ResolverContextLike + Sync> CacheKey<EvalContext<'a, Ctx>> for IO 
             IO::HttpStream { .. } => None,
             IO::GraphQL { req_template, .. } => req_template.cache_key(ctx),
             IO::Js { .. } => None,
+            IO::Postgres { req_template, .. } => req_template.cache_key(ctx),
         }
     }
 }

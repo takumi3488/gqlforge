@@ -330,6 +330,7 @@ impl ExecutionSpec {
             extensions: Arc::new(vec![]),
             cmd_worker: http_worker,
             worker,
+            postgres: None,
         };
 
         let endpoints = config
