@@ -72,6 +72,9 @@ pub mod pool {
         if result.is_empty() {
             result.push_str("_unnamed");
         }
+        if result.starts_with("__") {
+            result.insert(0, '_');
+        }
         result
     }
 
