@@ -244,6 +244,7 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
 fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
     let parts: Vec<&str> = name.0.iter().map(|p| p.value.as_str()).collect();
     match parts.as_slice() {
+        [] => ("public".to_string(), String::new()),
         [schema, table] => (schema.to_string(), table.to_string()),
         [table] => ("public".to_string(), table.to_string()),
         other => {
