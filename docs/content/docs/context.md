@@ -70,6 +70,22 @@ type Query {
 
 See [Environment Variables](@/docs/environment-variables.md) for more on using environment variables in your configuration.
 
+### `.claims`
+
+Accesses JWT claims from the authenticated user's token. Claims are available when a JWKS authentication provider is configured via `@link`.
+
+```graphql
+type Query {
+  myPosts: [Post] @http(url: "https://api.example.com/posts?author={{.claims.sub}}") @protected
+}
+```
+
+In this example, `{{.claims.sub}}` resolves to the `sub` claim from the verified JWT, filtering posts to those belonging to the authenticated user.
+
+Nested claims are supported with dot notation: `{{.claims.nested.key}}`.
+
+See [Authentication](@/docs/auth.md) for details on configuring authentication providers.
+
 ## Template Usage in Directives
 
 Context templates can be used in several places within resolver directives:
@@ -78,6 +94,7 @@ Context templates can be used in several places within resolver directives:
 - **Query parameters**: `@http(path: "/posts?author={{.value.authorId}}")`
 - **Request headers**: `headers: [{ key: "X-Token", value: "{{.headers.x-token}}" }]`
 - **Request body fields**: Within body templates for POST/PUT requests
+- **Claims in URLs**: `@http(url: "https://api.example.com/users/{{.claims.sub}}/posts")`
 
 ## Nested Access
 
