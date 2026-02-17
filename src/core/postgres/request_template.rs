@@ -152,6 +152,13 @@ impl RequestTemplate {
             .map(|m| m.render(ctx))
             .unwrap_or_default();
 
+        if input_json.is_empty() {
+            anyhow::bail!(
+                "UPDATE requires a non-empty input template for table {:?}",
+                self.table
+            );
+        }
+
         let entries = parse_json_object(&input_json)?;
         let mut params: Vec<String> = Vec::new();
         let mut set_clauses = Vec::new();

@@ -145,7 +145,17 @@ pub mod pool {
             }
             _ => {
                 // Fallback: try to get as String.
-                let v: Option<String> = row.try_get(idx).unwrap_or(None);
+                let v: Option<String> = match row.try_get(idx) {
+                    Ok(v) => v,
+                    Err(e) => {
+                        tracing::warn!(
+                            "Column {} (type {:?}) could not be read as String: {e}",
+                            col.name(),
+                            ty
+                        );
+                        None
+                    }
+                };
                 Ok(v.map(ConstValue::String).unwrap_or(ConstValue::Null))
             }
         }
