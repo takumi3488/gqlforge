@@ -20,17 +20,19 @@ The `@link` directive connects external resources to your GQLForge configuration
 
 ## Link Types
 
-| Type        | Description                                                           |
-| ----------- | --------------------------------------------------------------------- |
-| `Config`    | Another GQLForge configuration file to merge into the current schema. |
-| `Protobuf`  | A `.proto` file defining gRPC service interfaces.                     |
-| `Script`    | A JavaScript file providing custom resolver functions.                |
-| `Cert`      | A TLS certificate file (PEM format).                                  |
-| `Key`       | A TLS private key file (PEM format).                                  |
-| `Operation` | A file containing persisted GraphQL operations.                       |
-| `Htpasswd`  | An htpasswd file for basic authentication.                            |
-| `Jwks`      | A JWKS endpoint or file for JWT validation.                           |
-| `Grpc`      | A gRPC reflection endpoint for service discovery.                     |
+| Type        | Description                                                            |
+| ----------- | ---------------------------------------------------------------------- |
+| `Config`    | Another GQLForge configuration file to merge into the current schema.  |
+| `Protobuf`  | A `.proto` file defining gRPC service interfaces.                      |
+| `Script`    | A JavaScript file providing custom resolver functions.                 |
+| `Cert`      | A TLS certificate file (PEM format).                                   |
+| `Key`       | A TLS private key file (PEM format).                                   |
+| `Operation` | A file containing persisted GraphQL operations.                        |
+| `Htpasswd`  | An htpasswd file for basic authentication.                             |
+| `Jwks`      | A JWKS endpoint or file for JWT validation.                            |
+| `Grpc`      | A gRPC reflection endpoint for service discovery.                      |
+| `Sql`       | A SQL file containing `CREATE TABLE` statements for schema definition. |
+| `Postgres`  | A PostgreSQL connection URL (e.g. `postgres://user:pass@host/db`).     |
 
 ## Examples
 
@@ -54,6 +56,18 @@ schema
 )
 @server(port: 8000) {
   query: Query
+}
+```
+
+### Linking a PostgreSQL database
+
+```graphql
+schema
+@link(type: Postgres, src: "postgres://user:password@localhost:5432/mydb")
+@link(type: Sql, src: "./migrations/schema.sql")
+@server(port: 8000) {
+  query: Query
+  mutation: Mutation
 }
 ```
 

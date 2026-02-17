@@ -9,14 +9,15 @@ GQLForge uses GraphQL schema directives to declaratively configure data fetching
 
 ## Data Source Directives
 
-| Directive                                | Description                                                     |
-| ---------------------------------------- | --------------------------------------------------------------- |
-| [@http](@/docs/directives/http.md)       | Resolve a field by calling a REST/HTTP endpoint.                |
-| [@grpc](@/docs/directives/grpc.md)       | Resolve a field by calling a gRPC service method.               |
-| [@graphQL](@/docs/directives/graphQL.md) | Resolve a field by proxying to another GraphQL server.          |
-| [@call](@/docs/directives/call.md)       | Compose multiple resolver steps into a single field resolution. |
-| [@expr](@/docs/directives/expr.md)       | Return a static value or a computed expression.                 |
-| [@js](@/docs/directives/js.md)           | Resolve a field using a custom JavaScript function.             |
+| Directive                                  | Description                                                     |
+| ------------------------------------------ | --------------------------------------------------------------- |
+| [@http](@/docs/directives/http.md)         | Resolve a field by calling a REST/HTTP endpoint.                |
+| [@grpc](@/docs/directives/grpc.md)         | Resolve a field by calling a gRPC service method.               |
+| [@graphQL](@/docs/directives/graphQL.md)   | Resolve a field by proxying to another GraphQL server.          |
+| [@call](@/docs/directives/call.md)         | Compose multiple resolver steps into a single field resolution. |
+| [@expr](@/docs/directives/expr.md)         | Return a static value or a computed expression.                 |
+| [@js](@/docs/directives/js.md)             | Resolve a field using a custom JavaScript function.             |
+| [@postgres](@/docs/directives/postgres.md) | Resolve a field by querying a PostgreSQL table.                 |
 
 ## Schema Transformation Directives
 
