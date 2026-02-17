@@ -52,7 +52,8 @@ pub enum PostgresOperation {
 #[serde(rename_all = "camelCase")]
 #[serde(deny_unknown_fields)]
 pub struct Postgres {
-    /// The target table name (optionally schema-qualified, e.g. "public.users").
+    /// The target table name (optionally schema-qualified, e.g.
+    /// "public.users").
     pub table: String,
 
     /// The CRUD operation to perform.

@@ -6,10 +6,9 @@ pub mod schema;
 #[cfg(feature = "postgres")]
 pub mod sql_parser;
 
+use async_graphql_value::ConstValue;
 pub use request_template::RequestTemplate;
 pub use schema::DatabaseSchema;
-
-use async_graphql_value::ConstValue;
 
 /// Build a rustls-based TLS connector for PostgreSQL connections.
 #[cfg(feature = "postgres")]

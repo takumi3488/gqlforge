@@ -3,9 +3,8 @@ use indexmap::IndexMap;
 use serde_json::json;
 
 use crate::core::Type;
-use crate::core::config::PostgresOperation;
 use crate::core::config::{
-    Arg, Config, Field, Link, LinkType, Postgres, Resolver, Type as ConfigType,
+    Arg, Config, Field, Link, LinkType, Postgres, PostgresOperation, Resolver, Type as ConfigType,
 };
 use crate::core::postgres::schema::{Column, DatabaseSchema, PgType};
 
