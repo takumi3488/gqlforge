@@ -1,15 +1,29 @@
 use anyhow::{Context, Result};
-use tokio_postgres::NoTls;
 
 use super::schema::{
     Column, DatabaseSchema, ForeignKey, PgType, PrimaryKey, Table, UniqueConstraint,
 };
 
+fn redact_url(url: &str) -> String {
+    if let Some(at) = url.find('@')
+        && let Some(scheme_end) = url.find("://")
+    {
+        return format!("{}://***{}", &url[..scheme_end], &url[at..]);
+    }
+    "<redacted>".to_string()
+}
+
 /// Connect to a live PostgreSQL instance and introspect its schema.
 pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
-    let (client, connection) = tokio_postgres::connect(connection_url, NoTls)
+    let tls = super::make_tls_connect()?;
+    let (client, connection) = tokio_postgres::connect(connection_url, tls)
         .await
-        .with_context(|| format!("Failed to connect to PostgreSQL: {connection_url}"))?;
+        .with_context(|| {
+            format!(
+                "Failed to connect to PostgreSQL: {}",
+                redact_url(connection_url)
+            )
+        })?;
 
     // Spawn the connection handler.
     tokio::spawn(async move {
@@ -124,22 +138,23 @@ async fn fetch_foreign_keys(
 ) -> Result<Vec<ForeignKey>> {
     let query = r#"
         SELECT
-            kcu.column_name,
-            ccu.table_schema AS foreign_table_schema,
-            ccu.table_name AS foreign_table_name,
-            ccu.column_name AS foreign_column_name,
-            tc.constraint_name
-        FROM information_schema.table_constraints tc
-        JOIN information_schema.key_column_usage kcu
-          ON tc.constraint_name = kcu.constraint_name
-         AND tc.table_schema = kcu.table_schema
-        JOIN information_schema.constraint_column_usage ccu
-          ON ccu.constraint_name = tc.constraint_name
-         AND ccu.table_schema = tc.table_schema
-        WHERE tc.constraint_type = 'FOREIGN KEY'
-          AND tc.table_schema = $1
-          AND tc.table_name = $2
-        ORDER BY tc.constraint_name, kcu.ordinal_position
+            a1.attname AS column_name,
+            ns2.nspname AS foreign_table_schema,
+            cl2.relname AS foreign_table_name,
+            a2.attname AS foreign_column_name,
+            con.conname AS constraint_name
+        FROM pg_catalog.pg_constraint con
+        JOIN pg_catalog.pg_class cl ON cl.oid = con.conrelid
+        JOIN pg_catalog.pg_namespace ns ON ns.oid = cl.relnamespace
+        JOIN pg_catalog.pg_class cl2 ON cl2.oid = con.confrelid
+        JOIN pg_catalog.pg_namespace ns2 ON ns2.oid = cl2.relnamespace
+        CROSS JOIN LATERAL unnest(con.conkey, con.confkey) WITH ORDINALITY AS u(conkey, confkey, ord)
+        JOIN pg_catalog.pg_attribute a1 ON a1.attrelid = con.conrelid AND a1.attnum = u.conkey
+        JOIN pg_catalog.pg_attribute a2 ON a2.attrelid = con.confrelid AND a2.attnum = u.confkey
+        WHERE con.contype = 'f'
+          AND ns.nspname = $1
+          AND cl.relname = $2
+        ORDER BY con.conname, u.ord
     "#;
     let rows = client.query(query, &[&schema, &table]).await?;
 

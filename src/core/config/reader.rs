@@ -141,9 +141,9 @@ impl ConfigReader {
                     extensions.add_sql_migration(source.content);
                 }
                 LinkType::Postgres => {
-                    // Online introspection: handled at startup when the
-                    // postgres feature is enabled. Here we store the
-                    // connection string for later use.
+                    // Online introspection: connect to the database,
+                    // introspect its schema, and attach the result to
+                    // the config extensions.
                     #[cfg(feature = "postgres")]
                     {
                         let db_schema =

@@ -79,7 +79,7 @@ impl PgType {
     pub fn graphql_scalar(&self) -> &str {
         match self {
             PgType::SmallInt | PgType::Integer => "Int",
-            PgType::BigInt => "Int",
+            PgType::BigInt => "String",
             PgType::Real | PgType::DoublePrecision | PgType::Numeric => "Float",
             PgType::Boolean => "Boolean",
             PgType::Uuid => "ID",

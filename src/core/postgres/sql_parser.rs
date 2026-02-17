@@ -150,13 +150,17 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
 }
 
 fn column_from_def(col: &ColumnDef) -> Column {
-    let is_nullable = !col.options.iter().any(|opt| {
-        matches!(
-            opt,
-            ColumnOptionDef { option: ColumnOption::NotNull, .. }
-                | ColumnOptionDef { option: ColumnOption::Unique { is_primary: true, .. }, .. }
-        )
-    });
+    let is_serial = format!("{}", col.data_type)
+        .to_lowercase()
+        .contains("serial");
+    let is_nullable = !is_serial
+        && !col.options.iter().any(|opt| {
+            matches!(
+                opt,
+                ColumnOptionDef { option: ColumnOption::NotNull, .. }
+                    | ColumnOptionDef { option: ColumnOption::Unique { is_primary: true, .. }, .. }
+            )
+        });
     let has_default = col.options.iter().any(|opt| {
         matches!(
             opt,
@@ -242,7 +246,10 @@ fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
     match parts.as_slice() {
         [schema, table] => (schema.to_string(), table.to_string()),
         [table] => ("public".to_string(), table.to_string()),
-        _ => ("public".to_string(), name.to_string()),
+        other => {
+            let len = other.len();
+            (other[len - 2].to_string(), other[len - 1].to_string())
+        }
     }
 }
 

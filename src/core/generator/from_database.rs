@@ -81,7 +81,18 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
                     || fk.referenced_table == table.qualified_name()
                 {
                     let child_type_name = table_to_type_name(&other_table.name);
-                    let field_name = pluralise(&other_table.name.to_case(Case::Camel));
+                    let base_name = pluralise(&other_table.name.to_case(Case::Camel));
+                    let field_name = if output_type.fields.contains_key(&base_name) {
+                        let suffix = fk
+                            .columns
+                            .iter()
+                            .map(|c| c.to_case(Case::Camel))
+                            .collect::<Vec<_>>()
+                            .join("And");
+                        format!("{base_name}By{suffix}")
+                    } else {
+                        base_name
+                    };
 
                     let filter_obj: serde_json::Value = fk
                         .columns
@@ -256,7 +267,8 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
                 if pk.columns.contains(&col.name) {
                     continue;
                 }
-                let gql_type = column_to_graphql_type(col);
+                // All fields optional for partial updates.
+                let gql_type = Type::from(scalar_type(&col.pg_type));
                 input_type.fields.insert(
                     col.name.to_case(Case::Camel),
                     Field::default().type_of(gql_type),

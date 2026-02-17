@@ -8,6 +8,10 @@ use crate::core::ir::model::{CacheKey, IoId};
 use crate::core::mustache::Mustache;
 use crate::core::path::PathString;
 
+fn quote_ident(name: &str) -> String {
+    format!("\"{}\"", name.replace('"', "\"\""))
+}
+
 /// Template describing how to build a SQL query for a `@postgres` field.
 #[derive(Debug, Clone)]
 pub struct RequestTemplate {
@@ -39,7 +43,7 @@ impl Hash for RenderedQuery {
 impl RequestTemplate {
     /// Render the template against the given context to produce a SQL string
     /// with positional parameters (`$1`, `$2`, …).
-    pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
+    pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         match self.operation {
             PostgresOperation::Select => self.render_select(ctx),
             PostgresOperation::SelectOne => self.render_select_one(ctx),
@@ -49,13 +53,14 @@ impl RequestTemplate {
         }
     }
 
-    fn render_select<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
+    fn render_select<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         let cols = self.select_columns();
-        let mut sql = format!("SELECT {cols} FROM {}", self.table);
+        let table = quote_ident(&self.table);
+        let mut sql = format!("SELECT {cols} FROM {table}");
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len());
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
             sql.push_str(&format!(" WHERE {where_clause}"));
             params.extend(where_params);
         }
@@ -83,33 +88,37 @@ impl RequestTemplate {
             }
         }
 
-        RenderedQuery { sql, params }
+        Ok(RenderedQuery { sql, params })
     }
 
-    fn render_select_one<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
+    fn render_select_one<C: PathString + HasHeaders>(
+        &self,
+        ctx: &C,
+    ) -> anyhow::Result<RenderedQuery> {
         let cols = self.select_columns();
-        let mut sql = format!("SELECT {cols} FROM {}", self.table);
+        let table = quote_ident(&self.table);
+        let mut sql = format!("SELECT {cols} FROM {table}");
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len());
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
             sql.push_str(&format!(" WHERE {where_clause}"));
             params.extend(where_params);
         }
 
         sql.push_str(" LIMIT 1");
-        RenderedQuery { sql, params }
+        Ok(RenderedQuery { sql, params })
     }
 
-    fn render_insert<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
+    fn render_insert<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         let input_json = self
             .input
             .as_ref()
             .map(|m| m.render(ctx))
             .unwrap_or_default();
 
-        let entries = parse_json_object(&input_json);
-        let cols: Vec<&str> = entries.iter().map(|(k, _)| k.as_str()).collect();
+        let entries = parse_json_object(&input_json)?;
+        let cols: Vec<String> = entries.iter().map(|(k, _)| quote_ident(k)).collect();
         let mut params: Vec<String> = Vec::new();
         let mut placeholders = Vec::new();
 
@@ -121,55 +130,56 @@ impl RequestTemplate {
         let col_list = cols.join(", ");
         let val_list = placeholders.join(", ");
         let ret_cols = self.select_columns();
+        let table = quote_ident(&self.table);
 
-        let sql = format!(
-            "INSERT INTO {} ({col_list}) VALUES ({val_list}) RETURNING {ret_cols}",
-            self.table
-        );
-        RenderedQuery { sql, params }
+        let sql =
+            format!("INSERT INTO {table} ({col_list}) VALUES ({val_list}) RETURNING {ret_cols}");
+        Ok(RenderedQuery { sql, params })
     }
 
-    fn render_update<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
+    fn render_update<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         let input_json = self
             .input
             .as_ref()
             .map(|m| m.render(ctx))
             .unwrap_or_default();
 
-        let entries = parse_json_object(&input_json);
+        let entries = parse_json_object(&input_json)?;
         let mut params: Vec<String> = Vec::new();
         let mut set_clauses = Vec::new();
 
         for (k, v) in &entries {
             params.push(v.clone());
-            set_clauses.push(format!("{k} = ${}", params.len()));
+            set_clauses.push(format!("{} = ${}", quote_ident(k), params.len()));
         }
 
         let set_str = set_clauses.join(", ");
         let ret_cols = self.select_columns();
-        let mut sql = format!("UPDATE {} SET {set_str}", self.table);
+        let table = quote_ident(&self.table);
+        let mut sql = format!("UPDATE {table} SET {set_str}");
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len());
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
             sql.push_str(&format!(" WHERE {where_clause}"));
             params.extend(where_params);
         }
 
         sql.push_str(&format!(" RETURNING {ret_cols}"));
-        RenderedQuery { sql, params }
+        Ok(RenderedQuery { sql, params })
     }
 
-    fn render_delete<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedQuery {
-        let mut sql = format!("DELETE FROM {}", self.table);
+    fn render_delete<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
+        let table = quote_ident(&self.table);
+        let mut sql = format!("DELETE FROM {table}");
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len());
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
             sql.push_str(&format!(" WHERE {where_clause}"));
             params.extend(where_params);
         }
 
-        RenderedQuery { sql, params }
+        Ok(RenderedQuery { sql, params })
     }
 
     /// Parse a JSON filter object into `col = $N` clauses, returning the clause
@@ -179,49 +189,53 @@ impl RequestTemplate {
         filter: &Mustache,
         ctx: &C,
         offset: usize,
-    ) -> (String, Vec<String>) {
+    ) -> anyhow::Result<(String, Vec<String>)> {
         let rendered = filter.render(ctx);
-        let entries = parse_json_object(&rendered);
+        let entries = parse_json_object(&rendered)?;
         let mut params = Vec::new();
         let mut clauses = Vec::new();
 
         for (k, v) in entries {
             params.push(v);
-            clauses.push(format!("{k} = ${}", offset + params.len()));
+            clauses.push(format!("{} = ${}", quote_ident(&k), offset + params.len()));
         }
 
-        (clauses.join(" AND "), params)
+        Ok((clauses.join(" AND "), params))
     }
 
     fn select_columns(&self) -> String {
         if self.columns.is_empty() {
             "*".to_string()
         } else {
-            self.columns.join(", ")
+            self.columns
+                .iter()
+                .map(|c| quote_ident(c))
+                .collect::<Vec<_>>()
+                .join(", ")
         }
     }
 }
 
 impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
     fn cache_key(&self, ctx: &Ctx) -> Option<IoId> {
-        let rendered = self.render(ctx);
+        let rendered = self.render(ctx).ok()?;
         let mut hasher = GqlforgeHasher::default();
         rendered.hash(&mut hasher);
         Some(IoId::new(hasher.finish()))
     }
 }
 
-/// Best-effort parse of a simple JSON object `{"k":"v", ...}` into key-value
-/// pairs. Values are stringified (quotes stripped for simple strings).
-fn parse_json_object(json_str: &str) -> Vec<(String, String)> {
-    let Ok(value) = serde_json::from_str::<serde_json::Value>(json_str) else {
-        return Vec::new();
-    };
-    let Some(obj) = value.as_object() else {
-        return Vec::new();
-    };
+/// Parse a simple JSON object `{"k":"v", ...}` into key-value pairs.
+/// Values are stringified (quotes stripped for simple strings).
+fn parse_json_object(json_str: &str) -> anyhow::Result<Vec<(String, String)>> {
+    let value: serde_json::Value = serde_json::from_str(json_str)
+        .map_err(|e| anyhow::anyhow!("Invalid JSON in input/filter: {e}"))?;
+    let obj = value
+        .as_object()
+        .ok_or_else(|| anyhow::anyhow!("Expected JSON object in input/filter, got: {value}"))?;
 
-    obj.iter()
+    Ok(obj
+        .iter()
         .map(|(k, v)| {
             let val = match v {
                 serde_json::Value::String(s) => s.clone(),
@@ -229,7 +243,7 @@ fn parse_json_object(json_str: &str) -> Vec<(String, String)> {
             };
             (k.clone(), val)
         })
-        .collect()
+        .collect())
 }
 
 #[cfg(test)]
@@ -271,11 +285,11 @@ mod tests {
         };
 
         let ctx = Ctx { value: serde_json::Value::Null };
-        let rendered = tmpl.render(&ctx);
+        let rendered = tmpl.render(&ctx).unwrap();
 
         assert_eq!(
             rendered.sql,
-            "SELECT id, name, email FROM users WHERE active = $1 ORDER BY name ASC LIMIT $2 OFFSET $3"
+            r#"SELECT "id", "name", "email" FROM "users" WHERE "active" = $1 ORDER BY name ASC LIMIT $2 OFFSET $3"#
         );
         assert_eq!(rendered.params, vec!["true", "10", "0"]);
     }
@@ -296,9 +310,9 @@ mod tests {
         };
 
         let ctx = Ctx { value: serde_json::Value::Null };
-        let rendered = tmpl.render(&ctx);
+        let rendered = tmpl.render(&ctx).unwrap();
 
-        assert!(rendered.sql.starts_with("INSERT INTO users"));
+        assert!(rendered.sql.starts_with(r#"INSERT INTO "users""#));
         assert!(rendered.sql.contains("RETURNING"));
         assert_eq!(rendered.params.len(), 2);
     }
@@ -317,9 +331,9 @@ mod tests {
         };
 
         let ctx = Ctx { value: serde_json::Value::Null };
-        let rendered = tmpl.render(&ctx);
+        let rendered = tmpl.render(&ctx).unwrap();
 
-        assert_eq!(rendered.sql, "DELETE FROM users WHERE id = $1");
+        assert_eq!(rendered.sql, r#"DELETE FROM "users" WHERE "id" = $1"#);
         assert_eq!(rendered.params, vec!["42"]);
     }
 }

@@ -3,7 +3,6 @@ pub mod pool {
     use async_graphql_value::ConstValue;
     use deadpool_postgres::{Config, Pool, Runtime};
     use indexmap::IndexMap;
-    use tokio_postgres::NoTls;
 
     use crate::core::postgres::PostgresIO;
 
@@ -18,8 +17,9 @@ pub mod pool {
             let mut cfg = Config::new();
             cfg.url = Some(connection_url.to_string());
 
+            let tls = crate::core::postgres::make_tls_connect()?;
             let pool = cfg
-                .create_pool(Some(Runtime::Tokio1), NoTls)
+                .create_pool(Some(Runtime::Tokio1), tls)
                 .map_err(|e| anyhow::anyhow!("Failed to create PostgreSQL pool: {e}"))?;
 
             Ok(Self { pool })
@@ -45,13 +45,34 @@ pub mod pool {
                 let mut obj = IndexMap::new();
                 for (i, col) in row.columns().iter().enumerate() {
                     let value = row_value_to_const(row, i, col)?;
-                    obj.insert(async_graphql::Name::new(col.name()), value);
+                    obj.insert(
+                        async_graphql::Name::new(sanitize_graphql_name(col.name())),
+                        value,
+                    );
                 }
                 result.push(ConstValue::Object(obj));
             }
 
             Ok(ConstValue::List(result))
         }
+    }
+
+    fn sanitize_graphql_name(name: &str) -> String {
+        let mut result = String::with_capacity(name.len());
+        for c in name.chars() {
+            if c.is_ascii_alphanumeric() || c == '_' {
+                result.push(c);
+            } else {
+                result.push('_');
+            }
+        }
+        if result.starts_with(|c: char| c.is_ascii_digit()) {
+            result.insert(0, '_');
+        }
+        if result.is_empty() {
+            result.push_str("_unnamed");
+        }
+        result
     }
 
     fn row_value_to_const(

@@ -92,5 +92,6 @@ pub fn create_runtime(
             Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
             None => None,
         },
+        postgres: None,
     }
 }

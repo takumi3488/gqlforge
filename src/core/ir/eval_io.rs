@@ -113,7 +113,9 @@ where
             "HttpStream should be resolved via subscription stream, not eval_io".to_string(),
         )),
         IO::Postgres { req_template, dl_id: _, .. } => {
-            let rendered = req_template.render(ctx);
+            let rendered = req_template
+                .render(ctx)
+                .map_err(|e| Error::IO(e.to_string()))?;
             let pg = ctx
                 .request_ctx
                 .runtime
