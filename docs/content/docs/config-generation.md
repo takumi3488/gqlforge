@@ -15,7 +15,7 @@ The `gqlforge gen` command reads existing API definitions and produces a GQLForg
 gqlforge gen <file_path>
 ```
 
-The command accepts a path to a source definition file and writes the generated configuration to stdout. You can redirect the output to a file:
+The command accepts a path to a source definition file or a PostgreSQL connection URL and writes the generated configuration to stdout. You can redirect the output to a file:
 
 ```bash
 gqlforge gen ./petstore.json > app.graphql
@@ -60,6 +60,26 @@ gqlforge gen ./schema.graphql
 ```
 
 This is useful for wrapping an existing GraphQL service with GQLForge's optimization layer, adding caching, or composing multiple GraphQL sources.
+
+### PostgreSQL
+
+Generate a GraphQL schema by introspecting a live PostgreSQL database:
+
+```bash
+gqlforge gen postgres://user:password@localhost:5432/mydb
+```
+
+The generator connects to the database, reads table metadata, and produces a full CRUD schema with `@postgres` directives. For each table it creates:
+
+- `{table}ById` — fetch a single row by primary key
+- `{table}List` — paginated list query with `limit` / `offset` arguments
+- `create{Type}` — insert a new record
+- `update{Type}` — update by primary key
+- `delete{Type}` — delete by primary key
+
+Foreign key relationships are automatically resolved as nested object fields with `batchKey` for N+1 prevention.
+
+See [PostgreSQL Support](@/docs/postgres.md) for details on type mapping and the `@postgres` directive.
 
 ## Output Structure
 

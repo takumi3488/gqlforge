@@ -115,7 +115,7 @@ gqlforge init ./my-api
 
 ### `gen`
 
-Generates GQLForge configuration from existing API definitions such as REST API specs, Protocol Buffer files, or GraphQL schemas.
+Generates GQLForge configuration from existing API definitions such as REST API specs, Protocol Buffer files, GraphQL schemas, or PostgreSQL databases.
 
 ```bash
 gqlforge gen <file_path>
@@ -123,9 +123,9 @@ gqlforge gen <file_path>
 
 **Arguments:**
 
-| Argument    | Required | Description                        |
-| ----------- | -------- | ---------------------------------- |
-| `file_path` | Yes      | Path to the source definition file |
+| Argument    | Required | Description                                                     |
+| ----------- | -------- | --------------------------------------------------------------- |
+| `file_path` | Yes      | Path to a source definition file or a PostgreSQL connection URL |
 
 **Examples:**
 
@@ -135,6 +135,9 @@ gqlforge gen ./service.proto
 
 # Generate from an OpenAPI spec
 gqlforge gen ./openapi.json
+
+# Generate from a PostgreSQL database
+gqlforge gen postgres://user:password@localhost:5432/mydb
 ```
 
 See [Config Generation](@/docs/config-generation.md) for more details on supported source formats.
