@@ -246,10 +246,11 @@ fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
     match parts.as_slice() {
         [schema, table] => (schema.to_string(), table.to_string()),
         [table] => ("public".to_string(), table.to_string()),
-        other => {
+        other if other.len() >= 2 => {
             let len = other.len();
             (other[len - 2].to_string(), other[len - 1].to_string())
         }
+        _ => ("public".to_string(), String::new()),
     }
 }
 

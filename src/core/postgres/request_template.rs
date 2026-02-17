@@ -68,7 +68,8 @@ impl RequestTemplate {
         if let Some(order_by) = &self.order_by {
             let rendered = order_by.render(ctx);
             if !rendered.is_empty() {
-                sql.push_str(&format!(" ORDER BY {rendered}"));
+                let sanitized = sanitize_order_by(&rendered, &self.columns)?;
+                sql.push_str(&format!(" ORDER BY {sanitized}"));
             }
         }
 
@@ -116,6 +117,13 @@ impl RequestTemplate {
             .as_ref()
             .map(|m| m.render(ctx))
             .unwrap_or_default();
+
+        if input_json.is_empty() {
+            anyhow::bail!(
+                "INSERT requires a non-empty input template for table {:?}",
+                self.table
+            );
+        }
 
         let entries = parse_json_object(&input_json)?;
         let cols: Vec<String> = entries.iter().map(|(k, _)| quote_ident(k)).collect();
@@ -225,6 +233,52 @@ impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
     }
 }
 
+/// Validate that an ORDER BY clause only contains known column names and
+/// optional ASC/DESC direction keywords, then return a safe SQL fragment.
+fn sanitize_order_by(rendered: &str, columns: &[String]) -> anyhow::Result<String> {
+    let mut parts = Vec::new();
+    for token in rendered.split(',') {
+        let token = token.trim();
+        if token.is_empty() {
+            continue;
+        }
+        let mut words = token.split_whitespace();
+        let col = words
+            .next()
+            .ok_or_else(|| anyhow::anyhow!("Empty ORDER BY token"))?;
+        let dir = words.next().map(|d| d.to_uppercase());
+
+        // Validate direction if present.
+        if let Some(ref d) = dir
+            && d != "ASC"
+            && d != "DESC"
+        {
+            anyhow::bail!("Invalid ORDER BY direction: {d}");
+        }
+
+        // Reject unexpected trailing tokens.
+        if words.next().is_some() {
+            anyhow::bail!("Invalid ORDER BY clause: {token}");
+        }
+
+        // Allow if columns list is empty (no schema info) or column is known.
+        if !columns.is_empty() && !columns.iter().any(|c| c == col) {
+            anyhow::bail!("Unknown column in ORDER BY: {col}");
+        }
+
+        match dir {
+            Some(d) => parts.push(format!("{} {d}", quote_ident(col))),
+            None => parts.push(quote_ident(col)),
+        }
+    }
+
+    if parts.is_empty() {
+        anyhow::bail!("Empty ORDER BY clause");
+    }
+
+    Ok(parts.join(", "))
+}
+
 /// Parse a simple JSON object `{"k":"v", ...}` into key-value pairs.
 /// Values are stringified (quotes stripped for simple strings).
 fn parse_json_object(json_str: &str) -> anyhow::Result<Vec<(String, String)>> {
@@ -289,7 +343,7 @@ mod tests {
 
         assert_eq!(
             rendered.sql,
-            r#"SELECT "id", "name", "email" FROM "users" WHERE "active" = $1 ORDER BY name ASC LIMIT $2 OFFSET $3"#
+            r#"SELECT "id", "name", "email" FROM "users" WHERE "active" = $1 ORDER BY "name" ASC LIMIT $2 OFFSET $3"#
         );
         assert_eq!(rendered.params, vec!["true", "10", "0"]);
     }

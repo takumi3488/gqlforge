@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use crate::core::macros::MergeRight;
 use crate::core::{default_verify_ssl, is_default, verify_ssl_is_default};
 
-const DEFAULT_MAX_SIZE: usize = 100;
+pub const DEFAULT_MAX_SIZE: usize = 100;
 
 #[derive(
     Serialize, Deserialize, PartialEq, Eq, Clone, Debug, Setters, schemars::JsonSchema, MergeRight,

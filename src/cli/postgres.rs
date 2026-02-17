@@ -106,15 +106,35 @@ pub mod pool {
             }
             Type::FLOAT4 => {
                 let v: Option<f32> = row.try_get(idx)?;
-                Ok(v.and_then(|n| serde_json::Number::from_f64(n as f64))
-                    .map(ConstValue::Number)
-                    .unwrap_or(ConstValue::Null))
+                Ok(match v {
+                    Some(n) => match serde_json::Number::from_f64(n as f64) {
+                        Some(num) => ConstValue::Number(num),
+                        None => {
+                            tracing::warn!(
+                                "Column {} contains non-finite float value: {n}",
+                                col.name()
+                            );
+                            ConstValue::Null
+                        }
+                    },
+                    None => ConstValue::Null,
+                })
             }
             Type::FLOAT8 => {
                 let v: Option<f64> = row.try_get(idx)?;
-                Ok(v.and_then(serde_json::Number::from_f64)
-                    .map(ConstValue::Number)
-                    .unwrap_or(ConstValue::Null))
+                Ok(match v {
+                    Some(n) => match serde_json::Number::from_f64(n) {
+                        Some(num) => ConstValue::Number(num),
+                        None => {
+                            tracing::warn!(
+                                "Column {} contains non-finite float value: {n}",
+                                col.name()
+                            );
+                            ConstValue::Null
+                        }
+                    },
+                    None => ConstValue::Null,
+                })
             }
             Type::JSON | Type::JSONB => {
                 let v: Option<serde_json::Value> = row.try_get(idx)?;

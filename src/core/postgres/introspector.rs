@@ -78,7 +78,8 @@ async fn fetch_columns(
             data_type,
             is_nullable,
             column_default,
-            is_generated
+            is_generated,
+            is_identity
         FROM information_schema.columns
         WHERE table_schema = $1 AND table_name = $2
         ORDER BY ordinal_position
@@ -92,13 +93,14 @@ async fn fetch_columns(
         let is_nullable: String = row.get("is_nullable");
         let column_default: Option<String> = row.get("column_default");
         let is_generated: String = row.get("is_generated");
+        let is_identity: String = row.get("is_identity");
 
         columns.push(Column {
             name,
             pg_type: PgType::from_sql_name(&data_type),
             is_nullable: is_nullable == "YES",
             has_default: column_default.is_some(),
-            is_generated: is_generated != "NEVER",
+            is_generated: is_generated != "NEVER" || is_identity == "YES",
         });
     }
 
