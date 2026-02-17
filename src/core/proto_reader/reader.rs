@@ -8,7 +8,9 @@ use prost_reflect::prost_types::{FileDescriptorProto, FileDescriptorSet};
 use protox::file::{FileResolver, GoogleFileResolver};
 
 use crate::core::config::KeyValue;
-use crate::core::proto_reader::fetch::GrpcReflection;
+use crate::core::proto_reader::fetch::{
+    GRPC_REFLECTION_V1, GRPC_REFLECTION_V1ALPHA, GrpcReflection,
+};
 use crate::core::resource_reader::{Cached, ResourceReader};
 use crate::core::runtime::TargetRuntime;
 
@@ -30,22 +32,41 @@ impl ProtoReader {
         Self { reader, runtime }
     }
 
-    /// Fetches proto files from a grpc server (grpc reflection)
+    /// Fetches proto files from a grpc server (grpc reflection).
+    /// Tries v1 first, falls back to v1alpha if v1 is unavailable.
     pub async fn fetch<T: AsRef<str>>(
         &self,
         url: T,
         headers: Option<Vec<KeyValue>>,
     ) -> anyhow::Result<Vec<ProtoMetadata>> {
-        let grpc_reflection = Arc::new(GrpcReflection::new(
-            url.as_ref(),
-            headers,
-            self.runtime.clone(),
-        ));
+        let (grpc_reflection, service_list) = {
+            let v1 = GrpcReflection::new(
+                url.as_ref(),
+                headers.clone(),
+                self.runtime.clone(),
+                GRPC_REFLECTION_V1,
+            );
+            match v1.list_all_files().await {
+                Ok(services) => (v1, services),
+                Err(_) => {
+                    let v1alpha = GrpcReflection::new(
+                        url.as_ref(),
+                        headers,
+                        self.runtime.clone(),
+                        GRPC_REFLECTION_V1ALPHA,
+                    );
+                    let services = v1alpha.list_all_files().await?;
+                    (v1alpha, services)
+                }
+            }
+        };
 
+        let grpc_reflection = Arc::new(grpc_reflection);
         let mut proto_metadata = vec![];
-        let service_list = grpc_reflection.list_all_files().await?;
         for service in service_list {
-            if service.eq("grpc.reflection.v1alpha.ServerReflection") {
+            if service == "grpc.reflection.v1.ServerReflection"
+                || service == "grpc.reflection.v1alpha.ServerReflection"
+            {
                 continue;
             }
             let file_descriptor_proto = grpc_reflection.get_by_service(&service).await?;
