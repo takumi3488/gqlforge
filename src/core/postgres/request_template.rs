@@ -68,8 +68,10 @@ impl RequestTemplate {
         if let Some(order_by) = &self.order_by {
             let rendered = order_by.render(ctx);
             if !rendered.is_empty() {
-                let sanitized = sanitize_order_by(&rendered, &self.columns)?;
-                sql.push_str(&format!(" ORDER BY {sanitized}"));
+                let sanitized = sanitize_order_by(&rendered, &self.columns);
+                if !sanitized.is_empty() {
+                    sql.push_str(&format!(" ORDER BY {sanitized}"));
+                }
             }
         }
 
@@ -118,14 +120,22 @@ impl RequestTemplate {
             .map(|m| m.render(ctx))
             .unwrap_or_default();
 
-        if input_json.is_empty() {
-            anyhow::bail!(
-                "INSERT requires a non-empty input template for table {:?}",
-                self.table
-            );
+        let entries = parse_json_object(&input_json)?;
+        if entries.is_empty() {
+            anyhow::bail!("INSERT requires at least one field in input");
         }
 
-        let entries = parse_json_object(&input_json)?;
+        if !self.columns.is_empty() {
+            let unknown: Vec<&str> = entries
+                .iter()
+                .filter(|(k, _)| !self.columns.iter().any(|c| c == k))
+                .map(|(k, _)| k.as_str())
+                .collect();
+            if !unknown.is_empty() {
+                anyhow::bail!("Unknown column(s) in INSERT input: {}", unknown.join(", "));
+            }
+        }
+
         let cols: Vec<String> = entries.iter().map(|(k, _)| quote_ident(k)).collect();
         let mut params: Vec<String> = Vec::new();
         let mut placeholders = Vec::new();
@@ -146,20 +156,32 @@ impl RequestTemplate {
     }
 
     fn render_update<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
+        if self.filter.is_none() {
+            anyhow::bail!("UPDATE without a filter is not allowed (would affect all rows)");
+        }
+
         let input_json = self
             .input
             .as_ref()
             .map(|m| m.render(ctx))
             .unwrap_or_default();
 
-        if input_json.is_empty() {
-            anyhow::bail!(
-                "UPDATE requires a non-empty input template for table {:?}",
-                self.table
-            );
+        let entries = parse_json_object(&input_json)?;
+        if entries.is_empty() {
+            anyhow::bail!("UPDATE requires at least one field in input");
         }
 
-        let entries = parse_json_object(&input_json)?;
+        if !self.columns.is_empty() {
+            let unknown: Vec<&str> = entries
+                .iter()
+                .filter(|(k, _)| !self.columns.iter().any(|c| c == k))
+                .map(|(k, _)| k.as_str())
+                .collect();
+            if !unknown.is_empty() {
+                anyhow::bail!("Unknown column(s) in UPDATE input: {}", unknown.join(", "));
+            }
+        }
+
         let mut params: Vec<String> = Vec::new();
         let mut set_clauses = Vec::new();
 
@@ -168,44 +190,36 @@ impl RequestTemplate {
             set_clauses.push(format!("{} = ${}", quote_ident(k), params.len()));
         }
 
-        let filter = self.filter.as_ref().ok_or_else(|| {
-            anyhow::anyhow!(
-                "UPDATE requires a filter for table {:?} to prevent mass update",
-                self.table
-            )
-        })?;
-
         let set_str = set_clauses.join(", ");
         let ret_cols = self.select_columns();
         let table = quote_ident(&self.table);
         let mut sql = format!("UPDATE {table} SET {set_str}");
 
-        let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-        sql.push_str(&format!(" WHERE {where_clause}"));
-        params.extend(where_params);
+        if let Some(filter) = &self.filter {
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
+            sql.push_str(&format!(" WHERE {where_clause}"));
+            params.extend(where_params);
+        }
 
         sql.push_str(&format!(" RETURNING {ret_cols}"));
         Ok(RenderedQuery { sql, params })
     }
 
     fn render_delete<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
-        let filter = self.filter.as_ref().ok_or_else(|| {
-            anyhow::anyhow!(
-                "DELETE requires a filter for table {:?} to prevent mass deletion",
-                self.table
-            )
-        })?;
+        if self.filter.is_none() {
+            anyhow::bail!("DELETE without a filter is not allowed (would affect all rows)");
+        }
 
-        let ret_cols = self.select_columns();
         let table = quote_ident(&self.table);
         let mut sql = format!("DELETE FROM {table}");
         let mut params = Vec::new();
 
-        let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-        sql.push_str(&format!(" WHERE {where_clause}"));
-        params.extend(where_params);
+        if let Some(filter) = &self.filter {
+            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
+            sql.push_str(&format!(" WHERE {where_clause}"));
+            params.extend(where_params);
+        }
 
-        sql.push_str(&format!(" RETURNING {ret_cols}"));
         Ok(RenderedQuery { sql, params })
     }
 
@@ -227,7 +241,12 @@ impl RequestTemplate {
             clauses.push(format!("{} = ${}", quote_ident(&k), offset + params.len()));
         }
 
-        Ok((clauses.join(" AND "), params))
+        let clause = if clauses.is_empty() {
+            "TRUE".to_string()
+        } else {
+            clauses.join(" AND ")
+        };
+        Ok((clause, params))
     }
 
     fn select_columns(&self) -> String {
@@ -252,50 +271,31 @@ impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
     }
 }
 
-/// Validate that an ORDER BY clause only contains known column names and
-/// optional ASC/DESC direction keywords, then return a safe SQL fragment.
-fn sanitize_order_by(rendered: &str, columns: &[String]) -> anyhow::Result<String> {
-    let mut parts = Vec::new();
-    for token in rendered.split(',') {
-        let token = token.trim();
-        if token.is_empty() {
-            continue;
-        }
-        let mut words = token.split_whitespace();
-        let col = words
-            .next()
-            .ok_or_else(|| anyhow::anyhow!("Empty ORDER BY token"))?;
-        let dir = words.next().map(|d| d.to_uppercase());
-
-        // Validate direction if present.
-        if let Some(ref d) = dir
-            && d != "ASC"
-            && d != "DESC"
-        {
-            anyhow::bail!("Invalid ORDER BY direction: {d}");
-        }
-
-        // Reject unexpected trailing tokens.
-        if words.next().is_some() {
-            anyhow::bail!("Invalid ORDER BY clause: {token}");
-        }
-
-        // Allow if columns list is empty (no schema info) or column is known.
-        if !columns.is_empty() && !columns.iter().any(|c| c == col) {
-            anyhow::bail!("Unknown column in ORDER BY: {col}");
-        }
-
-        match dir {
-            Some(d) => parts.push(format!("{} {d}", quote_ident(col))),
-            None => parts.push(quote_ident(col)),
-        }
-    }
-
-    if parts.is_empty() {
-        anyhow::bail!("Empty ORDER BY clause");
-    }
-
-    Ok(parts.join(", "))
+/// Sanitise an ORDER BY clause by validating column names against a whitelist
+/// and only allowing `ASC` / `DESC` direction keywords.
+fn sanitize_order_by(rendered: &str, columns: &[String]) -> String {
+    rendered
+        .split(',')
+        .filter_map(|part| {
+            let part = part.trim();
+            if part.is_empty() {
+                return None;
+            }
+            let mut tokens = part.split_whitespace();
+            let col = tokens.next()?;
+            if !columns.iter().any(|c| c == col) {
+                return None;
+            }
+            let dir = tokens.next().map(|d| d.to_uppercase()).unwrap_or_default();
+            match dir.as_str() {
+                "ASC" => Some(format!("{} ASC", quote_ident(col))),
+                "DESC" => Some(format!("{} DESC", quote_ident(col))),
+                "" => Some(quote_ident(col)),
+                _ => None,
+            }
+        })
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 /// Parse a simple JSON object `{"k":"v", ...}` into key-value pairs.
@@ -406,10 +406,93 @@ mod tests {
         let ctx = Ctx { value: serde_json::Value::Null };
         let rendered = tmpl.render(&ctx).unwrap();
 
-        assert_eq!(
-            rendered.sql,
-            r#"DELETE FROM "users" WHERE "id" = $1 RETURNING *"#
-        );
+        assert_eq!(rendered.sql, r#"DELETE FROM "users" WHERE "id" = $1"#);
         assert_eq!(rendered.params, vec!["42"]);
+    }
+
+    #[test]
+    fn insert_unknown_column_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Insert,
+            filter: None,
+            input: Some(Mustache::parse(r#"{"name": "Alice", "bogus": "bad"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec!["id".into(), "name".into(), "email".into()],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Unknown column(s) in INSERT input"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn update_unknown_column_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Update,
+            filter: Some(Mustache::parse(r#"{"id": "1"}"#)),
+            input: Some(Mustache::parse(r#"{"bogus": "bad"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec!["id".into(), "name".into(), "email".into()],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string()
+                .contains("Unknown column(s) in UPDATE input"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn update_without_filter_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Update,
+            filter: None,
+            input: Some(Mustache::parse(r#"{"name": "Alice"}"#)),
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec![],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string().contains("UPDATE without a filter"),
+            "unexpected error: {err}"
+        );
+    }
+
+    #[test]
+    fn delete_without_filter_rejected() {
+        let tmpl = RequestTemplate {
+            table: "users".into(),
+            operation: PostgresOperation::Delete,
+            filter: None,
+            input: None,
+            limit: None,
+            offset: None,
+            order_by: None,
+            columns: vec![],
+        };
+
+        let ctx = Ctx { value: serde_json::Value::Null };
+        let err = tmpl.render(&ctx).unwrap_err();
+        assert!(
+            err.to_string().contains("DELETE without a filter"),
+            "unexpected error: {err}"
+        );
     }
 }

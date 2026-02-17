@@ -2,15 +2,13 @@ use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::BlueprintError;
 use crate::core::config::group_by::GroupBy;
-use crate::core::config::{ConfigModule, Field, GraphQLOperationType, Postgres};
+use crate::core::config::{ConfigModule, Postgres};
 use crate::core::ir::model::{IO, IR};
 use crate::core::mustache::Mustache;
 use crate::core::postgres::request_template::RequestTemplate;
 
 pub struct CompilePostgres<'a> {
     pub config_module: &'a ConfigModule,
-    pub operation_type: &'a GraphQLOperationType,
-    pub field: &'a Field,
     pub postgres: &'a Postgres,
 }
 

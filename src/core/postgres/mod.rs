@@ -14,9 +14,23 @@ pub use schema::DatabaseSchema;
 #[cfg(feature = "postgres")]
 pub(crate) fn make_tls_connect() -> anyhow::Result<tokio_postgres_rustls::MakeRustlsConnect> {
     let native = rustls_native_certs::load_native_certs();
+    if !native.errors.is_empty() {
+        tracing::warn!(
+            count = native.errors.len(),
+            "some native certificates could not be loaded: {:?}",
+            native.errors
+        );
+    }
     let mut root_store = rustls::RootCertStore::empty();
+    let mut added = 0u32;
     for cert in native.certs {
-        let _ = root_store.add(cert);
+        match root_store.add(cert) {
+            Ok(()) => added += 1,
+            Err(e) => tracing::warn!("skipping certificate: {e}"),
+        }
+    }
+    if added == 0 {
+        anyhow::bail!("no valid TLS root certificates found; cannot establish TLS connections");
     }
     let config = rustls::ClientConfig::builder()
         .with_root_certificates(root_store)

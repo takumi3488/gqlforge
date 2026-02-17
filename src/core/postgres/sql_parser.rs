@@ -100,7 +100,7 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
                 }
             }
 
-            // Ensure PK columns are marked as non-nullable (PRIMARY KEY implies NOT NULL).
+            // Table-level PK columns must be non-nullable
             if let Some(ref pk) = primary_key {
                 for col in &mut columns {
                     if pk.columns.contains(&col.name) {
@@ -153,37 +153,12 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
         AlterTableOperation::DropColumn { column_name, .. } => {
             table.columns.retain(|c| c.name != column_name.value);
         }
-        AlterTableOperation::AddConstraint(constraint) => match constraint {
-            TableConstraint::PrimaryKey { columns: pk_cols, .. } => {
-                let pk_names: Vec<String> = pk_cols.iter().map(|c| c.value.clone()).collect();
-                for col in &mut table.columns {
-                    if pk_names.contains(&col.name) {
-                        col.is_nullable = false;
-                    }
-                }
-                table.primary_key = Some(PrimaryKey { columns: pk_names });
-            }
-            TableConstraint::ForeignKey {
-                columns: fk_cols,
-                foreign_table,
-                referred_columns,
-                ..
-            } => {
-                let (ref_schema, ref_table) = extract_schema_and_name(foreign_table);
-                table.foreign_keys.push(ForeignKey {
-                    columns: fk_cols.iter().map(|c| c.value.clone()).collect(),
-                    referenced_schema: ref_schema,
-                    referenced_table: ref_table,
-                    referenced_columns: referred_columns.iter().map(|c| c.value.clone()).collect(),
-                });
-            }
-            TableConstraint::Unique { columns: u_cols, .. } => {
-                table.unique_constraints.push(UniqueConstraint {
-                    columns: u_cols.iter().map(|c| c.value.clone()).collect(),
-                });
-            }
-            _ => {}
-        },
+        AlterTableOperation::AddConstraint { .. } => {
+            tracing::warn!(
+                "ALTER TABLE ADD CONSTRAINT is not yet supported in DDL parsing; \
+                 constraint will be ignored"
+            );
+        }
         _ => {}
     }
     Ok(())
@@ -241,20 +216,14 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
         DataType::Uuid => PgType::Uuid,
         DataType::Date => PgType::Date,
         DataType::Timestamp(_, tz) => {
-            if matches!(
-                tz,
-                sqlparser::ast::TimezoneInfo::WithTimeZone | sqlparser::ast::TimezoneInfo::Tz
-            ) {
+            if matches!(tz, sqlparser::ast::TimezoneInfo::WithTimeZone) {
                 PgType::TimestampTz
             } else {
                 PgType::Timestamp
             }
         }
         DataType::Time(_, tz) => {
-            if matches!(
-                tz,
-                sqlparser::ast::TimezoneInfo::WithTimeZone | sqlparser::ast::TimezoneInfo::Tz
-            ) {
+            if matches!(tz, sqlparser::ast::TimezoneInfo::WithTimeZone) {
                 PgType::TimeTz
             } else {
                 PgType::Time
@@ -291,13 +260,13 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
 fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
     let parts: Vec<&str> = name.0.iter().map(|p| p.value.as_str()).collect();
     match parts.as_slice() {
+        [] => ("public".to_string(), String::new()),
         [schema, table] => (schema.to_string(), table.to_string()),
         [table] => ("public".to_string(), table.to_string()),
-        other if other.len() >= 2 => {
+        other => {
             let len = other.len();
             (other[len - 2].to_string(), other[len - 1].to_string())
         }
-        _ => ("public".to_string(), String::new()),
     }
 }
 
@@ -332,6 +301,10 @@ mod tests {
         let id_col = table.find_column("id").unwrap();
         assert_eq!(id_col.pg_type, PgType::Integer);
         assert!(!id_col.is_nullable);
+        assert!(
+            id_col.has_default,
+            "SERIAL column should have has_default = true"
+        );
 
         let name_col = table.find_column("name").unwrap();
         assert_eq!(name_col.pg_type, PgType::Varchar);
@@ -379,5 +352,29 @@ mod tests {
         let table = schema.find_table("users").unwrap();
         assert_eq!(table.columns.len(), 3);
         assert!(table.find_column("email").is_some());
+    }
+
+    #[test]
+    fn parse_alter_table_add_constraint_does_not_panic() {
+        let m1 = r#"
+            CREATE TABLE orders (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL
+            );
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY
+            );
+        "#
+        .to_string();
+        let m2 =
+            "ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);"
+                .to_string();
+
+        // Should not panic; the ADD CONSTRAINT is warned but gracefully ignored.
+        let schema = parse_migrations(&[m1, m2]).unwrap();
+        let table = schema.find_table("orders").unwrap();
+        // The FK is not applied via ALTER (not yet supported), so foreign_keys stays
+        // empty.
+        assert!(table.foreign_keys.is_empty());
     }
 }

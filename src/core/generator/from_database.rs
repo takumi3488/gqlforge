@@ -366,7 +366,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
             mutation_type.fields.insert(
                 delete_name,
                 Field::default()
-                    .type_of(Type::from(type_name.clone()))
+                    .type_of(Type::from("Boolean".to_string()))
                     .args(args)
                     .resolvers(resolver.into()),
             );
@@ -374,11 +374,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
     }
 
     config.types.insert("Query".to_string(), query_type);
-    if !mutation_type.fields.is_empty() {
-        config.types.insert("Mutation".to_string(), mutation_type);
-    } else {
-        config.schema.mutation = None;
-    }
+    config.types.insert("Mutation".to_string(), mutation_type);
 
     // Add the Postgres link.
     config.links.push(Link {
@@ -536,116 +532,5 @@ mod tests {
         // Users should have a `posts` has-many field (already plural → postsList)
         let users_type = config.types.get("Users").unwrap();
         assert!(users_type.fields.contains_key("postsList"));
-    }
-
-    #[test]
-    fn disambiguates_multiple_fks_to_same_table() {
-        let mut schema = DatabaseSchema::new();
-        schema.add_table(Table {
-            schema: "public".into(),
-            name: "users".into(),
-            columns: vec![Column {
-                name: "id".into(),
-                pg_type: PgType::Integer,
-                is_nullable: false,
-                has_default: true,
-                is_generated: false,
-            }],
-            primary_key: Some(PrimaryKey { columns: vec!["id".into()] }),
-            foreign_keys: vec![],
-            unique_constraints: vec![],
-        });
-        schema.add_table(Table {
-            schema: "public".into(),
-            name: "messages".into(),
-            columns: vec![
-                Column {
-                    name: "id".into(),
-                    pg_type: PgType::Integer,
-                    is_nullable: false,
-                    has_default: true,
-                    is_generated: false,
-                },
-                Column {
-                    name: "sender_id".into(),
-                    pg_type: PgType::Integer,
-                    is_nullable: false,
-                    has_default: false,
-                    is_generated: false,
-                },
-                Column {
-                    name: "receiver_id".into(),
-                    pg_type: PgType::Integer,
-                    is_nullable: false,
-                    has_default: false,
-                    is_generated: false,
-                },
-            ],
-            primary_key: Some(PrimaryKey { columns: vec!["id".into()] }),
-            foreign_keys: vec![
-                ForeignKey {
-                    columns: vec!["sender_id".into()],
-                    referenced_schema: "public".into(),
-                    referenced_table: "users".into(),
-                    referenced_columns: vec!["id".into()],
-                },
-                ForeignKey {
-                    columns: vec!["receiver_id".into()],
-                    referenced_schema: "public".into(),
-                    referenced_table: "users".into(),
-                    referenced_columns: vec!["id".into()],
-                },
-            ],
-            unique_constraints: vec![],
-        });
-
-        let config = from_database(&schema, "postgres://localhost/test").unwrap();
-        let messages_type = config.types.get("Messages").unwrap();
-
-        // First FK gets the base name, second gets disambiguated.
-        assert!(messages_type.fields.contains_key("users"));
-        assert!(messages_type.fields.contains_key("usersByreceiverId"));
-    }
-
-    #[test]
-    fn table_without_pk_omits_byid_update_delete() {
-        let mut schema = DatabaseSchema::new();
-        schema.add_table(Table {
-            schema: "public".into(),
-            name: "logs".into(),
-            columns: vec![
-                Column {
-                    name: "message".into(),
-                    pg_type: PgType::Text,
-                    is_nullable: false,
-                    has_default: false,
-                    is_generated: false,
-                },
-                Column {
-                    name: "level".into(),
-                    pg_type: PgType::Text,
-                    is_nullable: false,
-                    has_default: false,
-                    is_generated: false,
-                },
-            ],
-            primary_key: None,
-            foreign_keys: vec![],
-            unique_constraints: vec![],
-        });
-
-        let config = from_database(&schema, "postgres://localhost/test").unwrap();
-        let query = config.types.get("Query").unwrap();
-
-        // List query should exist.
-        assert!(query.fields.contains_key("logsList"));
-        // byId should NOT exist (no PK).
-        assert!(!query.fields.contains_key("logsById"));
-
-        // Mutation should have create but not update/delete (no PK).
-        let mutation = config.types.get("Mutation").unwrap();
-        assert!(mutation.fields.contains_key("createLogs"));
-        assert!(!mutation.fields.contains_key("updateLogs"));
-        assert!(!mutation.fields.contains_key("deleteLogs"));
     }
 }

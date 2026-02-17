@@ -6,7 +6,6 @@ use async_graphql::async_trait;
 use async_graphql_value::ConstValue;
 
 use crate::core::config::Batch;
-use crate::core::config::directives::DEFAULT_MAX_SIZE;
 use crate::core::config::group_by::GroupBy;
 use crate::core::data_loader::{DataLoader, Loader};
 use crate::core::http::Response;
@@ -32,7 +31,7 @@ impl PostgresDataLoader {
     pub fn into_data_loader(self, batch: Batch) -> DataLoader<PostgresDataLoaderRequest, Self> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))
-            .max_batch_size(batch.max_size.unwrap_or(DEFAULT_MAX_SIZE))
+            .max_batch_size(batch.max_size.unwrap_or_default())
     }
 }
 

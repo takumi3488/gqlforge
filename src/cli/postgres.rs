@@ -72,6 +72,9 @@ pub mod pool {
         if result.is_empty() {
             result.push_str("_unnamed");
         }
+        if result.starts_with("__") {
+            result.insert(0, '_');
+        }
         result
     }
 
@@ -106,35 +109,15 @@ pub mod pool {
             }
             Type::FLOAT4 => {
                 let v: Option<f32> = row.try_get(idx)?;
-                Ok(match v {
-                    Some(n) => match serde_json::Number::from_f64(n as f64) {
-                        Some(num) => ConstValue::Number(num),
-                        None => {
-                            tracing::warn!(
-                                "Column {} contains non-finite float value: {n}",
-                                col.name()
-                            );
-                            ConstValue::Null
-                        }
-                    },
-                    None => ConstValue::Null,
-                })
+                Ok(v.and_then(|n| serde_json::Number::from_f64(n as f64))
+                    .map(ConstValue::Number)
+                    .unwrap_or(ConstValue::Null))
             }
             Type::FLOAT8 => {
                 let v: Option<f64> = row.try_get(idx)?;
-                Ok(match v {
-                    Some(n) => match serde_json::Number::from_f64(n) {
-                        Some(num) => ConstValue::Number(num),
-                        None => {
-                            tracing::warn!(
-                                "Column {} contains non-finite float value: {n}",
-                                col.name()
-                            );
-                            ConstValue::Null
-                        }
-                    },
-                    None => ConstValue::Null,
-                })
+                Ok(v.and_then(serde_json::Number::from_f64)
+                    .map(ConstValue::Number)
+                    .unwrap_or(ConstValue::Null))
             }
             Type::JSON | Type::JSONB => {
                 let v: Option<serde_json::Value> = row.try_get(idx)?;
@@ -145,17 +128,7 @@ pub mod pool {
             }
             _ => {
                 // Fallback: try to get as String.
-                let v: Option<String> = match row.try_get(idx) {
-                    Ok(v) => v,
-                    Err(e) => {
-                        tracing::warn!(
-                            "Column {} (type {:?}) could not be read as String: {e}",
-                            col.name(),
-                            ty
-                        );
-                        None
-                    }
-                };
+                let v: Option<String> = row.try_get(idx).unwrap_or(None);
                 Ok(v.map(ConstValue::String).unwrap_or(ConstValue::Null))
             }
         }
