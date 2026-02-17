@@ -100,6 +100,15 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
                 }
             }
 
+            // Table-level PK columns must be non-nullable
+            if let Some(ref pk) = primary_key {
+                for col in &mut columns {
+                    if pk.columns.contains(&col.name) {
+                        col.is_nullable = false;
+                    }
+                }
+            }
+
             let table = Table {
                 schema: table_schema,
                 name: table_name,

@@ -178,9 +178,13 @@ impl DatabaseSchema {
 
     /// Look up a table by name (tries both `schema.name` and `public.name`).
     pub fn find_table(&self, name: &str) -> Option<&Table> {
-        self.tables
-            .get(name)
-            .or_else(|| self.tables.get(&format!("public.{name}")))
+        self.tables.get(name).or_else(|| {
+            if name.contains('.') {
+                None
+            } else {
+                self.tables.get(&format!("public.{name}"))
+            }
+        })
     }
 }
 
