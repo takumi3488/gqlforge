@@ -50,7 +50,7 @@ async fn main() {
 }
 
 async fn mode_check() -> Result<()> {
-    let rt = cli::runtime::init(&Default::default());
+    let rt = cli::runtime::init(&Default::default())?;
     let file_io = rt.file.deref();
 
     check_json(file_io).await?;
@@ -93,7 +93,7 @@ async fn check_graphql(file_io: &dyn FileIO) -> Result<()> {
 }
 
 async fn mode_fix() -> Result<()> {
-    let rt = cli::runtime::init(&Default::default());
+    let rt = cli::runtime::init(&Default::default())?;
     let file_io = rt.file;
 
     update_json(file_io.clone()).await?;

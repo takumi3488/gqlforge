@@ -24,7 +24,7 @@ mod tests {
                 tokio::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER).await?;
             let config = Config::from_sdl(&sdl).to_result()?;
             let blueprint = Blueprint::try_from(&ConfigModule::from(config))?;
-            let runtime = gqlforge::cli::runtime::init(&blueprint);
+            let runtime = gqlforge::cli::runtime::init(&blueprint)?;
             let app_ctx = Arc::new(AppContext::new(blueprint, runtime, EndpointSet::default()));
             let req_ctx = Arc::new(RequestContext::from(app_ctx.as_ref()));
 
