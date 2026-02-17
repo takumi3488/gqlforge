@@ -170,12 +170,13 @@ fn column_from_def(col: &ColumnDef) -> Column {
                     | ColumnOptionDef { option: ColumnOption::Unique { is_primary: true, .. }, .. }
             )
         });
-    let has_default = col.options.iter().any(|opt| {
-        matches!(
-            opt,
-            ColumnOptionDef { option: ColumnOption::Default(_), .. }
-        )
-    });
+    let has_default = is_serial
+        || col.options.iter().any(|opt| {
+            matches!(
+                opt,
+                ColumnOptionDef { option: ColumnOption::Default(_), .. }
+            )
+        });
     let is_generated = col.options.iter().any(|opt| {
         matches!(
             opt,
@@ -209,14 +210,20 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
         DataType::Uuid => PgType::Uuid,
         DataType::Date => PgType::Date,
         DataType::Timestamp(_, tz) => {
-            if matches!(tz, sqlparser::ast::TimezoneInfo::WithTimeZone) {
+            if matches!(
+                tz,
+                sqlparser::ast::TimezoneInfo::WithTimeZone | sqlparser::ast::TimezoneInfo::Tz
+            ) {
                 PgType::TimestampTz
             } else {
                 PgType::Timestamp
             }
         }
         DataType::Time(_, tz) => {
-            if matches!(tz, sqlparser::ast::TimezoneInfo::WithTimeZone) {
+            if matches!(
+                tz,
+                sqlparser::ast::TimezoneInfo::WithTimeZone | sqlparser::ast::TimezoneInfo::Tz
+            ) {
                 PgType::TimeTz
             } else {
                 PgType::Time

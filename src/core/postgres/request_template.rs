@@ -168,31 +168,41 @@ impl RequestTemplate {
             set_clauses.push(format!("{} = ${}", quote_ident(k), params.len()));
         }
 
+        let filter = self.filter.as_ref().ok_or_else(|| {
+            anyhow::anyhow!(
+                "UPDATE requires a filter for table {:?} to prevent mass update",
+                self.table
+            )
+        })?;
+
         let set_str = set_clauses.join(", ");
         let ret_cols = self.select_columns();
         let table = quote_ident(&self.table);
         let mut sql = format!("UPDATE {table} SET {set_str}");
 
-        if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
-            params.extend(where_params);
-        }
+        let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
+        sql.push_str(&format!(" WHERE {where_clause}"));
+        params.extend(where_params);
 
         sql.push_str(&format!(" RETURNING {ret_cols}"));
         Ok(RenderedQuery { sql, params })
     }
 
     fn render_delete<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
+        let filter = self.filter.as_ref().ok_or_else(|| {
+            anyhow::anyhow!(
+                "DELETE requires a filter for table {:?} to prevent mass deletion",
+                self.table
+            )
+        })?;
+
         let table = quote_ident(&self.table);
         let mut sql = format!("DELETE FROM {table}");
         let mut params = Vec::new();
 
-        if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
-            params.extend(where_params);
-        }
+        let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
+        sql.push_str(&format!(" WHERE {where_clause}"));
+        params.extend(where_params);
 
         Ok(RenderedQuery { sql, params })
     }
