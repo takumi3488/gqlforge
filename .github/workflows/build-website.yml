@@ -25,6 +25,10 @@ jobs:
         run: zola build
         working-directory: docs
 
+      - name: Copy markdown sources
+        run: bash copy-markdown.sh
+        working-directory: docs
+
       - name: Deploy to Cloudflare Pages
         uses: cloudflare/wrangler-action@v3
         with:
