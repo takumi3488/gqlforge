@@ -131,6 +131,17 @@ impl AppContext {
                                     // HttpStream is used in subscriptions, no data loader needed
                                     None
                                 }
+                                IO::Postgres { req_template, group_by, dedupe, .. } => {
+                                    // For now, Postgres data loaders are not
+                                    // yet batched in the same way as HTTP/gRPC.
+                                    // We just carry the IO through.
+                                    Some(IR::IO(Box::new(IO::Postgres {
+                                        req_template: req_template.clone(),
+                                        group_by: group_by.clone(),
+                                        dl_id: None,
+                                        dedupe: *dedupe,
+                                    })))
+                                }
                                 IO::Js { name: method } => {
                                     Some(IR::IO(Box::new(IO::Js { name: method.clone() })))
                                 }

@@ -1,3 +1,4 @@
+mod from_database;
 mod from_json;
 mod from_proto;
 mod generator;
@@ -5,6 +6,7 @@ mod graphql_type;
 mod json;
 mod proto;
 
+pub use from_database::from_database;
 pub use from_json::{FromJsonGenerator, RequestSample};
 pub use generator::{Generator, Input};
 

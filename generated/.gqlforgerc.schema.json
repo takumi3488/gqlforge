@@ -315,6 +315,20 @@
           "enum": [
             "Grpc"
           ]
+        },
+        {
+          "description": "Points to a SQL migration file. Used to build a database schema for the `@postgres` directive offline (without a live database connection).",
+          "type": "string",
+          "enum": [
+            "Sql"
+          ]
+        },
+        {
+          "description": "Points to a PostgreSQL connection string. The database will be introspected at startup to build a schema for the `@postgres` directive.",
+          "type": "string",
+          "enum": [
+            "Postgres"
+          ]
         }
       ]
     },

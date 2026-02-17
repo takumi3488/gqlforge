@@ -10,6 +10,7 @@ use crate::core::Transform;
 use crate::core::config::Config;
 use crate::core::macros::MergeRight;
 use crate::core::merge_right::MergeRight;
+use crate::core::postgres::schema::DatabaseSchema;
 use crate::core::proto_reader::ProtoMetadata;
 use crate::core::rest::{EndpointSet, Unchecked};
 
@@ -147,6 +148,12 @@ pub struct Extensions {
     pub htpasswd: Vec<Content<String>>,
 
     pub jwks: Vec<Content<JwkSet>>,
+
+    /// Raw SQL migration contents, applied in order to build a DatabaseSchema.
+    pub sql_migrations: Vec<String>,
+
+    /// Resolved database schema for `@postgres` directives.
+    pub database_schema: Option<DatabaseSchema>,
 }
 
 impl Extensions {
@@ -163,6 +170,14 @@ impl Extensions {
 
     pub fn has_auth(&self) -> bool {
         !self.htpasswd.is_empty() || !self.jwks.is_empty()
+    }
+
+    pub fn add_sql_migration(&mut self, content: String) {
+        self.sql_migrations.push(content);
+    }
+
+    pub fn set_database_schema(&mut self, schema: DatabaseSchema) {
+        self.database_schema = Some(schema);
     }
 }
 

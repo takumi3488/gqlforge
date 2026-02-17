@@ -6,7 +6,7 @@ use gqlforge_macros::{CustomResolver, MergeRight};
 use gqlforge_valid::{Valid, Validator};
 use serde::{Deserialize, Serialize};
 
-use super::{Call, EntityResolver, Expr, GraphQL, Grpc, Http, JS};
+use super::{Call, EntityResolver, Expr, GraphQL, Grpc, Http, JS, Postgres};
 use crate::core::directive::DirectiveCodec;
 use crate::core::merge_right::MergeRight;
 
@@ -35,6 +35,7 @@ pub enum Resolver {
     Call(Call),
     Js(JS),
     Expr(Expr),
+    Postgres(Postgres),
     #[serde(skip)]
     #[resolver(skip_directive)]
     ApolloFederation(ApolloFederation),
@@ -46,6 +47,7 @@ impl Resolver {
             Resolver::Http(http) => !http.batch_key.is_empty(),
             Resolver::Grpc(grpc) => !grpc.batch_key.is_empty(),
             Resolver::Graphql(graphql) => graphql.batch,
+            Resolver::Postgres(pg) => !pg.batch_key.is_empty(),
             Resolver::ApolloFederation(ApolloFederation::EntityResolver(entity_resolver)) => {
                 entity_resolver
                     .resolver_by_type

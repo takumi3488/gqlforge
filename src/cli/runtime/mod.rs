@@ -82,6 +82,7 @@ pub fn init(blueprint: &Blueprint) -> TargetRuntime {
         extensions: Arc::new(vec![]),
         cmd_worker: init_http_worker_io(blueprint.server.script.clone()),
         worker: init_resolver_worker_io(blueprint.server.script.clone()),
+        postgres: None,
     }
 }
 

@@ -1,0 +1,241 @@
+use std::collections::BTreeMap;
+use std::fmt;
+
+use serde::{Deserialize, Serialize};
+
+use crate::core::merge_right::MergeRight;
+
+/// PostgreSQL type → GraphQL scalar mapping.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub enum PgType {
+    SmallInt,
+    Integer,
+    BigInt,
+    Real,
+    DoublePrecision,
+    Numeric,
+    Boolean,
+    Text,
+    Varchar,
+    Char,
+    Uuid,
+    Date,
+    Timestamp,
+    TimestampTz,
+    Time,
+    TimeTz,
+    Interval,
+    Json,
+    Jsonb,
+    Bytea,
+    Inet,
+    Cidr,
+    MacAddr,
+    /// Array of another type.
+    Array(Box<PgType>),
+    /// Fallback for unrecognised types.
+    Other(String),
+}
+
+impl PgType {
+    /// Map a PostgreSQL type name (as returned by `information_schema` or
+    /// `sqlparser`) to a `PgType`.
+    pub fn from_sql_name(name: &str) -> Self {
+        match name.to_lowercase().as_str() {
+            "smallint" | "int2" | "smallserial" | "serial2" => PgType::SmallInt,
+            "integer" | "int" | "int4" | "serial" | "serial4" => PgType::Integer,
+            "bigint" | "int8" | "bigserial" | "serial8" => PgType::BigInt,
+            "real" | "float4" => PgType::Real,
+            "double precision" | "float8" => PgType::DoublePrecision,
+            "numeric" | "decimal" => PgType::Numeric,
+            "boolean" | "bool" => PgType::Boolean,
+            "text" => PgType::Text,
+            "character varying" | "varchar" => PgType::Varchar,
+            "character" | "char" => PgType::Char,
+            "uuid" => PgType::Uuid,
+            "date" => PgType::Date,
+            "timestamp" | "timestamp without time zone" => PgType::Timestamp,
+            "timestamp with time zone" | "timestamptz" => PgType::TimestampTz,
+            "time" | "time without time zone" => PgType::Time,
+            "time with time zone" | "timetz" => PgType::TimeTz,
+            "interval" => PgType::Interval,
+            "json" => PgType::Json,
+            "jsonb" => PgType::Jsonb,
+            "bytea" => PgType::Bytea,
+            "inet" => PgType::Inet,
+            "cidr" => PgType::Cidr,
+            "macaddr" | "macaddr8" => PgType::MacAddr,
+            other => {
+                if let Some(inner) = other.strip_suffix("[]") {
+                    PgType::Array(Box::new(PgType::from_sql_name(inner)))
+                } else {
+                    PgType::Other(other.to_string())
+                }
+            }
+        }
+    }
+
+    /// The corresponding GraphQL scalar name.
+    pub fn graphql_scalar(&self) -> &str {
+        match self {
+            PgType::SmallInt | PgType::Integer => "Int",
+            PgType::BigInt => "Int",
+            PgType::Real | PgType::DoublePrecision | PgType::Numeric => "Float",
+            PgType::Boolean => "Boolean",
+            PgType::Uuid => "ID",
+            PgType::Json | PgType::Jsonb => "JSON",
+            PgType::Date | PgType::Timestamp | PgType::TimestampTz => "DateTime",
+            PgType::Array(_) => "JSON",
+            PgType::Bytea => "String",
+            _ => "String",
+        }
+    }
+}
+
+impl fmt::Display for PgType {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            PgType::Array(inner) => write!(f, "{inner}[]"),
+            PgType::Other(name) => write!(f, "{name}"),
+            _ => write!(f, "{self:?}"),
+        }
+    }
+}
+
+/// A single column in a table.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Column {
+    pub name: String,
+    pub pg_type: PgType,
+    pub is_nullable: bool,
+    pub has_default: bool,
+    pub is_generated: bool,
+}
+
+/// Primary key definition (supports composite keys).
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct PrimaryKey {
+    pub columns: Vec<String>,
+}
+
+/// Foreign key referencing another table.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ForeignKey {
+    pub columns: Vec<String>,
+    pub referenced_schema: String,
+    pub referenced_table: String,
+    pub referenced_columns: Vec<String>,
+}
+
+/// Unique constraint on one or more columns.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct UniqueConstraint {
+    pub columns: Vec<String>,
+}
+
+/// Full metadata for a single table.
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+pub struct Table {
+    pub schema: String,
+    pub name: String,
+    pub columns: Vec<Column>,
+    pub primary_key: Option<PrimaryKey>,
+    pub foreign_keys: Vec<ForeignKey>,
+    pub unique_constraints: Vec<UniqueConstraint>,
+}
+
+impl Table {
+    pub fn qualified_name(&self) -> String {
+        format!("{}.{}", self.schema, self.name)
+    }
+
+    pub fn find_column(&self, name: &str) -> Option<&Column> {
+        self.columns.iter().find(|c| c.name == name)
+    }
+}
+
+/// The complete database schema.
+/// Key is `"schema.table_name"`.
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct DatabaseSchema {
+    pub tables: BTreeMap<String, Table>,
+}
+
+impl DatabaseSchema {
+    pub fn new() -> Self {
+        Self { tables: BTreeMap::new() }
+    }
+
+    pub fn add_table(&mut self, table: Table) {
+        let key = table.qualified_name();
+        self.tables.insert(key, table);
+    }
+
+    pub fn merge(mut self, other: Self) -> Self {
+        self.tables.extend(other.tables);
+        self
+    }
+
+    /// Look up a table by name (tries both `schema.name` and `public.name`).
+    pub fn find_table(&self, name: &str) -> Option<&Table> {
+        self.tables
+            .get(name)
+            .or_else(|| self.tables.get(&format!("public.{name}")))
+    }
+}
+
+impl MergeRight for DatabaseSchema {
+    fn merge_right(mut self, other: Self) -> Self {
+        self.tables.extend(other.tables);
+        self
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn pg_type_from_sql_name() {
+        assert_eq!(PgType::from_sql_name("integer"), PgType::Integer);
+        assert_eq!(PgType::from_sql_name("INT"), PgType::Integer);
+        assert_eq!(PgType::from_sql_name("varchar"), PgType::Varchar);
+        assert_eq!(PgType::from_sql_name("boolean"), PgType::Boolean);
+        assert_eq!(PgType::from_sql_name("timestamptz"), PgType::TimestampTz);
+        assert_eq!(
+            PgType::from_sql_name("integer[]"),
+            PgType::Array(Box::new(PgType::Integer))
+        );
+        assert_eq!(
+            PgType::from_sql_name("custom_type"),
+            PgType::Other("custom_type".into())
+        );
+    }
+
+    #[test]
+    fn graphql_scalar_mapping() {
+        assert_eq!(PgType::Integer.graphql_scalar(), "Int");
+        assert_eq!(PgType::DoublePrecision.graphql_scalar(), "Float");
+        assert_eq!(PgType::Boolean.graphql_scalar(), "Boolean");
+        assert_eq!(PgType::Text.graphql_scalar(), "String");
+        assert_eq!(PgType::Uuid.graphql_scalar(), "ID");
+        assert_eq!(PgType::Jsonb.graphql_scalar(), "JSON");
+    }
+
+    #[test]
+    fn database_schema_find_table() {
+        let mut schema = DatabaseSchema::new();
+        schema.add_table(Table {
+            schema: "public".into(),
+            name: "users".into(),
+            columns: vec![],
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+        });
+
+        assert!(schema.find_table("public.users").is_some());
+        assert!(schema.find_table("users").is_some());
+        assert!(schema.find_table("nonexistent").is_none());
+    }
+}

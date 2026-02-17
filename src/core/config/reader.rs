@@ -136,6 +136,27 @@ impl ConfigReader {
                         extensions.add_proto(m);
                     }
                 }
+                LinkType::Sql => {
+                    let source = self.resource_reader.read_file(path).await?;
+                    extensions.add_sql_migration(source.content);
+                }
+                LinkType::Postgres => {
+                    // Online introspection: handled at startup when the
+                    // postgres feature is enabled. Here we store the
+                    // connection string for later use.
+                    #[cfg(feature = "postgres")]
+                    {
+                        let db_schema =
+                            crate::core::postgres::introspector::introspect(&link.src).await?;
+                        extensions.set_database_schema(db_schema);
+                    }
+                    #[cfg(not(feature = "postgres"))]
+                    {
+                        anyhow::bail!(
+                            "LinkType::Postgres requires the 'postgres' feature to be enabled"
+                        );
+                    }
+                }
             }
         }
 
