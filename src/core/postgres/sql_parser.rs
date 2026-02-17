@@ -153,6 +153,37 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
         AlterTableOperation::DropColumn { column_name, .. } => {
             table.columns.retain(|c| c.name != column_name.value);
         }
+        AlterTableOperation::AddConstraint(constraint) => match constraint {
+            TableConstraint::PrimaryKey { columns: pk_cols, .. } => {
+                let pk_names: Vec<String> = pk_cols.iter().map(|c| c.value.clone()).collect();
+                for col in &mut table.columns {
+                    if pk_names.contains(&col.name) {
+                        col.is_nullable = false;
+                    }
+                }
+                table.primary_key = Some(PrimaryKey { columns: pk_names });
+            }
+            TableConstraint::ForeignKey {
+                columns: fk_cols,
+                foreign_table,
+                referred_columns,
+                ..
+            } => {
+                let (ref_schema, ref_table) = extract_schema_and_name(foreign_table);
+                table.foreign_keys.push(ForeignKey {
+                    columns: fk_cols.iter().map(|c| c.value.clone()).collect(),
+                    referenced_schema: ref_schema,
+                    referenced_table: ref_table,
+                    referenced_columns: referred_columns.iter().map(|c| c.value.clone()).collect(),
+                });
+            }
+            TableConstraint::Unique { columns: u_cols, .. } => {
+                table.unique_constraints.push(UniqueConstraint {
+                    columns: u_cols.iter().map(|c| c.value.clone()).collect(),
+                });
+            }
+            _ => {}
+        },
         _ => {}
     }
     Ok(())
