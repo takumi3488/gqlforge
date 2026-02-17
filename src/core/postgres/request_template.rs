@@ -196,6 +196,7 @@ impl RequestTemplate {
             )
         })?;
 
+        let ret_cols = self.select_columns();
         let table = quote_ident(&self.table);
         let mut sql = format!("DELETE FROM {table}");
         let mut params = Vec::new();
@@ -204,6 +205,7 @@ impl RequestTemplate {
         sql.push_str(&format!(" WHERE {where_clause}"));
         params.extend(where_params);
 
+        sql.push_str(&format!(" RETURNING {ret_cols}"));
         Ok(RenderedQuery { sql, params })
     }
 
@@ -404,7 +406,10 @@ mod tests {
         let ctx = Ctx { value: serde_json::Value::Null };
         let rendered = tmpl.render(&ctx).unwrap();
 
-        assert_eq!(rendered.sql, r#"DELETE FROM "users" WHERE "id" = $1"#);
+        assert_eq!(
+            rendered.sql,
+            r#"DELETE FROM "users" WHERE "id" = $1 RETURNING *"#
+        );
         assert_eq!(rendered.params, vec!["42"]);
     }
 }

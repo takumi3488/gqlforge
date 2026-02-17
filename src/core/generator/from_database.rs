@@ -366,7 +366,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
             mutation_type.fields.insert(
                 delete_name,
                 Field::default()
-                    .type_of(Type::from("Boolean".to_string()))
+                    .type_of(Type::from(type_name.clone()))
                     .args(args)
                     .resolvers(resolver.into()),
             );
