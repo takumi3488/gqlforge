@@ -1353,5 +1353,335 @@ pub mod pool {
             assert_eq!(compress_ipv6("2001:db8:0:0:0:0:0:1"), "2001:db8::1");
             assert_eq!(compress_ipv6("0:0:0:0:0:0:0:0"), "::");
         }
+
+        // ===== TypedParam error cases & additional types =====
+
+        #[test]
+        fn test_typed_param_int4_invalid() {
+            assert!(typed_param_to_bytes("abc", &postgres_types::Type::INT4).is_err());
+        }
+
+        #[test]
+        fn test_typed_param_int2() {
+            let bytes = typed_param_to_bytes("123", &postgres_types::Type::INT2).unwrap();
+            assert_eq!(bytes, 123i16.to_be_bytes().to_vec());
+        }
+
+        #[test]
+        fn test_typed_param_float4() {
+            let bytes = typed_param_to_bytes("1.5", &postgres_types::Type::FLOAT4).unwrap();
+            assert_eq!(bytes, 1.5f32.to_be_bytes().to_vec());
+        }
+
+        #[test]
+        fn test_typed_param_float8_invalid() {
+            assert!(typed_param_to_bytes("xyz", &postgres_types::Type::FLOAT8).is_err());
+        }
+
+        #[test]
+        fn test_typed_param_timestamp() {
+            let result =
+                typed_param_to_bytes("2024-01-15T10:30:00", &postgres_types::Type::TIMESTAMP);
+            assert!(result.is_ok());
+        }
+
+        #[test]
+        fn test_typed_param_date() {
+            let bytes = typed_param_to_bytes("2024-01-15", &postgres_types::Type::DATE).unwrap();
+            assert!(!bytes.is_empty());
+        }
+
+        #[test]
+        fn test_typed_param_date_invalid() {
+            assert!(typed_param_to_bytes("2024-13-01", &postgres_types::Type::DATE).is_err());
+        }
+
+        #[test]
+        fn test_typed_param_time() {
+            let bytes = typed_param_to_bytes("10:30:00", &postgres_types::Type::TIME).unwrap();
+            assert!(!bytes.is_empty());
+        }
+
+        #[test]
+        fn test_typed_param_uuid_invalid() {
+            assert!(typed_param_to_bytes("invalid-uuid", &postgres_types::Type::UUID).is_err());
+        }
+
+        // ===== Helper function tests: parse_naive_datetime =====
+
+        #[test]
+        fn test_parse_naive_datetime_iso_t() {
+            let dt = parse_naive_datetime("2024-01-15T10:30:00").unwrap();
+            assert_eq!(dt.to_string(), "2024-01-15 10:30:00");
+        }
+
+        #[test]
+        fn test_parse_naive_datetime_space() {
+            let dt = parse_naive_datetime("2024-01-15 10:30:00").unwrap();
+            assert_eq!(dt.to_string(), "2024-01-15 10:30:00");
+        }
+
+        #[test]
+        fn test_parse_naive_datetime_with_frac() {
+            let dt = parse_naive_datetime("2024-01-15T10:30:00.123456").unwrap();
+            assert_eq!(dt.to_string(), "2024-01-15 10:30:00.123456");
+        }
+
+        #[test]
+        fn test_parse_naive_datetime_invalid() {
+            assert!(parse_naive_datetime("not-a-date").is_err());
+        }
+
+        // ===== Helper function tests: parse_naive_time =====
+
+        #[test]
+        fn test_parse_naive_time_hms() {
+            let t = parse_naive_time("10:30:00").unwrap();
+            assert_eq!(t.to_string(), "10:30:00");
+        }
+
+        #[test]
+        fn test_parse_naive_time_hm() {
+            let t = parse_naive_time("10:30").unwrap();
+            assert_eq!(t.to_string(), "10:30:00");
+        }
+
+        #[test]
+        fn test_parse_naive_time_invalid() {
+            assert!(parse_naive_time("25:00:00").is_err());
+        }
+
+        // ===== Helper function tests: parse_uuid_to_bytes =====
+
+        #[test]
+        fn test_parse_uuid_to_bytes_valid() {
+            let bytes = parse_uuid_to_bytes("550e8400-e29b-41d4-a716-446655440000").unwrap();
+            assert_eq!(
+                bytes,
+                [
+                    0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55,
+                    0x44, 0x00, 0x00
+                ]
+            );
+        }
+
+        #[test]
+        fn test_parse_uuid_to_bytes_no_hyphens() {
+            let bytes = parse_uuid_to_bytes("550e8400e29b41d4a716446655440000").unwrap();
+            assert_eq!(
+                bytes,
+                [
+                    0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55,
+                    0x44, 0x00, 0x00
+                ]
+            );
+        }
+
+        #[test]
+        fn test_parse_uuid_to_bytes_invalid() {
+            assert!(parse_uuid_to_bytes("invalid-uuid").is_err());
+        }
+
+        // ===== raw_element_to_const additional type tests =====
+
+        #[test]
+        fn test_raw_element_int2() {
+            let result =
+                raw_element_to_const(&postgres_types::Type::INT2, &42i16.to_be_bytes()).unwrap();
+            assert_eq!(result, ConstValue::Number(42.into()));
+        }
+
+        #[test]
+        fn test_raw_element_int8() {
+            let result =
+                raw_element_to_const(&postgres_types::Type::INT8, &9999999999i64.to_be_bytes())
+                    .unwrap();
+            assert_eq!(result, ConstValue::Number(9999999999i64.into()));
+        }
+
+        #[test]
+        fn test_raw_element_float4() {
+            let result =
+                raw_element_to_const(&postgres_types::Type::FLOAT4, &1.5f32.to_be_bytes()).unwrap();
+            match result {
+                ConstValue::Number(n) => {
+                    let v = n.as_f64().unwrap();
+                    assert!((v - 1.5).abs() < 1e-6);
+                }
+                other => panic!("expected Number, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn test_raw_element_float4_nan() {
+            let result =
+                raw_element_to_const(&postgres_types::Type::FLOAT4, &f32::NAN.to_be_bytes())
+                    .unwrap();
+            assert_eq!(result, ConstValue::Null);
+        }
+
+        #[test]
+        fn test_raw_element_varchar() {
+            let result =
+                raw_element_to_const(&postgres_types::Type::VARCHAR, b"test string").unwrap();
+            assert_eq!(result, ConstValue::String("test string".to_string()));
+        }
+
+        #[test]
+        fn test_raw_element_timestamp() {
+            // 2024-01-15T10:30:00 is 8780 days + 37800 seconds after 2000-01-01T00:00:00
+            // = (8780 * 86400 + 37800) * 1_000_000 µs = 758_629_800_000_000
+            let us: i64 = 758_629_800_000_000;
+            let result =
+                raw_element_to_const(&postgres_types::Type::TIMESTAMP, &us.to_be_bytes()).unwrap();
+            match result {
+                ConstValue::String(s) => {
+                    assert!(s.starts_with("2024-01-15T10:30:00"));
+                }
+                other => panic!("expected String, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn test_raw_element_timestamptz() {
+            // Same µs value; TIMESTAMPTZ returns RFC3339 with +00:00
+            let us: i64 = 758_629_800_000_000;
+            let result =
+                raw_element_to_const(&postgres_types::Type::TIMESTAMPTZ, &us.to_be_bytes())
+                    .unwrap();
+            match result {
+                ConstValue::String(s) => {
+                    assert!(s.contains("2024-01-15"));
+                    assert!(s.contains("+00:00"));
+                }
+                other => panic!("expected String, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn test_raw_element_date() {
+            // 2024-01-15 is 8780 days after 2000-01-01
+            let days: i32 = 8780;
+            let result =
+                raw_element_to_const(&postgres_types::Type::DATE, &days.to_be_bytes()).unwrap();
+            assert_eq!(result, ConstValue::String("2024-01-15".to_string()));
+        }
+
+        #[test]
+        fn test_raw_element_time() {
+            // 10:30:00 = (10*3600 + 30*60) * 1_000_000 µs = 37_800_000_000
+            let us: i64 = 37_800_000_000;
+            let result =
+                raw_element_to_const(&postgres_types::Type::TIME, &us.to_be_bytes()).unwrap();
+            assert_eq!(result, ConstValue::String("10:30:00".to_string()));
+        }
+
+        #[test]
+        fn test_raw_element_json() {
+            let json_bytes = br#"{"key":"value"}"#;
+            let result = raw_element_to_const(&postgres_types::Type::JSON, json_bytes).unwrap();
+            match result {
+                ConstValue::Object(obj) => {
+                    assert_eq!(
+                        obj.get("key"),
+                        Some(&ConstValue::String("value".to_string()))
+                    );
+                }
+                other => panic!("expected Object, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn test_raw_element_jsonb() {
+            // JSONB has a 0x01 version byte prefix
+            let mut jsonb_bytes = vec![0x01u8];
+            jsonb_bytes.extend_from_slice(br#"{"key":"value"}"#);
+            let result = raw_element_to_const(&postgres_types::Type::JSONB, &jsonb_bytes).unwrap();
+            match result {
+                ConstValue::Object(obj) => {
+                    assert_eq!(
+                        obj.get("key"),
+                        Some(&ConstValue::String("value".to_string()))
+                    );
+                }
+                other => panic!("expected Object, got {:?}", other),
+            }
+        }
+
+        #[test]
+        fn test_raw_element_unknown_utf8_fallback() {
+            // Use an OID that doesn't match any known type — NAME is handled as TEXT,
+            // so use a truly unknown type. The fallback branch tries UTF-8 first.
+            let result =
+                raw_element_to_const(&postgres_types::Type::REGCLASS, b"some_table").unwrap();
+            assert_eq!(result, ConstValue::String("some_table".to_string()));
+        }
+
+        // ===== sanitize_graphql_name tests =====
+
+        #[test]
+        fn test_sanitize_graphql_name_normal() {
+            assert_eq!(sanitize_graphql_name("user_name"), "user_name");
+        }
+
+        #[test]
+        fn test_sanitize_graphql_name_special_chars() {
+            assert_eq!(sanitize_graphql_name("user-name"), "user_name");
+        }
+
+        #[test]
+        fn test_sanitize_graphql_name_starts_with_digit() {
+            assert_eq!(sanitize_graphql_name("1col"), "_1col");
+        }
+
+        #[test]
+        fn test_sanitize_graphql_name_empty() {
+            assert_eq!(sanitize_graphql_name(""), "_unnamed");
+        }
+
+        #[test]
+        fn test_sanitize_graphql_name_double_underscore() {
+            assert_eq!(sanitize_graphql_name("__type"), "___type");
+        }
+
+        // ===== Additional binary formatter tests =====
+
+        #[test]
+        fn test_format_macaddr8() {
+            let raw = [0x08, 0x00, 0x2b, 0x01, 0x02, 0x03, 0x04, 0x05];
+            assert_eq!(format_macaddr(&raw), "08:00:2b:01:02:03:04:05");
+        }
+
+        #[test]
+        fn test_format_interval_negative_time() {
+            // -01:30:00 => µs = -5_400_000_000
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&(-5_400_000_000i64).to_be_bytes());
+            raw.extend_from_slice(&0i32.to_be_bytes());
+            raw.extend_from_slice(&0i32.to_be_bytes());
+            assert_eq!(format_interval(&raw).unwrap(), "-01:30:00");
+        }
+
+        #[test]
+        fn test_format_timetz_negative_offset() {
+            // 15:00:00-05:00
+            // µs = 15*3600*1_000_000 = 54_000_000_000
+            // PostgreSQL offset = seconds west of UTC = 18000 (since -05 is 5*3600 west)
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&54_000_000_000i64.to_be_bytes());
+            raw.extend_from_slice(&18000i32.to_be_bytes());
+            assert_eq!(format_timetz(&raw).unwrap(), "15:00:00-05");
+        }
+
+        #[test]
+        fn test_format_timetz_with_minutes() {
+            // 12:00:00+05:30
+            // µs = 12*3600*1_000_000 = 43_200_000_000
+            // PostgreSQL offset = -(5*3600 + 30*60) = -19800
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&43_200_000_000i64.to_be_bytes());
+            raw.extend_from_slice(&(-19800i32).to_be_bytes());
+            assert_eq!(format_timetz(&raw).unwrap(), "12:00:00+05:30");
+        }
     }
 }
