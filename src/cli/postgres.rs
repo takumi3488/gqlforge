@@ -226,8 +226,8 @@ pub mod pool {
             for _ in 0..leading_zero_groups {
                 frac.push_str("0000");
             }
-            for i in frac_start..digits.len() {
-                frac.push_str(&format!("{:04}", digits[i]));
+            for d in digits.iter().skip(frac_start) {
+                frac.push_str(&format!("{:04}", d));
             }
             // Pad with zeros if needed.
             while frac.len() < dscale as usize {
@@ -418,7 +418,8 @@ pub mod pool {
         let minutes = (total_secs % 3600) / 60;
         let seconds = total_secs % 60;
 
-        // PostgreSQL stores offset as seconds west of UTC (negated from usual convention).
+        // PostgreSQL stores offset as seconds west of UTC (negated from usual
+        // convention).
         let tz_total = -offset_secs;
         let tz_sign = if tz_total >= 0 { '+' } else { '-' };
         let tz_abs = tz_total.unsigned_abs();
@@ -589,6 +590,7 @@ pub mod pool {
 
         let mut pos = header_end;
 
+        #[allow(clippy::too_many_arguments)]
         fn read_elements(
             raw: &[u8],
             pos: &mut usize,
@@ -895,7 +897,8 @@ pub mod pool {
                     };
                 }
 
-                // Fallback: try to get as String (works for TEXT, VARCHAR, BPCHAR, NAME, UNKNOWN).
+                // Fallback: try to get as String (works for TEXT, VARCHAR, BPCHAR, NAME,
+                // UNKNOWN).
                 match row.try_get::<_, Option<String>>(idx) {
                     Ok(v) => Ok(v.map(ConstValue::String).unwrap_or(ConstValue::Null)),
                     Err(_) => {
@@ -1157,7 +1160,7 @@ pub mod pool {
         #[test]
         fn test_typed_param_float8() {
             let bytes = typed_param_to_bytes("3.14", &postgres_types::Type::FLOAT8).unwrap();
-            assert_eq!(bytes, 3.14f64.to_be_bytes().to_vec());
+            assert_eq!(bytes, 3.14_f64.to_be_bytes().to_vec());
         }
 
         #[test]
@@ -1323,12 +1326,12 @@ pub mod pool {
         #[test]
         fn test_raw_element_float8() {
             let result =
-                raw_element_to_const(&postgres_types::Type::FLOAT8, &3.14f64.to_be_bytes())
+                raw_element_to_const(&postgres_types::Type::FLOAT8, &3.14_f64.to_be_bytes())
                     .unwrap();
             match result {
                 ConstValue::Number(n) => {
                     let v: f64 = n.as_f64().unwrap();
-                    assert!((v - 3.14).abs() < 1e-10);
+                    assert!((v - 3.14_f64).abs() < 1e-10);
                 }
                 other => panic!("expected Number, got {:?}", other),
             }
