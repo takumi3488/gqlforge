@@ -152,8 +152,10 @@ pub struct Extensions {
     /// Raw SQL migration contents, applied in order to build a DatabaseSchema.
     pub sql_migrations: Vec<String>,
 
-    /// Resolved database schema for `@postgres` directives.
-    pub database_schema: Option<DatabaseSchema>,
+    /// Resolved database schemas for `@postgres` directives.
+    /// Each entry corresponds to a `@link(type: Postgres)` and carries an
+    /// optional `id` for multi-database setups.
+    pub database_schemas: Vec<Content<DatabaseSchema>>,
 }
 
 impl Extensions {
@@ -176,8 +178,30 @@ impl Extensions {
         self.sql_migrations.push(content);
     }
 
-    pub fn set_database_schema(&mut self, schema: DatabaseSchema) {
-        self.database_schema = Some(schema);
+    pub fn add_database_schema(&mut self, id: Option<String>, schema: DatabaseSchema) {
+        self.database_schemas.push(Content { id, content: schema });
+    }
+
+    /// Find a database schema by connection id.
+    ///
+    /// - If `id` is `Some`, returns the matching schema.
+    /// - If `id` is `None` and there is exactly one schema, returns it.
+    /// - Otherwise returns `None`.
+    pub fn find_database_schema(&self, id: Option<&str>) -> Option<&DatabaseSchema> {
+        match id {
+            Some(id) => self
+                .database_schemas
+                .iter()
+                .find(|c| c.id.as_deref() == Some(id))
+                .map(|c| &c.content),
+            None => {
+                if self.database_schemas.len() == 1 {
+                    Some(&self.database_schemas[0].content)
+                } else {
+                    None
+                }
+            }
+        }
     }
 }
 
@@ -199,5 +223,51 @@ impl Deref for ConfigModule {
 impl From<Config> for ConfigModule {
     fn from(config: Config) -> Self {
         ConfigModule { cache: Cache::from(config), ..Default::default() }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::postgres::schema::DatabaseSchema;
+
+    #[test]
+    fn find_by_id_returns_matching() {
+        let mut ext = Extensions::default();
+        let schema = DatabaseSchema::new();
+        ext.add_database_schema(Some("main".to_string()), schema.clone());
+        ext.add_database_schema(Some("analytics".to_string()), DatabaseSchema::new());
+
+        let found = ext.find_database_schema(Some("main"));
+        assert!(found.is_some());
+        assert_eq!(found.unwrap(), &schema);
+    }
+
+    #[test]
+    fn find_by_id_returns_none_for_missing() {
+        let mut ext = Extensions::default();
+        ext.add_database_schema(Some("main".to_string()), DatabaseSchema::new());
+
+        assert!(ext.find_database_schema(Some("nonexistent")).is_none());
+    }
+
+    #[test]
+    fn find_without_id_returns_single() {
+        let mut ext = Extensions::default();
+        let schema = DatabaseSchema::new();
+        ext.add_database_schema(Some("main".to_string()), schema.clone());
+
+        let found = ext.find_database_schema(None);
+        assert!(found.is_some());
+        assert_eq!(found.unwrap(), &schema);
+    }
+
+    #[test]
+    fn find_without_id_returns_none_for_multiple() {
+        let mut ext = Extensions::default();
+        ext.add_database_schema(Some("main".to_string()), DatabaseSchema::new());
+        ext.add_database_schema(Some("analytics".to_string()), DatabaseSchema::new());
+
+        assert!(ext.find_database_schema(None).is_none());
     }
 }

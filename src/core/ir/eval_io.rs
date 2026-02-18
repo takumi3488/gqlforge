@@ -112,7 +112,7 @@ where
         IO::HttpStream { .. } => Err(Error::IO(
             "HttpStream should be resolved via subscription stream, not eval_io".to_string(),
         )),
-        IO::Postgres { req_template, dl_id: _, .. } => {
+        IO::Postgres { req_template, dl_id: _, connection_id, .. } => {
             let rendered = req_template
                 .render(ctx)
                 .map_err(|e| Error::IO(e.to_string()))?;
@@ -120,8 +120,13 @@ where
                 .request_ctx
                 .runtime
                 .postgres
-                .as_ref()
-                .ok_or_else(|| Error::IO("PostgreSQL runtime not configured".to_string()))?;
+                .get(connection_id)
+                .ok_or_else(|| {
+                    Error::IO(format!(
+                        "PostgreSQL connection '{}' not configured",
+                        connection_id
+                    ))
+                })?;
             let result = pg
                 .execute(&rendered.sql, &rendered.params)
                 .await

@@ -138,7 +138,14 @@ impl ConfigReader {
                 }
                 LinkType::Sql => {
                     let source = self.resource_reader.read_file(path).await?;
-                    extensions.add_sql_migration(source.content);
+                    extensions.add_sql_migration(source.content.clone());
+                    #[cfg(feature = "postgres")]
+                    {
+                        let schema =
+                            crate::core::postgres::sql_parser::parse_migrations(&[source.content])?;
+                        let id = link.id.clone().or_else(|| Some("default".to_string()));
+                        extensions.add_database_schema(id, schema);
+                    }
                 }
                 LinkType::Postgres => {
                     // Online introspection: connect to the database,
@@ -148,7 +155,8 @@ impl ConfigReader {
                     {
                         let db_schema =
                             crate::core::postgres::introspector::introspect(&link.src).await?;
-                        extensions.set_database_schema(db_schema);
+                        let id = link.id.clone().or_else(|| Some("default".to_string()));
+                        extensions.add_database_schema(id, db_schema);
                     }
                     #[cfg(not(feature = "postgres"))]
                     {

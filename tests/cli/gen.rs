@@ -291,7 +291,7 @@ pub mod test {
             let IO { fs, paths } = spec.configs.into_io().await;
             let path = paths.first().unwrap().as_str();
 
-            let mut runtime = gqlforge::cli::runtime::init(&Blueprint::default());
+            let mut runtime = gqlforge::cli::runtime::init(&Blueprint::default())?;
             runtime.http = Arc::new(NativeHttpTest::default());
             runtime.file = Arc::new(fs);
             if let Some(env) = spec.env {

@@ -11,6 +11,7 @@ use gqlforge::cli::javascript::init_worker_io;
 use gqlforge::core::blueprint::Script;
 use gqlforge::core::cache::InMemoryCache;
 use gqlforge::core::config::RuntimeConfig;
+use gqlforge::core::postgres::PostgresIO;
 use gqlforge::core::runtime::TargetRuntime;
 use gqlforge::core::worker::{Command, Event};
 
@@ -69,6 +70,7 @@ pub fn create_runtime(
     http_client: Arc<Http>,
     env: Option<HashMap<String, String>>,
     script: Option<Script>,
+    postgres: Option<HashMap<String, Arc<dyn PostgresIO>>>,
 ) -> TargetRuntime {
     let http = http_client.clone();
 
@@ -92,6 +94,6 @@ pub fn create_runtime(
             Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
             None => None,
         },
-        postgres: None,
+        postgres: postgres.unwrap_or_default(),
     }
 }

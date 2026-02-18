@@ -16,7 +16,7 @@ impl ServerConfig {
         blueprint: Blueprint,
         endpoints: EndpointSet<Unchecked>,
     ) -> anyhow::Result<Self> {
-        let rt = init(&blueprint);
+        let rt = init(&blueprint)?;
 
         let endpoints = endpoints.into_checked(&blueprint, rt.clone()).await?;
         let app_context = Arc::new(AppContext::new(blueprint.clone(), rt, endpoints));

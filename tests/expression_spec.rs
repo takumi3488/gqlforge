@@ -10,7 +10,7 @@ mod tests {
     use serde_json::json;
 
     async fn eval(expr: &IR) -> Result<Value, Error> {
-        let runtime = gqlforge::cli::runtime::init(&Blueprint::default());
+        let runtime = gqlforge::cli::runtime::init(&Blueprint::default()).unwrap();
         let req_ctx = RequestContext::new(runtime);
         let res_ctx = EmptyResolverContext {};
         let mut eval_ctx = EvalContext::new(&req_ctx, &res_ctx);
