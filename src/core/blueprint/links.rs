@@ -4,6 +4,7 @@ use super::BlueprintError;
 use crate::core::config::{Link, LinkType};
 use crate::core::directive::DirectiveCodec;
 
+#[derive(Debug)]
 pub struct Links;
 
 impl TryFrom<Vec<Link>> for Links {
@@ -69,5 +70,80 @@ impl TryFrom<Vec<Link>> for Links {
         .trace("schema")
         .map_to(Links)
         .to_result()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn pg_link(id: Option<&str>, src: &str) -> Link {
+        Link {
+            src: src.to_string(),
+            type_of: LinkType::Postgres,
+            id: id.map(|s| s.to_string()),
+            ..Default::default()
+        }
+    }
+
+    #[test]
+    fn single_postgres_link_without_id_succeeds() {
+        let links = vec![pg_link(None, "postgres://localhost/db")];
+        assert!(Links::try_from(links).is_ok());
+    }
+
+    #[test]
+    fn multiple_postgres_links_with_ids_succeeds() {
+        let links = vec![
+            pg_link(Some("main"), "postgres://localhost/main"),
+            pg_link(Some("analytics"), "postgres://localhost/analytics"),
+        ];
+        assert!(Links::try_from(links).is_ok());
+    }
+
+    #[test]
+    fn multiple_postgres_links_missing_id_fails() {
+        let links = vec![
+            pg_link(Some("main"), "postgres://localhost/main"),
+            pg_link(None, "postgres://localhost/analytics"),
+        ];
+        let result = Links::try_from(links);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let messages: Vec<String> = err.as_vec().iter().map(|c| c.message.to_string()).collect();
+        assert!(
+            messages
+                .iter()
+                .any(|m| m.contains("Multiple @link(type: Postgres)")),
+            "Expected PostgresMultipleLinksRequireId error, got: {:?}",
+            messages
+        );
+    }
+
+    #[test]
+    fn multiple_postgres_links_all_missing_id_fails() {
+        let links = vec![
+            pg_link(None, "postgres://localhost/main"),
+            pg_link(None, "postgres://localhost/analytics"),
+        ];
+        let result = Links::try_from(links);
+        assert!(result.is_err());
+    }
+
+    #[test]
+    fn duplicate_postgres_link_ids_fails() {
+        let links = vec![
+            pg_link(Some("main"), "postgres://localhost/db1"),
+            pg_link(Some("main"), "postgres://localhost/db2"),
+        ];
+        let result = Links::try_from(links);
+        assert!(result.is_err());
+        let err = result.unwrap_err();
+        let messages: Vec<String> = err.as_vec().iter().map(|c| c.message.to_string()).collect();
+        assert!(
+            messages.iter().any(|m| m.contains("Duplicated")),
+            "Expected Duplicated error, got: {:?}",
+            messages
+        );
     }
 }

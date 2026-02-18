@@ -1,0 +1,33 @@
+---
+source: tests/core/spec.rs
+expression: errors
+---
+[
+  {
+    "message": "expected array",
+    "trace": [
+      "Query",
+      "users",
+      "@expr"
+    ],
+    "description": null
+  },
+  {
+    "message": "Duplicated id: main",
+    "trace": [
+      "schema",
+      "@link",
+      "0"
+    ],
+    "description": null
+  },
+  {
+    "message": "Duplicated id: main",
+    "trace": [
+      "schema",
+      "@link",
+      "1"
+    ],
+    "description": null
+  }
+]

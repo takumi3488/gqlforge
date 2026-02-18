@@ -1,0 +1,28 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "main.sql", type: Sql)
+@link(id: "analytics", src: "analytics.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Event {
+  createdAt: DateTime
+  eventType: String
+  id: Int
+}
+
+type Query {
+  events: [Event] @postgres(db: "analytics", table: "events")
+  users: [User] @postgres(db: "main", table: "users")
+}
+
+type User {
+  id: Int
+  name: String
+}

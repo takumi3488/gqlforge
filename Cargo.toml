@@ -325,6 +325,10 @@ path = "tests/cli/gen.rs"
 
 [[test]]
 harness = false
+name = "postgres_execution_spec"
+
+[[test]]
+harness = false
 name = "json_to_config_spec"
 path = "src/core/generator/tests/json_to_config_spec.rs"
 

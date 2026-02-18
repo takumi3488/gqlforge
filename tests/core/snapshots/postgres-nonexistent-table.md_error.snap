@@ -1,0 +1,15 @@
+---
+source: tests/core/spec.rs
+expression: errors
+---
+[
+  {
+    "message": "Table 'posts' not found in database schema",
+    "trace": [
+      "Query",
+      "posts",
+      "@postgres"
+    ],
+    "description": null
+  }
+]

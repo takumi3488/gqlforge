@@ -225,3 +225,49 @@ impl From<Config> for ConfigModule {
         ConfigModule { cache: Cache::from(config), ..Default::default() }
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::core::postgres::schema::DatabaseSchema;
+
+    #[test]
+    fn find_by_id_returns_matching() {
+        let mut ext = Extensions::default();
+        let schema = DatabaseSchema::new();
+        ext.add_database_schema(Some("main".to_string()), schema.clone());
+        ext.add_database_schema(Some("analytics".to_string()), DatabaseSchema::new());
+
+        let found = ext.find_database_schema(Some("main"));
+        assert!(found.is_some());
+        assert_eq!(found.unwrap(), &schema);
+    }
+
+    #[test]
+    fn find_by_id_returns_none_for_missing() {
+        let mut ext = Extensions::default();
+        ext.add_database_schema(Some("main".to_string()), DatabaseSchema::new());
+
+        assert!(ext.find_database_schema(Some("nonexistent")).is_none());
+    }
+
+    #[test]
+    fn find_without_id_returns_single() {
+        let mut ext = Extensions::default();
+        let schema = DatabaseSchema::new();
+        ext.add_database_schema(Some("main".to_string()), schema.clone());
+
+        let found = ext.find_database_schema(None);
+        assert!(found.is_some());
+        assert_eq!(found.unwrap(), &schema);
+    }
+
+    #[test]
+    fn find_without_id_returns_none_for_multiple() {
+        let mut ext = Extensions::default();
+        ext.add_database_schema(Some("main".to_string()), DatabaseSchema::new());
+        ext.add_database_schema(Some("analytics".to_string()), DatabaseSchema::new());
+
+        assert!(ext.find_database_schema(None).is_none());
+    }
+}

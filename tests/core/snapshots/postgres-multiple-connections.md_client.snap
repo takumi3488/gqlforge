@@ -1,0 +1,25 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar DateTime
+
+type Event {
+  createdAt: DateTime
+  eventType: String
+  id: Int
+}
+
+type Query {
+  events: [Event]
+  users: [User]
+}
+
+type User {
+  id: Int
+  name: String
+}
+
+schema {
+  query: Query
+}
