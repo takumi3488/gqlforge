@@ -116,6 +116,24 @@ pub mod pool {
             }
         }
 
+        fn encode_format(&self, ty: &postgres_types::Type) -> postgres_types::Format {
+            use postgres_types::Type;
+            match *ty {
+                Type::BOOL
+                | Type::INT2
+                | Type::INT4
+                | Type::INT8
+                | Type::FLOAT4
+                | Type::FLOAT8
+                | Type::TIMESTAMP
+                | Type::TIMESTAMPTZ
+                | Type::DATE
+                | Type::TIME
+                | Type::UUID => postgres_types::Format::Binary,
+                _ => postgres_types::Format::Text,
+            }
+        }
+
         fn accepts(_ty: &postgres_types::Type) -> bool {
             true
         }
@@ -160,6 +178,13 @@ pub mod pool {
         let weight = i16::from_be_bytes([raw[2], raw[3]]) as i32;
         let sign = u16::from_be_bytes([raw[4], raw[5]]);
         let dscale = i16::from_be_bytes([raw[6], raw[7]]) as i32;
+
+        if ndigits < 0 {
+            anyhow::bail!("NUMERIC ndigits is negative: {ndigits}");
+        }
+        if dscale < 0 {
+            anyhow::bail!("NUMERIC dscale is negative: {dscale}");
+        }
 
         // NaN
         if sign == 0xC000 {
@@ -324,19 +349,21 @@ pub mod pool {
         format!("{}::{}", before, after)
     }
 
-    fn format_macaddr(raw: &[u8]) -> String {
+    fn format_macaddr(raw: &[u8]) -> anyhow::Result<String> {
         if raw.len() == 8 {
             // MACADDR8
-            format!(
+            Ok(format!(
                 "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
                 raw[0], raw[1], raw[2], raw[3], raw[4], raw[5], raw[6], raw[7]
-            )
-        } else {
+            ))
+        } else if raw.len() >= 6 {
             // MACADDR (6 bytes)
-            format!(
+            Ok(format!(
                 "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
                 raw[0], raw[1], raw[2], raw[3], raw[4], raw[5]
-            )
+            ))
+        } else {
+            anyhow::bail!("macaddr binary too short: {} bytes", raw.len())
         }
     }
 
@@ -541,7 +568,7 @@ pub mod pool {
             Type::TIMETZ => Ok(ConstValue::String(format_timetz(raw)?)),
             Type::INTERVAL => Ok(ConstValue::String(format_interval(raw)?)),
             Type::INET | Type::CIDR => Ok(ConstValue::String(format_inet(raw)?)),
-            Type::MACADDR | Type::MACADDR8 => Ok(ConstValue::String(format_macaddr(raw))),
+            Type::MACADDR | Type::MACADDR8 => Ok(ConstValue::String(format_macaddr(raw)?)),
             Type::JSON | Type::JSONB => {
                 // JSONB binary has a version byte prefix (0x01); JSON does not.
                 let data = if *ty == Type::JSONB && !raw.is_empty() {
@@ -569,6 +596,10 @@ pub mod pool {
 
         let ndim = i32::from_be_bytes(raw[0..4].try_into()?);
         // has_null flag at raw[4..8], elem_oid at raw[8..12] — we don't need them.
+
+        if ndim < 0 {
+            anyhow::bail!("array ndim is negative: {ndim}");
+        }
 
         if ndim == 0 {
             return Ok(ConstValue::List(vec![]));
@@ -752,7 +783,7 @@ pub mod pool {
             result.push_str("_unnamed");
         }
         if result.starts_with("__") {
-            result.insert(0, '_');
+            result.insert(0, 'x');
         }
         result
     }
@@ -875,7 +906,7 @@ pub mod pool {
             Type::MACADDR | Type::MACADDR8 => {
                 let v: Option<RawBytes> = row.try_get(idx)?;
                 match v {
-                    Some(raw) => Ok(ConstValue::String(format_macaddr(&raw.0))),
+                    Some(raw) => Ok(ConstValue::String(format_macaddr(&raw.0)?)),
                     None => Ok(ConstValue::Null),
                 }
             }
@@ -1029,7 +1060,7 @@ pub mod pool {
         #[test]
         fn test_format_macaddr() {
             let raw = [0x08, 0x00, 0x2b, 0x01, 0x02, 0x03];
-            assert_eq!(format_macaddr(&raw), "08:00:2b:01:02:03");
+            assert_eq!(format_macaddr(&raw).unwrap(), "08:00:2b:01:02:03");
         }
 
         #[test]
@@ -1652,7 +1683,7 @@ pub mod pool {
 
         #[test]
         fn test_sanitize_graphql_name_double_underscore() {
-            assert_eq!(sanitize_graphql_name("__type"), "___type");
+            assert_eq!(sanitize_graphql_name("__type"), "x__type");
         }
 
         // ===== Additional binary formatter tests =====
@@ -1660,7 +1691,7 @@ pub mod pool {
         #[test]
         fn test_format_macaddr8() {
             let raw = [0x08, 0x00, 0x2b, 0x01, 0x02, 0x03, 0x04, 0x05];
-            assert_eq!(format_macaddr(&raw), "08:00:2b:01:02:03:04:05");
+            assert_eq!(format_macaddr(&raw).unwrap(), "08:00:2b:01:02:03:04:05");
         }
 
         #[test]
@@ -1693,6 +1724,51 @@ pub mod pool {
             raw.extend_from_slice(&43_200_000_000i64.to_be_bytes());
             raw.extend_from_slice(&(-19800i32).to_be_bytes());
             assert_eq!(format_timetz(&raw).unwrap(), "12:00:00+05:30");
+        }
+
+        // ===== Error path tests =====
+
+        #[test]
+        fn test_format_uuid_short_input() {
+            let raw = [0u8; 15];
+            assert!(format_uuid(&raw).is_err());
+        }
+
+        #[test]
+        fn test_format_inet_short_input() {
+            let raw = [2u8, 32, 0]; // only 3 bytes, needs at least 4
+            assert!(format_inet(&raw).is_err());
+        }
+
+        #[test]
+        fn test_format_interval_short_input() {
+            let raw = [0u8; 15]; // needs at least 16
+            assert!(format_interval(&raw).is_err());
+        }
+
+        #[test]
+        fn test_parse_pg_numeric_short_input() {
+            let raw = [0u8; 7]; // needs at least 8
+            assert!(parse_pg_numeric(&raw).is_err());
+        }
+
+        #[test]
+        fn test_parse_pg_array_negative_ndim() {
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&(-1i32).to_be_bytes()); // ndim = -1
+            raw.extend_from_slice(&0i32.to_be_bytes()); // has_null
+            raw.extend_from_slice(&23i32.to_be_bytes()); // elem_oid
+            assert!(parse_pg_array(&raw, &postgres_types::Type::INT4).is_err());
+        }
+
+        #[test]
+        fn test_parse_pg_numeric_negative_ndigits() {
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&(-1i16).to_be_bytes()); // ndigits = -1
+            raw.extend_from_slice(&0i16.to_be_bytes()); // weight
+            raw.extend_from_slice(&0u16.to_be_bytes()); // sign
+            raw.extend_from_slice(&0i16.to_be_bytes()); // dscale
+            assert!(parse_pg_numeric(&raw).is_err());
         }
     }
 }
