@@ -191,6 +191,14 @@ pub mod pool {
             return Ok("NaN".to_string());
         }
 
+        // Infinity (PostgreSQL 14+)
+        if sign == 0xD000 {
+            return Ok("Infinity".to_string());
+        }
+        if sign == 0xF000 {
+            return Ok("-Infinity".to_string());
+        }
+
         if ndigits == 0 {
             if dscale > 0 {
                 return Ok(format!("0.{}", "0".repeat(dscale as usize)));
@@ -451,9 +459,9 @@ pub mod pool {
 
         // PostgreSQL stores offset as seconds west of UTC (negated from usual
         // convention).
-        let tz_total = -offset_secs;
-        let tz_sign = if tz_total >= 0 { '+' } else { '-' };
-        let tz_abs = tz_total.unsigned_abs();
+        // offset_secs <= 0 はUTCより東（+符号）、>0 は西（-符号）
+        let tz_sign = if offset_secs <= 0 { '+' } else { '-' };
+        let tz_abs = offset_secs.unsigned_abs(); // i32::MIN でもオーバーフローなし
         let tz_hours = tz_abs / 3600;
         let tz_minutes = (tz_abs % 3600) / 60;
 
@@ -1027,6 +1035,28 @@ pub mod pool {
             raw.extend_from_slice(&0xC000u16.to_be_bytes());
             raw.extend_from_slice(&0i16.to_be_bytes());
             assert_eq!(parse_pg_numeric(&raw).unwrap(), "NaN");
+        }
+
+        #[test]
+        fn test_parse_pg_numeric_infinity() {
+            // ndigits=0, weight=0, sign=0xD000, dscale=0
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            raw.extend_from_slice(&0xD000u16.to_be_bytes());
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            assert_eq!(parse_pg_numeric(&raw).unwrap(), "Infinity");
+        }
+
+        #[test]
+        fn test_parse_pg_numeric_neg_infinity() {
+            // ndigits=0, weight=0, sign=0xF000, dscale=0
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            raw.extend_from_slice(&0xF000u16.to_be_bytes());
+            raw.extend_from_slice(&0i16.to_be_bytes());
+            assert_eq!(parse_pg_numeric(&raw).unwrap(), "-Infinity");
         }
 
         #[test]
@@ -1732,6 +1762,18 @@ pub mod pool {
             raw.extend_from_slice(&43_200_000_000i64.to_be_bytes());
             raw.extend_from_slice(&(-19800i32).to_be_bytes());
             assert_eq!(format_timetz(&raw).unwrap(), "12:00:00+05:30");
+        }
+
+        #[test]
+        fn test_format_timetz_offset_secs_min() {
+            // offset_secs = i32::MIN はオーバーフローなしで処理されるべき
+            let mut raw = Vec::new();
+            raw.extend_from_slice(&0i64.to_be_bytes()); // microseconds = 0
+            raw.extend_from_slice(&i32::MIN.to_be_bytes()); // offset_secs = i32::MIN
+            // i32::MIN の unsigned_abs = 2147483648
+            // tz_abs = 2147483648, tz_hours = 596523, tz_minutes = 14
+            // パニックしないことを確認
+            assert!(format_timetz(&raw).is_ok());
         }
 
         // ===== Error path tests =====
