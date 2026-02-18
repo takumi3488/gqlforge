@@ -52,6 +52,11 @@ pub enum PostgresOperation {
 #[serde(rename_all = "camelCase")]
 #[serde(deny_unknown_fields)]
 pub struct Postgres {
+    /// The `@link(type: Postgres)` id to use. Optional when only one Postgres
+    /// link is defined.
+    #[serde(default, skip_serializing_if = "is_default")]
+    pub db: Option<String>,
+
     /// The target table name (optionally schema-qualified, e.g.
     /// "public.users").
     pub table: String,

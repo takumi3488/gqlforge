@@ -19,7 +19,7 @@ impl ServerConfig {
         s3_configs: &[S3LinkConfig],
     ) -> anyhow::Result<Self> {
         #[allow(unused_mut)]
-        let mut rt = init(&blueprint);
+        let mut rt = init(&blueprint)?;
 
         #[cfg(feature = "s3")]
         {

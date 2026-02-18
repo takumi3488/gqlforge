@@ -43,12 +43,27 @@ pub fn config_blueprint<'a>() -> TryFold<'a, ConfigModule, Blueprint, BlueprintE
         |blueprint| blueprint.telemetry,
     );
 
+    let postgres_connections = TryFoldConfig::<Blueprint>::new(|config_module, mut blueprint| {
+        let connections: Vec<(String, String)> = config_module
+            .links
+            .iter()
+            .filter(|link| link.type_of == crate::core::config::LinkType::Postgres)
+            .map(|link| {
+                let id = link.id.clone().unwrap_or_else(|| "default".to_string());
+                (id, link.src.clone())
+            })
+            .collect();
+        blueprint.postgres_connections = connections;
+        Valid::succeed(blueprint)
+    });
+
     server
         .and(schema)
         .and(definitions)
         .and(upstream)
         .and(links)
         .and(opentelemetry)
+        .and(postgres_connections)
         // set the federation config only after setting other properties to be able
         // to use blueprint inside the handler and to avoid recursion overflow
         .and(update_federation().trace("federation"))

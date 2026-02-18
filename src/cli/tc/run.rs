@@ -32,22 +32,22 @@ pub async fn run() -> Result<()> {
     run_command(cli).await
 }
 
-fn get_runtime_and_config_reader(verify_ssl: bool) -> (TargetRuntime, ConfigReader) {
+fn get_runtime_and_config_reader(verify_ssl: bool) -> Result<(TargetRuntime, ConfigReader)> {
     let mut blueprint = Blueprint::default();
     blueprint.upstream.verify_ssl = verify_ssl;
-    let runtime = cli::runtime::init(&blueprint);
-    (runtime.clone(), ConfigReader::init(runtime))
+    let runtime = cli::runtime::init(&blueprint)?;
+    Ok((runtime.clone(), ConfigReader::init(runtime)))
 }
 
 async fn run_command(cli: Cli) -> Result<()> {
     match cli.command {
         Command::Start { file_paths, verify_ssl } => {
-            let (runtime, config_reader) = get_runtime_and_config_reader(verify_ssl);
+            let (runtime, config_reader) = get_runtime_and_config_reader(verify_ssl)?;
             validate_rc_config_files(runtime, &file_paths).await;
             start::start_command(file_paths, &config_reader).await?;
         }
         Command::Check { file_paths, n_plus_one_queries, schema, verify_ssl } => {
-            let (runtime, config_reader) = get_runtime_and_config_reader(verify_ssl);
+            let (runtime, config_reader) = get_runtime_and_config_reader(verify_ssl)?;
             validate_rc_config_files(runtime.clone(), &file_paths).await;
             check::check_command(
                 check::CheckParams { file_paths, n_plus_one_queries, schema, runtime },
@@ -56,11 +56,11 @@ async fn run_command(cli: Cli) -> Result<()> {
             .await?;
         }
         Command::Init { folder_path } => {
-            let (runtime, _) = get_runtime_and_config_reader(true);
+            let (runtime, _) = get_runtime_and_config_reader(true)?;
             init::init_command(runtime, &folder_path).await?;
         }
         Command::Gen { file_path } => {
-            let (runtime, _) = get_runtime_and_config_reader(true);
+            let (runtime, _) = get_runtime_and_config_reader(true)?;
             r#gen::gen_command(&file_path, runtime).await?;
         }
     }

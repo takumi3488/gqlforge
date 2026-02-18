@@ -25,6 +25,9 @@ pub struct Blueprint {
     pub server: Server,
     pub upstream: Upstream,
     pub telemetry: Telemetry,
+    /// PostgreSQL connection definitions: `(connection_id, connection_url)`.
+    #[setters(skip)]
+    pub postgres_connections: Vec<(String, String)>,
 }
 
 #[derive(Clone, Debug)]

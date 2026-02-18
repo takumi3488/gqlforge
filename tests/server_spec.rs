@@ -153,7 +153,7 @@ pub mod test {
                 Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
                 None => None,
             },
-            postgres: None,
+            postgres: HashMap::new(),
             s3: HashMap::new(),
         }
     }

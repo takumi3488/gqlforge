@@ -87,6 +87,7 @@ pub enum IO {
         group_by: Option<GroupBy>,
         dl_id: Option<DataLoaderId>,
         dedupe: bool,
+        connection_id: String,
     },
     S3 {
         req_template: s3::RequestTemplate,

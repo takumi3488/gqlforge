@@ -35,8 +35,9 @@ pub struct TargetRuntime {
     pub cmd_worker: Option<Arc<dyn WorkerIO<Event, Command>>>,
     /// Worker middleware for resolving data.
     pub worker: Option<Arc<dyn WorkerIO<ConstValue, ConstValue>>>,
-    /// PostgreSQL connection pool for `@postgres` directives.
-    pub postgres: Option<Arc<dyn PostgresIO>>,
+    /// PostgreSQL connection pools for `@postgres` directives, keyed by
+    /// connection id.
+    pub postgres: HashMap<String, Arc<dyn PostgresIO>>,
     /// S3 clients keyed by @link id for `@s3` directives.
     pub s3: HashMap<String, Arc<dyn S3IO>>,
 }
@@ -198,7 +199,7 @@ pub mod test {
                 Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
                 None => None,
             },
-            postgres: None,
+            postgres: HashMap::new(),
             s3: HashMap::new(),
         }
     }
