@@ -147,13 +147,19 @@ where
         IO::S3 { req_template, .. } => {
             let rendered = req_template.render(ctx);
             let link_id = rendered.link_id.as_deref();
-            let s3 = ctx
-                .request_ctx
-                .runtime
-                .s3
-                .get(link_id.unwrap_or(""))
-                .or_else(|| ctx.request_ctx.runtime.s3.values().next())
-                .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?;
+            let s3 =
+                match link_id {
+                    Some(id) => ctx.request_ctx.runtime.s3.get(id).ok_or_else(|| {
+                        Error::IO(format!("S3 link '{}' not found in runtime", id))
+                    })?,
+                    None => ctx
+                        .request_ctx
+                        .runtime
+                        .s3
+                        .get("")
+                        .or_else(|| ctx.request_ctx.runtime.s3.values().next())
+                        .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?,
+                };
 
             match rendered.operation {
                 S3Operation::GetPresignedUrl => {

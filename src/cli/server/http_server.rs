@@ -34,7 +34,9 @@ impl Server {
     pub async fn start(self) -> Result<()> {
         let blueprint = Blueprint::try_from(&self.config_module).map_err(Errata::from)?;
         let endpoints = self.config_module.extensions().endpoint_set.clone();
-        let server_config = Arc::new(ServerConfig::new(blueprint.clone(), endpoints).await?);
+        let s3_configs = self.config_module.extensions().s3_configs.clone();
+        let server_config =
+            Arc::new(ServerConfig::new(blueprint.clone(), endpoints, &s3_configs).await?);
 
         init_opentelemetry(blueprint.telemetry.clone(), &server_config.app_ctx.runtime).await?;
 

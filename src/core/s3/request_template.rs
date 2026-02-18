@@ -49,6 +49,10 @@ impl RequestTemplate {
     /// S3 request.
     pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> RenderedRequest {
         let bucket = self.bucket.render(ctx);
+        debug_assert!(
+            !bucket.is_empty(),
+            "S3 bucket name rendered to an empty string"
+        );
         let key = self
             .key
             .as_ref()

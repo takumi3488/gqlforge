@@ -87,12 +87,14 @@ pub struct S3 {
     pub dedupe: Option<bool>,
 }
 
+const DEFAULT_EXPIRATION_SECS: u64 = 3600;
+
 fn default_expiration() -> u64 {
-    3600
+    DEFAULT_EXPIRATION_SECS
 }
 
 fn is_default_expiration(val: &u64) -> bool {
-    *val == 3600
+    *val == DEFAULT_EXPIRATION_SECS
 }
 
 #[cfg(test)]

@@ -6,7 +6,7 @@ use rustls_pemfile;
 use rustls_pki_types::{CertificateDer, PrivateKeyDer};
 use url::Url;
 
-use super::{ConfigModule, Content, Link, LinkType, PrivateKey, S3LinkConfig};
+use super::{ConfigModule, Content, Link, LinkType, PrivateKey};
 use crate::core::config::{Config, ConfigReaderContext, Source};
 use crate::core::proto_reader::ProtoReader;
 use crate::core::resource_reader::{Cached, Resource, ResourceReader};
@@ -158,25 +158,32 @@ impl ConfigReader {
                     }
                 }
                 LinkType::S3 => {
-                    // Extract region and forcePathStyle from link meta.
-                    let meta = link.meta.as_ref();
-                    let region = meta
-                        .and_then(|m| m.get("region"))
-                        .and_then(|v| v.as_str())
-                        .unwrap_or("us-east-1")
-                        .to_string();
-                    let force_path_style = meta
-                        .and_then(|m| m.get("forcePathStyle"))
-                        .and_then(|v| v.as_bool())
-                        .unwrap_or(false);
-                    let id = link.id.clone().unwrap_or_default();
+                    #[cfg(feature = "s3")]
+                    {
+                        // Extract region and forcePathStyle from link meta.
+                        let meta = link.meta.as_ref();
+                        let region = meta
+                            .and_then(|m| m.get("region"))
+                            .and_then(|v| v.as_str())
+                            .unwrap_or("us-east-1")
+                            .to_string();
+                        let force_path_style = meta
+                            .and_then(|m| m.get("forcePathStyle"))
+                            .and_then(|v| v.as_bool())
+                            .unwrap_or(false);
+                        let id = link.id.clone().unwrap_or_default();
 
-                    extensions.add_s3_config(S3LinkConfig {
-                        id,
-                        endpoint: link.src.clone(),
-                        region,
-                        force_path_style,
-                    });
+                        extensions.add_s3_config(super::S3LinkConfig {
+                            id,
+                            endpoint: link.src.clone(),
+                            region,
+                            force_path_style,
+                        });
+                    }
+                    #[cfg(not(feature = "s3"))]
+                    {
+                        anyhow::bail!("LinkType::S3 requires the 's3' feature to be enabled");
+                    }
                 }
             }
         }

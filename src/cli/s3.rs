@@ -15,7 +15,7 @@ pub mod client {
     impl S3Client {
         /// Create a new S3 client from the given endpoint configuration.
         pub async fn new(
-            endpoint: &str,
+            endpoint: Option<&str>,
             region: &str,
             force_path_style: bool,
         ) -> anyhow::Result<Self> {
@@ -27,8 +27,8 @@ pub mod client {
             let mut s3_config_builder =
                 aws_sdk_s3::config::Builder::from(&config).force_path_style(force_path_style);
 
-            if !endpoint.is_empty() {
-                s3_config_builder = s3_config_builder.endpoint_url(endpoint);
+            if let Some(ep) = endpoint {
+                s3_config_builder = s3_config_builder.endpoint_url(ep);
             }
 
             let client = aws_sdk_s3::Client::from_conf(s3_config_builder.build());

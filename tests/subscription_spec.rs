@@ -153,7 +153,7 @@ pub mod test {
                 None => None,
             },
             postgres: None,
-            s3: std::collections::HashMap::new(),
+            s3: HashMap::new(),
         }
     }
 }
