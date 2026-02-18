@@ -4,11 +4,13 @@ use async_graphql_value::ConstValue;
 use gqlforge::core::postgres::PostgresIO;
 
 /// A mock implementation of `PostgresIO` that returns a fixed response.
+#[allow(dead_code)]
 pub struct MockPostgresIO {
     response: ConstValue,
 }
 
 impl MockPostgresIO {
+    #[allow(dead_code)]
     pub fn new(response: ConstValue) -> Arc<Self> {
         Arc::new(Self { response })
     }

@@ -143,7 +143,8 @@ impl ConfigReader {
                     {
                         let schema =
                             crate::core::postgres::sql_parser::parse_migrations(&[source.content])?;
-                        extensions.add_database_schema(link.id.clone(), schema);
+                        let id = link.id.clone().or_else(|| Some("default".to_string()));
+                        extensions.add_database_schema(id, schema);
                     }
                 }
                 LinkType::Postgres => {
