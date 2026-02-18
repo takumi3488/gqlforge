@@ -150,6 +150,9 @@ where
         }
         IO::S3 { req_template, .. } => {
             let rendered = req_template.render(ctx);
+            if rendered.bucket.is_empty() {
+                return Err(Error::IO("S3 bucket name must not be empty".to_string()));
+            }
             let link_id = rendered.link_id.as_deref();
             let s3 =
                 match link_id {
