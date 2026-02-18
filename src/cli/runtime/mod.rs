@@ -94,6 +94,7 @@ pub fn init(blueprint: &Blueprint) -> anyhow::Result<TargetRuntime> {
         cmd_worker: init_http_worker_io(blueprint.server.script.clone()),
         worker: init_resolver_worker_io(blueprint.server.script.clone()),
         postgres,
+        s3: HashMap::new(),
     })
 }
 

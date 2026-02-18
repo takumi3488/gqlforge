@@ -34,6 +34,7 @@ pub mod proto_reader;
 pub mod resource_reader;
 pub mod rest;
 pub mod runtime;
+pub mod s3;
 pub mod scalar;
 pub mod schema_extension;
 mod serde_value_ext;

@@ -4,6 +4,7 @@ use std::sync::Arc;
 use crate::cli::runtime::init;
 use crate::core::app_context::AppContext;
 use crate::core::blueprint::{Blueprint, Http};
+use crate::core::config::S3LinkConfig;
 use crate::core::rest::{EndpointSet, Unchecked};
 
 pub struct ServerConfig {
@@ -15,8 +16,33 @@ impl ServerConfig {
     pub async fn new(
         blueprint: Blueprint,
         endpoints: EndpointSet<Unchecked>,
+        s3_configs: &[S3LinkConfig],
     ) -> anyhow::Result<Self> {
-        let rt = init(&blueprint)?;
+        #[allow(unused_mut)]
+        let mut rt = init(&blueprint)?;
+
+        #[cfg(feature = "s3")]
+        {
+            for config in s3_configs {
+                let endpoint = if config.endpoint.is_empty() {
+                    None
+                } else {
+                    Some(config.endpoint.as_str())
+                };
+                let client = crate::cli::s3::client::S3Client::new(
+                    endpoint,
+                    &config.region,
+                    config.force_path_style,
+                )
+                .await?;
+                rt.s3.insert(config.id.clone(), std::sync::Arc::new(client));
+            }
+        }
+
+        #[cfg(not(feature = "s3"))]
+        {
+            let _ = s3_configs;
+        }
 
         let endpoints = endpoints.into_checked(&blueprint, rt.clone()).await?;
         let app_context = Arc::new(AppContext::new(blueprint.clone(), rt, endpoints));

@@ -61,6 +61,10 @@ pub enum LinkType {
     /// Points to a PostgreSQL connection string. The database will be
     /// introspected at startup to build a schema for the `@postgres` directive.
     Postgres,
+
+    /// Points to an S3 or S3-compatible endpoint. The endpoint URL and
+    /// region/credentials metadata are used by the `@s3` directive.
+    S3,
 }
 
 /// The @link directive allows you to import external resources, such as

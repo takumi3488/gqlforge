@@ -152,6 +152,10 @@ impl AppContext {
                                 IO::Js { name: method } => {
                                     Some(IR::IO(Box::new(IO::Js { name: method.clone() })))
                                 }
+                                IO::S3 { req_template, dedupe } => Some(IR::IO(Box::new(IO::S3 {
+                                    req_template: req_template.clone(),
+                                    dedupe: *dedupe,
+                                }))),
                             },
                             _ => None,
                         })

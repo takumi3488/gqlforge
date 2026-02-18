@@ -7,6 +7,8 @@ pub mod metrics;
 #[cfg(feature = "postgres")]
 pub mod postgres;
 pub mod runtime;
+#[cfg(feature = "s3")]
+pub mod s3;
 pub mod server;
 mod tc;
 pub mod telemetry;

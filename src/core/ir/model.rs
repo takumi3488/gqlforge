@@ -12,7 +12,7 @@ use crate::core::blueprint::{Auth, DynamicValue};
 use crate::core::config::group_by::GroupBy;
 use crate::core::graphql::{self};
 use crate::core::worker_hooks::WorkerHooks;
-use crate::core::{grpc, http, postgres};
+use crate::core::{grpc, http, postgres, s3};
 
 #[derive(Clone, Debug, Display)]
 pub enum IR {
@@ -89,6 +89,10 @@ pub enum IO {
         dedupe: bool,
         connection_id: String,
     },
+    S3 {
+        req_template: s3::RequestTemplate,
+        dedupe: bool,
+    },
 }
 
 impl IO {
@@ -102,6 +106,7 @@ impl IO {
             IO::HttpStream { .. } => false,
             IO::Js { .. } => false,
             IO::Postgres { dedupe, .. } => *dedupe,
+            IO::S3 { dedupe, .. } => *dedupe,
         }
     }
 }
@@ -246,6 +251,7 @@ impl<'a, Ctx: ResolverContextLike + Sync> CacheKey<EvalContext<'a, Ctx>> for IO 
             IO::GraphQL { req_template, .. } => req_template.cache_key(ctx),
             IO::Js { .. } => None,
             IO::Postgres { req_template, .. } => req_template.cache_key(ctx),
+            IO::S3 { req_template, .. } => req_template.cache_key(ctx),
         }
     }
 }

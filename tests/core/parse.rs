@@ -331,6 +331,7 @@ impl ExecutionSpec {
             cmd_worker: http_worker,
             worker,
             postgres: HashMap::new(),
+            s3: HashMap::new(),
         };
 
         let endpoints = config

@@ -10,6 +10,7 @@ mod modify;
 mod postgres;
 mod protected;
 mod resolver;
+mod s3;
 mod select;
 
 pub use apollo_federation::*;
@@ -24,4 +25,5 @@ pub use modify::*;
 pub use postgres::*;
 pub use protected::*;
 pub use resolver::*;
+pub use s3::*;
 pub use select::*;
