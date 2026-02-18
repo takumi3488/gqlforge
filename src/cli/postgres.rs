@@ -614,7 +614,11 @@ pub mod pool {
         let mut dims = Vec::with_capacity(ndim as usize);
         for i in 0..ndim as usize {
             let offset = 12 + i * 8;
-            let dim_size = i32::from_be_bytes(raw[offset..offset + 4].try_into()?) as usize;
+            let dim_size_i32 = i32::from_be_bytes(raw[offset..offset + 4].try_into()?);
+            if dim_size_i32 < 0 {
+                anyhow::bail!("array dim_size is negative: {dim_size_i32}");
+            }
+            let dim_size = dim_size_i32 as usize;
             // lower_bound at offset+4..offset+8 — not needed for value parsing.
             dims.push(dim_size);
         }
