@@ -1159,8 +1159,8 @@ pub mod pool {
 
         #[test]
         fn test_typed_param_float8() {
-            let bytes = typed_param_to_bytes("3.14", &postgres_types::Type::FLOAT8).unwrap();
-            assert_eq!(bytes, 3.14_f64.to_be_bytes().to_vec());
+            let bytes = typed_param_to_bytes("1.23", &postgres_types::Type::FLOAT8).unwrap();
+            assert_eq!(bytes, 1.23_f64.to_be_bytes().to_vec());
         }
 
         #[test]
@@ -1326,12 +1326,12 @@ pub mod pool {
         #[test]
         fn test_raw_element_float8() {
             let result =
-                raw_element_to_const(&postgres_types::Type::FLOAT8, &3.14_f64.to_be_bytes())
+                raw_element_to_const(&postgres_types::Type::FLOAT8, &1.23_f64.to_be_bytes())
                     .unwrap();
             match result {
                 ConstValue::Number(n) => {
                     let v: f64 = n.as_f64().unwrap();
-                    assert!((v - 3.14_f64).abs() < 1e-10);
+                    assert!((v - 1.23_f64).abs() < 1e-10);
                 }
                 other => panic!("expected Number, got {:?}", other),
             }
