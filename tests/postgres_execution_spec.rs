@@ -7,9 +7,8 @@
 
 mod core;
 
-use std::path::Path;
-
 use core::spec::load_and_test_execution_spec;
+use std::path::Path;
 
 fn run_execution_spec(path: &Path) -> datatest_stable::Result<()> {
     let result = tokio_test::block_on(load_and_test_execution_spec(path));

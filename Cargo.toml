@@ -326,6 +326,7 @@ path = "tests/cli/gen.rs"
 [[test]]
 harness = false
 name = "postgres_execution_spec"
+required-features = ["postgres"]
 
 [[test]]
 harness = false
