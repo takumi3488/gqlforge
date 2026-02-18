@@ -6,8 +6,7 @@ use super::eval_http::{
 };
 use super::model::{CacheKey, IO};
 use super::{DynamicRequest, EvalContext, ResolverContextLike};
-use crate::core::config::GraphQLOperationType;
-use crate::core::config::S3Operation;
+use crate::core::config::{GraphQLOperationType, S3Operation};
 use crate::core::data_loader::DataLoader;
 use crate::core::graphql::GraphqlDataLoader;
 use crate::core::grpc;

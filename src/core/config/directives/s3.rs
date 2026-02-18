@@ -73,7 +73,8 @@ pub struct S3 {
     )]
     pub expiration: u64,
 
-    /// Content-Type header for PUT presigned URLs (Mustache template supported).
+    /// Content-Type header for PUT presigned URLs (Mustache template
+    /// supported).
     #[serde(default, skip_serializing_if = "is_default")]
     pub content_type: Option<String>,
 
