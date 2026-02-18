@@ -439,6 +439,10 @@ pub mod pool {
         let microseconds = i64::from_be_bytes(raw[0..8].try_into()?);
         let offset_secs = i32::from_be_bytes(raw[8..12].try_into()?);
 
+        if microseconds < 0 {
+            anyhow::bail!("TIMETZ microseconds value is negative: {microseconds}");
+        }
+
         let total_secs = microseconds / 1_000_000;
         let us_remainder = microseconds % 1_000_000;
         let hours = total_secs / 3600;
