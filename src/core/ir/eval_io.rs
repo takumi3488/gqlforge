@@ -7,6 +7,7 @@ use super::eval_http::{
 use super::model::{CacheKey, IO};
 use super::{DynamicRequest, EvalContext, ResolverContextLike};
 use crate::core::config::GraphQLOperationType;
+use crate::core::config::S3Operation;
 use crate::core::data_loader::DataLoader;
 use crate::core::graphql::GraphqlDataLoader;
 use crate::core::grpc;
@@ -141,6 +142,63 @@ where
                     Ok(val.unwrap_or_default())
                 }
                 _ => Ok(ConstValue::Null),
+            }
+        }
+        IO::S3 { req_template, .. } => {
+            let rendered = req_template.render(ctx);
+            let link_id = rendered.link_id.as_deref();
+            let s3 = ctx
+                .request_ctx
+                .runtime
+                .s3
+                .get(link_id.unwrap_or(""))
+                .or_else(|| ctx.request_ctx.runtime.s3.values().next())
+                .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?;
+
+            match rendered.operation {
+                S3Operation::GetPresignedUrl => {
+                    let key = rendered.key.as_deref().ok_or_else(|| {
+                        Error::IO("S3 GET_PRESIGNED_URL requires a key".to_string())
+                    })?;
+                    let url = s3
+                        .get_presigned_url(&rendered.bucket, key, rendered.expiration)
+                        .await
+                        .map_err(|e| Error::IO(e.to_string()))?;
+                    Ok(ConstValue::String(url))
+                }
+                S3Operation::PutPresignedUrl => {
+                    let key = rendered.key.as_deref().ok_or_else(|| {
+                        Error::IO("S3 PUT_PRESIGNED_URL requires a key".to_string())
+                    })?;
+                    let url = s3
+                        .put_presigned_url(
+                            &rendered.bucket,
+                            key,
+                            rendered.expiration,
+                            rendered.content_type.as_deref(),
+                        )
+                        .await
+                        .map_err(|e| Error::IO(e.to_string()))?;
+                    Ok(ConstValue::String(url))
+                }
+                S3Operation::List => {
+                    let result = s3
+                        .list_objects(&rendered.bucket, rendered.prefix.as_deref())
+                        .await
+                        .map_err(|e| Error::IO(e.to_string()))?;
+                    Ok(result)
+                }
+                S3Operation::Delete => {
+                    let key = rendered
+                        .key
+                        .as_deref()
+                        .ok_or_else(|| Error::IO("S3 DELETE requires a key".to_string()))?;
+                    let result = s3
+                        .delete_object(&rendered.bucket, key)
+                        .await
+                        .map_err(|e| Error::IO(e.to_string()))?;
+                    Ok(result)
+                }
             }
         }
     }

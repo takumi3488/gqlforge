@@ -1,9 +1,11 @@
+use std::collections::HashMap;
 use std::sync::Arc;
 
 use async_graphql_value::ConstValue;
 
 use super::ir::model::IoId;
 use crate::core::postgres::PostgresIO;
+use crate::core::s3::S3IO;
 use crate::core::schema_extension::SchemaExtension;
 use crate::core::worker::{Command, Event};
 use crate::core::{Cache, EnvIO, FileIO, HttpIO, WorkerIO};
@@ -35,6 +37,8 @@ pub struct TargetRuntime {
     pub worker: Option<Arc<dyn WorkerIO<ConstValue, ConstValue>>>,
     /// PostgreSQL connection pool for `@postgres` directives.
     pub postgres: Option<Arc<dyn PostgresIO>>,
+    /// S3 clients keyed by @link id for `@s3` directives.
+    pub s3: HashMap<String, Arc<dyn S3IO>>,
 }
 
 impl TargetRuntime {
@@ -195,6 +199,7 @@ pub mod test {
                 None => None,
             },
             postgres: None,
+            s3: HashMap::new(),
         }
     }
 }

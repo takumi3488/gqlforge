@@ -329,6 +329,13 @@
           "enum": [
             "Postgres"
           ]
+        },
+        {
+          "description": "Points to an S3 or S3-compatible endpoint. The endpoint URL and region/credentials metadata are used by the `@s3` directive.",
+          "type": "string",
+          "enum": [
+            "S3"
+          ]
         }
       ]
     },

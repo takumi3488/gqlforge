@@ -2,6 +2,7 @@ mod env;
 mod file;
 mod http;
 
+use std::collections::HashMap;
 use std::fs;
 use std::hash::Hash;
 use std::sync::Arc;
@@ -83,6 +84,7 @@ pub fn init(blueprint: &Blueprint) -> TargetRuntime {
         cmd_worker: init_http_worker_io(blueprint.server.script.clone()),
         worker: init_resolver_worker_io(blueprint.server.script.clone()),
         postgres: None,
+        s3: HashMap::new(),
     }
 }
 

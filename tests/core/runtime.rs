@@ -93,5 +93,6 @@ pub fn create_runtime(
             None => None,
         },
         postgres: None,
+        s3: HashMap::new(),
     }
 }

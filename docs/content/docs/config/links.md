@@ -33,6 +33,7 @@ The `@link` directive connects external resources to your GQLForge configuration
 | `Grpc`      | A gRPC reflection endpoint for service discovery.                      |
 | `Sql`       | A SQL file containing `CREATE TABLE` statements for schema definition. |
 | `Postgres`  | A PostgreSQL connection URL (e.g. `postgres://user:pass@host/db`).     |
+| `S3`        | An S3 or S3-compatible endpoint URL for the `@s3` directive.           |
 
 ## Examples
 
@@ -68,6 +69,16 @@ schema
 @server(port: 8000) {
   query: Query
   mutation: Mutation
+}
+```
+
+### Linking an S3 storage endpoint
+
+```graphql
+schema
+@link(id: "aws", type: S3, src: "https://s3.ap-northeast-1.amazonaws.com", meta: { region: "ap-northeast-1" })
+@server(port: 8000) {
+  query: Query
 }
 ```
 

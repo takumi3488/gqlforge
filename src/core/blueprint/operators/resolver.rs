@@ -2,7 +2,7 @@ use gqlforge_valid::{Valid, Validator};
 
 use super::{
     compile_call, compile_expr, compile_graphql, compile_grpc, compile_http, compile_js,
-    compile_postgres,
+    compile_postgres, compile_s3,
 };
 use crate::core::blueprint::{BlueprintError, FieldDefinition};
 use crate::core::config::{self, ConfigModule, Field, GraphQLOperationType, Resolver};
@@ -52,6 +52,8 @@ pub fn compile_resolver(
             compile_postgres(super::CompilePostgres { config_module, postgres: pg })
                 .trace(config::Postgres::trace_name().as_str())
         }
+        Resolver::S3(s3) => compile_s3(super::CompileS3 { config_module, s3 })
+            .trace(config::S3::trace_name().as_str()),
         Resolver::ApolloFederation(_) => {
             // ignore the Federation resolvers since they have special meaning
             // and should be executed only after the other config processing

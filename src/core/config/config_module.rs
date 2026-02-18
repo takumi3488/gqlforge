@@ -154,6 +154,22 @@ pub struct Extensions {
 
     /// Resolved database schema for `@postgres` directives.
     pub database_schema: Option<DatabaseSchema>,
+
+    /// S3 connection configurations from `@link(type: S3)` directives.
+    pub s3_configs: Vec<S3LinkConfig>,
+}
+
+/// Configuration for an S3-compatible connection derived from a `@link`.
+#[derive(Clone, Debug)]
+pub struct S3LinkConfig {
+    /// The @link id (used to match `linkId` in @s3 directives).
+    pub id: String,
+    /// The S3 endpoint URL (e.g. `https://s3.ap-northeast-1.amazonaws.com`).
+    pub endpoint: String,
+    /// The AWS region.
+    pub region: String,
+    /// Whether to use path-style addressing (for MinIO, R2, etc.).
+    pub force_path_style: bool,
 }
 
 impl Extensions {
@@ -178,6 +194,10 @@ impl Extensions {
 
     pub fn set_database_schema(&mut self, schema: DatabaseSchema) {
         self.database_schema = Some(schema);
+    }
+
+    pub fn add_s3_config(&mut self, config: S3LinkConfig) {
+        self.s3_configs.push(config);
     }
 }
 
