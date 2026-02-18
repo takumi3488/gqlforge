@@ -127,9 +127,11 @@ pub mod pool {
     // Binary format parsers
     // ---------------------------------------------------------------------------
 
-    fn format_uuid(raw: &[u8]) -> String {
-        assert!(raw.len() >= 16, "UUID must be 16 bytes");
-        format!(
+    fn format_uuid(raw: &[u8]) -> anyhow::Result<String> {
+        if raw.len() < 16 {
+            anyhow::bail!("UUID binary too short");
+        }
+        Ok(format!(
             "{:02x}{:02x}{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",
             raw[0],
             raw[1],
@@ -147,7 +149,7 @@ pub mod pool {
             raw[13],
             raw[14],
             raw[15]
-        )
+        ))
     }
 
     fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
@@ -493,7 +495,7 @@ pub mod pool {
                 let s = std::str::from_utf8(raw)?;
                 Ok(ConstValue::String(s.to_string()))
             }
-            Type::UUID => Ok(ConstValue::String(format_uuid(raw))),
+            Type::UUID => Ok(ConstValue::String(format_uuid(raw)?)),
             Type::BYTEA => Ok(ConstValue::String(format_bytea(raw))),
             Type::NUMERIC => Ok(ConstValue::String(parse_pg_numeric(raw)?)),
             Type::TIMESTAMP => {
@@ -850,7 +852,7 @@ pub mod pool {
             Type::UUID => {
                 let v: Option<RawBytes> = row.try_get(idx)?;
                 match v {
-                    Some(raw) => Ok(ConstValue::String(format_uuid(&raw.0))),
+                    Some(raw) => Ok(ConstValue::String(format_uuid(&raw.0)?)),
                     None => Ok(ConstValue::Null),
                 }
             }
@@ -925,13 +927,19 @@ pub mod pool {
                 0x55, 0x0e, 0x84, 0x00, 0xe2, 0x9b, 0x41, 0xd4, 0xa7, 0x16, 0x44, 0x66, 0x55, 0x44,
                 0x00, 0x00,
             ];
-            assert_eq!(format_uuid(&bytes), "550e8400-e29b-41d4-a716-446655440000");
+            assert_eq!(
+                format_uuid(&bytes).unwrap(),
+                "550e8400-e29b-41d4-a716-446655440000"
+            );
         }
 
         #[test]
         fn test_format_uuid_all_zeros() {
             let bytes = [0u8; 16];
-            assert_eq!(format_uuid(&bytes), "00000000-0000-0000-0000-000000000000");
+            assert_eq!(
+                format_uuid(&bytes).unwrap(),
+                "00000000-0000-0000-0000-000000000000"
+            );
         }
 
         #[test]
