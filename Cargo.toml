@@ -35,7 +35,6 @@ tracing = "0.1.44"
 url = { version = "2.5.8", features = ["serde"] }
 
 [dependencies]
-# dependencies specific to CLI must have optional = true and the dep should be added to default feature.
 # The following IO-related dependencies (e.g. postgres) are always compiled.
 
 deadpool-postgres = { version = "0.14" }
@@ -51,6 +50,7 @@ tokio-postgres = { version = "0.7", features = [
 ] }
 tokio-postgres-rustls = { version = "0.13" }
 
+# Dependencies specific to CLI must have optional = true and be added to the default feature.
 aws-config = { version = "1", optional = true, features = [
   "behavior-version-latest",
 ] }
