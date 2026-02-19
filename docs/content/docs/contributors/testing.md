@@ -69,7 +69,7 @@ To run PostgreSQL-specific integration tests:
 cargo test --test postgres_execution_spec
 ```
 
-These tests require a running PostgreSQL instance. See the test fixtures for connection details.
+These tests validate SQL DDL parsing and schema generation using the built-in SQL parser. They do **not** require a running PostgreSQL instance.
 
 ## Writing New Tests
 

@@ -36,7 +36,7 @@ url = { version = "2.5.8", features = ["serde"] }
 
 [dependencies]
 # dependencies specific to CLI must have optional = true and the dep should be added to default feature.
-# non-optional dependencies must be added to the default feature if they are IO-related
+# The following IO-related dependencies (e.g. postgres) are always compiled.
 
 deadpool-postgres = { version = "0.14" }
 postgres-types = { version = "0.2", features = [
