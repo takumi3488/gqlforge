@@ -637,6 +637,7 @@ pub mod pool {
 
         let mut pos = header_end;
 
+        #[allow(clippy::too_many_arguments)]
         fn read_elements(
             raw: &[u8],
             pos: &mut usize,
