@@ -36,7 +36,7 @@ url = { version = "2.5.8", features = ["serde"] }
 
 [dependencies]
 # dependencies specific to CLI must have optional = true and the dep should be added to default feature.
-# one needs to add default feature tag if it is something IO related or might conflict with WASM
+# non-optional dependencies must be added to the default feature if they are IO-related
 
 deadpool-postgres = { version = "0.14" }
 postgres-types = { version = "0.2", features = [
@@ -91,14 +91,8 @@ tower-http = { version = "0.6", features = [
   "fs",
 ], optional = true, default-features = false }
 
-# dependencies safe for wasm:
-
 anyhow = { workspace = true }
 async-recursion = "1.1.1"
-async-std = { version = "1.13.2", features = [
-  "wasm-bindgen-futures",
-  "unstable",
-] }
 async-stream = "0.3"
 async-trait = "0.1.89"
 bytes = "1"
@@ -110,7 +104,6 @@ derive_setters = "0.1.9"
 exitcode = "1.1.2"
 fnv = "1.0.7"
 futures-channel = { version = "0.3.31" }
-futures-timer = { version = "3.0.3", features = ["wasm-bindgen"] }
 futures-util = { workspace = true }
 http-body-util = "0.1"
 hyper = { version = "1", features = [
@@ -170,7 +163,6 @@ convert_case = { workspace = true }
 dashmap = "6.1.0"
 derive_more = { workspace = true }
 dotenvy = "0.15.7"
-getrandom = { version = "0.2.17", features = ["js"] }
 gqlforge-chunk = { path = "gqlforge-chunk", version = "0.1.0" }
 gqlforge-hasher = { path = "gqlforge-hasher", version = "0.1.0" }
 gqlforge-macros = { path = "gqlforge-macros", version = "0.1.0" }
@@ -178,7 +170,7 @@ gqlforge-tracker = { path = "gqlforge-tracker", version = "0.1.0", optional = tr
 gqlforge-typedefs-common = { path = "./gqlforge-typedefs-common", version = "0.1.0" }
 gqlforge-valid = { workspace = true }
 headers = { workspace = true }
-htpasswd-verify = { version = "0.3.0" } # fork version that is wasm compatible (see [patch.crates-io])
+htpasswd-verify = { version = "0.3.0" } # uses fork (see [patch.crates-io])
 http = { workspace = true }
 indenter = "0.3.4"
 jsonwebtoken = { version = "10.3.0", features = ["aws_lc_rs"] }
@@ -260,8 +252,6 @@ tokio-test = "0.4.5"
 js = ["dep:rquickjs"]
 
 # Feature Flag to core CLI features.
-# This is created to control what we expose for WASM.
-# Will be deprecated once we move CLI to it's own crate and WASM builds won't depend on it.
 cli = [
   "tokio/fs",
   "tokio/rt-multi-thread",
