@@ -67,6 +67,7 @@ impl ExecutionMock {
     }
 }
 
+#[allow(clippy::too_many_arguments)]
 pub fn create_runtime(
     http_client: Arc<Http>,
     env: Option<HashMap<String, String>>,
