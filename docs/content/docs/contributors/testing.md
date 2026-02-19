@@ -61,6 +61,16 @@ To accept all pending snapshot changes at once:
 cargo insta accept
 ```
 
+## PostgreSQL Integration Tests
+
+To run PostgreSQL-specific integration tests:
+
+```bash
+cargo test --test postgres_execution_spec
+```
+
+These tests validate SQL DDL parsing and schema generation using the built-in SQL parser. They do **not** require a running PostgreSQL instance.
+
 ## Writing New Tests
 
 When adding a new feature:

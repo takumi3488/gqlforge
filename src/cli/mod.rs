@@ -4,7 +4,6 @@ pub mod generator;
 #[cfg(feature = "js")]
 pub mod javascript;
 pub mod metrics;
-#[cfg(feature = "postgres")]
 pub mod postgres;
 pub mod runtime;
 #[cfg(feature = "s3")]

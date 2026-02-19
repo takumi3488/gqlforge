@@ -7,7 +7,6 @@ use std::sync::{Arc, Mutex};
 use std::time::Duration;
 
 use futures_channel::oneshot;
-use futures_timer::Delay;
 
 pub use super::cache::NoCache;
 pub use super::factory::CacheFactory;
@@ -177,10 +176,7 @@ where
                 let disable_cache = self.disable_cache.load(Ordering::SeqCst);
                 let task = async move { inner.do_load(disable_cache, keys).await };
 
-                #[cfg(not(target_arch = "wasm32"))]
                 tokio::spawn(Box::pin(task));
-                #[cfg(target_arch = "wasm32")]
-                async_std::task::spawn_local(Box::pin(task));
             }
             Action::StartFetch => {
                 let inner = self.inner.clone();
@@ -188,7 +184,7 @@ where
                 let delay = self.delay;
 
                 let task = async move {
-                    Delay::new(delay).await;
+                    tokio::time::sleep(delay).await;
 
                     let keys = {
                         let mut requests = inner.requests.lock().unwrap();
@@ -199,10 +195,7 @@ where
                         inner.do_load(disable_cache, keys).await
                     }
                 };
-                #[cfg(not(target_arch = "wasm32"))]
                 tokio::spawn(Box::pin(task));
-                #[cfg(target_arch = "wasm32")]
-                async_std::task::spawn_local(Box::pin(task));
             }
             Action::Delay => {}
         }

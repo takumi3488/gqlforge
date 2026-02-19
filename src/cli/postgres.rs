@@ -1,4 +1,3 @@
-#[cfg(feature = "postgres")]
 pub mod pool {
     use async_graphql_value::ConstValue;
     use deadpool_postgres::{Config, Pool, Runtime};

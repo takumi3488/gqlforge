@@ -77,7 +77,6 @@ pub fn init(blueprint: &Blueprint) -> anyhow::Result<TargetRuntime> {
     #[allow(unused_mut)]
     let mut postgres: HashMap<String, Arc<dyn crate::core::postgres::PostgresIO>> = HashMap::new();
 
-    #[cfg(feature = "postgres")]
     for (id, url) in &blueprint.postgres_connections {
         let pool = crate::cli::postgres::pool::PostgresPool::new(url)
             .map_err(|e| anyhow::anyhow!("Failed to create Postgres pool '{}': {}", id, e))?;
