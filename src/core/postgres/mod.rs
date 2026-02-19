@@ -1,9 +1,7 @@
 pub mod data_loader;
-#[cfg(feature = "postgres")]
 pub mod introspector;
 pub mod request_template;
 pub mod schema;
-#[cfg(feature = "postgres")]
 pub mod sql_parser;
 
 use async_graphql_value::ConstValue;
@@ -11,7 +9,6 @@ pub use request_template::RequestTemplate;
 pub use schema::DatabaseSchema;
 
 /// Build a rustls-based TLS connector for PostgreSQL connections.
-#[cfg(feature = "postgres")]
 pub(crate) fn make_tls_connect() -> anyhow::Result<tokio_postgres_rustls::MakeRustlsConnect> {
     let native = rustls_native_certs::load_native_certs();
     if !native.errors.is_empty() {

@@ -176,3 +176,7 @@ type Posts {
   users: Users @postgres(table: "users", operation: SELECT_ONE, filter: { id: "{{.value.userId}}" }, batchKey: ["id"])
 }
 ```
+
+## Build Requirements
+
+PostgreSQL support is included in all standard GQLForge builds — no additional feature flags are required.
