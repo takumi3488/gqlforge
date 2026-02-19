@@ -1,0 +1,23 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar Date
+
+scalar DateTime
+
+type Event {
+  createdAt: DateTime
+  id: Int
+  scheduledDate: Date
+  startTime: String
+  updatedAt: DateTime
+}
+
+type Query {
+  events: [Event]
+}
+
+schema {
+  query: Query
+}

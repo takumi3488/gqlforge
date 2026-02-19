@@ -1,0 +1,12 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Query {
+  getFileUrl(key: String!): String
+  @s3(bucket: "my-bucket", operation: "GET_PRESIGNED_URL", key: "{{.args.key}}")
+}

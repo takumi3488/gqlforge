@@ -1,0 +1,19 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar JSON
+
+type Product {
+  id: Int
+  scores: JSON
+  tags: JSON
+}
+
+type Query {
+  products: [Product]
+}
+
+schema {
+  query: Query
+}

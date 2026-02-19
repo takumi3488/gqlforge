@@ -195,7 +195,7 @@ async fn test_spec(spec: ExecutionSpec) {
     let mock_http_client = Arc::new(Http::new(&spec));
 
     let mut runtime =
-        runtime::create_runtime(mock_http_client.clone(), spec.env.clone(), None, None);
+        runtime::create_runtime(mock_http_client.clone(), spec.env.clone(), None, None, None);
     runtime.file = Arc::new(File::new(spec.clone()));
 
     let runtime_clone = runtime.clone();

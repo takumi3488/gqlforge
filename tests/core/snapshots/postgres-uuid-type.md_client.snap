@@ -1,0 +1,16 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Item {
+  id: ID
+  name: String
+}
+
+type Query {
+  items: [Item]
+}
+
+schema {
+  query: Query
+}

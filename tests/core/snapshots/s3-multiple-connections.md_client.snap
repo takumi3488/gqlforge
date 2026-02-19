@@ -1,0 +1,12 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Query {
+  getBackupUrl(key: String!): String
+  getPrimaryUrl(key: String!): String
+}
+
+schema {
+  query: Query
+}

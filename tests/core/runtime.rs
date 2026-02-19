@@ -13,6 +13,7 @@ use gqlforge::core::cache::InMemoryCache;
 use gqlforge::core::config::RuntimeConfig;
 use gqlforge::core::postgres::PostgresIO;
 use gqlforge::core::runtime::TargetRuntime;
+use gqlforge::core::s3::S3IO;
 use gqlforge::core::worker::{Command, Event};
 
 use super::env::Env;
@@ -71,6 +72,7 @@ pub fn create_runtime(
     env: Option<HashMap<String, String>>,
     script: Option<Script>,
     postgres: Option<HashMap<String, Arc<dyn PostgresIO>>>,
+    s3: Option<HashMap<String, Arc<dyn S3IO>>>,
 ) -> TargetRuntime {
     let http = http_client.clone();
 
@@ -95,6 +97,6 @@ pub fn create_runtime(
             None => None,
         },
         postgres: postgres.unwrap_or_default(),
-        s3: HashMap::new(),
+        s3: s3.unwrap_or_default(),
     }
 }

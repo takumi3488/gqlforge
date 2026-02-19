@@ -1,0 +1,11 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Query {
+  putFileUrl(key: String!, contentType: String): String
+}
+
+schema {
+  query: Query
+}

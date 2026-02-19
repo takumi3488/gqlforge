@@ -1,0 +1,13 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar JSON
+
+type Query {
+  deleteFile(key: String!): JSON
+}
+
+schema {
+  query: Query
+}

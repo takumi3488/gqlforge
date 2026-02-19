@@ -1,0 +1,19 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar JSON
+
+type Query {
+  records: [Record]
+}
+
+type Record {
+  id: Int
+  metadata: JSON
+  settings: JSON
+}
+
+schema {
+  query: Query
+}
