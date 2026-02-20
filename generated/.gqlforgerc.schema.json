@@ -588,7 +588,7 @@
       ]
     },
     "Link": {
-      "description": "The @link directive allows you to import external resources, such as\nconfiguration - which will be merged into the config importing it -,\nor a .proto file - which will be later used by `@grpc` directive -.",
+      "description": "The @link directive allows you to import external resources, such as\nconfiguration - which will be merged into the config importing it -,\nor a .proto file - which will be later used by the `@grpc` directive.",
       "type": "object",
       "properties": {
         "id": {

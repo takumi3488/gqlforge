@@ -133,8 +133,8 @@ where
                 .map_err(|e| Error::IO(e.to_string()))?;
             // SELECT_ONE: returns the first element of the list (Null if empty)
             if req_template.operation == PostgresOperation::SelectOne {
-                if let ConstValue::List(mut vec) = result {
-                    Ok(vec.pop().unwrap_or(ConstValue::Null))
+                if let ConstValue::List(vec) = result {
+                    Ok(vec.into_iter().next().unwrap_or(ConstValue::Null))
                 } else {
                     Ok(result)
                 }
