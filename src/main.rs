@@ -35,7 +35,8 @@ fn run_blocking() -> anyhow::Result<()> {
 
 fn main() -> anyhow::Result<()> {
     // Initialize rustls CryptoProvider first (using aws_lc_rs)
-    // Explicit configuration required when both aws-lc-rs and ring are present as dependencies
+    // Explicit configuration required when both aws-lc-rs and ring are present as
+    // dependencies
     rustls::crypto::aws_lc_rs::default_provider()
         .install_default()
         .expect("Failed to install rustls CryptoProvider");
