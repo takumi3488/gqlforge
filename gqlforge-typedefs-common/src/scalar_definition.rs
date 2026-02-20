@@ -1,6 +1,6 @@
 use async_graphql::Name;
 use async_graphql::parser::types::{TypeDefinition, TypeKind, TypeSystemDefinition};
-use schemars::schema::{Schema, SchemaObject};
+use schemars::Schema;
 
 use crate::common::{get_description, pos};
 
@@ -8,13 +8,15 @@ pub trait ScalarDefinition {
     fn scalar_definition() -> TypeSystemDefinition;
 }
 
-pub fn into_scalar_definition(root_schema: Schema, name: &str) -> TypeSystemDefinition {
-    let schema: SchemaObject = root_schema.into_object();
-    let description = get_description(&schema);
+pub fn into_scalar_definition(schema: Schema, name: &str) -> TypeSystemDefinition {
+    let description = schema
+        .as_object()
+        .and_then(|o| get_description(o))
+        .map(|s| s.to_owned());
     TypeSystemDefinition::Type(pos(TypeDefinition {
         name: pos(Name::new(name)),
         kind: TypeKind::Scalar,
-        description: description.map(|inner| pos(inner.clone())),
+        description: description.map(pos),
         directives: vec![],
         extend: false,
     }))

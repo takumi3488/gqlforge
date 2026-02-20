@@ -1,13 +1,12 @@
 use async_graphql::parser::types::{ServiceDocument, TypeSystemDefinition};
-use schemars::JsonSchema;
-use schemars::schema::RootSchema;
+use schemars::{JsonSchema, Schema};
 mod common;
 pub mod directive_definition;
 mod enum_definition;
 pub mod input_definition;
 pub mod scalar_definition;
 
-pub fn into_schemars<T>() -> RootSchema
+pub fn into_schemars<T>() -> Schema
 where
     T: JsonSchema,
 {

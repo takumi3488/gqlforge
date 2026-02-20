@@ -1,11 +1,8 @@
 use async_graphql::{Pos, Positioned};
-use schemars::schema::SchemaObject;
+use serde_json::{Map, Value};
 
-pub fn get_description(schema: &SchemaObject) -> Option<&String> {
-    schema
-        .metadata
-        .as_ref()
-        .and_then(|metadata| metadata.description.as_ref())
+pub fn get_description(schema: &Map<String, Value>) -> Option<&str> {
+    schema.get("description").and_then(Value::as_str)
 }
 
 pub fn first_char_to_upper(name: &mut String) {

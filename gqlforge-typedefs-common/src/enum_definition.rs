@@ -2,7 +2,8 @@ use async_graphql::parser::types::{
     EnumType, EnumValueDefinition, TypeDefinition, TypeKind, TypeSystemDefinition,
 };
 use async_graphql::{Name, Positioned};
-use schemars::schema::Schema;
+use schemars::Schema;
+use serde_json::Value;
 
 #[derive(Debug)]
 pub struct EnumVariant {
@@ -49,54 +50,54 @@ pub fn into_enum_definition(enum_value: EnumValue, name: &str) -> TypeSystemDefi
     }))
 }
 
-pub fn into_enum_value(obj: &Schema) -> Option<EnumValue> {
-    match obj {
-        Schema::Object(schema_object) => {
-            let description =
-                get_description(schema_object).map(|description| pos(description.to_owned()));
+pub fn into_enum_value(schema: &Schema) -> Option<EnumValue> {
+    let obj = schema.as_object()?;
+    let description = get_description(obj).map(|d| pos(d.to_owned()));
 
-            // if it has enum_values then it's raw enum
-            if let Some(enum_values) = &schema_object.enum_values {
-                return Some(EnumValue {
-                    variants: enum_values
-                        .iter()
-                        .map(|val| EnumVariant::new(val.to_string()))
-                        .collect::<Vec<_>>(),
-                    description,
-                });
-            }
-
-            // in case enum has description docs for the variants they will be generated
-            // as schema with `one_of` entry, where every enum variant is separate enum
-            // entry
-            if let Some(subschema) = &schema_object.subschemas
-                && let Some(one_ofs) = &subschema.one_of
-            {
-                let variants = one_ofs
-                    .iter()
-                    .filter_map(|one_of| {
-                        // try to parse one_of value as enum
-                        into_enum_value(one_of).and_then(|mut en| {
-                            // if it has only single variant it's our high-level enum
-                            if en.variants.len() == 1 {
-                                Some(EnumVariant {
-                                    value: en.variants.pop().unwrap().value,
-                                    description: en.description,
-                                })
-                            } else {
-                                None
-                            }
-                        })
-                    })
-                    .collect::<Vec<_>>();
-
-                if !variants.is_empty() {
-                    return Some(EnumValue { variants, description });
-                }
-            }
-
-            None
+    // Simple enum: { "enum": ["Var1", "Var2", ...] }
+    if let Some(Value::Array(enum_values)) = obj.get("enum") {
+        let variants = enum_values
+            .iter()
+            .filter_map(|v| v.as_str())
+            .map(|s| EnumVariant::new(s.to_string()))
+            .collect::<Vec<_>>();
+        if !variants.is_empty() {
+            return Some(EnumValue { variants, description });
         }
-        _ => None,
     }
+
+    // Single const value (used in oneOf for enums with docs in schemars 1.x)
+    if let Some(const_val) = obj.get("const")
+        && let Some(s) = const_val.as_str()
+    {
+        return Some(EnumValue { variants: vec![EnumVariant::new(s.to_string())], description });
+    }
+
+    // Enum with per-variant docs: { "oneOf": [{ "const": "V1", ... }, ...] }
+    if let Some(Value::Array(one_ofs)) = obj.get("oneOf") {
+        let variants = one_ofs
+            .iter()
+            .filter_map(|one_of| {
+                let one_of_schema: &Schema = (one_of).try_into().ok()?;
+                // try to parse one_of value as enum
+                into_enum_value(one_of_schema).and_then(|mut en| {
+                    // if it has only single variant it's our high-level enum
+                    if en.variants.len() == 1 {
+                        Some(EnumVariant {
+                            value: en.variants.pop().unwrap().value,
+                            description: en.description,
+                        })
+                    } else {
+                        None
+                    }
+                })
+            })
+            .collect::<Vec<_>>();
+
+        if !variants.is_empty() {
+            return Some(EnumValue { variants, description });
+        }
+    }
+
+    None
 }

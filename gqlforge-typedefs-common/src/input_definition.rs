@@ -3,9 +3,8 @@ use async_graphql::parser::types::{
     TypeSystemDefinition,
 };
 use async_graphql::{Name, Positioned};
-use schemars::schema::{
-    ArrayValidation, InstanceType, ObjectValidation, Schema, SchemaObject, SingleOrVec,
-};
+use schemars::Schema;
+use serde_json::{Map, Value};
 
 use crate::common::{first_char_to_upper, get_description, pos};
 
@@ -13,8 +12,14 @@ pub trait InputDefinition {
     fn input_definition() -> TypeSystemDefinition;
 }
 
-pub fn into_input_definition(schema: SchemaObject, name: &str) -> TypeSystemDefinition {
-    let description = get_description(&schema).cloned();
+pub fn into_input_definition_from_schema(schema: Schema, name: &str) -> TypeSystemDefinition {
+    let empty = Map::new();
+    let obj = schema.as_object().unwrap_or(&empty);
+    into_input_definition(obj, name)
+}
+
+pub fn into_input_definition(schema: &Map<String, Value>, name: &str) -> TypeSystemDefinition {
+    let description = get_description(schema).map(|s| s.to_owned());
 
     TypeSystemDefinition::Type(pos(TypeDefinition {
         name: pos(Name::new(name)),
@@ -27,105 +32,169 @@ pub fn into_input_definition(schema: SchemaObject, name: &str) -> TypeSystemDefi
     }))
 }
 
-pub fn into_input_value_definition(schema: SchemaObject) -> Vec<Positioned<InputValueDefinition>> {
+pub fn into_input_value_definition(
+    schema: &Map<String, Value>,
+) -> Vec<Positioned<InputValueDefinition>> {
     let mut arguments_type = vec![];
-    if let Some(subschema) = schema.subschemas.clone() {
-        let list = subschema.any_of.or(subschema.all_of).or(subschema.one_of);
-        if let Some(list) = list {
-            for schema in list {
-                let schema_object = schema.into_object();
-                arguments_type.extend(build_arguments_type(schema_object));
-            }
 
-            return arguments_type;
+    let list = schema
+        .get("anyOf")
+        .or_else(|| schema.get("allOf"))
+        .or_else(|| schema.get("oneOf"));
+
+    if let Some(Value::Array(schemas)) = list {
+        for sub_schema in schemas {
+            if let Some(obj) = sub_schema.as_object() {
+                arguments_type.extend(build_arguments_type(obj));
+            }
         }
+        return arguments_type;
     }
 
     build_arguments_type(schema)
 }
 
-fn build_arguments_type(schema: SchemaObject) -> Vec<Positioned<InputValueDefinition>> {
+fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValueDefinition>> {
     let mut arguments = vec![];
-    if let Some(obj) = schema.object {
-        let required = obj.required;
-        for (name, property) in obj.properties.into_iter() {
-            let property = property.into_object();
-            let description = get_description(&property);
-            let nullable = !required.contains(&name);
-            let definition = pos(InputValueDefinition {
-                description: description.map(|inner| pos(inner.to_owned())),
-                name: pos(Name::new(&name)),
-                ty: pos(determine_input_value_type_from_schema(
-                    name, &property, nullable,
-                )),
-                default_value: None,
-                directives: Vec::new(),
-            });
 
-            arguments.push(definition);
-        }
+    let properties = match schema.get("properties").and_then(Value::as_object) {
+        Some(p) => p,
+        None => return arguments,
+    };
+
+    let required_arr = schema.get("required").and_then(Value::as_array);
+    let is_required = |name: &str| -> bool {
+        required_arr.is_some_and(|arr| arr.iter().any(|v| v.as_str() == Some(name)))
+    };
+
+    for (name, property) in properties {
+        let (property_obj, nullable_from_anyof) = if let Some(obj) = property.as_object() {
+            unwrap_nullable(obj)
+        } else {
+            continue;
+        };
+
+        let property_obj = match property_obj {
+            Some(o) => o,
+            None => continue,
+        };
+
+        let description = get_description(property_obj);
+        let nullable = !is_required(name) || nullable_from_anyof;
+        let definition = pos(InputValueDefinition {
+            description: description.map(|inner| pos(inner.to_owned())),
+            name: pos(Name::new(name)),
+            ty: pos(determine_input_value_type_from_schema(
+                name.to_string(),
+                property_obj,
+                nullable,
+            )),
+            default_value: None,
+            directives: Vec::new(),
+        });
+
+        arguments.push(definition);
     }
 
     arguments
 }
 
+/// If schema is `{ "anyOf": [T, {"type":"null"}] }`, returns (Some(T), true).
+/// Otherwise returns (Some(schema), false).
+fn unwrap_nullable(schema: &Map<String, Value>) -> (Option<&Map<String, Value>>, bool) {
+    if let Some(Value::Array(schemas)) = schema.get("anyOf") {
+        let non_null: Vec<_> = schemas
+            .iter()
+            .filter(|s| {
+                s.as_object()
+                    .is_none_or(|o| o.get("type").and_then(Value::as_str) != Some("null"))
+            })
+            .collect();
+        let has_null = schemas.len() != non_null.len();
+
+        if has_null && non_null.len() == 1 {
+            return (non_null[0].as_object(), true);
+        }
+    }
+    (Some(schema), false)
+}
+
 fn determine_input_value_type_from_schema(
     mut name: String,
-    schema: &SchemaObject,
+    schema: &Map<String, Value>,
     nullable: bool,
 ) -> Type {
     first_char_to_upper(&mut name);
-    if let Some(instance_type) = &schema.instance_type {
-        match instance_type {
-            SingleOrVec::Single(typ) => match **typ {
-                InstanceType::Null
-                | InstanceType::Boolean
-                | InstanceType::Number
-                | InstanceType::String
-                | InstanceType::Integer => Type {
-                    nullable,
-                    base: BaseType::Named(Name::new(get_instance_type_name(typ))),
-                },
-                _ => determine_type_from_schema(name, schema),
+
+    if let Some(type_value) = schema.get("type") {
+        match type_value {
+            Value::String(typ) => match typ.as_str() {
+                "boolean" | "number" | "string" | "integer" => {
+                    return Type {
+                        nullable,
+                        base: BaseType::Named(Name::new(get_type_name(typ))),
+                    };
+                }
+                _ => {}
             },
-            SingleOrVec::Vec(typ) => match typ.first().unwrap() {
-                InstanceType::Null
-                | InstanceType::Boolean
-                | InstanceType::Number
-                | InstanceType::String
-                | InstanceType::Integer => Type {
-                    nullable,
-                    base: BaseType::Named(Name::new(get_instance_type_name(typ.first().unwrap()))),
-                },
-                _ => determine_type_from_schema(name, schema),
-            },
+            Value::Array(types) => {
+                let non_null_types: Vec<&str> = types
+                    .iter()
+                    .filter_map(Value::as_str)
+                    .filter(|&t| t != "null")
+                    .collect();
+                let is_nullable = types.iter().any(|t| t.as_str() == Some("null"));
+
+                if let Some(&typ) = non_null_types.first() {
+                    match typ {
+                        "boolean" | "number" | "string" | "integer" => {
+                            return Type {
+                                nullable: nullable || is_nullable,
+                                base: BaseType::Named(Name::new(get_type_name(typ))),
+                            };
+                        }
+                        _ => {}
+                    }
+                }
+            }
+            _ => {}
         }
-    } else {
-        determine_type_from_schema(name, schema)
     }
+
+    determine_type_from_schema(name, schema)
 }
 
-fn determine_type_from_schema(name: String, schema: &SchemaObject) -> Type {
-    if let Some(arr_valid) = &schema.array {
-        return determine_type_from_arr_valid(name, arr_valid);
+fn determine_type_from_schema(name: String, schema: &Map<String, Value>) -> Type {
+    // Array type
+    if let Some(items) = schema.get("items").or_else(|| schema.get("prefixItems")) {
+        return determine_type_from_array(name, items);
     }
 
-    if let Some(typ) = &schema.object {
-        return determine_type_from_object_valid(name, typ);
+    // Object type with properties
+    if let Some(Value::Object(props)) = schema.get("properties")
+        && !props.is_empty()
+    {
+        return Type { nullable: true, base: BaseType::Named(Name::new(name)) };
     }
 
-    if let Some(subschema) = schema.subschemas.clone().into_iter().next() {
-        let list = subschema.any_of.or(subschema.all_of).or(subschema.one_of);
+    // anyOf/allOf/oneOf – look for a $ref in the schemas
+    let list = schema
+        .get("anyOf")
+        .or_else(|| schema.get("allOf"))
+        .or_else(|| schema.get("oneOf"));
 
-        if let Some(list) = list
-            && let Some(Schema::Object(obj)) = list.first()
-            && let Some(reference) = &obj.reference
-        {
-            return determine_type_from_reference(reference);
+    if let Some(Value::Array(schemas)) = list {
+        for s in schemas {
+            if let Some(obj) = s.as_object()
+                && let Some(Value::String(reference)) = obj.get("$ref")
+            {
+                return determine_type_from_reference(reference);
+            }
         }
     }
 
-    if let Some(reference) = &schema.reference {
+    // Direct $ref
+    if let Some(Value::String(reference)) = schema.get("$ref") {
         return determine_type_from_reference(reference);
     }
 
@@ -138,42 +207,40 @@ fn determine_type_from_reference(reference: &str) -> Type {
     Type { nullable: true, base: BaseType::Named(Name::new(name)) }
 }
 
-fn determine_type_from_arr_valid(name: String, array_valid: &ArrayValidation) -> Type {
-    if let Some(items) = &array_valid.items {
-        match items {
-            SingleOrVec::Single(schema) => Type {
-                nullable: true,
-                base: BaseType::List(Box::new(determine_input_value_type_from_schema(
-                    name,
-                    &schema.clone().into_object(),
-                    false,
-                ))),
-            },
-            SingleOrVec::Vec(schemas) => Type {
-                nullable: true,
-                base: BaseType::List(Box::new(determine_input_value_type_from_schema(
-                    name,
-                    &schemas[0].clone().into_object(),
-                    false,
-                ))),
-            },
+fn determine_type_from_array(name: String, items: &Value) -> Type {
+    match items {
+        Value::Object(schema) => Type {
+            nullable: true,
+            base: BaseType::List(Box::new(determine_input_value_type_from_schema(
+                name, schema, false,
+            ))),
+        },
+        Value::Array(schemas) => {
+            if let Some(Value::Object(schema)) = schemas.first() {
+                Type {
+                    nullable: true,
+                    base: BaseType::List(Box::new(determine_input_value_type_from_schema(
+                        name, schema, false,
+                    ))),
+                }
+            } else {
+                Type { nullable: true, base: BaseType::Named(Name::new("JSON")) }
+            }
         }
-    } else {
-        Type { nullable: true, base: BaseType::Named(Name::new("JSON")) }
+        _ => Type { nullable: true, base: BaseType::Named(Name::new("JSON")) },
     }
 }
 
-fn determine_type_from_object_valid(name: String, typ: &ObjectValidation) -> Type {
-    if !typ.properties.is_empty() {
-        Type { nullable: true, base: BaseType::Named(Name::new(name)) }
-    } else {
-        Type { nullable: true, base: BaseType::Named(Name::new("JSON")) }
-    }
-}
-
-fn get_instance_type_name(typ: &InstanceType) -> String {
+fn get_type_name(typ: &str) -> String {
     match typ {
-        &InstanceType::Integer => "Int".to_string(),
-        _ => format!("{:?}", typ),
+        "integer" => "Int".to_string(),
+        "boolean" => "Boolean".to_string(),
+        "number" => "Float".to_string(),
+        "string" => "String".to_string(),
+        other => {
+            let mut s = other.to_string();
+            first_char_to_upper(&mut s);
+            s
+        }
     }
 }

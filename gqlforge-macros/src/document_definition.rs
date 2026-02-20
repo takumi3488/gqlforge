@@ -84,7 +84,7 @@ pub fn expand_input_definition(input: TokenStream) -> TokenStream {
         impl gqlforge_typedefs_common::input_definition::InputDefinition for #struct_identifier {
             fn input_definition() -> async_graphql::parser::types::TypeSystemDefinition {
                 let schemars = gqlforge_typedefs_common::into_schemars::<Self>();
-                gqlforge_typedefs_common::input_definition::into_input_definition(schemars.schema, stringify!(#struct_identifier))
+                gqlforge_typedefs_common::input_definition::into_input_definition_from_schema(schemars, stringify!(#struct_identifier))
             }
         }
     };

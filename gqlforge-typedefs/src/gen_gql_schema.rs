@@ -16,15 +16,14 @@ mod tests {
     use gqlforge_typedefs_common::scalar_definition::{ScalarDefinition, into_scalar_definition};
     use gqlforge_typedefs_common::{ServiceDocumentBuilder, into_schemars};
     use schemars::JsonSchema;
-    use schemars::schema::Schema;
 
     #[derive(JsonSchema)]
     struct FooScalar(String);
 
     impl ScalarDefinition for FooScalar {
         fn scalar_definition() -> async_graphql::parser::types::TypeSystemDefinition {
-            let root_schema = into_schemars::<Self>();
-            into_scalar_definition(Schema::Object(root_schema.schema), "FooScalar")
+            let schema = into_schemars::<Self>();
+            into_scalar_definition(schema, "FooScalar")
         }
     }
 
@@ -95,7 +94,7 @@ mod tests {
             .add_directive(ComplexDirective::directive_definition(&mut HashSet::new()))
             .build();
         let actual = gqlforge::core::document::print(doc);
-        let expected = "directive @complexDirective(\n  custom_type: FooType\n  enum_field: FooEnum\n  field1: Int!\n) repeatable on SCHEMA\n\ninput BarType {\n  field2: BazType\n}\n\ninput BazType {\n  field: Int!\n}\n\ninput FooType {\n  field1: Int!\n  field2: Int\n  field3: [String!]\n  inner_type: BarType\n}\n\nenum FooEnum {\n  Variant\n  Variant2\n  Variat3\n}".to_string();
+        let expected = "directive @complexDirective(\n  field1: Int!\n  enum_field: FooEnum\n  custom_type: FooType\n) repeatable on SCHEMA\n\ninput FooType {\n  field1: Int!\n  field2: Int\n  field3: [String!]\n  inner_type: BarType\n}\n\ninput BarType {\n  field2: BazType\n}\n\ninput BazType {\n  field: Int!\n}\n\nenum FooEnum {\n  Variant\n  Variant2\n  Variat3\n}".to_string();
 
         assert_eq!(actual, expected);
     }

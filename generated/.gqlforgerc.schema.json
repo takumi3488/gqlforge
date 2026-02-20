@@ -1,142 +1,245 @@
 {
-  "$schema": "http://json-schema.org/draft-07/schema#",
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
   "title": "RuntimeConfig",
   "type": "object",
   "properties": {
+    "server": {
+      "description": "Dictates how the server behaves and helps tune gqlforge for all ingress\nrequests. Features such as request batching, SSL, HTTP2 etc. can be\nconfigured here.",
+      "$ref": "#/$defs/Server"
+    },
+    "upstream": {
+      "description": "Dictates how gqlforge should handle upstream requests/responses.\nTuning upstream can improve performance and reliability for connections.",
+      "$ref": "#/$defs/Upstream"
+    },
     "links": {
       "description": "A list of all links in the schema.",
       "type": "array",
       "items": {
-        "$ref": "#/definitions/Link"
+        "$ref": "#/$defs/Link"
       }
-    },
-    "server": {
-      "description": "Dictates how the server behaves and helps tune gqlforge for all ingress requests. Features such as request batching, SSL, HTTP2 etc. can be configured here.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Server"
-        }
-      ]
     },
     "telemetry": {
       "description": "Enable [opentelemetry](https://opentelemetry.io) support",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Telemetry"
-        }
-      ]
-    },
-    "upstream": {
-      "description": "Dictates how gqlforge should handle upstream requests/responses. Tuning upstream can improve performance and reliability for connections.",
-      "allOf": [
-        {
-          "$ref": "#/definitions/Upstream"
-        }
-      ]
+      "$ref": "#/$defs/Telemetry"
     }
   },
-  "definitions": {
-    "Batch": {
+  "$defs": {
+    "Server": {
+      "description": "The `@server` directive, when applied at the schema level, offers a\ncomprehensive set of server configurations. It dictates how the server\nbehaves and helps tune gqlforge for various use-cases.",
       "type": "object",
       "properties": {
-        "delay": {
-          "default": 0,
-          "type": "integer",
-          "format": "uint",
-          "minimum": 0.0
+        "apolloTracing": {
+          "description": "`apolloTracing` exposes GraphQL query performance data, including\nexecution time of queries and individual resolvers.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "batchRequests": {
+          "description": "`batchRequests` combines multiple requests into one, improving\nperformance but potentially introducing latency and complicating\ndebugging. Use judiciously. @default `false`.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         },
         "headers": {
-          "default": [],
-          "type": "array",
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
+          "description": "`headers` contains key-value pairs that are included as default headers\nin server responses, allowing for consistent header management across\nall responses.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Headers"
+            },
+            {
+              "type": "null"
+            }
+          ]
         },
-        "maxSize": {
+        "globalResponseTimeout": {
+          "description": "`globalResponseTimeout` sets the maximum query duration before\ntermination, acting as a safeguard against long-running queries.",
           "type": [
             "integer",
             "null"
           ],
-          "format": "uint",
-          "minimum": 0.0
-        }
-      }
-    },
-    "Cors": {
-      "description": "Type to configure Cross-Origin Resource Sharing (CORS) for a server.",
-      "type": "object",
-      "properties": {
-        "allowCredentials": {
-          "description": "Indicates whether the server allows credentials (e.g., cookies, authorization headers) to be sent in cross-origin requests.",
+          "format": "int64"
+        },
+        "hostname": {
+          "description": "`hostname` sets the server hostname.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "introspection": {
+          "description": "`introspection` allows clients to fetch schema information directly,\naiding tools and applications in understanding available types, fields,\nand operations. @default `true`.",
           "type": [
             "boolean",
             "null"
           ]
         },
-        "allowHeaders": {
-          "description": "A list of allowed headers in cross-origin requests. This can be used to specify custom headers that are allowed to be included in cross-origin requests.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "allowMethods": {
-          "description": "A list of allowed HTTP methods in cross-origin requests. These methods specify the actions that are permitted in cross-origin requests.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/Method"
-          }
-        },
-        "allowOrigins": {
-          "description": "A list of origins that are allowed to access the server's resources in cross-origin requests. An origin can be a domain, a subdomain, or even 'null' for local file schemes.",
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
-        },
-        "allowPrivateNetwork": {
-          "description": "Indicates whether requests from private network addresses are allowed in cross-origin requests. Private network addresses typically include IP addresses reserved for internal networks.",
+        "enableFederation": {
+          "description": "`enableFederation` enables functionality to Gqlforge server to act\nas a federation subgraph.",
           "type": [
             "boolean",
             "null"
           ]
         },
-        "exposeHeaders": {
-          "description": "A list of headers that the server exposes to the browser in cross-origin responses. Exposing certain headers allows the client-side code to access them in the response.",
+        "pipelineFlush": {
+          "description": "`pipelineFlush` allows to control flushing behavior of the server\npipeline.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "port": {
+          "description": "`port` sets the Gqlforge running port. @default `8000`.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint16",
+          "minimum": 0,
+          "maximum": 65535
+        },
+        "queryValidation": {
+          "description": "`queryValidation` checks incoming GraphQL queries against the schema,\npreventing errors from invalid queries. Can be disabled for performance.\n@default `false`.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "responseValidation": {
+          "description": "`responseValidation` Gqlforge automatically validates responses from\nupstream services using inferred schema. @default `false`.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "script": {
+          "description": "A link to an external JS file that listens on every HTTP request\nresponse event.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/ScriptOptions"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "showcase": {
+          "description": "`showcase` enables the /showcase/graphql endpoint.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "vars": {
+          "description": "This configuration defines local variables for server operations. Useful\nfor storing constant configurations, secrets, or shared information.",
           "type": "array",
           "items": {
-            "type": "string"
+            "$ref": "#/$defs/KeyValue"
           }
         },
-        "maxAge": {
-          "description": "The maximum time (in seconds) that the client should cache preflight OPTIONS requests in order to avoid sending excessive requests to the server.",
+        "version": {
+          "description": "`version` sets the HTTP version for the server. Options are `HTTP1` and\n`HTTP2`. @default `HTTP1`.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/HttpVersion"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "workers": {
+          "description": "`workers` sets the number of worker threads. @default the number of\nsystem cores.",
           "type": [
             "integer",
             "null"
           ],
           "format": "uint",
-          "minimum": 0.0
+          "minimum": 0
         },
-        "vary": {
-          "description": "A list of header names that indicate the values of which might cause the server's response to vary, potentially affecting caching.",
-          "default": [
-            "origin",
-            "access-control-request-method",
-            "access-control-request-headers"
+        "routes": {
+          "description": "`routes` allows customization of server endpoint paths.\nIt provides options to change the default paths for status and GraphQL\nendpoints. Default values are:\n- status: \"/status\"\n- graphQL: \"/graphql\" If not specified, these default values will be\n  used.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Routes"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "limitComplexity": {
+          "description": "`limitComplexity` sets the maximum allowed query complexity.\nQueries exceeding this limit are rejected during validation.\n@default `1000`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
           ],
-          "type": "array",
-          "items": {
-            "type": "string"
-          }
+          "format": "uint",
+          "minimum": 0
+        },
+        "limitDepth": {
+          "description": "`limitDepth` sets the maximum allowed query nesting depth.\nQueries exceeding this limit are rejected during validation.\n@default `15`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0
+        },
+        "limitDirectives": {
+          "description": "`limitDirectives` sets the maximum number of directives allowed.\nQueries exceeding this limit are rejected during validation.\n@default `50`. Set to `0` to disable.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0
+        },
+        "spa": {
+          "description": "`spa` configures single-page application hosting.\nStatic files are served from the specified directory.\nRequests without file extensions that don't match any known route\nwill serve `index.html` for client-side routing.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Spa"
+            },
+            {
+              "type": "null"
+            }
+          ]
         }
-      }
+      },
+      "additionalProperties": false
     },
     "Headers": {
       "type": "object",
       "properties": {
         "cacheControl": {
-          "description": "`cacheControl` sends `Cache-Control` headers in responses when activated. The `max-age` value is the least of the values received from upstream services. @default `false`.",
+          "description": "`cacheControl` sends `Cache-Control` headers in responses when\nactivated. The `max-age` value is the least of the values received from\nupstream services. @default `false`.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "custom": {
+          "description": "`headers` are key-value pairs included in every server\nresponse. Useful for setting headers like `Access-Control-Allow-Origin`\nfor cross-origin requests or additional headers for downstream services.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/KeyValue"
+          }
+        },
+        "experimental": {
+          "description": "`experimental` allows the use of `X-*` experimental headers\nin the response. @default `[]`.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          }
+        },
+        "setCookies": {
+          "description": "`setCookies` when enabled stores `set-cookie` headers\nand all the response will be sent with the headers.",
           "type": [
             "boolean",
             "null"
@@ -146,53 +249,17 @@
           "description": "`cors` allows Cross-Origin Resource Sharing (CORS) for a server.",
           "anyOf": [
             {
-              "$ref": "#/definitions/Cors"
+              "$ref": "#/$defs/Cors"
             },
             {
               "type": "null"
             }
           ]
-        },
-        "custom": {
-          "description": "`headers` are key-value pairs included in every server response. Useful for setting headers like `Access-Control-Allow-Origin` for cross-origin requests or additional headers for downstream services.",
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/KeyValue"
-          }
-        },
-        "experimental": {
-          "description": "`experimental` allows the use of `X-*` experimental headers in the response. @default `[]`.",
-          "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
-        },
-        "setCookies": {
-          "description": "`setCookies` when enabled stores `set-cookie` headers and all the response will be sent with the headers.",
-          "type": [
-            "boolean",
-            "null"
-          ]
         }
       }
     },
-    "HttpVersion": {
-      "type": "string",
-      "enum": [
-        "HTTP1",
-        "HTTP2"
-      ]
-    },
     "KeyValue": {
       "type": "object",
-      "required": [
-        "key",
-        "value"
-      ],
       "properties": {
         "key": {
           "type": "string"
@@ -200,144 +267,80 @@
         "value": {
           "type": "string"
         }
-      }
+      },
+      "required": [
+        "key",
+        "value"
+      ]
     },
-    "Link": {
-      "description": "The @link directive allows you to import external resources, such as configuration – which will be merged into the config importing it –, or a .proto file – which will be later used by `@grpc` directive –.",
+    "Cors": {
+      "description": "Type to configure Cross-Origin Resource Sharing (CORS) for a server.",
       "type": "object",
       "properties": {
-        "headers": {
-          "description": "Custom headers for gRPC reflection server.",
+        "allowCredentials": {
+          "description": "Indicates whether the server allows credentials (e.g., cookies,\nauthorization headers) to be sent in cross-origin requests.",
           "type": [
-            "array",
-            "null"
-          ],
-          "items": {
-            "$ref": "#/definitions/KeyValue"
-          }
-        },
-        "id": {
-          "description": "The id of the link. It is used to reference the link in the schema.",
-          "type": [
-            "string",
+            "boolean",
             "null"
           ]
         },
-        "meta": {
-          "description": "Additional metadata pertaining to the linked resource."
-        },
-        "proto_paths": {
-          "description": "The proto paths to be used when resolving dependencies. Only valid when [`Link::type_of`] is [`LinkType::Protobuf`]",
-          "type": [
-            "array",
-            "null"
-          ],
+        "allowHeaders": {
+          "description": "A list of allowed headers in cross-origin requests.\nThis can be used to specify custom headers that are allowed to be\nincluded in cross-origin requests.",
+          "type": "array",
           "items": {
             "type": "string"
           }
         },
-        "src": {
-          "description": "The source of the link. It can be a URL or a path to a file. If a path is provided, it is relative to the file that imports the link.",
-          "type": "string"
+        "allowMethods": {
+          "description": "A list of allowed HTTP methods in cross-origin requests.\nThese methods specify the actions that are permitted in cross-origin\nrequests.",
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Method"
+          }
         },
-        "type": {
-          "description": "The type of the link. It can be `Config`, or `Protobuf`.",
-          "allOf": [
-            {
-              "$ref": "#/definitions/LinkType"
-            }
+        "allowOrigins": {
+          "description": "A list of origins that are allowed to access the server's resources in\ncross-origin requests. An origin can be a domain, a subdomain, or\neven 'null' for local file schemes.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "allowPrivateNetwork": {
+          "description": "Indicates whether requests from private network addresses are allowed in\ncross-origin requests. Private network addresses typically include\nIP addresses reserved for internal networks.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "exposeHeaders": {
+          "description": "A list of headers that the server exposes to the browser in cross-origin\nresponses. Exposing certain headers allows the client-side code to\naccess them in the response.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          }
+        },
+        "maxAge": {
+          "description": "The maximum time (in seconds) that the client should cache preflight\nOPTIONS requests in order to avoid sending excessive requests to the\nserver.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0
+        },
+        "vary": {
+          "description": "A list of header names that indicate the values of which might cause the\nserver's response to vary, potentially affecting caching.",
+          "type": "array",
+          "items": {
+            "type": "string"
+          },
+          "default": [
+            "origin",
+            "access-control-request-method",
+            "access-control-request-headers"
           ]
         }
-      },
-      "additionalProperties": false
-    },
-    "LinkType": {
-      "oneOf": [
-        {
-          "description": "Points to another Gqlforge Configuration file. The imported configuration will be merged into the importing configuration.",
-          "type": "string",
-          "enum": [
-            "Config"
-          ]
-        },
-        {
-          "description": "Points to a Protobuf file. The imported Protobuf file will be used by the `@grpc` directive. If your API exposes a reflection endpoint, you should set the type to `Grpc` instead.",
-          "type": "string",
-          "enum": [
-            "Protobuf"
-          ]
-        },
-        {
-          "description": "Points to a JS file. The imported JS file will be used by the `@js` directive.",
-          "type": "string",
-          "enum": [
-            "Script"
-          ]
-        },
-        {
-          "description": "Points to a Cert file. The imported Cert file will be used by the server to serve over HTTPS.",
-          "type": "string",
-          "enum": [
-            "Cert"
-          ]
-        },
-        {
-          "description": "Points to a Key file. The imported Key file will be used by the server to serve over HTTPS.",
-          "type": "string",
-          "enum": [
-            "Key"
-          ]
-        },
-        {
-          "description": "A trusted document that contains GraphQL operations (queries, mutations) that can be exposed a REST API using the `@rest` directive.",
-          "type": "string",
-          "enum": [
-            "Operation"
-          ]
-        },
-        {
-          "description": "Points to a Htpasswd file. The imported Htpasswd file will be used by the server to authenticate users.",
-          "type": "string",
-          "enum": [
-            "Htpasswd"
-          ]
-        },
-        {
-          "description": "Points to a Jwks file. The imported Jwks file will be used by the server to authenticate users.",
-          "type": "string",
-          "enum": [
-            "Jwks"
-          ]
-        },
-        {
-          "description": "Points to a reflection endpoint. The imported reflection endpoint will be used by the `@grpc` directive to resolve data from gRPC services.",
-          "type": "string",
-          "enum": [
-            "Grpc"
-          ]
-        },
-        {
-          "description": "Points to a SQL migration file. Used to build a database schema for the `@postgres` directive offline (without a live database connection).",
-          "type": "string",
-          "enum": [
-            "Sql"
-          ]
-        },
-        {
-          "description": "Points to a PostgreSQL connection string. The database will be introspected at startup to build a schema for the `@postgres` directive.",
-          "type": "string",
-          "enum": [
-            "Postgres"
-          ]
-        },
-        {
-          "description": "Points to an S3 or S3-compatible endpoint. The endpoint URL and region/credentials metadata are used by the `@s3` directive.",
-          "type": "string",
-          "enum": [
-            "S3"
-          ]
-        }
-      ]
+      }
     },
     "Method": {
       "type": "string",
@@ -353,69 +356,6 @@
         "TRACE"
       ]
     },
-    "OtlpExporter": {
-      "description": "Output the opentelemetry data to otlp collector",
-      "type": "object",
-      "required": [
-        "url"
-      ],
-      "properties": {
-        "headers": {
-          "type": "array",
-          "items": {
-            "$ref": "#/definitions/KeyValue"
-          }
-        },
-        "url": {
-          "type": "string"
-        }
-      }
-    },
-    "PrometheusExporter": {
-      "description": "Output the telemetry metrics data to prometheus server",
-      "type": "object",
-      "properties": {
-        "format": {
-          "$ref": "#/definitions/PrometheusFormat"
-        },
-        "path": {
-          "default": "/metrics",
-          "type": "string"
-        }
-      }
-    },
-    "PrometheusFormat": {
-      "description": "Output format for prometheus data",
-      "type": "string",
-      "enum": [
-        "text",
-        "protobuf"
-      ]
-    },
-    "Proxy": {
-      "type": "object",
-      "required": [
-        "url"
-      ],
-      "properties": {
-        "url": {
-          "type": "string"
-        }
-      }
-    },
-    "Routes": {
-      "type": "object",
-      "properties": {
-        "graphQL": {
-          "default": "/graphql",
-          "type": "string"
-        },
-        "status": {
-          "default": "/status",
-          "type": "string"
-        }
-      }
-    },
     "ScriptOptions": {
       "type": "object",
       "properties": {
@@ -425,226 +365,345 @@
             "null"
           ],
           "format": "uint64",
-          "minimum": 0.0
+          "minimum": 0
         }
       }
     },
-    "Server": {
-      "description": "The `@server` directive, when applied at the schema level, offers a comprehensive set of server configurations. It dictates how the server behaves and helps tune gqlforge for various use-cases.",
+    "HttpVersion": {
+      "type": "string",
+      "enum": [
+        "HTTP1",
+        "HTTP2"
+      ]
+    },
+    "Routes": {
       "type": "object",
       "properties": {
-        "apolloTracing": {
-          "description": "`apolloTracing` exposes GraphQL query performance data, including execution time of queries and individual resolvers.",
-          "type": [
-            "boolean",
-            "null"
-          ]
+        "status": {
+          "type": "string",
+          "default": "/status"
         },
-        "batchRequests": {
-          "description": "`batchRequests` combines multiple requests into one, improving performance but potentially introducing latency and complicating debugging. Use judiciously. @default `false`.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "enableFederation": {
-          "description": "`enableFederation` enables functionality to Gqlforge server to act as a federation subgraph.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "globalResponseTimeout": {
-          "description": "`globalResponseTimeout` sets the maximum query duration before termination, acting as a safeguard against long-running queries.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "int64"
-        },
-        "headers": {
-          "description": "`headers` contains key-value pairs that are included as default headers in server responses, allowing for consistent header management across all responses.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Headers"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "hostname": {
-          "description": "`hostname` sets the server hostname.",
+        "graphQL": {
+          "type": "string",
+          "default": "/graphql"
+        }
+      }
+    },
+    "Spa": {
+      "type": "object",
+      "properties": {
+        "dir": {
+          "description": "Path to the directory containing SPA static assets.\nThe directory must contain an `index.html` file.",
+          "type": "string"
+        }
+      },
+      "additionalProperties": false,
+      "required": [
+        "dir"
+      ]
+    },
+    "Upstream": {
+      "description": "The `upstream` directive allows you to control various aspects of the\nupstream server connection. This includes settings like connection timeouts,\nkeep-alive intervals, and more. If not specified, default values are used.",
+      "type": "object",
+      "properties": {
+        "onRequest": {
+          "description": "onRequest field gives the ability to specify the global request\ninterception handler.",
           "type": [
             "string",
             "null"
           ]
         },
-        "introspection": {
-          "description": "`introspection` allows clients to fetch schema information directly, aiding tools and applications in understanding available types, fields, and operations. @default `true`.",
+        "allowedHeaders": {
+          "description": "`allowedHeaders` defines the HTTP headers allowed to be forwarded to\nupstream services. If not set, no headers are forwarded, enhancing\nsecurity but possibly limiting data flow.",
           "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "limitComplexity": {
-          "description": "`limitComplexity` sets the maximum allowed query complexity. Queries exceeding this limit are rejected during validation. @default `1000`. Set to `0` to disable.",
-          "type": [
-            "integer",
+            "array",
             "null"
           ],
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "limitDepth": {
-          "description": "`limitDepth` sets the maximum allowed query nesting depth. Queries exceeding this limit are rejected during validation. @default `15`. Set to `0` to disable.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "limitDirectives": {
-          "description": "`limitDirectives` sets the maximum number of directives allowed. Queries exceeding this limit are rejected during validation. @default `50`. Set to `0` to disable.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "pipelineFlush": {
-          "description": "`pipelineFlush` allows to control flushing behavior of the server pipeline.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "port": {
-          "description": "`port` sets the Gqlforge running port. @default `8000`.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint16",
-          "minimum": 0.0
-        },
-        "queryValidation": {
-          "description": "`queryValidation` checks incoming GraphQL queries against the schema, preventing errors from invalid queries. Can be disabled for performance. @default `false`.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "responseValidation": {
-          "description": "`responseValidation` Gqlforge automatically validates responses from upstream services using inferred schema. @default `false`.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "routes": {
-          "description": "`routes` allows customization of server endpoint paths. It provides options to change the default paths for status and GraphQL endpoints. Default values are: - status: \"/status\" - graphQL: \"/graphql\" If not specified, these default values will be used.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Routes"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "script": {
-          "description": "A link to an external JS file that listens on every HTTP request response event.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/ScriptOptions"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "showcase": {
-          "description": "`showcase` enables the /showcase/graphql endpoint.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "spa": {
-          "description": "`spa` configures single-page application hosting. Static files are served from the specified directory. Requests without file extensions that don't match any known route will serve `index.html` for client-side routing.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Spa"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "vars": {
-          "description": "This configuration defines local variables for server operations. Useful for storing constant configurations, secrets, or shared information.",
-          "type": "array",
+          "uniqueItems": true,
           "items": {
-            "$ref": "#/definitions/KeyValue"
+            "type": "string"
           }
         },
-        "version": {
-          "description": "`version` sets the HTTP version for the server. Options are `HTTP1` and `HTTP2`. @default `HTTP1`.",
+        "batch": {
+          "description": "An object that specifies the batch settings, including `maxSize` (the\nmaximum size of the batch), `delay` (the delay in milliseconds between\neach batch), and `headers` (an array of HTTP headers to be included in\nthe batch).",
           "anyOf": [
             {
-              "$ref": "#/definitions/HttpVersion"
+              "$ref": "#/$defs/Batch"
             },
             {
               "type": "null"
             }
           ]
         },
-        "workers": {
-          "description": "`workers` sets the number of worker threads. @default the number of system cores.",
+        "connectTimeout": {
+          "description": "The time in seconds that the connection will wait for a response before\ntiming out.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "httpCache": {
+          "description": "Providing httpCache size enables Gqlforge's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "http2Only": {
+          "description": "The `http2Only` setting allows you to specify whether the client should\nalways issue HTTP2 requests, without checking if the server supports it\nor not. By default it is set to `false` for all HTTP requests made by\nthe server, but is automatically set to true for GRPC.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "keepAliveInterval": {
+          "description": "The time in seconds between each keep-alive message sent to maintain the\nconnection.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "keepAliveTimeout": {
+          "description": "The time in seconds that the connection will wait for a keep-alive\nmessage before closing.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "keepAliveWhileIdle": {
+          "description": "A boolean value that determines whether keep-alive messages should be\nsent while the connection is idle.",
+          "type": [
+            "boolean",
+            "null"
+          ]
+        },
+        "poolMaxIdlePerHost": {
+          "description": "The maximum number of idle connections that will be maintained per host.",
           "type": [
             "integer",
             "null"
           ],
           "format": "uint",
-          "minimum": 0.0
+          "minimum": 0
+        },
+        "poolIdleTimeout": {
+          "description": "The time in seconds that the connection pool will wait before closing\nidle connections.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "proxy": {
+          "description": "The `proxy` setting defines an intermediary server through which the\nupstream requests will be routed before reaching their intended\nendpoint. By specifying a proxy URL, you introduce an additional layer,\nenabling custom routing and security policies.",
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Proxy"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "tcpKeepAlive": {
+          "description": "The time in seconds between each TCP keep-alive message sent to maintain\nthe connection.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "timeout": {
+          "description": "The maximum time in seconds that the connection will wait for a\nresponse.",
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint64",
+          "minimum": 0
+        },
+        "userAgent": {
+          "description": "The User-Agent header value to be used in HTTP requests. @default\n`Gqlforge/1.0`",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "verifySSL": {
+          "description": "A boolean value that determines whether to verify certificates.\nSetting this as `false` will make gqlforge accept self-signed\ncertificates. NOTE: use this *only* during development or testing.\nIt is highly recommended to keep this enabled (`true`) in\nproduction.",
+          "type": [
+            "boolean",
+            "null"
+          ]
         }
       },
       "additionalProperties": false
     },
-    "Spa": {
-      "type": "object",
-      "required": [
-        "dir"
-      ],
-      "properties": {
-        "dir": {
-          "description": "Path to the directory containing SPA static assets. The directory must contain an `index.html` file.",
-          "type": "string"
-        }
-      },
-      "additionalProperties": false
-    },
-    "StdoutExporter": {
-      "description": "Output the opentelemetry data to the stdout. Mostly used for debug purposes",
+    "Batch": {
       "type": "object",
       "properties": {
-        "pretty": {
-          "description": "Output to stdout in pretty human-readable format",
-          "type": "boolean"
+        "delay": {
+          "type": "integer",
+          "format": "uint",
+          "minimum": 0,
+          "default": 0
+        },
+        "headers": {
+          "type": "array",
+          "uniqueItems": true,
+          "items": {
+            "type": "string"
+          },
+          "default": []
+        },
+        "maxSize": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "format": "uint",
+          "minimum": 0
         }
       }
     },
+    "Proxy": {
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        }
+      },
+      "required": [
+        "url"
+      ]
+    },
+    "Link": {
+      "description": "The @link directive allows you to import external resources, such as\nconfiguration – which will be merged into the config importing it –,\nor a .proto file – which will be later used by `@grpc` directive –.",
+      "type": "object",
+      "properties": {
+        "id": {
+          "description": "The id of the link. It is used to reference the link in the schema.",
+          "type": [
+            "string",
+            "null"
+          ]
+        },
+        "src": {
+          "description": "The source of the link. It can be a URL or a path to a file.\nIf a path is provided, it is relative to the file that imports the link.",
+          "type": "string"
+        },
+        "type": {
+          "description": "The type of the link. It can be `Config`, or `Protobuf`.",
+          "$ref": "#/$defs/LinkType"
+        },
+        "headers": {
+          "description": "Custom headers for gRPC reflection server.",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "$ref": "#/$defs/KeyValue"
+          }
+        },
+        "meta": {
+          "description": "Additional metadata pertaining to the linked resource."
+        },
+        "proto_paths": {
+          "description": "The proto paths to be used when resolving dependencies.\nOnly valid when [`Link::type_of`] is [`LinkType::Protobuf`]",
+          "type": [
+            "array",
+            "null"
+          ],
+          "items": {
+            "type": "string"
+          }
+        }
+      },
+      "additionalProperties": false
+    },
+    "LinkType": {
+      "oneOf": [
+        {
+          "description": "Points to another Gqlforge Configuration file. The imported\nconfiguration will be merged into the importing configuration.",
+          "type": "string",
+          "const": "Config"
+        },
+        {
+          "description": "Points to a Protobuf file. The imported Protobuf file will be used by\nthe `@grpc` directive. If your API exposes a reflection endpoint, you\nshould set the type to `Grpc` instead.",
+          "type": "string",
+          "const": "Protobuf"
+        },
+        {
+          "description": "Points to a JS file. The imported JS file will be used by the `@js`\ndirective.",
+          "type": "string",
+          "const": "Script"
+        },
+        {
+          "description": "Points to a Cert file. The imported Cert file will be used by the server\nto serve over HTTPS.",
+          "type": "string",
+          "const": "Cert"
+        },
+        {
+          "description": "Points to a Key file. The imported Key file will be used by the server\nto serve over HTTPS.",
+          "type": "string",
+          "const": "Key"
+        },
+        {
+          "description": "A trusted document that contains GraphQL operations (queries, mutations)\nthat can be exposed a REST API using the `@rest` directive.",
+          "type": "string",
+          "const": "Operation"
+        },
+        {
+          "description": "Points to a Htpasswd file. The imported Htpasswd file will be used by\nthe server to authenticate users.",
+          "type": "string",
+          "const": "Htpasswd"
+        },
+        {
+          "description": "Points to a Jwks file. The imported Jwks file will be used by the server\nto authenticate users.",
+          "type": "string",
+          "const": "Jwks"
+        },
+        {
+          "description": "Points to a reflection endpoint. The imported reflection endpoint will\nbe used by the `@grpc` directive to resolve data from gRPC services.",
+          "type": "string",
+          "const": "Grpc"
+        },
+        {
+          "description": "Points to a SQL migration file. Used to build a database schema for\nthe `@postgres` directive offline (without a live database connection).",
+          "type": "string",
+          "const": "Sql"
+        },
+        {
+          "description": "Points to a PostgreSQL connection string. The database will be\nintrospected at startup to build a schema for the `@postgres` directive.",
+          "type": "string",
+          "const": "Postgres"
+        },
+        {
+          "description": "Points to an S3 or S3-compatible endpoint. The endpoint URL and\nregion/credentials metadata are used by the `@s3` directive.",
+          "type": "string",
+          "const": "S3"
+        }
+      ]
+    },
     "Telemetry": {
-      "description": "The @telemetry directive facilitates seamless integration with OpenTelemetry, enhancing the observability of your GraphQL services powered by Gqlforge.  By leveraging this directive, developers gain access to valuable insights into the performance and behavior of their applications.",
+      "description": "The @telemetry directive facilitates seamless integration with\nOpenTelemetry, enhancing the observability of your GraphQL services powered\nby Gqlforge.  By leveraging this directive, developers gain access to\nvaluable insights into the performance and behavior of their applications.",
       "type": "object",
       "properties": {
         "export": {
           "anyOf": [
             {
-              "$ref": "#/definitions/TelemetryExporter"
+              "$ref": "#/$defs/TelemetryExporter"
             },
             {
               "type": "null"
@@ -652,7 +711,7 @@
           ]
         },
         "requestHeaders": {
-          "description": "The list of headers that will be sent as additional attributes to telemetry exporters Be careful about **leaking sensitive information** from requests when enabling the headers that may contain sensitive data",
+          "description": "The list of headers that will be sent as additional attributes to\ntelemetry exporters Be careful about **leaking sensitive\ninformation** from requests when enabling the headers that may\ncontain sensitive data",
           "type": "array",
           "items": {
             "type": "string"
@@ -665,188 +724,90 @@
       "oneOf": [
         {
           "type": "object",
+          "properties": {
+            "stdout": {
+              "$ref": "#/$defs/StdoutExporter"
+            }
+          },
           "required": [
             "stdout"
           ],
-          "properties": {
-            "stdout": {
-              "$ref": "#/definitions/StdoutExporter"
-            }
-          },
           "additionalProperties": false
         },
         {
           "type": "object",
+          "properties": {
+            "otlp": {
+              "$ref": "#/$defs/OtlpExporter"
+            }
+          },
           "required": [
             "otlp"
           ],
-          "properties": {
-            "otlp": {
-              "$ref": "#/definitions/OtlpExporter"
-            }
-          },
           "additionalProperties": false
         },
         {
           "type": "object",
+          "properties": {
+            "prometheus": {
+              "$ref": "#/$defs/PrometheusExporter"
+            }
+          },
           "required": [
             "prometheus"
           ],
-          "properties": {
-            "prometheus": {
-              "$ref": "#/definitions/PrometheusExporter"
-            }
-          },
           "additionalProperties": false
         }
       ]
     },
-    "Upstream": {
-      "description": "The `upstream` directive allows you to control various aspects of the upstream server connection. This includes settings like connection timeouts, keep-alive intervals, and more. If not specified, default values are used.",
+    "StdoutExporter": {
+      "description": "Output the opentelemetry data to the stdout. Mostly used for debug purposes",
       "type": "object",
       "properties": {
-        "allowedHeaders": {
-          "description": "`allowedHeaders` defines the HTTP headers allowed to be forwarded to upstream services. If not set, no headers are forwarded, enhancing security but possibly limiting data flow.",
-          "type": [
-            "array",
-            "null"
-          ],
+        "pretty": {
+          "description": "Output to stdout in pretty human-readable format",
+          "type": "boolean"
+        }
+      }
+    },
+    "OtlpExporter": {
+      "description": "Output the opentelemetry data to otlp collector",
+      "type": "object",
+      "properties": {
+        "url": {
+          "type": "string"
+        },
+        "headers": {
+          "type": "array",
           "items": {
-            "type": "string"
-          },
-          "uniqueItems": true
-        },
-        "batch": {
-          "description": "An object that specifies the batch settings, including `maxSize` (the maximum size of the batch), `delay` (the delay in milliseconds between each batch), and `headers` (an array of HTTP headers to be included in the batch).",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Batch"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "connectTimeout": {
-          "description": "The time in seconds that the connection will wait for a response before timing out.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "http2Only": {
-          "description": "The `http2Only` setting allows you to specify whether the client should always issue HTTP2 requests, without checking if the server supports it or not. By default it is set to `false` for all HTTP requests made by the server, but is automatically set to true for GRPC.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "httpCache": {
-          "description": "Providing httpCache size enables Gqlforge's HTTP caching, adhering to the [HTTP Caching RFC](https://tools.ietf.org/html/rfc7234), to enhance performance by minimizing redundant data fetches. Defaults to `0` if unspecified.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "keepAliveInterval": {
-          "description": "The time in seconds between each keep-alive message sent to maintain the connection.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "keepAliveTimeout": {
-          "description": "The time in seconds that the connection will wait for a keep-alive message before closing.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "keepAliveWhileIdle": {
-          "description": "A boolean value that determines whether keep-alive messages should be sent while the connection is idle.",
-          "type": [
-            "boolean",
-            "null"
-          ]
-        },
-        "onRequest": {
-          "description": "onRequest field gives the ability to specify the global request interception handler.",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "poolIdleTimeout": {
-          "description": "The time in seconds that the connection pool will wait before closing idle connections.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "poolMaxIdlePerHost": {
-          "description": "The maximum number of idle connections that will be maintained per host.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint",
-          "minimum": 0.0
-        },
-        "proxy": {
-          "description": "The `proxy` setting defines an intermediary server through which the upstream requests will be routed before reaching their intended endpoint. By specifying a proxy URL, you introduce an additional layer, enabling custom routing and security policies.",
-          "anyOf": [
-            {
-              "$ref": "#/definitions/Proxy"
-            },
-            {
-              "type": "null"
-            }
-          ]
-        },
-        "tcpKeepAlive": {
-          "description": "The time in seconds between each TCP keep-alive message sent to maintain the connection.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "timeout": {
-          "description": "The maximum time in seconds that the connection will wait for a response.",
-          "type": [
-            "integer",
-            "null"
-          ],
-          "format": "uint64",
-          "minimum": 0.0
-        },
-        "userAgent": {
-          "description": "The User-Agent header value to be used in HTTP requests. @default `Gqlforge/1.0`",
-          "type": [
-            "string",
-            "null"
-          ]
-        },
-        "verifySSL": {
-          "description": "A boolean value that determines whether to verify certificates. Setting this as `false` will make gqlforge accept self-signed certificates. NOTE: use this *only* during development or testing. It is highly recommended to keep this enabled (`true`) in production.",
-          "type": [
-            "boolean",
-            "null"
-          ]
+            "$ref": "#/$defs/KeyValue"
+          }
         }
       },
-      "additionalProperties": false
+      "required": [
+        "url"
+      ]
+    },
+    "PrometheusExporter": {
+      "description": "Output the telemetry metrics data to prometheus server",
+      "type": "object",
+      "properties": {
+        "path": {
+          "type": "string",
+          "default": "/metrics"
+        },
+        "format": {
+          "$ref": "#/$defs/PrometheusFormat"
+        }
+      }
+    },
+    "PrometheusFormat": {
+      "description": "Output format for prometheus data",
+      "type": "string",
+      "enum": [
+        "text",
+        "protobuf"
+      ]
     }
   }
 }
