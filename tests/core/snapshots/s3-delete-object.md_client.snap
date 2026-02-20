@@ -1,0 +1,18 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+scalar JSON
+
+type Mutation {
+  deleteFile(key: String!): JSON
+}
+
+type Query {
+  getFileUrl(key: String!): String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}

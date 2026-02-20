@@ -5,4 +5,5 @@ mod model;
 mod parse;
 pub mod postgres;
 mod runtime;
+pub mod s3;
 pub mod spec;

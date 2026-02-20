@@ -1,0 +1,24 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Query {
+  getBackupUrl(key: String!): String
+  @s3(
+    bucket: "backup-bucket"
+    operation: "GET_PRESIGNED_URL"
+    key: "{{.args.key}}"
+    linkId: "backup"
+  )
+  getPrimaryUrl(key: String!): String
+  @s3(
+    bucket: "primary-bucket"
+    operation: "GET_PRESIGNED_URL"
+    key: "{{.args.key}}"
+    linkId: "primary"
+  )
+}

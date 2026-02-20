@@ -1,0 +1,26 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "users.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Query {
+  user(id: Int!): User
+  @postgres(
+    table: "users"
+    operation: "SELECT_ONE"
+    filter: { id: "{{.args.id}}" }
+  )
+}
+
+type User {
+  email: String
+  id: Int
+  name: String
+}

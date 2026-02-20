@@ -1,0 +1,31 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "users.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+  mutation: Mutation
+}
+
+type Mutation {
+  updateUser(name: String): User
+  @postgres(
+    table: "users"
+    operation: "UPDATE"
+    input: "{\"name\": \"{{.args.name}}\"}"
+  )
+}
+
+type Query {
+  users: [User] @postgres(table: "users")
+}
+
+type User {
+  email: String
+  id: Int
+  name: String
+}

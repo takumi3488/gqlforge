@@ -1,0 +1,15 @@
+---
+source: tests/core/spec.rs
+expression: errors
+---
+[
+  {
+    "message": "@s3 operation GetPresignedUrl requires a 'key' field",
+    "trace": [
+      "Query",
+      "getFileUrl",
+      "@s3"
+    ],
+    "description": null
+  }
+]

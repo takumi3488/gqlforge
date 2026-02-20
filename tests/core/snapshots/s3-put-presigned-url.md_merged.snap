@@ -1,0 +1,17 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema @server @upstream @link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Query {
+  putFileUrl(key: String!, contentType: String): String
+  @s3(
+    bucket: "my-bucket"
+    operation: "PUT_PRESIGNED_URL"
+    key: "{{.args.key}}"
+    contentType: "{{.args.contentType}}"
+  )
+}

@@ -1,0 +1,21 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "products.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Product {
+  id: Int
+  scores: JSON
+  tags: JSON
+}
+
+type Query {
+  products: [Product] @postgres(table: "products")
+}
