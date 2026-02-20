@@ -1,0 +1,27 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "users.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+  mutation: Mutation
+}
+
+type Mutation {
+  deleteUser(id: Int!): User
+  @postgres(table: "users", operation: "DELETE", filter: { id: "{{.args.id}}" })
+}
+
+type Query {
+  users: [User] @postgres(table: "users")
+}
+
+type User {
+  email: String
+  id: Int
+  name: String
+}

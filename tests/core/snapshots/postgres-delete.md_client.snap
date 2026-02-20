@@ -1,0 +1,22 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Mutation {
+  deleteUser(id: Int!): User
+}
+
+type Query {
+  users: [User]
+}
+
+type User {
+  email: String
+  id: Int
+  name: String
+}
+
+schema {
+  query: Query
+  mutation: Mutation
+}
