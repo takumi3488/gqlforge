@@ -4,10 +4,15 @@ expression: formatted
 ---
 scalar JSON
 
-type Query {
+type Mutation {
   deleteFile(key: String!): JSON
+}
+
+type Query {
+  getFileUrl(key: String!): String
 }
 
 schema {
   query: Query
+  mutation: Mutation
 }

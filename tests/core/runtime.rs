@@ -67,13 +67,17 @@ impl ExecutionMock {
     }
 }
 
-#[allow(clippy::too_many_arguments)]
+#[derive(Default)]
+pub struct RuntimeIO {
+    pub postgres: Option<HashMap<String, Arc<dyn PostgresIO>>>,
+    pub s3: Option<HashMap<String, Arc<dyn S3IO>>>,
+}
+
 pub fn create_runtime(
     http_client: Arc<Http>,
     env: Option<HashMap<String, String>>,
     script: Option<Script>,
-    postgres: Option<HashMap<String, Arc<dyn PostgresIO>>>,
-    s3: Option<HashMap<String, Arc<dyn S3IO>>>,
+    io: RuntimeIO,
 ) -> TargetRuntime {
     let http = http_client.clone();
 
@@ -97,7 +101,7 @@ pub fn create_runtime(
             Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
             None => None,
         },
-        postgres: postgres.unwrap_or_default(),
-        s3: s3.unwrap_or_default(),
+        postgres: io.postgres.unwrap_or_default(),
+        s3: io.s3.unwrap_or_default(),
     }
 }
