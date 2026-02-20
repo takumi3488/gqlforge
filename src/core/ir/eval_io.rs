@@ -131,7 +131,7 @@ where
                 .execute(&rendered.sql, &rendered.params)
                 .await
                 .map_err(|e| Error::IO(e.to_string()))?;
-            // SELECT_ONE: リストの最初の要素を返す（空なら Null）
+            // SELECT_ONE: returns the first element of the list (Null if empty)
             if req_template.operation == PostgresOperation::SelectOne {
                 if let ConstValue::List(mut vec) = result {
                     Ok(vec.pop().unwrap_or(ConstValue::Null))

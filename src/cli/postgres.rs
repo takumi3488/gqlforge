@@ -458,9 +458,9 @@ pub mod pool {
 
         // PostgreSQL stores offset as seconds west of UTC (negated from usual
         // convention).
-        // offset_secs <= 0 はUTCより東（+符号）、>0 は西（-符号）
+        // offset_secs <= 0 means east of UTC (+ sign), > 0 means west (- sign)
         let tz_sign = if offset_secs <= 0 { '+' } else { '-' };
-        let tz_abs = offset_secs.unsigned_abs(); // i32::MIN でもオーバーフローなし
+        let tz_abs = offset_secs.unsigned_abs(); // no overflow even for i32::MIN
         let tz_hours = tz_abs / 3600;
         let tz_minutes = (tz_abs % 3600) / 60;
 
@@ -1765,13 +1765,13 @@ pub mod pool {
 
         #[test]
         fn test_format_timetz_offset_secs_min() {
-            // offset_secs = i32::MIN はオーバーフローなしで処理されるべき
+            // offset_secs = i32::MIN should be handled without overflow
             let mut raw = Vec::new();
             raw.extend_from_slice(&0i64.to_be_bytes()); // microseconds = 0
             raw.extend_from_slice(&i32::MIN.to_be_bytes()); // offset_secs = i32::MIN
-            // i32::MIN の unsigned_abs = 2147483648
+            // i32::MIN's unsigned_abs = 2147483648
             // tz_abs = 2147483648, tz_hours = 596523, tz_minutes = 14
-            // パニックしないことを確認
+            // verify no panic occurs
             assert!(format_timetz(&raw).is_ok());
         }
 
