@@ -1,8 +1,9 @@
-use std::collections::{BTreeMap, HashSet};
+use std::collections::HashSet;
 
 use async_graphql::Name;
 use async_graphql::parser::types::{DirectiveLocation, TypeSystemDefinition};
-use schemars::schema::{RootSchema, Schema, SchemaObject};
+use schemars::Schema;
+use serde_json::Value;
 
 use crate::common::{first_char_to_lower, first_char_to_upper, get_description, pos};
 use crate::enum_definition::{into_enum_definition, into_enum_value};
@@ -41,32 +42,43 @@ fn into_directive_location(str: &str) -> DirectiveLocation {
 }
 
 pub fn into_directive_definition(
-    root_schema: RootSchema,
+    root_schema: Schema,
     attrs: Attrs,
     generated_types: &mut HashSet<String>,
 ) -> Vec<TypeSystemDefinition> {
-    let mut service_doc_definitions = vec![];
-    let definitions: BTreeMap<String, Schema> = root_schema.definitions;
-    let schema: SchemaObject = root_schema.schema;
-    let description = get_description(&schema);
+    let root_obj = match root_schema.as_object() {
+        Some(o) => o,
+        None => return vec![],
+    };
 
-    for (mut name, schema) in definitions.into_iter() {
-        if generated_types.contains(&name) {
-            continue;
-        }
-        // the definition could either be an enum or a type
-        // we don't know which one is it, so we first try to get an EnumValue
-        // if into_enum_value return Some we can be sure it's an Enum
-        if let Some(enum_values) = into_enum_value(&schema) {
-            service_doc_definitions.push(into_enum_definition(enum_values, &name));
-            generated_types.insert(name.to_string());
-        } else {
-            generated_types.insert(name.to_string());
-            first_char_to_upper(&mut name);
-            service_doc_definitions.push(into_input_definition(
-                schema.clone().into_object(),
-                name.as_str(),
-            ));
+    let mut service_doc_definitions = vec![];
+    let description = get_description(root_obj);
+
+    // Get sub-type definitions from $defs (2020-12) or definitions (draft07)
+    let definitions = root_obj
+        .get("$defs")
+        .or_else(|| root_obj.get("definitions"))
+        .and_then(Value::as_object);
+
+    if let Some(definitions) = definitions {
+        for (name, schema_value) in definitions {
+            if generated_types.contains(name) {
+                continue;
+            }
+            // the definition could either be an enum or a type
+            // we don't know which one is it, so we first try to get an EnumValue
+            // if into_enum_value returns Some we can be sure it's an Enum
+            if let Ok(schema) = Schema::try_from(schema_value.clone()) {
+                if let Some(enum_values) = into_enum_value(&schema) {
+                    service_doc_definitions.push(into_enum_definition(enum_values, name));
+                    generated_types.insert(name.clone());
+                } else if let Some(obj) = schema.as_object() {
+                    generated_types.insert(name.clone());
+                    let mut capitalized_name = name.clone();
+                    first_char_to_upper(&mut capitalized_name);
+                    service_doc_definitions.push(into_input_definition(obj, &capitalized_name));
+                }
+            }
         }
     }
 
@@ -76,11 +88,11 @@ pub fn into_directive_definition(
         first_char_to_lower(attrs.name)
     };
 
-    let directve_definition =
+    let directive_definition =
         TypeSystemDefinition::Directive(pos(async_graphql::parser::types::DirectiveDefinition {
-            description: description.map(|inner| pos(inner.clone())),
+            description: description.map(|inner| pos(inner.to_owned())),
             name: pos(Name::new(name)),
-            arguments: into_input_value_definition(schema),
+            arguments: into_input_value_definition(root_obj),
             is_repeatable: attrs.repeatable,
             locations: attrs
                 .locations
@@ -88,6 +100,6 @@ pub fn into_directive_definition(
                 .map(|val| pos(into_directive_location(val)))
                 .collect(),
         }));
-    service_doc_definitions.push(directve_definition);
+    service_doc_definitions.push(directive_definition);
     service_doc_definitions
 }

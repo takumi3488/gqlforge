@@ -66,15 +66,15 @@ pub fn doc(input: TokenStream) -> TokenStream {
         let variant_name = &variant.ident;
         let ty = extract_gen_doc_ty(&variant.attrs).to_lowercase();
 
-        let instance_type = match ty.as_str() {
-            "integer" => quote! { InstanceType::Integer },
-            "string" => quote! { InstanceType::String },
-            "object" => quote! { InstanceType::Integer },
-            _ => quote! { InstanceType::Null },
+        let type_str = match ty.as_str() {
+            "integer" => "integer",
+            "string" => "string",
+            "object" => "object",
+            _ => "null",
         };
 
         quote! {
-            #name::#variant_name => #instance_type,
+            #name::#variant_name => #type_str,
         }
     });
 
@@ -85,7 +85,7 @@ pub fn doc(input: TokenStream) -> TokenStream {
                     #(#match_arms)*
                 }
             }
-            pub fn ty(&self) -> InstanceType {
+            pub fn ty(&self) -> &'static str {
                 match self {
                     #(#match_arms_ty)*
                 }

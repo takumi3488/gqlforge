@@ -11,7 +11,6 @@ use gqlforge::cli;
 use gqlforge::core::FileIO;
 use gqlforge::core::config::RuntimeConfig;
 use gqlforge::core::tracing::default_tracing_for_name;
-use schemars::schema::RootSchema;
 use serde_json::{Value, json};
 
 static JSON_SCHEMA_FILE: &str = "generated/.gqlforgerc.schema.json";
@@ -141,7 +140,7 @@ fn get_graphql_path() -> PathBuf {
 }
 
 fn get_updated_json() -> Result<Value> {
-    let schema: RootSchema = schemars::schema_for!(RuntimeConfig);
+    let schema = schemars::schema_for!(RuntimeConfig);
 
     let schema = json!(schema);
     Ok(schema)

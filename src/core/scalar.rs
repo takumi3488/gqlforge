@@ -3,7 +3,7 @@ use std::fmt::Debug;
 
 use gqlforge_macros::Doc;
 use lazy_static::lazy_static;
-use schemars::schema::{InstanceType, Schema, SchemaObject};
+use schemars::Schema;
 use strum::IntoEnumIterator;
 
 use crate::core::json::JsonLike;
@@ -154,31 +154,26 @@ impl Scalar {
         gqlforge_typedefs_common::scalar_definition::into_scalar_definition(schemars, &self.name())
     }
     pub fn schema(&self) -> Schema {
-        let type_of = self.ty();
-        let format = match type_of {
-            InstanceType::Integer => Some(self.name().to_lowercase()),
-            _ => None,
-        };
+        let type_str = self.ty();
         let mut value = serde_json::json!(
             {
                 "title": self.name(),
-                "type": type_of,
+                "type": type_str,
                 "description": self.doc(),
             }
         );
-        if let Some(format) = format {
-            value["format"] = serde_json::json!(format);
+        if type_str == "integer" {
+            value["format"] = serde_json::json!(self.name().to_lowercase());
         }
 
-        let metadata = serde_json::from_value(value).unwrap();
-        Schema::Object(SchemaObject { metadata: Some(Box::new(metadata)), ..Default::default() })
+        Schema::try_from(value).unwrap()
     }
 }
 
 #[cfg(test)]
 mod test {
     use async_graphql_value::ConstValue;
-    use schemars::schema::Schema;
+    use schemars::Schema;
 
     use crate::core::scalar::{CUSTOM_SCALARS, Scalar};
 
@@ -522,8 +517,7 @@ mod test {
     }
 
     fn get_name(v: Schema) -> String {
-        serde_json::to_value(v)
-            .unwrap()
+        v.to_value()
             .as_object()
             .unwrap()
             .get("title")
