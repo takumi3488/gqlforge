@@ -11,10 +11,10 @@ use crate::core::postgres::schema::{Column, DatabaseSchema, PgType};
 /// Generate a GraphQL `Config` from a `DatabaseSchema`.
 ///
 /// This follows the PostGraphile-style convention:
-/// - Each table → an output type (PascalCase)
+/// - Each table -> an output type (PascalCase)
 /// - Query: `tableNameById`, `tableNameList`
 /// - Mutation: `createTableName`, `updateTableName`, `deleteTableName`
-/// - FK relationships → nested object fields with `@postgres(batchKey: …)`
+/// - FK relationships -> nested object fields with `@postgres(batchKey: ...)`
 pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::Result<Config> {
     let mut config = Config::default();
     config.schema.query = Some("Query".to_string());
@@ -529,7 +529,7 @@ mod tests {
         let posts_type = config.types.get("Posts").unwrap();
         assert!(posts_type.fields.contains_key("users"));
 
-        // Users should have a `posts` has-many field (already plural → postsList)
+        // Users should have a `posts` has-many field (already plural -> postsList)
         let users_type = config.types.get("Users").unwrap();
         assert!(users_type.fields.contains_key("postsList"));
     }

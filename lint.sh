@@ -37,6 +37,26 @@ run_autogen_schema() {
     return $?
 }
 
+run_check_non_ascii() {
+    local result
+    result=$(LC_ALL=C grep -rn \
+        --include="*.rs" \
+        --include="*.toml" \
+        --include="*.yml" \
+        --include="*.yaml" \
+        --include="*.graphql" \
+        --include="*.json" \
+        --exclude-dir=target \
+        --exclude-dir=.git \
+        '[^[:print:][:space:]]' . 2>/dev/null)
+    if [ -n "$result" ]; then
+        echo "Error: Non-ASCII characters found in source files:"
+        echo "$result"
+        return 1
+    fi
+    return 0
+}
+
 # Extract the mode from the argument
 if [[ $1 == "--mode="* ]]; then
     MODE=${1#--mode=}
@@ -48,6 +68,9 @@ fi
 # Run commands based on mode
 case $MODE in
     check|fix)
+        run_check_non_ascii
+        NON_ASCII_EXIT_CODE=$?
+
         run_autogen_schema $MODE
         AUTOGEN_SCHEMA_EXIT_CODE=$?
 
@@ -70,6 +93,8 @@ case $MODE in
 esac
 
 # If any command failed, exit with a non-zero status code
-if [ $FMT_EXIT_CODE -ne 0 ] || [ $CLIPPY_EXIT_CODE -ne 0 ] || [ $DPRINT_EXIT_CODE -ne 0 ] || [ $AUTOGEN_SCHEMA_EXIT_CODE -ne 0 ]; then
+if [ $FMT_EXIT_CODE -ne 0 ] || [ $CLIPPY_EXIT_CODE -ne 0 ] || \
+   [ $DPRINT_EXIT_CODE -ne 0 ] || [ $AUTOGEN_SCHEMA_EXIT_CODE -ne 0 ] || \
+   [ $NON_ASCII_EXIT_CODE -ne 0 ]; then
     exit 1
 fi

@@ -11,7 +11,7 @@ use self::server_config::ServerConfig;
 fn log_launch(sc: &ServerConfig) {
     let addr = sc.addr().to_string();
     tracing::info!(
-        "🚀 Gqlforge launched at [{}] over {}",
+        "\u{1F680} Gqlforge launched at [{}] over {}",
         addr,
         sc.http_version()
     );
@@ -20,5 +20,5 @@ fn log_launch(sc: &ServerConfig) {
 
     let graphiql_url = sc.graphiql_url() + gql_slug;
     let url = playground::build_url(&graphiql_url);
-    tracing::info!("🌍 Playground: {}", url);
+    tracing::info!("\u{1F30D} Playground: {}", url);
 }

@@ -80,7 +80,7 @@ fn margin(str: &str, margin: usize) -> String {
 
 fn bullet(str: &str) -> String {
     let mut chars = margin(str, 2).chars().collect::<Vec<char>>();
-    chars[0] = '•';
+    chars[0] = '\u{2022}';
     chars[1] = ' ';
     chars.into_iter().collect::<String>()
 }
@@ -316,7 +316,7 @@ mod tests {
 
         let expected = r"|Configuration Error
                      |Caused by:
-                     |  • URL needs to be specified [at User.posts.@http.url]"
+                     |  \u{2022} URL needs to be specified [at User.posts.@http.url]"
             .strip_margin();
 
         assert_eq!(error.to_string(), expected);
@@ -355,10 +355,10 @@ mod tests {
 
         let expected = r"|Configuration Error
                      |Caused by:
-                     |  • URL needs to be specified [at User.posts.@http.url]
-                     |  • URL needs to be specified [at Post.users.@http.url]
-                     |  • URL needs to be specified: Set `url` in @http or @server directives [at Query.users.@http.url]
-                     |  • URL needs to be specified [at Query.posts.@http.url]"
+                     |  \u{2022} URL needs to be specified [at User.posts.@http.url]
+                     |  \u{2022} URL needs to be specified [at Post.users.@http.url]
+                     |  \u{2022} URL needs to be specified: Set `url` in @http or @server directives [at Query.users.@http.url]
+                     |  \u{2022} URL needs to be specified [at Query.posts.@http.url]"
             .strip_margin();
 
         assert_eq!(error.to_string(), expected);
@@ -373,7 +373,7 @@ mod tests {
         let error = Errata::from(valid);
         let expected = r"|Invalid Configuration
                      |Caused by:
-                     |  • URL needs to be specified: Set `url` in @http or @server directives [at Query.users.@http.url]"
+                     |  \u{2022} URL needs to be specified: Set `url` in @http or @server directives [at Query.users.@http.url]"
             .strip_margin();
 
         assert_eq!(error.to_string(), expected);

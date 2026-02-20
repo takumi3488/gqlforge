@@ -42,7 +42,7 @@ impl Hash for RenderedQuery {
 
 impl RequestTemplate {
     /// Render the template against the given context to produce a SQL string
-    /// with positional parameters (`$1`, `$2`, …).
+    /// with positional parameters (`$1`, `$2`, ...).
     pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         match self.operation {
             PostgresOperation::Select => self.render_select(ctx),

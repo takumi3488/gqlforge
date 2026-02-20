@@ -64,7 +64,7 @@ fn show_update_message(name: &str, latest_version: Version) {
         "{} {} {} {}. {}. Release notes: {}",
         "A new release of gqlforge is available:",
         VERSION.as_str().cyan(),
-        "➜",
+        "\u{279C}",
         latest_version.to_string().cyan(),
         InstallationMethod::get_installation_method().display_message(),
         github_release_url.yellow()

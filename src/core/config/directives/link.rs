@@ -68,8 +68,8 @@ pub enum LinkType {
 }
 
 /// The @link directive allows you to import external resources, such as
-/// configuration – which will be merged into the config importing it –,
-/// or a .proto file – which will be later used by `@grpc` directive –.
+/// configuration - which will be merged into the config importing it -,
+/// or a .proto file - which will be later used by `@grpc` directive -.
 #[derive(
     Default,
     Serialize,

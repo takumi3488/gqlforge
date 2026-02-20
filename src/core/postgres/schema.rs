@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::merge_right::MergeRight;
 
-/// PostgreSQL type → GraphQL scalar mapping.
+/// PostgreSQL type -> GraphQL scalar mapping.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PgType {
     SmallInt,

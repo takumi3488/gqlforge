@@ -139,7 +139,7 @@ mod tests {
         assert!(result.is_fail());
         assert_eq!(
             result.to_result().unwrap_err().to_string(),
-            "Validation Error\n• The `field` cannot be an empty string for the `@discriminate` of type Test\n"
+            "Validation Error\n\u{2022} The `field` cannot be an empty string for the `@discriminate` of type Test\n"
         );
     }
 

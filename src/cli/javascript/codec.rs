@@ -262,7 +262,7 @@ mod test {
         let mut headers = HeaderMap::new();
         headers.insert(
             HeaderName::from_static("x-unusual-header"),
-            HeaderValue::from_str("🚀").unwrap(),
+            HeaderValue::from_str("\u{1F680}").unwrap(),
         );
         let response = crate::core::http::Response {
             status: reqwest::StatusCode::OK,
@@ -274,7 +274,10 @@ mod test {
         let response: Result<crate::core::http::Response<Bytes>, _> = js_response.try_into();
         assert!(response.is_ok());
         let response = response.unwrap();
-        assert_eq!(response.headers.get("x-unusual-header").unwrap(), "🚀");
+        assert_eq!(
+            response.headers.get("x-unusual-header").unwrap(),
+            "\u{1F680}"
+        );
         assert_eq!(response.body, Bytes::from(body));
     }
 
