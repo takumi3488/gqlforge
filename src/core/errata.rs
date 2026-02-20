@@ -314,7 +314,7 @@ mod tests {
             ]),
         ]);
 
-        let expected = r"|Configuration Error
+        let expected = "|Configuration Error
                      |Caused by:
                      |  \u{2022} URL needs to be specified [at User.posts.@http.url]"
             .strip_margin();
@@ -353,7 +353,7 @@ mod tests {
             ]),
         ]);
 
-        let expected = r"|Configuration Error
+        let expected = "|Configuration Error
                      |Caused by:
                      |  \u{2022} URL needs to be specified [at User.posts.@http.url]
                      |  \u{2022} URL needs to be specified [at Post.users.@http.url]
@@ -371,7 +371,7 @@ mod tests {
             .trace(vec!["Query", "users", "@http", "url"]);
         let valid = ValidationError::from(cause);
         let error = Errata::from(valid);
-        let expected = r"|Invalid Configuration
+        let expected = "|Invalid Configuration
                      |Caused by:
                      |  \u{2022} URL needs to be specified: Set `url` in @http or @server directives [at Query.users.@http.url]"
             .strip_margin();

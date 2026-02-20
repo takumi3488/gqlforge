@@ -177,7 +177,7 @@ fn determine_type_from_schema(name: String, schema: &Map<String, Value>) -> Type
         return Type { nullable: true, base: BaseType::Named(Name::new(name)) };
     }
 
-    // anyOf/allOf/oneOf – look for a $ref in the schemas
+    // anyOf/allOf/oneOf - look for a $ref in the schemas
     let list = schema
         .get("anyOf")
         .or_else(|| schema.get("allOf"))
