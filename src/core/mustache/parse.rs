@@ -1,3 +1,4 @@
+use nom::Parser;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_until};
 use nom::character::complete::char;
@@ -27,27 +28,28 @@ fn parse_name(input: &str) -> IResult<&str, String> {
         nom::bytes::complete::tag("-"),
     )));
 
-    let parser =
-        nom::sequence::tuple((spaces, alpha, alphanumeric_or_underscore_or_hyphen, spaces));
+    let parser = (spaces, alpha, alphanumeric_or_underscore_or_hyphen, spaces);
 
     nom::combinator::map(parser, |(_, a, b, _)| {
         let b: String = b.into_iter().collect();
         format!("{}{}", a, b)
-    })(input)
+    })
+    .parse(input)
 }
 
 fn parse_expression(input: &str) -> IResult<&str, Segment> {
     delimited(
         tag("{{"),
         map(
-            nom::sequence::tuple((
+            (
                 nom::combinator::opt(char('.')), // Optional leading dot
                 nom::multi::separated_list1(char('.'), parse_name),
-            )),
+            ),
             |(_, expr_parts)| Segment::Expression(expr_parts),
         ),
         tag("}}"),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_segment(input: &str) -> IResult<&str, Vec<Segment>> {
@@ -56,7 +58,8 @@ fn parse_segment(input: &str) -> IResult<&str, Vec<Segment>> {
         map(take_until("{{"), |txt: &str| {
             Segment::Literal(txt.to_string())
         }),
-    )))(input);
+    )))
+    .parse(input);
 
     if let Ok((remaining, segments)) = expression_result {
         if remaining.is_empty() {
@@ -77,7 +80,8 @@ fn parse_mustache(input: &str) -> IResult<&str, Mustache> {
             Segment::Literal(s) => (!s.is_empty()) && s != "\"",
             _ => true,
         }))
-    })(input)
+    })
+    .parse(input)
 }
 
 #[cfg(test)]
