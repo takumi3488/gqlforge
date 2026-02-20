@@ -1,11 +1,10 @@
-use nom::IResult;
-use nom::Parser;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::complete::{char, multispace0};
 use nom::combinator::{map, value};
 use nom::multi::separated_list1;
 use nom::sequence::{delimited, preceded};
+use nom::{IResult, Parser};
 
 use super::{EvalContext, ResolverContextLike};
 use crate::core::path::PathString;

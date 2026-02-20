@@ -1,11 +1,10 @@
-use nom::Parser;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_until};
 use nom::character::complete::char;
 use nom::combinator::map;
 use nom::multi::many0;
 use nom::sequence::delimited;
-use nom::{Finish, IResult};
+use nom::{Finish, IResult, Parser};
 
 use super::*;
 
