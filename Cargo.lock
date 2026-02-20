@@ -2273,7 +2273,7 @@ dependencies = [
  "http 1.4.0",
  "http-body-util",
  "http-cache-reqwest",
- "http-cache-semantics 3.0.0",
+ "http-cache-semantics",
  "httpmock",
  "hyper 1.8.1",
  "hyper-rustls 0.27.7",
@@ -2395,7 +2395,7 @@ dependencies = [
  "http 1.4.0",
  "http-cache",
  "http-cache-reqwest",
- "http-cache-semantics 2.1.1",
+ "http-cache-semantics",
  "moka",
  "reqwest 0.13.2",
  "serde",
@@ -2773,7 +2773,7 @@ dependencies = [
  "http 1.4.0",
  "http-body 1.0.1",
  "http-body-util",
- "http-cache-semantics 2.1.1",
+ "http-cache-semantics",
  "httpdate",
  "log",
  "moka",
@@ -2797,7 +2797,7 @@ dependencies = [
  "http-body 1.0.1",
  "http-body-util",
  "http-cache",
- "http-cache-semantics 2.1.1",
+ "http-cache-semantics",
  "reqwest 0.13.2",
  "reqwest-middleware",
  "url",
@@ -2812,19 +2812,6 @@ dependencies = [
  "http 1.4.0",
  "http-serde",
  "reqwest 0.12.28",
- "serde",
- "time",
-]
-
-[[package]]
-name = "http-cache-semantics"
-version = "3.0.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0603b99309a1e404c2c0945650c0f775b50bb72ac90ae570cb93f9ff05d9efe7"
-dependencies = [
- "http 1.4.0",
- "http-serde",
- "reqwest 0.13.2",
  "serde",
  "time",
 ]
