@@ -1,10 +1,10 @@
-use nom::IResult;
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::complete::{char, multispace0};
 use nom::combinator::{map, value};
 use nom::multi::separated_list1;
-use nom::sequence::{delimited, preceded, tuple};
+use nom::sequence::{delimited, preceded};
+use nom::{IResult, Parser};
 
 use super::{EvalContext, ResolverContextLike};
 use crate::core::path::PathString;
@@ -95,11 +95,12 @@ fn parse_path(input: &str) -> IResult<&str, Operand> {
     map(
         separated_list1(char('.'), take_while1(is_ident_char)),
         |parts: Vec<&str>| Operand::Path(parts.into_iter().map(String::from).collect()),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_string_literal(input: &str) -> IResult<&str, Operand> {
-    let (input, _) = char('\'')(input)?;
+    let (input, _) = char('\'').parse(input)?;
     let bytes = input.as_bytes();
     let mut result = String::new();
     let mut i = 0;
@@ -128,8 +129,8 @@ fn parse_string_literal(input: &str) -> IResult<&str, Operand> {
 }
 
 fn parse_number_literal(input: &str) -> IResult<&str, Operand> {
-    let (input, neg) = nom::combinator::opt(char('-'))(input)?;
-    let (input, digits) = take_while1(|c: char| c.is_ascii_digit())(input)?;
+    let (input, neg) = nom::combinator::opt(char('-')).parse(input)?;
+    let (input, digits) = take_while1(|c: char| c.is_ascii_digit()).parse(input)?;
     let n: i64 = digits.parse().map_err(|_| {
         nom::Err::Error(nom::error::Error::new(input, nom::error::ErrorKind::Digit))
     })?;
@@ -141,7 +142,8 @@ fn parse_bool_literal(input: &str) -> IResult<&str, Operand> {
     let (remaining, op) = alt((
         value(Operand::BoolLiteral(true), tag("true")),
         value(Operand::BoolLiteral(false), tag("false")),
-    ))(input)?;
+    ))
+    .parse(input)?;
     // Ensure the keyword is not a prefix of a longer identifier
     if remaining
         .chars()
@@ -164,13 +166,14 @@ fn parse_operand(input: &str) -> IResult<&str, Operand> {
         parse_bool_literal,
         parse_number_literal,
         parse_path,
-    ))(input)
+    ))
+    .parse(input)
 }
 
 fn parse_comparison(input: &str) -> IResult<&str, AccessExpr> {
     let (input, left) = parse_operand(input)?;
     let (input, _) = multispace0(input)?;
-    let (input, op) = alt((tag("!="), tag("==")))(input)?;
+    let (input, op) = alt((tag("!="), tag("=="))).parse(input)?;
     let (input, _) = multispace0(input)?;
     let (input, right) = parse_operand(input)?;
     let (input, _) = multispace0(input)?;
@@ -183,7 +186,7 @@ fn parse_comparison(input: &str) -> IResult<&str, AccessExpr> {
 
 fn parse_not(input: &str) -> IResult<&str, AccessExpr> {
     let (input, _) = multispace0(input)?;
-    let (input, _) = char('!')(input)?;
+    let (input, _) = char('!').parse(input)?;
     let (input, _) = multispace0(input)?;
     let (input, expr) = parse_atom(input)?;
     Ok((input, AccessExpr::Not(Box::new(expr))))
@@ -194,20 +197,20 @@ fn parse_parens(input: &str) -> IResult<&str, AccessExpr> {
         preceded(multispace0, char('(')),
         parse_or_expr,
         preceded(multispace0, char(')')),
-    )(input)
+    )
+    .parse(input)
 }
 
 fn parse_atom(input: &str) -> IResult<&str, AccessExpr> {
     let (input, _) = multispace0(input)?;
-    alt((parse_parens, parse_not, parse_comparison))(input)
+    alt((parse_parens, parse_not, parse_comparison)).parse(input)
 }
 
 fn parse_and_expr(input: &str) -> IResult<&str, AccessExpr> {
     let (input, first) = parse_atom(input)?;
-    let (input, rest) = nom::multi::many0(preceded(
-        tuple((multispace0, tag("&&"), multispace0)),
-        parse_atom,
-    ))(input)?;
+    let (input, rest) =
+        nom::multi::many0(preceded((multispace0, tag("&&"), multispace0), parse_atom))
+            .parse(input)?;
     Ok((
         input,
         rest.into_iter().fold(first, |acc, expr| {
@@ -219,9 +222,10 @@ fn parse_and_expr(input: &str) -> IResult<&str, AccessExpr> {
 fn parse_or_expr(input: &str) -> IResult<&str, AccessExpr> {
     let (input, first) = parse_and_expr(input)?;
     let (input, rest) = nom::multi::many0(preceded(
-        tuple((multispace0, tag("||"), multispace0)),
+        (multispace0, tag("||"), multispace0),
         parse_and_expr,
-    ))(input)?;
+    ))
+    .parse(input)?;
     Ok((
         input,
         rest.into_iter().fold(first, |acc, expr| {
