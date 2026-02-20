@@ -132,7 +132,8 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
             };
             schema.add_table(table);
         }
-        Statement::AlterTable { name, operations, .. } => {
+        Statement::AlterTable(alter_table) => {
+            let name = &alter_table.name;
             let qualified = format_object_name(name);
             let key = if schema.tables.contains_key(&qualified) {
                 Some(qualified)
@@ -146,7 +147,7 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
                 }
             };
             if let Some(table) = key.and_then(|k| schema.tables.get_mut(&k)) {
-                for op in operations {
+                for op in &alter_table.operations {
                     apply_alter_op(table, op)?;
                 }
             }
@@ -222,7 +223,7 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
         DataType::Int(_) | DataType::Integer(_) => PgType::Integer,
         DataType::BigInt(_) => PgType::BigInt,
         DataType::Real => PgType::Real,
-        DataType::Double | DataType::DoublePrecision => PgType::DoublePrecision,
+        DataType::Double(_) | DataType::DoublePrecision => PgType::DoublePrecision,
         DataType::Numeric(_) | DataType::Decimal(_) | DataType::Dec(_) => PgType::Numeric,
         DataType::Boolean => PgType::Boolean,
         DataType::Text => PgType::Text,
