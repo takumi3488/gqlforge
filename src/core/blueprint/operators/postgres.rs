@@ -168,7 +168,7 @@ mod tests {
         let cm = make_config_module(vec![]);
         let pg = Postgres { table: "users".to_string(), ..Default::default() };
         let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
-        // No schema → skips table validation, succeeds with connection_id "default"
+        // No schema -> skips table validation, succeeds with connection_id "default"
         let ir = result.to_result().unwrap();
         match ir {
             IR::IO(io) => match io.as_ref() {

@@ -458,9 +458,9 @@ pub mod pool {
 
         // PostgreSQL stores offset as seconds west of UTC (negated from usual
         // convention).
-        // offset_secs <= 0 はUTCより東（+符号）、>0 は西（-符号）
+        // offset_secs <= 0 means east of UTC (+ sign), > 0 means west (- sign)
         let tz_sign = if offset_secs <= 0 { '+' } else { '-' };
-        let tz_abs = offset_secs.unsigned_abs(); // i32::MIN でもオーバーフローなし
+        let tz_abs = offset_secs.unsigned_abs(); // no overflow even for i32::MIN
         let tz_hours = tz_abs / 3600;
         let tz_minutes = (tz_abs % 3600) / 60;
 
@@ -606,7 +606,7 @@ pub mod pool {
         }
 
         let ndim = i32::from_be_bytes(raw[0..4].try_into()?);
-        // has_null flag at raw[4..8], elem_oid at raw[8..12] — we don't need them.
+        // has_null flag at raw[4..8], elem_oid at raw[8..12] - we don't need them.
 
         if ndim < 0 {
             anyhow::bail!("array ndim is negative: {ndim}");
@@ -630,7 +630,7 @@ pub mod pool {
                 anyhow::bail!("array dim_size is negative: {dim_size_i32}");
             }
             let dim_size = dim_size_i32 as usize;
-            // lower_bound at offset+4..offset+8 — not needed for value parsing.
+            // lower_bound at offset+4..offset+8 - not needed for value parsing.
             dims.push(dim_size);
         }
 
@@ -1102,7 +1102,7 @@ pub mod pool {
 
         #[test]
         fn test_format_interval_day_and_time() {
-            // 1 day 02:30:00 => µs for 2h30m = 9_000_000_000, days=1, months=0
+            // 1 day 02:30:00 => us for 2h30m = 9_000_000_000, days=1, months=0
             let mut raw = Vec::new();
             raw.extend_from_slice(&9_000_000_000i64.to_be_bytes());
             raw.extend_from_slice(&1i32.to_be_bytes());
@@ -1132,7 +1132,7 @@ pub mod pool {
         #[test]
         fn test_format_timetz() {
             // 10:30:00+09:00
-            // µs = (10*3600 + 30*60) * 1_000_000 = 37_800_000_000
+            // us = (10*3600 + 30*60) * 1_000_000 = 37_800_000_000
             // PostgreSQL offset = seconds west of UTC = -32400 (since +09 is 9*3600 east)
             let mut raw = Vec::new();
             raw.extend_from_slice(&37_800_000_000i64.to_be_bytes());
@@ -1609,7 +1609,7 @@ pub mod pool {
         #[test]
         fn test_raw_element_timestamp() {
             // 2024-01-15T10:30:00 is 8780 days + 37800 seconds after 2000-01-01T00:00:00
-            // = (8780 * 86400 + 37800) * 1_000_000 µs = 758_629_800_000_000
+            // = (8780 * 86400 + 37800) * 1_000_000 us = 758_629_800_000_000
             let us: i64 = 758_629_800_000_000;
             let result =
                 raw_element_to_const(&postgres_types::Type::TIMESTAMP, &us.to_be_bytes()).unwrap();
@@ -1623,7 +1623,7 @@ pub mod pool {
 
         #[test]
         fn test_raw_element_timestamptz() {
-            // Same µs value; TIMESTAMPTZ returns RFC3339 with +00:00
+            // Same us value; TIMESTAMPTZ returns RFC3339 with +00:00
             let us: i64 = 758_629_800_000_000;
             let result =
                 raw_element_to_const(&postgres_types::Type::TIMESTAMPTZ, &us.to_be_bytes())
@@ -1648,7 +1648,7 @@ pub mod pool {
 
         #[test]
         fn test_raw_element_time() {
-            // 10:30:00 = (10*3600 + 30*60) * 1_000_000 µs = 37_800_000_000
+            // 10:30:00 = (10*3600 + 30*60) * 1_000_000 us = 37_800_000_000
             let us: i64 = 37_800_000_000;
             let result =
                 raw_element_to_const(&postgres_types::Type::TIME, &us.to_be_bytes()).unwrap();
@@ -1689,7 +1689,7 @@ pub mod pool {
 
         #[test]
         fn test_raw_element_unknown_utf8_fallback() {
-            // Use an OID that doesn't match any known type — NAME is handled as TEXT,
+            // Use an OID that doesn't match any known type - NAME is handled as TEXT,
             // so use a truly unknown type. The fallback branch tries UTF-8 first.
             let result =
                 raw_element_to_const(&postgres_types::Type::REGCLASS, b"some_table").unwrap();
@@ -1733,7 +1733,7 @@ pub mod pool {
 
         #[test]
         fn test_format_interval_negative_time() {
-            // -01:30:00 => µs = -5_400_000_000
+            // -01:30:00 => us = -5_400_000_000
             let mut raw = Vec::new();
             raw.extend_from_slice(&(-5_400_000_000i64).to_be_bytes());
             raw.extend_from_slice(&0i32.to_be_bytes());
@@ -1744,7 +1744,7 @@ pub mod pool {
         #[test]
         fn test_format_timetz_negative_offset() {
             // 15:00:00-05:00
-            // µs = 15*3600*1_000_000 = 54_000_000_000
+            // us = 15*3600*1_000_000 = 54_000_000_000
             // PostgreSQL offset = seconds west of UTC = 18000 (since -05 is 5*3600 west)
             let mut raw = Vec::new();
             raw.extend_from_slice(&54_000_000_000i64.to_be_bytes());
@@ -1755,7 +1755,7 @@ pub mod pool {
         #[test]
         fn test_format_timetz_with_minutes() {
             // 12:00:00+05:30
-            // µs = 12*3600*1_000_000 = 43_200_000_000
+            // us = 12*3600*1_000_000 = 43_200_000_000
             // PostgreSQL offset = -(5*3600 + 30*60) = -19800
             let mut raw = Vec::new();
             raw.extend_from_slice(&43_200_000_000i64.to_be_bytes());
@@ -1765,13 +1765,13 @@ pub mod pool {
 
         #[test]
         fn test_format_timetz_offset_secs_min() {
-            // offset_secs = i32::MIN はオーバーフローなしで処理されるべき
+            // offset_secs = i32::MIN should be handled without overflow
             let mut raw = Vec::new();
             raw.extend_from_slice(&0i64.to_be_bytes()); // microseconds = 0
             raw.extend_from_slice(&i32::MIN.to_be_bytes()); // offset_secs = i32::MIN
-            // i32::MIN の unsigned_abs = 2147483648
+            // i32::MIN's unsigned_abs = 2147483648
             // tz_abs = 2147483648, tz_hours = 596523, tz_minutes = 14
-            // パニックしないことを確認
+            // verify no panic occurs
             assert!(format_timetz(&raw).is_ok());
         }
 

@@ -496,13 +496,13 @@ mod tests {
     #[test]
     fn test_get_formatted_docs_utf8() {
         let input = Some(String::from(
-            "get_formatted_docs 함수 테스트를 위한 문장입니다. 테스트를 위해 긴 문장을 입력하는 중 입니다. テストのために長い文章を入力しているところです。なんて素敵な長文です！",
+            "get_formatted_docs \u{D568}\u{C218} \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D55C} \u{BB38}\u{C7A5}\u{C785}\u{B2C8}\u{B2E4}. \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D574} \u{AE34} \u{BB38}\u{C7A5}\u{C744} \u{C785}\u{B825}\u{D558}\u{B294} \u{C911} \u{C785}\u{B2C8}\u{B2E4}. \u{30C6}\u{30B9}\u{30C8}\u{306E}\u{305F}\u{3081}\u{306B}\u{9577}\u{3044}\u{6587}\u{7AE0}\u{3092}\u{5165}\u{529B}\u{3057}\u{3066}\u{3044}\u{308B}\u{3068}\u{3053}\u{308D}\u{3067}\u{3059}\u{3002}\u{306A}\u{3093}\u{3066}\u{7D20}\u{6575}\u{306A}\u{9577}\u{6587}\u{3067}\u{3059}\u{FF01}",
         ));
         let indent = 4;
 
         let result = get_formatted_docs(input, indent);
         let expected = String::from(
-            "    \"\"\"\n    get_formatted_docs 함수 테스트를 위한 문장입니다. 테스트를 위해 \n    긴 문장을 입력하는 중 입니다. テストのために長い文章を入力しているところです。なんて素敵な長文です！\n    \"\"\"\n",
+            "    \"\"\"\n    get_formatted_docs \u{D568}\u{C218} \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D55C} \u{BB38}\u{C7A5}\u{C785}\u{B2C8}\u{B2E4}. \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D574} \n    \u{AE34} \u{BB38}\u{C7A5}\u{C744} \u{C785}\u{B825}\u{D558}\u{B294} \u{C911} \u{C785}\u{B2C8}\u{B2E4}. \u{30C6}\u{30B9}\u{30C8}\u{306E}\u{305F}\u{3081}\u{306B}\u{9577}\u{3044}\u{6587}\u{7AE0}\u{3092}\u{5165}\u{529B}\u{3057}\u{3066}\u{3044}\u{308B}\u{3068}\u{3053}\u{308D}\u{3067}\u{3059}\u{3002}\u{306A}\u{3093}\u{3066}\u{7D20}\u{6575}\u{306A}\u{9577}\u{6587}\u{3067}\u{3059}\u{FF01}\n    \"\"\"\n",
         );
 
         assert_eq!(result, expected)
