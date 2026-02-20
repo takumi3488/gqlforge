@@ -6,7 +6,7 @@ use super::eval_http::{
 };
 use super::model::{CacheKey, IO};
 use super::{DynamicRequest, EvalContext, ResolverContextLike};
-use crate::core::config::{GraphQLOperationType, S3Operation};
+use crate::core::config::{GraphQLOperationType, PostgresOperation, S3Operation};
 use crate::core::data_loader::DataLoader;
 use crate::core::graphql::GraphqlDataLoader;
 use crate::core::grpc;
@@ -131,7 +131,16 @@ where
                 .execute(&rendered.sql, &rendered.params)
                 .await
                 .map_err(|e| Error::IO(e.to_string()))?;
-            Ok(result)
+            // SELECT_ONE: リストの最初の要素を返す（空なら Null）
+            if req_template.operation == PostgresOperation::SelectOne {
+                if let ConstValue::List(mut vec) = result {
+                    Ok(vec.pop().unwrap_or(ConstValue::Null))
+                } else {
+                    Ok(result)
+                }
+            } else {
+                Ok(result)
+            }
         }
         IO::Js { name } => {
             match ctx
