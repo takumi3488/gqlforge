@@ -1,7 +1,7 @@
 use anyhow::{Context, Result};
 use sqlparser::ast::{
-    AlterTableOperation, ColumnDef, ColumnOption, ColumnOptionDef, DataType, ObjectName, Statement,
-    TableConstraint,
+    AlterTableOperation, ColumnDef, ColumnOption, ColumnOptionDef, DataType, Expr, ObjectName,
+    Statement, TableConstraint,
 };
 use sqlparser::dialect::PostgreSqlDialect;
 use sqlparser::parser::Parser;
@@ -42,31 +42,47 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
 
             for constraint in &create.constraints {
                 match constraint {
-                    TableConstraint::PrimaryKey { columns: pk_cols, .. } => {
+                    TableConstraint::PrimaryKey(pk) => {
                         primary_key = Some(PrimaryKey {
-                            columns: pk_cols.iter().map(|c| c.value.clone()).collect(),
+                            columns: pk
+                                .columns
+                                .iter()
+                                .filter_map(|c| {
+                                    if let Expr::Identifier(ident) = &c.column.expr {
+                                        Some(ident.value.clone())
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect(),
                         });
                     }
-                    TableConstraint::ForeignKey {
-                        columns: fk_cols,
-                        foreign_table,
-                        referred_columns,
-                        ..
-                    } => {
-                        let (ref_schema, ref_table) = extract_schema_and_name(foreign_table);
+                    TableConstraint::ForeignKey(fk) => {
+                        let (ref_schema, ref_table) = extract_schema_and_name(&fk.foreign_table);
                         foreign_keys.push(ForeignKey {
-                            columns: fk_cols.iter().map(|c| c.value.clone()).collect(),
+                            columns: fk.columns.iter().map(|c| c.value.clone()).collect(),
                             referenced_schema: ref_schema,
                             referenced_table: ref_table,
-                            referenced_columns: referred_columns
+                            referenced_columns: fk
+                                .referred_columns
                                 .iter()
                                 .map(|c| c.value.clone())
                                 .collect(),
                         });
                     }
-                    TableConstraint::Unique { columns: u_cols, .. } => {
+                    TableConstraint::Unique(u) => {
                         unique_constraints.push(UniqueConstraint {
-                            columns: u_cols.iter().map(|c| c.value.clone()).collect(),
+                            columns: u
+                                .columns
+                                .iter()
+                                .filter_map(|c| {
+                                    if let Expr::Identifier(ident) = &c.column.expr {
+                                        Some(ident.value.clone())
+                                    } else {
+                                        None
+                                    }
+                                })
+                                .collect(),
                         });
                     }
                     _ => {}
@@ -82,10 +98,7 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
                         if def.options.iter().any(|opt| {
                             matches!(
                                 opt,
-                                ColumnOptionDef {
-                                    option: ColumnOption::Unique { is_primary: true, .. },
-                                    ..
-                                }
+                                ColumnOptionDef { option: ColumnOption::PrimaryKey(_), .. }
                             )
                         }) {
                             Some(col.name.clone())
@@ -119,7 +132,8 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
             };
             schema.add_table(table);
         }
-        Statement::AlterTable { name, operations, .. } => {
+        Statement::AlterTable(alter_table) => {
+            let name = &alter_table.name;
             let qualified = format_object_name(name);
             let key = if schema.tables.contains_key(&qualified) {
                 Some(qualified)
@@ -133,7 +147,7 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
                 }
             };
             if let Some(table) = key.and_then(|k| schema.tables.get_mut(&k)) {
-                for op in operations {
+                for op in &alter_table.operations {
                     apply_alter_op(table, op)?;
                 }
             }
@@ -150,8 +164,10 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
         AlterTableOperation::AddColumn { column_def, .. } => {
             table.columns.push(column_from_def(column_def));
         }
-        AlterTableOperation::DropColumn { column_name, .. } => {
-            table.columns.retain(|c| c.name != column_name.value);
+        AlterTableOperation::DropColumn { column_names, .. } => {
+            for column_name in column_names {
+                table.columns.retain(|c| c.name != column_name.value);
+            }
         }
         AlterTableOperation::AddConstraint { .. } => {
             tracing::warn!(
@@ -173,7 +189,7 @@ fn column_from_def(col: &ColumnDef) -> Column {
             matches!(
                 opt,
                 ColumnOptionDef { option: ColumnOption::NotNull, .. }
-                    | ColumnOptionDef { option: ColumnOption::Unique { is_primary: true, .. }, .. }
+                    | ColumnOptionDef { option: ColumnOption::PrimaryKey(_), .. }
             )
         });
     let has_default = is_serial
@@ -207,7 +223,7 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
         DataType::Int(_) | DataType::Integer(_) => PgType::Integer,
         DataType::BigInt(_) => PgType::BigInt,
         DataType::Real => PgType::Real,
-        DataType::Double | DataType::DoublePrecision => PgType::DoublePrecision,
+        DataType::Double(_) | DataType::DoublePrecision => PgType::DoublePrecision,
         DataType::Numeric(_) | DataType::Decimal(_) | DataType::Dec(_) => PgType::Numeric,
         DataType::Boolean => PgType::Boolean,
         DataType::Text => PgType::Text,
@@ -229,7 +245,7 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
                 PgType::Time
             }
         }
-        DataType::Interval => PgType::Interval,
+        DataType::Interval { .. } => PgType::Interval,
         DataType::JSON => PgType::Json,
         DataType::JSONB => PgType::Jsonb,
         DataType::Bytea => PgType::Bytea,
@@ -258,14 +274,21 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
 }
 
 fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
-    let parts: Vec<&str> = name.0.iter().map(|p| p.value.as_str()).collect();
+    let parts: Vec<String> = name
+        .0
+        .iter()
+        .filter_map(|p| match p {
+            sqlparser::ast::ObjectNamePart::Identifier(ident) => Some(ident.value.clone()),
+            _ => None,
+        })
+        .collect();
     match parts.as_slice() {
         [] => ("public".to_string(), String::new()),
-        [schema, table] => (schema.to_string(), table.to_string()),
-        [table] => ("public".to_string(), table.to_string()),
+        [schema, table] => (schema.clone(), table.clone()),
+        [table] => ("public".to_string(), table.clone()),
         other => {
             let len = other.len();
-            (other[len - 2].to_string(), other[len - 1].to_string())
+            (other[len - 2].clone(), other[len - 1].clone())
         }
     }
 }
