@@ -219,14 +219,14 @@ pub(super) fn format_macaddr(raw: &[u8]) -> anyhow::Result<String> {
             "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
             raw[0], raw[1], raw[2], raw[3], raw[4], raw[5], raw[6], raw[7]
         ))
-    } else if raw.len() >= 6 {
+    } else if raw.len() == 6 {
         // MACADDR (6 bytes)
         Ok(format!(
             "{:02x}:{:02x}:{:02x}:{:02x}:{:02x}:{:02x}",
             raw[0], raw[1], raw[2], raw[3], raw[4], raw[5]
         ))
     } else {
-        anyhow::bail!("macaddr binary too short: {} bytes", raw.len())
+        anyhow::bail!("macaddr binary unexpected length: {} bytes", raw.len())
     }
 }
 
