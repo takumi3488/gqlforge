@@ -148,7 +148,7 @@ pub(super) fn format_inet(raw: &[u8]) -> anyhow::Result<String> {
             anyhow::bail!("Invalid IPv4 address length");
         }
         format!("{}.{}.{}.{}", addr[0], addr[1], addr[2], addr[3])
-    } else {
+    } else if family == 3 {
         // IPv6
         if addr_len != 16 {
             anyhow::bail!("Invalid IPv6 address length");
@@ -160,6 +160,8 @@ pub(super) fn format_inet(raw: &[u8]) -> anyhow::Result<String> {
         }
         let full = parts.join(":");
         compress_ipv6(&full)
+    } else {
+        anyhow::bail!("Unknown INET address family: {}", family);
     };
 
     let max_mask = if family == 2 { 32 } else { 128 };
