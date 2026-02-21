@@ -140,7 +140,6 @@ impl RequestContext {
         self.runtime.cache.get(key).await
     }
 
-    #[allow(clippy::too_many_arguments)]
     pub async fn cache_insert(
         &self,
         key: IoId,

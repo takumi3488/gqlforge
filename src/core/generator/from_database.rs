@@ -6,7 +6,7 @@ use crate::core::Type;
 use crate::core::config::{
     Arg, Config, Field, Link, LinkType, Postgres, PostgresOperation, Resolver, Type as ConfigType,
 };
-use crate::core::postgres::schema::{Column, DatabaseSchema, PgType};
+use crate::core::postgres::schema::{Column, DatabaseSchema, PgType, PrimaryKey, Table};
 
 /// Generate a GraphQL `Config` from a `DatabaseSchema`.
 ///
@@ -52,21 +52,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
                 base_name
             };
 
-            let filter_obj: serde_json::Value = fk
-                .referenced_columns
-                .iter()
-                .zip(fk.columns.iter())
-                .map(|(ref_col, col)| {
-                    (
-                        ref_col.clone(),
-                        serde_json::Value::String(format!(
-                            "{{{{.value.{}}}}}",
-                            col.to_case(Case::Camel)
-                        )),
-                    )
-                })
-                .collect::<serde_json::Map<String, serde_json::Value>>()
-                .into();
+            let filter_obj = build_fk_filter(&fk.referenced_columns, &fk.columns);
 
             let resolver = Resolver::Postgres(Postgres {
                 table: fk.referenced_table.clone(),
@@ -104,21 +90,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
                         base_name
                     };
 
-                    let filter_obj: serde_json::Value = fk
-                        .columns
-                        .iter()
-                        .zip(fk.referenced_columns.iter())
-                        .map(|(col, ref_col)| {
-                            (
-                                col.clone(),
-                                serde_json::Value::String(format!(
-                                    "{{{{.value.{}}}}}",
-                                    ref_col.to_case(Case::Camel)
-                                )),
-                            )
-                        })
-                        .collect::<serde_json::Map<String, serde_json::Value>>()
-                        .into();
+                    let filter_obj = build_fk_filter(&fk.columns, &fk.referenced_columns);
 
                     let resolver = Resolver::Postgres(Postgres {
                         table: other_table.name.clone(),
@@ -147,32 +119,12 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
         // --- Query: byId ---
         if let Some(pk) = &table.primary_key {
             let by_id_name = format!("{}ById", table.name.to_case(Case::Camel));
-            let mut args = IndexMap::new();
-            let mut filter_map = serde_json::Map::new();
-
-            for pk_col in &pk.columns {
-                let col = table.find_column(pk_col);
-                let gql_type = col
-                    .map(|c| scalar_type(&c.pg_type))
-                    .unwrap_or("ID".to_string());
-
-                args.insert(
-                    pk_col.to_case(Case::Camel),
-                    Arg {
-                        type_of: Type::from(gql_type.clone()).into_required(),
-                        ..Default::default()
-                    },
-                );
-                filter_map.insert(
-                    pk_col.clone(),
-                    json!(format!("{{{{.args.{}}}}}", pk_col.to_case(Case::Camel))),
-                );
-            }
+            let (args, filter) = build_pk_args_and_filter(table, pk);
 
             let resolver = Resolver::Postgres(Postgres {
                 table: table.name.clone(),
                 operation: PostgresOperation::SelectOne,
-                filter: Some(serde_json::Value::Object(filter_map)),
+                filter: Some(filter),
                 ..Default::default()
             });
 
@@ -286,26 +238,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
             }
 
             config.types.insert(input_type_name.clone(), input_type);
-            let mut args = IndexMap::new();
-            let mut filter_map = serde_json::Map::new();
-            for pk_col in &pk.columns {
-                let col = table.find_column(pk_col);
-                let gql_type = col
-                    .map(|c| scalar_type(&c.pg_type))
-                    .unwrap_or("ID".to_string());
-
-                args.insert(
-                    pk_col.to_case(Case::Camel),
-                    Arg {
-                        type_of: Type::from(gql_type.clone()).into_required(),
-                        ..Default::default()
-                    },
-                );
-                filter_map.insert(
-                    pk_col.clone(),
-                    json!(format!("{{{{.args.{}}}}}", pk_col.to_case(Case::Camel))),
-                );
-            }
+            let (mut args, filter) = build_pk_args_and_filter(table, pk);
             args.insert(
                 "input".to_string(),
                 Arg {
@@ -317,7 +250,7 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
             let resolver = Resolver::Postgres(Postgres {
                 table: table.name.clone(),
                 operation: PostgresOperation::Update,
-                filter: Some(serde_json::Value::Object(filter_map)),
+                filter: Some(filter),
                 input: Some("{{.args.input}}".to_string()),
                 ..Default::default()
             });
@@ -334,32 +267,12 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
         // --- Mutation: delete ---
         if let Some(pk) = &table.primary_key {
             let delete_name = format!("delete{type_name}");
-            let mut args = IndexMap::new();
-            let mut filter_map = serde_json::Map::new();
-
-            for pk_col in &pk.columns {
-                let col = table.find_column(pk_col);
-                let gql_type = col
-                    .map(|c| scalar_type(&c.pg_type))
-                    .unwrap_or("ID".to_string());
-
-                args.insert(
-                    pk_col.to_case(Case::Camel),
-                    Arg {
-                        type_of: Type::from(gql_type.clone()).into_required(),
-                        ..Default::default()
-                    },
-                );
-                filter_map.insert(
-                    pk_col.clone(),
-                    json!(format!("{{{{.args.{}}}}}", pk_col.to_case(Case::Camel))),
-                );
-            }
+            let (args, filter) = build_pk_args_and_filter(table, pk);
 
             let resolver = Resolver::Postgres(Postgres {
                 table: table.name.clone(),
                 operation: PostgresOperation::Delete,
-                filter: Some(serde_json::Value::Object(filter_map)),
+                filter: Some(filter),
                 ..Default::default()
             });
 
@@ -387,6 +300,50 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
     });
 
     Ok(config)
+}
+
+/// Build a filter object that maps source columns to mustache expressions
+/// referencing target columns.
+fn build_fk_filter(source_columns: &[String], target_columns: &[String]) -> serde_json::Value {
+    source_columns
+        .iter()
+        .zip(target_columns.iter())
+        .map(|(src, tgt)| {
+            (
+                src.clone(),
+                serde_json::Value::String(format!("{{{{.value.{}}}}}", tgt.to_case(Case::Camel))),
+            )
+        })
+        .collect::<serde_json::Map<String, serde_json::Value>>()
+        .into()
+}
+
+/// Build PK-based args and filter map for a table.
+fn build_pk_args_and_filter(
+    table: &Table,
+    pk: &PrimaryKey,
+) -> (IndexMap<String, Arg>, serde_json::Value) {
+    let mut args = IndexMap::new();
+    let mut filter_map = serde_json::Map::new();
+    for pk_col in &pk.columns {
+        let col = table.find_column(pk_col);
+        let gql_type = col
+            .map(|c| scalar_type(&c.pg_type))
+            .unwrap_or("ID".to_string());
+
+        args.insert(
+            pk_col.to_case(Case::Camel),
+            Arg {
+                type_of: Type::from(gql_type.clone()).into_required(),
+                ..Default::default()
+            },
+        );
+        filter_map.insert(
+            pk_col.clone(),
+            json!(format!("{{{{.args.{}}}}}", pk_col.to_case(Case::Camel))),
+        );
+    }
+    (args, serde_json::Value::Object(filter_map))
 }
 
 fn table_to_type_name(table_name: &str) -> String {
