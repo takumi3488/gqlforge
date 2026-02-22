@@ -45,10 +45,10 @@ mod tests {
         let cachability = super::cache_policy(res).and_then(|value| value.cachability);
 
         match cachability {
-            Some(Cachability::Public) => "public".to_string(),
-            Some(Cachability::Private) => "private".to_string(),
-            Some(Cachability::NoCache) => "no-cache".to_string(),
-            _ => "".to_string(),
+            Some(Cachability::Public) => "public".to_owned(),
+            Some(Cachability::Private) => "private".to_owned(),
+            Some(Cachability::NoCache) => "no-cache".to_owned(),
+            _ => String::new(),
         }
     }
 

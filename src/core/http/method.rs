@@ -2,6 +2,7 @@ use serde::{Deserialize, Serialize};
 use strum_macros::Display;
 
 #[derive(
+    Copy,
     Clone,
     Debug,
     Serialize,

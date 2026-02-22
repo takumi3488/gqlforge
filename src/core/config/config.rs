@@ -685,7 +685,7 @@ impl From<RuntimeConfig> for Config {
 }
 
 #[derive(
-    Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Default, schemars::JsonSchema,
+    Copy, Clone, Debug, Serialize, Deserialize, PartialEq, Eq, Hash, Default, schemars::JsonSchema,
 )]
 pub enum Encoding {
     #[default]

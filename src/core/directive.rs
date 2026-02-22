@@ -51,7 +51,7 @@ impl<'a, A: Deserialize<'a> + Serialize + 'a> DirectiveCodec for A {
                 ValidationError::new(e.to_string())
                     .trace(format!("@{}", directive.name.node).as_str())
             }))
-            .map(|v| (k.node.as_str().to_string(), v))
+            .map(|v| (k.node.as_str().to_owned(), v))
         })
         .map(|items| {
             items.iter().fold(Map::new(), |mut map, (k, v)| {

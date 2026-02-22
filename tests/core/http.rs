@@ -62,7 +62,7 @@ impl HttpIO for Http {
             .iter()
             .find(|mock| {
                 let mock_req = &mock.mock.request;
-                let method_match = req.method() == mock_req.0.method.clone().to_hyper();
+                let method_match = req.method() == mock_req.0.method.to_hyper();
                 let url_match = req.url().as_str() == mock_req.0.url.clone().as_str();
                 let body_match = mock_req
                     .0

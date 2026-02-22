@@ -288,7 +288,7 @@ async fn run_test(
             .map(|body| Full::new(Bytes::from(body.to_bytes())))
             .unwrap_or_default();
 
-        let method = request.method.clone();
+        let method = request.method;
         let headers = request.headers.clone();
         let url = request.url.clone();
 

@@ -122,7 +122,7 @@ impl Generator {
                         ));
                     }
 
-                    let request_method = method.clone().to_hyper();
+                    let request_method = method.to_hyper();
                     let mut request = reqwest::Request::new(request_method, url.parse()?);
                     if !req_body.is_null() {
                         request.body_mut().replace(req_body.to_string().into());
