@@ -18,30 +18,21 @@ impl ServerConfig {
         endpoints: EndpointSet<Unchecked>,
         s3_configs: &[S3LinkConfig],
     ) -> anyhow::Result<Self> {
-        #[allow(unused_mut)]
         let mut rt = init(&blueprint)?;
 
-        #[cfg(feature = "s3")]
-        {
-            for config in s3_configs {
-                let endpoint = if config.endpoint.is_empty() {
-                    None
-                } else {
-                    Some(config.endpoint.as_str())
-                };
-                let client = crate::cli::s3::client::S3Client::new(
-                    endpoint,
-                    &config.region,
-                    config.force_path_style,
-                )
-                .await?;
-                rt.s3.insert(config.id.clone(), std::sync::Arc::new(client));
-            }
-        }
-
-        #[cfg(not(feature = "s3"))]
-        {
-            let _ = s3_configs;
+        for config in s3_configs {
+            let endpoint = if config.endpoint.is_empty() {
+                None
+            } else {
+                Some(config.endpoint.as_str())
+            };
+            let client = crate::cli::s3::client::S3Client::new(
+                endpoint,
+                &config.region,
+                config.force_path_style,
+            )
+            .await?;
+            rt.s3.insert(config.id.clone(), std::sync::Arc::new(client));
         }
 
         let endpoints = endpoints.into_checked(&blueprint, rt.clone()).await?;
