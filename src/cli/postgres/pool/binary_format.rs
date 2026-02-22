@@ -1,6 +1,6 @@
 pub(super) fn format_uuid(raw: &[u8]) -> anyhow::Result<String> {
-    if raw.len() < 16 {
-        anyhow::bail!("UUID binary too short");
+    if raw.len() != 16 {
+        anyhow::bail!("UUID binary unexpected length: {} bytes", raw.len());
     }
     Ok(format!(
         "{:02x}{:02x}{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}-{:02x}{:02x}{:02x}{:02x}{:02x}{:02x}",

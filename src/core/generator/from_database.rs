@@ -305,6 +305,11 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
 /// Build a filter object that maps source columns to mustache expressions
 /// referencing target columns.
 fn build_fk_filter(source_columns: &[String], target_columns: &[String]) -> serde_json::Value {
+    debug_assert_eq!(
+        source_columns.len(),
+        target_columns.len(),
+        "FK source and target column counts must match"
+    );
     source_columns
         .iter()
         .zip(target_columns.iter())
@@ -334,7 +339,7 @@ fn build_pk_args_and_filter(
         args.insert(
             pk_col.to_case(Case::Camel),
             Arg {
-                type_of: Type::from(gql_type.clone()).into_required(),
+                type_of: Type::from(gql_type).into_required(),
                 ..Default::default()
             },
         );

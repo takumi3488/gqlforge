@@ -2,9 +2,10 @@ use async_graphql_value::ConstValue;
 use deadpool_postgres::{Config, Pool, Runtime};
 use indexmap::IndexMap;
 
+use crate::core::postgres::PostgresIO;
+
 use super::conversion::{row_value_to_const, sanitize_graphql_name};
 use super::types::TypedParam;
-use crate::core::postgres::PostgresIO;
 
 /// A connection pool backed by `deadpool-postgres`.
 pub struct PostgresPool {
