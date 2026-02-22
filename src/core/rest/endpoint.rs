@@ -146,7 +146,7 @@ impl Endpoint {
         let mut variables = Variables::default();
 
         // Method
-        if self.method.clone().to_hyper() != request.method() {
+        if self.method.to_hyper() != request.method() {
             return None;
         }
 

@@ -27,10 +27,12 @@ impl DataLoaderRequest {
     }
 
     pub fn to_request(&self) -> reqwest::Request {
-        // TODO: excessive clone for the whole structure instead of cloning only part of
-        // it check if we really need to clone anything at all or just pass
-        // references?
-        self.clone().request
+        self.request.try_clone().unwrap_or_else(|| {
+            let mut req =
+                reqwest::Request::new(self.request.method().clone(), self.request.url().clone());
+            req.headers_mut().extend(self.request.headers().clone());
+            req
+        })
     }
     pub fn headers(&self) -> &BTreeSet<String> {
         &self.headers

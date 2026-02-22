@@ -48,7 +48,7 @@ impl TryFrom<&Directive> for Rest {
                         map.iter()
                             .filter_map(|(k, v)| {
                                 if let Value::Variable(v) = v {
-                                    Some((k.as_str().to_owned(), v.as_str().to_string()))
+                                    Some((k.as_str().to_owned(), v.as_str().to_owned()))
                                 } else {
                                     None
                                 }

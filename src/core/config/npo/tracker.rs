@@ -44,7 +44,7 @@ impl Display for QueryPath {
                 path.push_str(
                     query_path
                         .iter()
-                        .rfold("".to_string(), |s, field_name| {
+                        .rfold(String::new(), |s, field_name| {
                             if s.is_empty() {
                                 field_name.to_string()
                             } else {
@@ -58,7 +58,7 @@ impl Display for QueryPath {
             })
             .collect();
 
-        let val = query_data.iter().fold("".to_string(), |s, query| {
+        let val = query_data.iter().fold(String::new(), |s, query| {
             if s.is_empty() {
                 query.to_string()
             } else {

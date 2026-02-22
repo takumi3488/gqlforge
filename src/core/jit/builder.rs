@@ -178,7 +178,7 @@ impl<'a> Builder<'a> {
                     let request_args = gql_field
                         .arguments
                         .iter()
-                        .map(|(k, v)| (k.node.as_str().to_string(), v.node.to_owned()))
+                        .map(|(k, v)| (k.node.as_str().to_owned(), v.node.to_owned()))
                         .collect::<HashMap<_, _>>();
 
                     let parent_fragment = parent_fragment.map(|s| s.to_owned());
