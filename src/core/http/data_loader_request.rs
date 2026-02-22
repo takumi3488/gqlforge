@@ -4,6 +4,15 @@ use std::ops::Deref;
 
 use gqlforge_hasher::GqlforgeHasher;
 
+fn clone_request(req: &reqwest::Request) -> reqwest::Request {
+    req.try_clone().unwrap_or_else(|| {
+        let mut new_req = reqwest::Request::new(req.method().clone(), req.url().clone());
+        new_req.headers_mut().extend(req.headers().clone());
+        *new_req.timeout_mut() = req.timeout().copied();
+        new_req
+    })
+}
+
 #[derive(Debug)]
 pub struct DataLoaderRequest {
     request: reqwest::Request,
@@ -27,12 +36,7 @@ impl DataLoaderRequest {
     }
 
     pub fn to_request(&self) -> reqwest::Request {
-        self.request.try_clone().unwrap_or_else(|| {
-            let mut req =
-                reqwest::Request::new(self.request.method().clone(), self.request.url().clone());
-            req.headers_mut().extend(self.request.headers().clone());
-            req
-        })
+        clone_request(&self.request)
     }
     pub fn headers(&self) -> &BTreeSet<String> {
         &self.headers
@@ -74,13 +78,7 @@ impl Eq for DataLoaderRequest {}
 
 impl Clone for DataLoaderRequest {
     fn clone(&self) -> Self {
-        let req = self.request.try_clone().unwrap_or_else(|| {
-            let mut req =
-                reqwest::Request::new(self.request.method().clone(), self.request.url().clone());
-            req.headers_mut().extend(self.request.headers().clone());
-            req
-        });
-
+        let req = clone_request(&self.request);
         DataLoaderRequest::new(req, self.headers.clone())
             .with_batching_value(self.batching_value.clone())
     }
