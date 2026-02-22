@@ -1,4 +1,3 @@
-#[cfg(feature = "s3")]
 pub mod client {
     use std::time::Duration;
 
