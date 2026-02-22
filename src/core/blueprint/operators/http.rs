@@ -67,10 +67,10 @@ pub fn compile_http(
 
             match RequestTemplate::try_from(
                 Endpoint::new(base_url.to_string())
-                    .method(http.method.clone())
+                    .method(http.method)
                     .query(query)
                     .body(http.body.clone())
-                    .encoding(http.encoding.clone()),
+                    .encoding(http.encoding),
             )
             .map(|req_tmpl| req_tmpl.headers(headers))
             {
