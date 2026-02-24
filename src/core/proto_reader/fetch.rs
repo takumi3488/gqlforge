@@ -167,6 +167,10 @@ impl GrpcReflection {
             HeaderName::from_static("content-type"),
             Mustache::parse("application/grpc+proto"),
         ));
+        headers.push((
+            HeaderName::from_static("te"),
+            Mustache::parse("trailers"),
+        ));
         let body_ = Some(RequestBody {
             mustache: Some(Mustache::parse(body.to_string().as_str())),
             value: Default::default(),
