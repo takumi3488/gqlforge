@@ -63,7 +63,7 @@ http-cache-reqwest = { version = "1.0.0-alpha.4", features = [
   "manager-moka",
   "url-standard",
 ], default-features = false, optional = true }
-hyper-rustls = { version = "0.27", optional = true }
+hyper-rustls = { version = "0.27", optional = true, features = ["http2"] }
 inquire = { version = "0.9.3", optional = true }
 mimalloc = { version = "0.1.48", default-features = false, optional = true }
 moka = { version = "0.12.13", default-features = false, features = [
@@ -115,6 +115,7 @@ hyper-util = { version = "0.1", features = [
   "server-auto",
   "http1",
   "http2",
+  "client-legacy",
 ] }
 indexmap = { workspace = true }
 lazy_static = { workspace = true }

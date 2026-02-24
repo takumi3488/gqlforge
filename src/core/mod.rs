@@ -83,6 +83,19 @@ pub trait HttpIO: Sync + Send + 'static {
             "Streaming not supported by this HttpIO implementation"
         ))
     }
+
+    /// Send an HTTP/2 request for gRPC. Uses Full<Bytes> body to ensure END_STREAM is set.
+    async fn execute_h2(
+        &self,
+        url: &str,
+        headers: ::http::HeaderMap,
+        body: Vec<u8>,
+    ) -> anyhow::Result<Response<bytes::Bytes>> {
+        let mut req = reqwest::Request::new(reqwest::Method::POST, url.parse()?);
+        *req.headers_mut() = headers;
+        req.body_mut().replace(body.into());
+        self.execute(req).await
+    }
 }
 
 #[async_trait::async_trait]

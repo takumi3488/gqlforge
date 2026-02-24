@@ -3,7 +3,10 @@ use std::time::Duration;
 use anyhow::Result;
 use bytes::Bytes;
 use gqlforge_http_cache::HttpCacheManager;
+use http_body_util::{BodyExt, Full};
 use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
+use hyper_util::client::legacy::Client as H2Client;
+use hyper_util::rt::TokioExecutor;
 use once_cell::sync::Lazy;
 use opentelemetry::KeyValue;
 use opentelemetry::metrics::Counter;
@@ -67,9 +70,15 @@ fn get_response_status(response: &reqwest_middleware::Result<reqwest::Response>)
     KeyValue::new(HTTP_RESPONSE_STATUS_CODE, status_code as i64)
 }
 
+type GrpcH2Client = H2Client<
+    hyper_rustls::HttpsConnector<hyper_util::client::legacy::connect::HttpConnector>,
+    Full<Bytes>,
+>;
+
 #[derive(Clone)]
 pub struct NativeHttp {
     client: ClientWithMiddleware,
+    h2_client: Option<GrpcH2Client>,
     http2_only: bool,
     enable_telemetry: bool,
 }
@@ -78,6 +87,7 @@ impl Default for NativeHttp {
     fn default() -> Self {
         Self {
             client: ClientBuilder::new(Client::new()).build(),
+            h2_client: None,
             http2_only: false,
             enable_telemetry: false,
         }
@@ -120,8 +130,22 @@ impl NativeHttp {
                 options: HttpCacheOptions::default(),
             }))
         }
+
+        // hyper-rustls requires an explicit CryptoProvider (unlike reqwest which handles this internally)
+        let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
+        let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
+            .with_native_roots()
+            .expect("Failed to load native roots for h2_client")
+            .https_or_http()
+            .enable_http2()
+            .build();
+        let h2_client = H2Client::builder(TokioExecutor::new())
+            .http2_only(true)
+            .build(https_connector);
+
         Self {
             client: client.build(),
+            h2_client: Some(h2_client),
             http2_only: upstream.http2_only,
             enable_telemetry: telemetry.export.is_some(),
         }
@@ -196,6 +220,35 @@ impl HttpIO for NativeHttp {
 
         let response = self.client.execute(request).await?;
         Ok(response)
+    }
+
+    async fn execute_h2(
+        &self,
+        url: &str,
+        headers: http::HeaderMap,
+        body: Vec<u8>,
+    ) -> Result<Response<Bytes>> {
+        if let Some(ref h2_client) = self.h2_client {
+            let mut req = http::Request::builder()
+                .method(http::Method::POST)
+                .uri(url)
+                .body(Full::new(Bytes::from(body)))
+                .expect("Failed to build h2 request");
+            *req.headers_mut() = headers;
+
+            tracing::info!("h2 POST {}", url);
+            let resp = h2_client.request(req).await?;
+            let status = resp.status();
+            let resp_headers = resp.headers().clone();
+            let body = resp.into_body().collect().await?.to_bytes();
+            Ok(Response { status, headers: resp_headers, body })
+        } else {
+            // Fallback to reqwest (used in tests without h2_client)
+            let mut req = reqwest::Request::new(reqwest::Method::POST, url.parse()?);
+            *req.headers_mut() = headers;
+            req.body_mut().replace(body.into());
+            self.execute(req).await
+        }
     }
 }
 

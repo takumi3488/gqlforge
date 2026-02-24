@@ -181,11 +181,15 @@ impl GrpcReflection {
 
         let ctx = ConfigReaderContext::new(&self.target_runtime);
 
-        let req = req_template.render(&ctx)?.to_request()?;
-        let resp = self.target_runtime.http2_only.execute(req).await?;
-        let body = resp.body.as_bytes();
+        let rendered = req_template.render(&ctx)?;
+        let body_bytes = rendered.operation.convert_input(&rendered.body)?;
+        let resp = self
+            .target_runtime
+            .http2_only
+            .execute_h2(rendered.url.as_ref(), rendered.headers, body_bytes)
+            .await?;
 
-        let response: ReflectionResponse = operation.convert_output(body)?;
+        let response: ReflectionResponse = operation.convert_output(resp.body.as_ref())?;
         Ok(response)
     }
 }
