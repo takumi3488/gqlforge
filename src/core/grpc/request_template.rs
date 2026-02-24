@@ -3,7 +3,7 @@ use std::hash::{Hash, Hasher};
 use anyhow::Result;
 use derive_setters::Setters;
 use gqlforge_hasher::GqlforgeHasher;
-use http::header::{CONTENT_TYPE, HeaderMap, HeaderValue};
+use http::header::{CONTENT_TYPE, HeaderMap, HeaderName, HeaderValue};
 use url::Url;
 
 use super::request::create_grpc_request;
@@ -68,6 +68,10 @@ impl RequestTemplate {
         let mut header_map = HeaderMap::new();
 
         header_map.insert(CONTENT_TYPE, GRPC_MIME_TYPE.to_owned());
+        header_map.insert(
+            HeaderName::from_static("te"),
+            HeaderValue::from_static("trailers"),
+        );
 
         for (k, v) in &self.headers {
             if let Ok(header_value) = HeaderValue::from_str(&v.render(ctx)) {
@@ -244,6 +248,10 @@ mod tests {
                 (
                     HeaderName::from_static("content-type"),
                     HeaderValue::from_static("application/grpc")
+                ),
+                (
+                    HeaderName::from_static("te"),
+                    HeaderValue::from_static("trailers")
                 )
             ])
         );
