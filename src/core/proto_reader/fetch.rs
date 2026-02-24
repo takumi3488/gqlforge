@@ -197,7 +197,7 @@ impl GrpcReflection {
             );
         }
 
-        // gRPC ステータス確認（trailers-only エラーレスポンスはヘッダーに含まれる）
+        // Check gRPC status (trailers-only error responses carry grpc-status in headers)
         if let Some(grpc_status) = resp.headers.get("grpc-status") {
             let code: i32 = grpc_status.to_str().unwrap_or("0").parse().unwrap_or(0);
             if code != 0 {

@@ -241,7 +241,7 @@ impl HttpIO for NativeHttp {
             let status = resp.status();
             let mut resp_headers = resp.headers().clone();
             let collected = resp.into_body().collect().await?;
-            // HTTP/2 トレーラーをヘッダーにマージ（gRPC trailers-only レスポンス対応）
+            // Merge HTTP/2 trailers into headers for gRPC trailers-only responses
             if let Some(trailers) = collected.trailers().cloned() {
                 resp_headers.extend(trailers);
             }
