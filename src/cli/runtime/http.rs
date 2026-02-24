@@ -232,8 +232,7 @@ impl HttpIO for NativeHttp {
             let mut req = http::Request::builder()
                 .method(http::Method::POST)
                 .uri(url)
-                .body(Full::new(Bytes::from(body)))
-                .expect("Failed to build h2 request");
+                .body(Full::new(Bytes::from(body)))?;
             *req.headers_mut() = headers;
 
             tracing::info!("h2 POST {}", url);

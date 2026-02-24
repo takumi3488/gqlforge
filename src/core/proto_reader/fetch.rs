@@ -189,6 +189,13 @@ impl GrpcReflection {
             .execute_h2(rendered.url.as_ref(), rendered.headers, body_bytes)
             .await?;
 
+        if !resp.status.is_success() {
+            anyhow::bail!(
+                "gRPC reflection request failed with HTTP status {}",
+                resp.status
+            );
+        }
+
         let response: ReflectionResponse = operation.convert_output(resp.body.as_ref())?;
         Ok(response)
     }
