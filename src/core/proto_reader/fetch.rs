@@ -197,6 +197,19 @@ impl GrpcReflection {
             );
         }
 
+        // gRPC ステータス確認（trailers-only エラーレスポンスはヘッダーに含まれる）
+        if let Some(grpc_status) = resp.headers.get("grpc-status") {
+            let code: i32 = grpc_status.to_str().unwrap_or("0").parse().unwrap_or(0);
+            if code != 0 {
+                let msg = resp
+                    .headers
+                    .get("grpc-message")
+                    .and_then(|v| v.to_str().ok())
+                    .unwrap_or("unknown");
+                anyhow::bail!("gRPC reflection error: grpc-status={}, grpc-message={}", code, msg);
+            }
+        }
+
         let response: ReflectionResponse = operation.convert_output(resp.body.as_ref())?;
         Ok(response)
     }
