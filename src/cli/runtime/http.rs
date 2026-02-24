@@ -131,7 +131,8 @@ impl NativeHttp {
             }))
         }
 
-        // hyper-rustls requires an explicit CryptoProvider (unlike reqwest which handles this internally)
+        // hyper-rustls requires an explicit CryptoProvider (unlike reqwest which
+        // handles this internally)
         let _ = rustls::crypto::aws_lc_rs::default_provider().install_default();
         let https_connector = hyper_rustls::HttpsConnectorBuilder::new()
             .with_native_roots()
