@@ -80,7 +80,7 @@ impl HttpIO for Http {
                 let headers_match = req
                     .headers()
                     .iter()
-                    .filter(|(key, _)| *key != "content-type")
+                    .filter(|(key, _)| *key != "content-type" && *key != "te")
                     .all(|(key, value)| {
                         let header_name = key.to_string();
 
