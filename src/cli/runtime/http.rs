@@ -239,8 +239,13 @@ impl HttpIO for NativeHttp {
             tracing::info!("h2 POST {}", url);
             let resp = h2_client.request(req).await?;
             let status = resp.status();
-            let resp_headers = resp.headers().clone();
-            let body = resp.into_body().collect().await?.to_bytes();
+            let mut resp_headers = resp.headers().clone();
+            let collected = resp.into_body().collect().await?;
+            // Merge HTTP/2 trailers into headers for gRPC trailers-only responses
+            if let Some(trailers) = collected.trailers().cloned() {
+                resp_headers.extend(trailers);
+            }
+            let body = collected.to_bytes();
             Ok(Response { status, headers: resp_headers, body })
         } else {
             // Fallback to reqwest (used in tests without h2_client)
