@@ -142,7 +142,11 @@ pub struct Table {
     pub primary_key: Option<PrimaryKey>,
     pub foreign_keys: Vec<ForeignKey>,
     pub unique_constraints: Vec<UniqueConstraint>,
-    /// True if this relation is a VIEW (read-only); false for a base table.
+    /// True if this relation is a VIEW; false for a base table.
+    /// Note: views are not necessarily read-only — simple views may be
+    /// directly updatable, and any view can be made writable via INSTEAD OF
+    /// triggers or rules. This flag indicates the relation type only, not
+    /// guaranteed write-safety.
     #[serde(default, skip_serializing_if = "crate::core::is_default")]
     pub is_view: bool,
 }

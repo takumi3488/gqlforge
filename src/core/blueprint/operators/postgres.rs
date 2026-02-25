@@ -54,7 +54,9 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
                 )
             {
                 Valid::fail(BlueprintError::Cause(format!(
-                    "Cannot perform {} on view '{}'. Views are read-only.",
+                    "Cannot perform {} on view '{}'. \
+                     Standard views do not support write operations; \
+                     use a base table or define INSTEAD OF triggers on the view.",
                     pg.operation, pg.table
                 )))
             } else {
