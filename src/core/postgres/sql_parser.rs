@@ -420,9 +420,10 @@ fn find_col_type_in_tables(
 ) -> Option<PgType> {
     for table_name in from_tables {
         if let Some(table) = schema.find_table(table_name)
-            && let Some(col) = table.find_column(col_name) {
-                return Some(col.pg_type.clone());
-            }
+            && let Some(col) = table.find_column(col_name)
+        {
+            return Some(col.pg_type.clone());
+        }
     }
     None
 }
