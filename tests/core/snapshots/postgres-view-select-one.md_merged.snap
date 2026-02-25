@@ -1,0 +1,27 @@
+---
+source: tests/core/spec.rs
+assertion_line: 238
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "schema.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type ActiveProduct {
+  id: Int
+  name: String
+  price: Float
+}
+
+type Query {
+  activeProduct(id: Int!): ActiveProduct
+  @postgres(
+    table: "active_products"
+    operation: "SELECT_ONE"
+    filter: { id: "{{.args.id}}" }
+  )
+}

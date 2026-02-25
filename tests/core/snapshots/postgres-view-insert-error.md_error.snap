@@ -1,0 +1,15 @@
+---
+source: tests/core/spec.rs
+expression: errors
+---
+[
+  {
+    "message": "Cannot perform Insert on view 'active_users'. Standard views do not support write operations; use a base table or define INSTEAD OF triggers on the view.",
+    "trace": [
+      "Mutation",
+      "createUser",
+      "@postgres"
+    ],
+    "description": null
+  }
+]

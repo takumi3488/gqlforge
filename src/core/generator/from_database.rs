@@ -167,122 +167,125 @@ pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::R
             );
         }
 
-        // --- Mutation: create ---
-        {
-            let create_name = format!("create{type_name}");
-            let input_type_name = format!("Create{type_name}Input");
-            let mut input_type = ConfigType::default();
+        // Views are read-only: skip all mutation generation.
+        if !table.is_view {
+            // --- Mutation: create ---
+            {
+                let create_name = format!("create{type_name}");
+                let input_type_name = format!("Create{type_name}Input");
+                let mut input_type = ConfigType::default();
 
-            for col in &table.columns {
-                if col.is_generated {
-                    continue;
+                for col in &table.columns {
+                    if col.is_generated {
+                        continue;
+                    }
+                    if col.has_default
+                        && table
+                            .primary_key
+                            .as_ref()
+                            .is_some_and(|pk| pk.columns.contains(&col.name))
+                    {
+                        continue;
+                    }
+                    let gql_type = column_to_input_type(col);
+                    input_type.fields.insert(
+                        col.name.to_case(Case::Camel),
+                        Field::default().type_of(gql_type),
+                    );
                 }
-                if col.has_default
-                    && table
-                        .primary_key
-                        .as_ref()
-                        .is_some_and(|pk| pk.columns.contains(&col.name))
-                {
-                    continue;
-                }
-                let gql_type = column_to_input_type(col);
-                input_type.fields.insert(
-                    col.name.to_case(Case::Camel),
-                    Field::default().type_of(gql_type),
-                );
-            }
 
-            config.types.insert(input_type_name.clone(), input_type);
+                config.types.insert(input_type_name.clone(), input_type);
 
-            let resolver = Resolver::Postgres(Postgres {
-                table: table.name.clone(),
-                operation: PostgresOperation::Insert,
-                input: Some("{{.args.input}}".to_string()),
-                ..Default::default()
-            });
-
-            mutation_type.fields.insert(
-                create_name,
-                Field::default()
-                    .type_of(Type::from(type_name.clone()))
-                    .args(IndexMap::from([(
-                        "input".to_string(),
-                        Arg {
-                            type_of: Type::from(input_type_name.clone()).into_required(),
-                            ..Default::default()
-                        },
-                    )]))
-                    .resolvers(resolver.into()),
-            );
-        }
-
-        // --- Mutation: update ---
-        if let Some(pk) = &table.primary_key {
-            let update_name = format!("update{type_name}");
-            let input_type_name = format!("Update{type_name}Input");
-            let mut input_type = ConfigType::default();
-
-            for col in &table.columns {
-                if col.is_generated {
-                    continue;
-                }
-                if pk.columns.contains(&col.name) {
-                    continue;
-                }
-                // All fields optional for partial updates.
-                let gql_type = Type::from(scalar_type(&col.pg_type));
-                input_type.fields.insert(
-                    col.name.to_case(Case::Camel),
-                    Field::default().type_of(gql_type),
-                );
-            }
-
-            config.types.insert(input_type_name.clone(), input_type);
-            let (mut args, filter) = build_pk_args_and_filter(table, pk);
-            args.insert(
-                "input".to_string(),
-                Arg {
-                    type_of: Type::from(input_type_name.clone()).into_required(),
+                let resolver = Resolver::Postgres(Postgres {
+                    table: table.name.clone(),
+                    operation: PostgresOperation::Insert,
+                    input: Some("{{.args.input}}".to_string()),
                     ..Default::default()
-                },
-            );
+                });
 
-            let resolver = Resolver::Postgres(Postgres {
-                table: table.name.clone(),
-                operation: PostgresOperation::Update,
-                filter: Some(filter),
-                input: Some("{{.args.input}}".to_string()),
-                ..Default::default()
-            });
+                mutation_type.fields.insert(
+                    create_name,
+                    Field::default()
+                        .type_of(Type::from(type_name.clone()))
+                        .args(IndexMap::from([(
+                            "input".to_string(),
+                            Arg {
+                                type_of: Type::from(input_type_name.clone()).into_required(),
+                                ..Default::default()
+                            },
+                        )]))
+                        .resolvers(resolver.into()),
+                );
+            }
 
-            mutation_type.fields.insert(
-                update_name,
-                Field::default()
-                    .type_of(Type::from(type_name.clone()))
-                    .args(args)
-                    .resolvers(resolver.into()),
-            );
-        }
+            // --- Mutation: update ---
+            if let Some(pk) = &table.primary_key {
+                let update_name = format!("update{type_name}");
+                let input_type_name = format!("Update{type_name}Input");
+                let mut input_type = ConfigType::default();
 
-        // --- Mutation: delete ---
-        if let Some(pk) = &table.primary_key {
-            let delete_name = format!("delete{type_name}");
-            let (args, filter) = build_pk_args_and_filter(table, pk);
+                for col in &table.columns {
+                    if col.is_generated {
+                        continue;
+                    }
+                    if pk.columns.contains(&col.name) {
+                        continue;
+                    }
+                    // All fields optional for partial updates.
+                    let gql_type = Type::from(scalar_type(&col.pg_type));
+                    input_type.fields.insert(
+                        col.name.to_case(Case::Camel),
+                        Field::default().type_of(gql_type),
+                    );
+                }
 
-            let resolver = Resolver::Postgres(Postgres {
-                table: table.name.clone(),
-                operation: PostgresOperation::Delete,
-                filter: Some(filter),
-                ..Default::default()
-            });
+                config.types.insert(input_type_name.clone(), input_type);
+                let (mut args, filter) = build_pk_args_and_filter(table, pk);
+                args.insert(
+                    "input".to_string(),
+                    Arg {
+                        type_of: Type::from(input_type_name.clone()).into_required(),
+                        ..Default::default()
+                    },
+                );
 
-            mutation_type.fields.insert(
-                delete_name,
-                Field::default()
-                    .type_of(Type::from("Boolean".to_string()))
-                    .args(args)
-                    .resolvers(resolver.into()),
-            );
+                let resolver = Resolver::Postgres(Postgres {
+                    table: table.name.clone(),
+                    operation: PostgresOperation::Update,
+                    filter: Some(filter),
+                    input: Some("{{.args.input}}".to_string()),
+                    ..Default::default()
+                });
+
+                mutation_type.fields.insert(
+                    update_name,
+                    Field::default()
+                        .type_of(Type::from(type_name.clone()))
+                        .args(args)
+                        .resolvers(resolver.into()),
+                );
+            }
+
+            // --- Mutation: delete ---
+            if let Some(pk) = &table.primary_key {
+                let delete_name = format!("delete{type_name}");
+                let (args, filter) = build_pk_args_and_filter(table, pk);
+
+                let resolver = Resolver::Postgres(Postgres {
+                    table: table.name.clone(),
+                    operation: PostgresOperation::Delete,
+                    filter: Some(filter),
+                    ..Default::default()
+                });
+
+                mutation_type.fields.insert(
+                    delete_name,
+                    Field::default()
+                        .type_of(Type::from("Boolean".to_string()))
+                        .args(args)
+                        .resolvers(resolver.into()),
+                );
+            }
         }
     }
 
@@ -420,6 +423,7 @@ mod tests {
             primary_key: Some(PrimaryKey { columns: vec!["id".into()] }),
             foreign_keys: vec![],
             unique_constraints: vec![],
+            is_view: false,
         });
         schema.add_table(Table {
             schema: "public".into(),
@@ -455,6 +459,7 @@ mod tests {
                 referenced_columns: vec!["id".into()],
             }],
             unique_constraints: vec![],
+            is_view: false,
         });
         schema
     }
@@ -494,5 +499,84 @@ mod tests {
         // Users should have a `posts` has-many field (already plural -> postsList)
         let users_type = config.types.get("Users").unwrap();
         assert!(users_type.fields.contains_key("postsList"));
+    }
+
+    #[test]
+    fn views_generate_only_queries() {
+        let mut schema = DatabaseSchema::new();
+        schema.add_table(Table {
+            schema: "public".into(),
+            name: "active_users".into(),
+            columns: vec![
+                Column {
+                    name: "id".into(),
+                    pg_type: PgType::Integer,
+                    is_nullable: false,
+                    has_default: false,
+                    is_generated: false,
+                },
+                Column {
+                    name: "name".into(),
+                    pg_type: PgType::Text,
+                    is_nullable: false,
+                    has_default: false,
+                    is_generated: false,
+                },
+            ],
+            // Views typically have no PK.
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+            is_view: true,
+        });
+
+        let config = from_database(&schema, "postgres://localhost/test").unwrap();
+
+        // Query: list should be generated.
+        let query = config.types.get("Query").unwrap();
+        assert!(query.fields.contains_key("activeUsersList"));
+        // No byId since there is no PK.
+        assert!(!query.fields.contains_key("activeUsersById"));
+
+        // Mutations must NOT be generated for views.
+        let mutation = config.types.get("Mutation").unwrap();
+        assert!(!mutation.fields.contains_key("createActiveUsers"));
+        assert!(!mutation.fields.contains_key("updateActiveUsers"));
+        assert!(!mutation.fields.contains_key("deleteActiveUsers"));
+    }
+
+    #[test]
+    fn views_without_pk_no_by_id() {
+        let mut schema = DatabaseSchema::new();
+        schema.add_table(Table {
+            schema: "public".into(),
+            name: "summary_view".into(),
+            columns: vec![
+                Column {
+                    name: "category".into(),
+                    pg_type: PgType::Text,
+                    is_nullable: true,
+                    has_default: false,
+                    is_generated: false,
+                },
+                Column {
+                    name: "total".into(),
+                    pg_type: PgType::Integer,
+                    is_nullable: true,
+                    has_default: false,
+                    is_generated: false,
+                },
+            ],
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+            is_view: true,
+        });
+
+        let config = from_database(&schema, "postgres://localhost/test").unwrap();
+        let query = config.types.get("Query").unwrap();
+
+        assert!(query.fields.contains_key("summaryViewList"));
+        assert!(!query.fields.contains_key("summaryViewById"));
     }
 }

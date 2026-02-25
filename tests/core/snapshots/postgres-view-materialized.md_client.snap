@@ -1,0 +1,17 @@
+---
+source: tests/core/spec.rs
+assertion_line: 255
+expression: formatted
+---
+type CompletedOrder {
+  amount: Float
+  id: Int
+}
+
+type Query {
+  completedOrders(limit: Int, offset: Int): [CompletedOrder]
+}
+
+schema {
+  query: Query
+}
