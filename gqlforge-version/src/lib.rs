@@ -1,5 +1,3 @@
-const DEFAULT_VERSION: &str = "0.1.0-dev";
-
 pub struct Version {
     version: &'static str,
 }
