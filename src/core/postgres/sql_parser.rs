@@ -318,7 +318,8 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
     }
 }
 
-/// Collect table names referenced in the top-level FROM clause (including joins).
+/// Collect table names referenced in the top-level FROM clause (including
+/// joins).
 fn collect_from_table_names(query: &sqlparser::ast::Query) -> Vec<String> {
     let SetExpr::Select(select) = query.body.as_ref() else {
         return vec![];
@@ -340,8 +341,8 @@ fn collect_from_table_names(query: &sqlparser::ast::Query) -> Vec<String> {
 /// Infer view columns by scanning the SELECT projection of the defining query.
 ///
 /// Handles explicit column references (`SELECT id, name`), compound identifiers
-/// (`SELECT t.id`), aliased expressions (`SELECT id AS user_id`), bare wildcards
-/// (`SELECT *`), and qualified wildcards (`SELECT t.*`).
+/// (`SELECT t.id`), aliased expressions (`SELECT id AS user_id`), bare
+/// wildcards (`SELECT *`), and qualified wildcards (`SELECT t.*`).
 fn infer_view_columns_from_projection(
     query: &sqlparser::ast::Query,
     from_tables: &[String],
@@ -459,8 +460,9 @@ fn infer_view_columns_from_projection(
                 }
             }
             _ => {
-                // Complex expressions without aliases (functions, arithmetic, etc.)
-                // cannot have their column name or type inferred; they are skipped.
+                // Complex expressions without aliases (functions, arithmetic,
+                // etc.) cannot have their column name or type
+                // inferred; they are skipped.
             }
         }
     }
@@ -505,7 +507,8 @@ fn infer_type_at_projection_pos(
         .and_then(|n| find_col_type_in_tables(n, qualifier.as_deref(), from_tables, schema))
 }
 
-/// Search `from_tables` in the schema and return the type of `col_name` if found.
+/// Search `from_tables` in the schema and return the type of `col_name` if
+/// found.
 ///
 /// When `qualifier` is provided the table whose unqualified name matches is
 /// tried first, which resolves ambiguous column references in JOINs (e.g.
