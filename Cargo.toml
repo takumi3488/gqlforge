@@ -336,3 +336,24 @@ path = "src/core/generator/tests/json_to_config_spec.rs"
 
 [patch.crates-io]
 htpasswd-verify = { git = "https://github.com/twistedfall/htpasswd-verify", rev = "ff14703083cbd639f7d05622b398926f3e718d61" }
+
+[profile.dist]
+inherits = "release"
+
+[workspace.metadata.dist]
+cargo-dist-version = "0.31.0"
+ci = ["github"]
+installers = ["shell"]
+targets = [
+  "x86_64-apple-darwin",
+  "aarch64-apple-darwin",
+  "x86_64-unknown-linux-gnu",
+  "aarch64-unknown-linux-gnu",
+]
+hosting = ["github"]
+pr-run-mode = "plan"
+github-attestations = true
+allow-dirty = ["ci"]
+
+[workspace.metadata.dist.github-custom-runners]
+aarch64-unknown-linux-gnu = "ubuntu-24.04-arm"
