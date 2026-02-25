@@ -353,6 +353,7 @@ targets = [
 hosting = ["github"]
 pr-run-mode = "plan"
 github-attestations = true
+allow-dirty = ["ci"]
 
 [workspace.metadata.dist.github-custom-runners]
 aarch64-unknown-linux-gnu = "ubuntu-24.04-arm"
