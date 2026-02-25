@@ -31,7 +31,7 @@ static RESOURCE: Lazy<Resource> = Lazy::new(|| {
         .with_service_name("gqlforge")
         .with_attributes([KeyValue::new(
             opentelemetry_semantic_conventions::resource::SERVICE_VERSION,
-            option_env!("APP_VERSION").unwrap_or("dev"),
+            option_env!("APP_VERSION").unwrap_or(env!("CARGO_PKG_VERSION")),
         )])
         .build()
 });

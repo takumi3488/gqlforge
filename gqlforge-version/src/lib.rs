@@ -20,7 +20,7 @@ impl Version {
 
 pub const VERSION: Version = match option_env!("APP_VERSION") {
     Some(version) => Version::new(version),
-    None => Version::new(DEFAULT_VERSION),
+    None => Version::new(env!("CARGO_PKG_VERSION")),
 };
 
 #[cfg(test)]
@@ -29,8 +29,8 @@ mod tests {
 
     #[test]
     fn test_default_version() {
-        assert_eq!(VERSION.as_str(), DEFAULT_VERSION);
-        assert!(VERSION.is_dev());
+        assert_eq!(VERSION.as_str(), env!("CARGO_PKG_VERSION"));
+        assert!(!VERSION.is_dev());
     }
 
     #[test]
