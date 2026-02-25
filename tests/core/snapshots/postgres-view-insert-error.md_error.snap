@@ -1,0 +1,16 @@
+---
+source: tests/core/spec.rs
+assertion_line: 83
+expression: errors
+---
+[
+  {
+    "message": "Cannot perform Insert on view 'active_users'. Views are read-only.",
+    "trace": [
+      "Mutation",
+      "createUser",
+      "@postgres"
+    ],
+    "description": null
+  }
+]

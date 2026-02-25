@@ -1,0 +1,26 @@
+---
+source: tests/core/spec.rs
+assertion_line: 238
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "schema.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type CompletedOrder {
+  amount: Float
+  id: Int
+}
+
+type Query {
+  completedOrders(limit: Int, offset: Int): [CompletedOrder]
+  @postgres(
+    table: "completed_orders"
+    limit: "{{.args.limit}}"
+    offset: "{{.args.offset}}"
+  )
+}

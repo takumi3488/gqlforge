@@ -1,0 +1,18 @@
+---
+source: tests/core/spec.rs
+assertion_line: 255
+expression: formatted
+---
+type ActiveProduct {
+  id: Int
+  name: String
+  price: Float
+}
+
+type Query {
+  activeProduct(id: Int!): ActiveProduct
+}
+
+schema {
+  query: Query
+}

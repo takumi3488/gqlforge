@@ -2,7 +2,7 @@ use gqlforge_valid::{Valid, Validator};
 
 use crate::core::blueprint::BlueprintError;
 use crate::core::config::group_by::GroupBy;
-use crate::core::config::{ConfigModule, Postgres};
+use crate::core::config::{ConfigModule, Postgres, PostgresOperation};
 use crate::core::ir::model::{IO, IR};
 use crate::core::mustache::Mustache;
 use crate::core::postgres::request_template::RequestTemplate;
@@ -44,8 +44,22 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
         .find_database_schema(Some(&connection_id));
 
     let table_valid = if let Some(schema) = db_schema {
-        if schema.find_table(&pg.table).is_some() {
-            Valid::succeed(())
+        if let Some(table) = schema.find_table(&pg.table) {
+            if table.is_view
+                && matches!(
+                    pg.operation,
+                    PostgresOperation::Insert
+                        | PostgresOperation::Update
+                        | PostgresOperation::Delete
+                )
+            {
+                Valid::fail(BlueprintError::Cause(format!(
+                    "Cannot perform {} on view '{}'. Views are read-only.",
+                    pg.operation, pg.table
+                )))
+            } else {
+                Valid::succeed(())
+            }
         } else {
             Valid::fail(BlueprintError::Cause(format!(
                 "Table '{}' not found in database schema",
@@ -135,7 +149,18 @@ mod tests {
             primary_key: None,
             foreign_keys: vec![],
             unique_constraints: vec![],
+            is_view: false,
         }
+    }
+
+    fn make_view_table(name: &str) -> Table {
+        Table { is_view: true, ..make_table(name) }
+    }
+
+    fn make_view_schema(table_name: &str) -> DatabaseSchema {
+        let mut schema = DatabaseSchema::new();
+        schema.add_table(make_view_table(table_name));
+        schema
     }
 
     fn make_schema(table_name: &str) -> DatabaseSchema {
@@ -226,5 +251,69 @@ mod tests {
         };
         let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
         assert!(result.to_result().is_err());
+    }
+
+    #[test]
+    fn view_insert_fails() {
+        let cm = make_config_module(vec![Content {
+            id: Some("main".to_string()),
+            content: make_view_schema("user_summary"),
+        }]);
+        let pg = Postgres {
+            table: "user_summary".to_string(),
+            operation: PostgresOperation::Insert,
+            db: Some("main".to_string()),
+            ..Default::default()
+        };
+        let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
+        assert!(result.to_result().is_err());
+    }
+
+    #[test]
+    fn view_update_fails() {
+        let cm = make_config_module(vec![Content {
+            id: Some("main".to_string()),
+            content: make_view_schema("user_summary"),
+        }]);
+        let pg = Postgres {
+            table: "user_summary".to_string(),
+            operation: PostgresOperation::Update,
+            db: Some("main".to_string()),
+            ..Default::default()
+        };
+        let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
+        assert!(result.to_result().is_err());
+    }
+
+    #[test]
+    fn view_delete_fails() {
+        let cm = make_config_module(vec![Content {
+            id: Some("main".to_string()),
+            content: make_view_schema("user_summary"),
+        }]);
+        let pg = Postgres {
+            table: "user_summary".to_string(),
+            operation: PostgresOperation::Delete,
+            db: Some("main".to_string()),
+            ..Default::default()
+        };
+        let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
+        assert!(result.to_result().is_err());
+    }
+
+    #[test]
+    fn view_select_succeeds() {
+        let cm = make_config_module(vec![Content {
+            id: Some("main".to_string()),
+            content: make_view_schema("user_summary"),
+        }]);
+        let pg = Postgres {
+            table: "user_summary".to_string(),
+            operation: PostgresOperation::Select,
+            db: Some("main".to_string()),
+            ..Default::default()
+        };
+        let result = compile_postgres(CompilePostgres { config_module: &cm, postgres: &pg });
+        assert!(result.to_result().is_ok());
     }
 }

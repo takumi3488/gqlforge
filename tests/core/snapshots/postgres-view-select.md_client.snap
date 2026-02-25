@@ -1,0 +1,18 @@
+---
+source: tests/core/spec.rs
+assertion_line: 255
+expression: formatted
+---
+type ActiveUser {
+  email: String
+  id: Int
+  name: String
+}
+
+type Query {
+  activeUsers(limit: Int, offset: Int): [ActiveUser]
+}
+
+schema {
+  query: Query
+}

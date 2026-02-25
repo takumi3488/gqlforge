@@ -142,6 +142,9 @@ pub struct Table {
     pub primary_key: Option<PrimaryKey>,
     pub foreign_keys: Vec<ForeignKey>,
     pub unique_constraints: Vec<UniqueConstraint>,
+    /// True if this relation is a VIEW (read-only); false for a base table.
+    #[serde(default, skip_serializing_if = "crate::core::is_default")]
+    pub is_view: bool,
 }
 
 impl Table {
@@ -236,10 +239,41 @@ mod tests {
             primary_key: None,
             foreign_keys: vec![],
             unique_constraints: vec![],
+            is_view: false,
         });
 
         assert!(schema.find_table("public.users").is_some());
         assert!(schema.find_table("users").is_some());
         assert!(schema.find_table("nonexistent").is_none());
+    }
+
+    #[test]
+    fn database_schema_view_helpers() {
+        let mut schema = DatabaseSchema::new();
+        schema.add_table(Table {
+            schema: "public".into(),
+            name: "user_summary".into(),
+            columns: vec![],
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+            is_view: true,
+        });
+
+        let view = schema.find_table("user_summary").unwrap();
+        assert!(view.is_view);
+
+        schema.add_table(Table {
+            schema: "public".into(),
+            name: "users".into(),
+            columns: vec![],
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+            is_view: false,
+        });
+
+        let table = schema.find_table("users").unwrap();
+        assert!(!table.is_view);
     }
 }

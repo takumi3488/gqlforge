@@ -34,12 +34,12 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
 
     let mut schema = DatabaseSchema::new();
 
-    // --- 1. Fetch tables ---
+    // --- 1. Fetch tables and views ---
     let tables_query = r#"
-        SELECT table_schema, table_name
+        SELECT table_schema, table_name, table_type
         FROM information_schema.tables
         WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
-          AND table_type = 'BASE TABLE'
+          AND table_type IN ('BASE TABLE', 'VIEW')
         ORDER BY table_schema, table_name
     "#;
     let table_rows = client.query(tables_query, &[]).await?;
@@ -47,6 +47,8 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
     for row in &table_rows {
         let table_schema: String = row.get("table_schema");
         let table_name: String = row.get("table_name");
+        let table_type: String = row.get("table_type");
+        let is_view = table_type == "VIEW";
 
         let columns = fetch_columns(&client, &table_schema, &table_name).await?;
         let primary_key = fetch_primary_key(&client, &table_schema, &table_name).await?;
@@ -61,6 +63,7 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
             primary_key,
             foreign_keys,
             unique_constraints,
+            is_view,
         });
     }
 
