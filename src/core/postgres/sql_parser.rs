@@ -338,6 +338,10 @@ fn collect_from_table_names(query: &sqlparser::ast::Query) -> Vec<String> {
 }
 
 /// Infer view columns by scanning the SELECT projection of the defining query.
+///
+/// Handles explicit column references (`SELECT id, name`), compound identifiers
+/// (`SELECT t.id`), aliased expressions (`SELECT id AS user_id`), bare wildcards
+/// (`SELECT *`), and qualified wildcards (`SELECT t.*`).
 fn infer_view_columns_from_projection(
     query: &sqlparser::ast::Query,
     from_tables: &[String],
@@ -346,45 +350,128 @@ fn infer_view_columns_from_projection(
     let SetExpr::Select(select) = query.body.as_ref() else {
         return vec![];
     };
-    select
-        .projection
-        .iter()
-        .filter_map(|item| {
-            let (col_name, base_name) = match item {
-                SelectItem::UnnamedExpr(Expr::Identifier(ident)) => {
-                    (ident.value.clone(), Some(ident.value.clone()))
+
+    let mut columns = Vec::new();
+
+    for item in &select.projection {
+        match item {
+            SelectItem::UnnamedExpr(Expr::Identifier(ident)) => {
+                let col_name = ident.value.clone();
+                let pg_type = find_col_type_in_tables(&col_name, None, from_tables, schema)
+                    .unwrap_or(PgType::Text);
+                columns.push(Column {
+                    name: col_name,
+                    pg_type,
+                    is_nullable: true,
+                    has_default: false,
+                    is_generated: false,
+                });
+            }
+            SelectItem::UnnamedExpr(Expr::CompoundIdentifier(parts)) => {
+                if let Some(last) = parts.last() {
+                    let col_name = last.value.clone();
+                    let qualifier =
+                        (parts.len() >= 2).then(|| parts[parts.len() - 2].value.clone());
+                    let pg_type = find_col_type_in_tables(
+                        &col_name,
+                        qualifier.as_deref(),
+                        from_tables,
+                        schema,
+                    )
+                    .unwrap_or(PgType::Text);
+                    columns.push(Column {
+                        name: col_name,
+                        pg_type,
+                        is_nullable: true,
+                        has_default: false,
+                        is_generated: false,
+                    });
                 }
-                SelectItem::UnnamedExpr(Expr::CompoundIdentifier(parts)) => {
-                    let last = parts.last()?.value.clone();
-                    (last.clone(), Some(last))
+            }
+            SelectItem::ExprWithAlias { alias, expr } => {
+                let (base_name, qualifier) = match expr {
+                    Expr::Identifier(i) => (Some(i.value.clone()), None),
+                    Expr::CompoundIdentifier(parts) => {
+                        let col = parts.last().map(|i| i.value.clone());
+                        let qual = (parts.len() >= 2).then(|| parts[parts.len() - 2].value.clone());
+                        (col, qual)
+                    }
+                    _ => (None, None),
+                };
+                let pg_type = base_name
+                    .as_deref()
+                    .and_then(|n| {
+                        find_col_type_in_tables(n, qualifier.as_deref(), from_tables, schema)
+                    })
+                    .unwrap_or(PgType::Text);
+                columns.push(Column {
+                    name: alias.value.clone(),
+                    pg_type,
+                    is_nullable: true,
+                    has_default: false,
+                    is_generated: false,
+                });
+            }
+            SelectItem::Wildcard(_) => {
+                // Expand SELECT * to all columns from every FROM-clause table.
+                for table_name in from_tables {
+                    if let Some(table) = schema.find_table(table_name) {
+                        for col in &table.columns {
+                            columns.push(Column {
+                                name: col.name.clone(),
+                                pg_type: col.pg_type.clone(),
+                                is_nullable: true,
+                                has_default: false,
+                                is_generated: false,
+                            });
+                        }
+                    }
                 }
-                SelectItem::ExprWithAlias { alias, expr } => {
-                    let base = match expr {
-                        Expr::Identifier(i) => Some(i.value.clone()),
-                        Expr::CompoundIdentifier(parts) => parts.last().map(|i| i.value.clone()),
-                        _ => None,
-                    };
-                    (alias.value.clone(), base)
+            }
+            SelectItem::QualifiedWildcard(kind, _) => {
+                // Expand table.* to all columns from the specified table.
+                let qual: Option<String> = match kind {
+                    sqlparser::ast::SelectItemQualifiedWildcardKind::ObjectName(name) => {
+                        name.0.last().and_then(|p| match p {
+                            sqlparser::ast::ObjectNamePart::Identifier(i) => Some(i.value.clone()),
+                            _ => None,
+                        })
+                    }
+                    _ => None,
+                };
+                if let Some(qual) = qual {
+                    for table_name in from_tables {
+                        let short = table_name.rsplit('.').next().unwrap_or(table_name.as_str());
+                        if (short == qual || table_name.as_str() == qual)
+                            && let Some(table) = schema.find_table(table_name)
+                        {
+                            for col in &table.columns {
+                                columns.push(Column {
+                                    name: col.name.clone(),
+                                    pg_type: col.pg_type.clone(),
+                                    is_nullable: true,
+                                    has_default: false,
+                                    is_generated: false,
+                                });
+                            }
+                        }
+                    }
                 }
-                _ => return None,
-            };
-            let pg_type = base_name
-                .as_deref()
-                .and_then(|n| find_col_type_in_tables(n, from_tables, schema))
-                .unwrap_or(PgType::Text);
-            Some(Column {
-                name: col_name,
-                pg_type,
-                is_nullable: true,
-                has_default: false,
-                is_generated: false,
-            })
-        })
-        .collect()
+            }
+            _ => {
+                // Complex expressions without aliases (functions, arithmetic, etc.)
+                // cannot have their column name or type inferred; they are skipped.
+            }
+        }
+    }
+
+    columns
 }
 
 /// Infer the type of the view column at the given positional index in the
 /// SELECT projection by looking up the underlying column in the FROM tables.
+/// Qualifier context (e.g. `t.col`) is preserved to resolve ambiguous columns
+/// in joins.
 fn infer_type_at_projection_pos(
     pos: usize,
     query: &sqlparser::ast::Query,
@@ -395,29 +482,53 @@ fn infer_type_at_projection_pos(
         return None;
     };
     let item = select.projection.get(pos)?;
-    let col_name = match item {
-        SelectItem::UnnamedExpr(Expr::Identifier(ident)) => Some(ident.value.clone()),
+    let (col_name, qualifier) = match item {
+        SelectItem::UnnamedExpr(Expr::Identifier(ident)) => (Some(ident.value.clone()), None),
         SelectItem::UnnamedExpr(Expr::CompoundIdentifier(parts)) => {
-            parts.last().map(|i| i.value.clone())
+            let col = parts.last().map(|i| i.value.clone());
+            let qual = (parts.len() >= 2).then(|| parts[parts.len() - 2].value.clone());
+            (col, qual)
         }
         SelectItem::ExprWithAlias { expr, .. } => match expr {
-            Expr::Identifier(i) => Some(i.value.clone()),
-            Expr::CompoundIdentifier(parts) => parts.last().map(|i| i.value.clone()),
-            _ => None,
+            Expr::Identifier(i) => (Some(i.value.clone()), None),
+            Expr::CompoundIdentifier(parts) => {
+                let col = parts.last().map(|i| i.value.clone());
+                let qual = (parts.len() >= 2).then(|| parts[parts.len() - 2].value.clone());
+                (col, qual)
+            }
+            _ => (None, None),
         },
-        _ => None,
+        _ => (None, None),
     };
     col_name
         .as_deref()
-        .and_then(|n| find_col_type_in_tables(n, from_tables, schema))
+        .and_then(|n| find_col_type_in_tables(n, qualifier.as_deref(), from_tables, schema))
 }
 
 /// Search `from_tables` in the schema and return the type of `col_name` if found.
+///
+/// When `qualifier` is provided the table whose unqualified name matches is
+/// tried first, which resolves ambiguous column references in JOINs (e.g.
+/// `t.id` where multiple tables share an `id` column).
 fn find_col_type_in_tables(
     col_name: &str,
+    qualifier: Option<&str>,
     from_tables: &[String],
     schema: &DatabaseSchema,
 ) -> Option<PgType> {
+    if let Some(qual) = qualifier {
+        // Prefer the specific table named by the qualifier.
+        for table_name in from_tables {
+            let short = table_name.rsplit('.').next().unwrap_or(table_name.as_str());
+            if (short == qual || table_name.as_str() == qual)
+                && let Some(table) = schema.find_table(table_name)
+                && let Some(col) = table.find_column(col_name)
+            {
+                return Some(col.pg_type.clone());
+            }
+        }
+    }
+    // Fall back to unqualified search across all FROM tables.
     for table_name in from_tables {
         if let Some(table) = schema.find_table(table_name)
             && let Some(col) = table.find_column(col_name)
@@ -621,6 +732,78 @@ mod tests {
         assert_eq!(view.columns.len(), 2);
         let total_col = view.find_column("total").unwrap();
         assert_eq!(total_col.pg_type, PgType::Numeric);
+    }
+
+    #[test]
+    fn parse_view_with_wildcard_select() {
+        let sql = r#"
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL,
+                age INTEGER
+            );
+            CREATE VIEW all_users AS SELECT * FROM users;
+        "#
+        .to_string();
+
+        let schema = parse_migrations(&[sql]).unwrap();
+        let view = schema.find_table("all_users").unwrap();
+        assert!(view.is_view);
+        // SELECT * expands to all source table columns.
+        assert_eq!(view.columns.len(), 3);
+        let id_col = view.find_column("id").unwrap();
+        assert_eq!(id_col.pg_type, PgType::Integer);
+        let name_col = view.find_column("name").unwrap();
+        assert_eq!(name_col.pg_type, PgType::Text);
+    }
+
+    #[test]
+    fn parse_view_with_qualified_wildcard() {
+        let sql = r#"
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL
+            );
+            CREATE VIEW user_view AS SELECT users.* FROM users;
+        "#
+        .to_string();
+
+        let schema = parse_migrations(&[sql]).unwrap();
+        let view = schema.find_table("user_view").unwrap();
+        assert!(view.is_view);
+        assert_eq!(view.columns.len(), 2);
+        let id_col = view.find_column("id").unwrap();
+        assert_eq!(id_col.pg_type, PgType::Integer);
+    }
+
+    #[test]
+    fn parse_view_join_qualifier_disambiguates_columns() {
+        // Both tables have an `id` column; qualifier should resolve to the
+        // correct type rather than always picking the first table's column.
+        let sql = r#"
+            CREATE TABLE users (
+                id SERIAL PRIMARY KEY,
+                name TEXT NOT NULL
+            );
+            CREATE TABLE posts (
+                id SERIAL PRIMARY KEY,
+                user_id INTEGER NOT NULL,
+                title TEXT NOT NULL
+            );
+            CREATE VIEW post_details AS
+                SELECT posts.id, users.name
+                FROM users JOIN posts ON users.id = posts.user_id;
+        "#
+        .to_string();
+
+        let schema = parse_migrations(&[sql]).unwrap();
+        let view = schema.find_table("post_details").unwrap();
+        assert!(view.is_view);
+        assert_eq!(view.columns.len(), 2);
+        let id_col = view.find_column("id").unwrap();
+        assert_eq!(id_col.pg_type, PgType::Integer);
+        let name_col = view.find_column("name").unwrap();
+        assert_eq!(name_col.pg_type, PgType::Text);
     }
 
     #[test]

@@ -67,7 +67,78 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
         });
     }
 
+    // --- 2. Fetch materialized views ---
+    // information_schema.tables does not include materialized views (relkind='m');
+    // they must be discovered via pg_catalog.pg_matviews.
+    let matviews_query = r#"
+        SELECT schemaname AS table_schema, matviewname AS table_name
+        FROM pg_catalog.pg_matviews
+        WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
+        ORDER BY schemaname, matviewname
+    "#;
+    let matview_rows = client.query(matviews_query, &[]).await?;
+
+    for row in &matview_rows {
+        let table_schema: String = row.get("table_schema");
+        let table_name: String = row.get("table_name");
+
+        let columns = fetch_matview_columns(&client, &table_schema, &table_name).await?;
+
+        schema.add_table(Table {
+            schema: table_schema,
+            name: table_name,
+            columns,
+            primary_key: None,
+            foreign_keys: vec![],
+            unique_constraints: vec![],
+            is_view: true,
+        });
+    }
+
     Ok(schema)
+}
+
+/// Fetch columns for a materialized view using pg_catalog.pg_attribute.
+/// information_schema.columns excludes materialized views (relkind = 'm'),
+/// so we query the system catalog directly.
+async fn fetch_matview_columns(
+    client: &tokio_postgres::Client,
+    schema: &str,
+    table: &str,
+) -> Result<Vec<Column>> {
+    let query = r#"
+        SELECT
+            a.attname AS column_name,
+            pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,
+            (NOT a.attnotnull) AS is_nullable
+        FROM pg_catalog.pg_class c
+        JOIN pg_catalog.pg_namespace n ON n.oid = c.relnamespace
+        JOIN pg_catalog.pg_attribute a ON a.attrelid = c.oid
+        WHERE n.nspname = $1
+          AND c.relname = $2
+          AND c.relkind = 'm'
+          AND a.attnum > 0
+          AND NOT a.attisdropped
+        ORDER BY a.attnum
+    "#;
+    let rows = client.query(query, &[&schema, &table]).await?;
+
+    let mut columns = Vec::new();
+    for row in rows {
+        let name: String = row.get("column_name");
+        let data_type: String = row.get("data_type");
+        let is_nullable: bool = row.get("is_nullable");
+
+        columns.push(Column {
+            name,
+            pg_type: PgType::from_sql_name(&data_type),
+            is_nullable,
+            has_default: false,
+            is_generated: false,
+        });
+    }
+
+    Ok(columns)
 }
 
 async fn fetch_columns(
