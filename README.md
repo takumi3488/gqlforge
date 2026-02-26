@@ -4,6 +4,12 @@ Gqlforge is an open-source solution for building high-performance GraphQL backen
 
 ## Installation
 
+### Homebrew (macOS / Linux)
+
+```bash
+brew install takumi3488/tap/gqlforge
+```
+
 ### Shell (macOS / Linux)
 
 ```bash
