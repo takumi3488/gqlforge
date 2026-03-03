@@ -15,4 +15,4 @@ Fixes #... _(Replace "..." with the issue number)_
 - [ ] I have updated the [documentation] accordingly.
 - [ ] I have performed a self-review of my code.
 
-[documentation]: https://github.com/takumi3488/gqlforge/tree/develop/docs
+[documentation]: https://github.com/smartcrabai/gqlforge/tree/develop/docs

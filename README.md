@@ -7,27 +7,27 @@ Gqlforge is an open-source solution for building high-performance GraphQL backen
 ### Homebrew (macOS / Linux)
 
 ```bash
-brew install takumi3488/tap/gqlforge
+brew install smartcrabai/tap/gqlforge
 ```
 
 ### Shell (macOS / Linux)
 
 ```bash
 curl --proto '=https' --tlsv1.2 -LsSf \
-  https://github.com/takumi3488/gqlforge/releases/latest/download/gqlforge-installer.sh | sh
+  https://github.com/smartcrabai/gqlforge/releases/latest/download/gqlforge-installer.sh | sh
 ```
 
 ### Cargo
 
 ```bash
-cargo install --git https://github.com/takumi3488/gqlforge
+cargo install --git https://github.com/smartcrabai/gqlforge
 ```
 
 ### Docker
 
 ```bash
-docker pull ghcr.io/takumi3488/gqlforge/gqlforge
-docker run -p 8000:8000 -p 8081:8081 ghcr.io/takumi3488/gqlforge/gqlforge
+docker pull ghcr.io/smartcrabai/gqlforge/gqlforge
+docker run -p 8000:8000 -p 8081:8081 ghcr.io/smartcrabai/gqlforge/gqlforge
 ```
 
 ## Get Started
