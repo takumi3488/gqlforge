@@ -28,6 +28,7 @@ pub(super) fn sanitize_graphql_name(name: &str) -> String {
     result
 }
 
+#[expect(clippy::too_many_lines, reason = "handles all Postgres type conversions")]
 pub(super) fn row_value_to_const(
     row: &tokio_postgres::Row,
     idx: usize,
@@ -41,64 +42,54 @@ pub(super) fn row_value_to_const(
     match *ty {
         Type::BOOL => {
             let v: Option<bool> = row.try_get(idx)?;
-            Ok(v.map(ConstValue::Boolean).unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, ConstValue::Boolean))
         }
         Type::INT2 => {
             let v: Option<i16> = row.try_get(idx)?;
-            Ok(v.map(|n| ConstValue::Number(n.into()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |n| ConstValue::Number(n.into())))
         }
         Type::INT4 => {
             let v: Option<i32> = row.try_get(idx)?;
-            Ok(v.map(|n| ConstValue::Number(n.into()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |n| ConstValue::Number(n.into())))
         }
         Type::INT8 => {
             let v: Option<i64> = row.try_get(idx)?;
-            Ok(v.map(|n| ConstValue::Number(n.into()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |n| ConstValue::Number(n.into())))
         }
         Type::FLOAT4 => {
             let v: Option<f32> = row.try_get(idx)?;
-            Ok(v.and_then(|n| serde_json::Number::from_f64(n as f64))
-                .map(ConstValue::Number)
-                .unwrap_or(ConstValue::Null))
+            Ok(v.and_then(|n| serde_json::Number::from_f64(f64::from(n)))
+                .map_or(ConstValue::Null, ConstValue::Number))
         }
         Type::FLOAT8 => {
             let v: Option<f64> = row.try_get(idx)?;
             Ok(v.and_then(serde_json::Number::from_f64)
-                .map(ConstValue::Number)
-                .unwrap_or(ConstValue::Null))
+                .map_or(ConstValue::Null, ConstValue::Number))
         }
         Type::JSON | Type::JSONB => {
             let v: Option<serde_json::Value> = row.try_get(idx)?;
             Ok(
-                v.map(|j| ConstValue::from_json(j).unwrap_or(ConstValue::Null))
-                    .unwrap_or(ConstValue::Null),
+                v.map_or(ConstValue::Null, |j| ConstValue::from_json(j).unwrap_or(ConstValue::Null)),
             )
         }
         // --- chrono-based datetime types ---
         Type::TIMESTAMP => {
             let v: Option<chrono::NaiveDateTime> = row.try_get(idx)?;
             Ok(
-                v.map(|dt| ConstValue::String(dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string()))
-                    .unwrap_or(ConstValue::Null),
+                v.map_or(ConstValue::Null, |dt| ConstValue::String(dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string())),
             )
         }
         Type::TIMESTAMPTZ => {
             let v: Option<chrono::DateTime<chrono::Utc>> = row.try_get(idx)?;
-            Ok(v.map(|dt| ConstValue::String(dt.to_rfc3339()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |dt| ConstValue::String(dt.to_rfc3339())))
         }
         Type::DATE => {
             let v: Option<chrono::NaiveDate> = row.try_get(idx)?;
-            Ok(v.map(|d| ConstValue::String(d.to_string()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |d| ConstValue::String(d.to_string())))
         }
         Type::TIME => {
             let v: Option<chrono::NaiveTime> = row.try_get(idx)?;
-            Ok(v.map(|t| ConstValue::String(t.to_string()))
-                .unwrap_or(ConstValue::Null))
+            Ok(v.map_or(ConstValue::Null, |t| ConstValue::String(t.to_string())))
         }
         // --- RawBytes-based types ---
         Type::TIMETZ => {
@@ -155,8 +146,7 @@ pub(super) fn row_value_to_const(
             if matches!(ty.kind(), Kind::Enum(_)) {
                 let v: Option<EnumText> = row.try_get(idx)?;
                 return Ok(v
-                    .map(|e| ConstValue::String(e.0))
-                    .unwrap_or(ConstValue::Null));
+                    .map_or(ConstValue::Null, |e| ConstValue::String(e.0)));
             }
 
             // Check for array types.
@@ -170,16 +160,13 @@ pub(super) fn row_value_to_const(
 
             // Fallback: try to get as String (works for TEXT, VARCHAR, BPCHAR, NAME,
             // UNKNOWN).
-            match row.try_get::<_, Option<String>>(idx) {
-                Ok(v) => Ok(v.map(ConstValue::String).unwrap_or(ConstValue::Null)),
-                Err(_) => {
-                    tracing::warn!(
-                        column = col.name(),
-                        pg_type = %ty,
-                        "unsupported PostgreSQL type, returning null"
-                    );
-                    Ok(ConstValue::Null)
-                }
+            if let Ok(v) = row.try_get::<_, Option<String>>(idx) { Ok(v.map_or(ConstValue::Null, ConstValue::String)) } else {
+                tracing::warn!(
+                    column = col.name(),
+                    pg_type = %ty,
+                    "unsupported PostgreSQL type, returning null"
+                );
+                Ok(ConstValue::Null)
             }
         }
     }

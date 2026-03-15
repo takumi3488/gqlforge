@@ -62,11 +62,11 @@ impl From<Grpc> for Http {
         // remove the last
         // method: package.service.method
         // remove the method from the end.
-        let parts = grpc.method.split(".").collect::<Vec<_>>();
-        let method = parts[..parts.len() - 1].join(".").to_string();
+        let parts = grpc.method.split('.').collect::<Vec<_>>();
+        let method = parts[..parts.len() - 1].join(".").clone();
         let endpoint = parts[parts.len() - 1].to_string();
 
-        let new_url = format!("{}/{}/{}", url, method, endpoint);
+        let new_url = format!("{url}/{method}/{endpoint}");
         let mut headers = grpc.headers;
         headers.push(crate::core::config::KeyValue {
             key: HEADER_CONNECT_PROTOCOL_VERSION.to_string(),
@@ -94,6 +94,7 @@ impl From<Grpc> for Http {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use serde_json::{Value, json};
 
     use super::*;
@@ -105,11 +106,11 @@ mod tests {
             url: "http://localhost:8080".to_string(),
             method: "package.service.method".to_string(),
             body: Some(json!({"key": "value"})),
-            headers: Default::default(),
-            batch_key: Default::default(),
-            dedupe: Default::default(),
-            select: Default::default(),
-            on_response_body: Default::default(),
+            headers: Vec::new(),
+            batch_key: Vec::new(),
+            dedupe: None,
+            select: None,
+            on_response_body: None,
         };
 
         let http = Http::from(grpc);
@@ -124,12 +125,12 @@ mod tests {
         let grpc = Grpc {
             url: "http://localhost:8080".to_string(),
             method: "package.service.method".to_string(),
-            body: Default::default(),
-            headers: Default::default(),
-            batch_key: Default::default(),
-            dedupe: Default::default(),
-            select: Default::default(),
-            on_response_body: Default::default(),
+            body: None,
+            headers: Vec::new(),
+            batch_key: Vec::new(),
+            dedupe: None,
+            select: None,
+            on_response_body: None,
         };
 
         let http = Http::from(grpc);
@@ -144,10 +145,10 @@ mod tests {
             method: "a.b.c".to_string(),
             body: None,
             headers: vec![KeyValue { key: "X-Foo".to_string(), value: "bar".to_string() }],
-            batch_key: Default::default(),
-            dedupe: Default::default(),
-            select: Default::default(),
-            on_response_body: Default::default(),
+            batch_key: Vec::new(),
+            dedupe: None,
+            select: None,
+            on_response_body: None,
         };
 
         let http = Http::from(grpc);

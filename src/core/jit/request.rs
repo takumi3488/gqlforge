@@ -1,5 +1,4 @@
 use std::collections::HashMap;
-use std::ops::DerefMut;
 
 use async_graphql_value::ConstValue;
 use gqlforge_valid::Validator;
@@ -25,18 +24,22 @@ pub struct Request<V> {
 // NOTE: This is hot code and should allocate minimal memory
 impl From<async_graphql::Request> for Request<ConstValue> {
     fn from(mut value: async_graphql::Request) -> Self {
-        let variables = std::mem::take(value.variables.deref_mut());
+        let variables = std::mem::take(&mut *value.variables);
 
         Self {
             query: value.query,
             operation_name: value.operation_name,
-            variables: Variables::from_iter(variables.into_iter().map(|(k, v)| (k.to_string(), v))),
+            variables: variables.into_iter().map(|(k, v)| (k.to_string(), v)).collect::<Variables<_>>(),
             extensions: value.extensions.0,
         }
     }
 }
 
 impl Request<ConstValue> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn create_plan(
         &self,
         blueprint: &Blueprint,
@@ -61,6 +64,7 @@ impl Request<ConstValue> {
 }
 
 impl<V> Request<V> {
+    #[must_use] 
     pub fn new(query: &str) -> Self {
         Self {
             query: query.to_string(),
@@ -70,6 +74,7 @@ impl<V> Request<V> {
         }
     }
 
+    #[must_use]
     pub fn variables(self, vars: impl IntoIterator<Item = (String, V)>) -> Self {
         Self { variables: Variables::from_iter(vars), ..self }
     }

@@ -27,18 +27,21 @@ pub struct EvalContext<'a, Ctx: ResolverContextLike> {
 }
 
 impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
+    #[must_use]
     pub fn with_value(&mut self, value: Value) -> EvalContext<'a, Ctx> {
         let mut ctx = self.clone();
         ctx.graphql_ctx_value = Some(Arc::new(value));
         ctx
     }
 
+    #[must_use]
     pub fn with_args(&self, args: Value) -> EvalContext<'a, Ctx> {
         let mut ctx = self.clone();
         ctx.graphql_ctx_args = Some(Arc::new(args));
         ctx
     }
 
+    #[must_use] 
     pub fn is_query(&self) -> bool {
         self.graphql_ctx.is_query()
     }
@@ -52,6 +55,7 @@ impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
         }
     }
 
+    #[must_use] 
     pub fn value(&self) -> Option<&Value> {
         self.graphql_ctx.value()
     }
@@ -79,32 +83,37 @@ impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
         }
     }
 
+    #[must_use] 
     pub fn headers(&self) -> &HeaderMap {
         &self.request_ctx.allowed_headers
     }
 
+    #[must_use] 
     pub fn header(&self, key: &str) -> Option<&str> {
         let value = self.headers().get(key)?;
 
         value.to_str().ok()
     }
 
+    #[must_use] 
     pub fn env_var(&self, key: &str) -> Option<Cow<'_, str>> {
         self.request_ctx.runtime.env.get(key)
     }
 
+    #[must_use] 
     pub fn var(&self, key: &str) -> Option<&str> {
         let vars = &self.request_ctx.server.vars;
 
-        vars.get(key).map(|v| v.as_str())
+        vars.get(key).map(std::string::String::as_str)
     }
 
+    #[must_use] 
     pub fn vars(&self) -> &BTreeMap<String, String> {
         &self.request_ctx.server.vars
     }
 
     pub fn add_error(&self, error: ServerError) {
-        self.graphql_ctx.add_error(error)
+        self.graphql_ctx.add_error(error);
     }
 }
 
@@ -151,7 +160,7 @@ fn format_selection_field(
     let arguments = format_selection_field_arguments(field);
     let selection_set = format_selection_set(field.selection_set(), related_fields);
 
-    let mut output = format!("{}{}", name, arguments);
+    let mut output = format!("{name}{arguments}");
 
     if let Some(directives) = field.directives() {
         let directives = print_directives(directives.iter());
@@ -179,7 +188,7 @@ fn format_selection_field_arguments(field: &SelectionField) -> Cow<'static, str>
 
     let args = arguments
         .iter()
-        .map(|(name, value)| format!("{}: {}", name, value))
+        .map(|(name, value)| format!("{name}: {value}"))
         .collect::<Vec<_>>()
         .join(",");
 
@@ -207,6 +216,7 @@ pub fn get_path_value<'a, T: AsRef<str>>(input: &'a Value, path: &[T]) -> Option
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::Value;
     use serde_json::json;
 

@@ -4,17 +4,14 @@ use nom::character::complete::char;
 use nom::combinator::map;
 use nom::multi::many0;
 use nom::sequence::delimited;
-use nom::{Finish, IResult, Parser};
+use nom::{IResult, Parser};
 
-use super::*;
+use super::{Mustache, Segment};
 
 impl Mustache {
+    #[must_use]
     pub fn parse(str: &str) -> Mustache {
-        let result = parse_mustache(str).finish();
-        match result {
-            Ok((_, mustache)) => mustache,
-            Err(_) => Mustache::from(vec![Segment::Literal(str.to_string())]),
-        }
+        parse_mustache(str)
     }
 }
 
@@ -31,7 +28,7 @@ fn parse_name(input: &str) -> IResult<&str, String> {
 
     nom::combinator::map(parser, |(_, a, b, _)| {
         let b: String = b.into_iter().collect();
-        format!("{}{}", a, b)
+        format!("{a}{b}")
     })
     .parse(input)
 }
@@ -51,7 +48,7 @@ fn parse_expression(input: &str) -> IResult<&str, Segment> {
     .parse(input)
 }
 
-fn parse_segment(input: &str) -> IResult<&str, Vec<Segment>> {
+fn parse_segments(input: &str) -> Vec<Segment> {
     let expression_result = many0(alt((
         parse_expression,
         map(take_until("{{"), |txt: &str| {
@@ -62,30 +59,27 @@ fn parse_segment(input: &str) -> IResult<&str, Vec<Segment>> {
 
     if let Ok((remaining, segments)) = expression_result {
         if remaining.is_empty() {
-            Ok((remaining, segments))
+            segments
         } else {
             let mut segments = segments;
             segments.push(Segment::Literal(remaining.to_string()));
-            Ok(("", segments))
+            segments
         }
     } else {
-        Ok(("", vec![Segment::Literal(input.to_string())]))
+        vec![Segment::Literal(input.to_string())]
     }
 }
 
-fn parse_mustache(input: &str) -> IResult<&str, Mustache> {
-    map(parse_segment, |segments| {
-        Mustache::from(segments.into_iter().filter(|seg| match seg {
-            Segment::Literal(s) => (!s.is_empty()) && s != "\"",
-            _ => true,
-        }))
-    })
-    .parse(input)
+fn parse_mustache(input: &str) -> Mustache {
+    let segments = parse_segments(input);
+    Mustache::from(segments.into_iter().filter(|seg| match seg {
+        Segment::Literal(s) => (!s.is_empty()) && s != "\"",
+        Segment::Expression(_) => true,
+    }))
 }
 
 #[cfg(test)]
 mod tests {
-
     use pretty_assertions::assert_eq;
 
     use crate::core::mustache::{Mustache, Segment};

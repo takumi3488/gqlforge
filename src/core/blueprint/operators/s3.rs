@@ -6,11 +6,13 @@ use crate::core::ir::model::{IO, IR};
 use crate::core::mustache::Mustache;
 use crate::core::s3::request_template::RequestTemplate;
 
+#[derive(Clone, Copy)]
 pub struct CompileS3<'a> {
     pub config_module: &'a ConfigModule,
     pub s3: &'a S3,
 }
 
+#[must_use] 
 pub fn compile_s3(inputs: CompileS3) -> Valid<IR, BlueprintError> {
     let s3 = inputs.s3;
     let dedupe = s3.dedupe.unwrap_or_default();
@@ -30,7 +32,7 @@ pub fn compile_s3(inputs: CompileS3) -> Valid<IR, BlueprintError> {
         S3Operation::List => Valid::succeed(()),
     };
 
-    key_valid.map(|_| {
+    key_valid.map(|()| {
         let bucket = Mustache::parse(&s3.bucket);
         let key = s3.key.as_ref().map(|v| Mustache::parse(v));
         let prefix = s3.prefix.as_ref().map(|v| Mustache::parse(v));

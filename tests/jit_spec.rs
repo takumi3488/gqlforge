@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use core::str;
     use std::sync::Arc;
 
@@ -82,7 +83,7 @@ mod tests {
     async fn test_executor_fragments() {
         //  NOTE: This test makes a real HTTP call
         let request = Request::new(
-            r#"
+            r"
             fragment UserPII on User {
               name
               email
@@ -96,7 +97,7 @@ mod tests {
                 username
               }
             }
-        "#,
+        ",
         );
         let executor = TestExecutor::try_new().await.unwrap();
         let response = executor.run(request).await.unwrap();
@@ -108,7 +109,7 @@ mod tests {
     async fn test_executor_fragments_nested() {
         //  NOTE: This test makes a real HTTP call
         let request = Request::new(
-            r#"
+            r"
             fragment UserPII on User {
               name
               email
@@ -125,7 +126,7 @@ mod tests {
                 }
               }
             }
-        "#,
+        ",
         );
         let executor = TestExecutor::try_new().await.unwrap();
         let response = executor.run(request).await.unwrap();
@@ -156,14 +157,14 @@ mod tests {
     #[tokio::test]
     async fn test_executor_variables() {
         //  NOTE: This test makes a real HTTP call
-        let query = r#"
+        let query = r"
             query user($id: Int!) {
               user(id: $id) {
                 id
                 name
               }
             }
-        "#;
+        ";
         let request = Request::new(query);
         let executor = TestExecutor::try_new().await.unwrap();
 
@@ -180,22 +181,22 @@ mod tests {
 
     #[tokio::test]
     async fn test_operation_plan_cache() {
-        fn get_id_value(data: serde_json::Value) -> Option<i64> {
+        fn get_id_value(data: &serde_json::Value) -> Option<i64> {
             data.get_key("data")
                 .and_then(|v| v.get_key("user"))
                 .and_then(|v| v.get_key("id"))
-                .and_then(|u| u.as_i64())
+                .and_then(serde_json::Value::as_i64)
         }
 
         //  NOTE: This test makes a real HTTP call
-        let query = r#"
+        let query = r"
             query user($id: Int!) {
               user(id: $id) {
                 id
                 name
               }
             }
-        "#;
+        ";
         let request = Request::new(query);
         let executor = TestExecutor::try_new().await.unwrap();
 
@@ -207,13 +208,13 @@ mod tests {
         let request = request.variables([("id".into(), ConstValue::from(1))]);
         let response = executor.run(request).await.unwrap();
 
-        assert_eq!(get_id_value(response).unwrap(), 1);
+        assert_eq!(get_id_value(&response).unwrap(), 1);
 
         let request = Request::new(query);
         let request = request.variables([("id".into(), ConstValue::from(2))]);
         let response = executor.run(request).await.unwrap();
 
-        assert_eq!(get_id_value(response).unwrap(), 2);
+        assert_eq!(get_id_value(&response).unwrap(), 2);
     }
 
     #[tokio::test]
@@ -230,7 +231,7 @@ mod tests {
     async fn test_skip() {
         //  NOTE: This test makes a real HTTP call
         let mut request = Request::new(
-            r#"
+            r"
                 query ($TRUE: Boolean!){
                   users {
                     id @skip(if: true)
@@ -240,7 +241,7 @@ mod tests {
                     phone @skip(if: false) @include(if: true)
                   }
                 }
-        "#,
+        ",
         );
         request
             .variables

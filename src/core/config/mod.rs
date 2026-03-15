@@ -15,7 +15,7 @@ mod directive;
 pub mod directives;
 mod from_document;
 pub mod group_by;
-mod headers;
+pub mod headers;
 mod into_document;
 mod key_values;
 mod npo;

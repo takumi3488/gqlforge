@@ -91,29 +91,28 @@ impl Display for Error {
         match self {
             Error::InitializationFailed => write!(f, "Failed to initialize worker"),
             Error::Communication => write!(f, "Worker communication error"),
-            Error::SerdeJson(error) => write!(f, "Serde Json Error: {}", error),
+            Error::SerdeJson(error) => write!(f, "Serde Json Error: {error}"),
             Error::RequestCloneFailed => write!(f, "Request Clone Failed"),
             Error::HyperHeaderStr(error) => {
-                write!(f, "Hyper Header To Str Error: {}", error)
+                write!(f, "Hyper Header To Str Error: {error}")
             }
             Error::JsRuntimeStopped => write!(f, "JS Runtime Stopped Error"),
-            Error::CLI(msg) => write!(f, "CLI Error: {}", msg),
-            Error::Join(error) => write!(f, "Join Error: {}", error),
+            Error::CLI(msg) => write!(f, "CLI Error: {msg}"),
+            Error::Join(error) => write!(f, "Join Error: {error}"),
             Error::RuntimeNotInitialized => write!(f, "Runtime not initialized"),
             Error::InvalidFunction(function_name) => {
-                write!(f, "{} is not a function", function_name)
+                write!(f, "{function_name} is not a function")
             }
-            Error::Rquickjs(error) => write!(f, "Rquickjs error: {}", error),
-            Error::DeserializeFailed(error) => write!(f, "Deserialize Failed: {}", error),
+            Error::Rquickjs(error) => write!(f, "Rquickjs error: {error}"),
+            Error::DeserializeFailed(error) => write!(f, "Deserialize Failed: {error}"),
             Error::GlobalThisNotInitialised(error) => {
-                write!(f, "globalThis not initialized: {}", error)
+                write!(f, "globalThis not initialized: {error}")
             }
             Error::FunctionValueParseError(error, name) => write!(
                 f,
-                "Error: {}\nUnable to parse value from js function: {} maybe because it's not returning a string?",
-                error, name
+                "Error: {error}\nUnable to parse value from js function: {name} maybe because it's not returning a string?"
             ),
-            Error::Anyhow(msg) => write!(f, "Error: {}", msg),
+            Error::Anyhow(msg) => write!(f, "Error: {msg}"),
         }
     }
 }

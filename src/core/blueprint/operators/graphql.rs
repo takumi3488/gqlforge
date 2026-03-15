@@ -48,11 +48,12 @@ fn create_related_fields(
         for type_name in &union_.types {
             map.extend(create_related_fields(config, type_name, visited).0);
         }
-    };
+    }
 
     RelatedFields(map)
 }
 
+#[must_use] 
 pub fn compile_graphql(
     config: &ConfigModule,
     operation_type: &GraphQLOperationType,
@@ -63,7 +64,7 @@ pub fn compile_graphql(
 
     let mustache = match helpers::headers::to_mustache_headers(&graphql.headers).to_result() {
         Ok(mustache) => Valid::succeed(mustache),
-        Err(err) => Valid::from_validation_err(BlueprintError::from_validation_string(err)),
+        Err(err) => Valid::from_validation_err(BlueprintError::from_validation_string(&err)),
     };
 
     Valid::succeed(graphql.url.as_str())

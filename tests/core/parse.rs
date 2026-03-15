@@ -1,3 +1,4 @@
+#![expect(clippy::unwrap_used, reason = "test code")]
 extern crate core;
 
 use std::borrow::Cow;
@@ -23,7 +24,7 @@ use markdown::mdast::Node;
 
 use super::file::File;
 use super::http::Http;
-use super::model::*;
+use super::model::{Mock, APIRequest, Annotation};
 use super::runtime::ExecutionSpec;
 
 struct Env {
@@ -43,11 +44,13 @@ impl Env {
 }
 
 impl ExecutionSpec {
+    #[expect(clippy::too_many_lines, reason = "test spec parser")]
+    #[expect(clippy::unused_async, reason = "async kept for caller compatibility")]
     pub async fn from_source(path: &Path, contents: String) -> anyhow::Result<Self> {
         let ast = markdown::to_mdast(&contents, &ParseOptions::default()).unwrap();
         let mut children = ast
             .children()
-            .unwrap_or_else(|| panic!("Failed to parse {:?}: empty file unexpected", path))
+            .unwrap_or_else(|| panic!("Failed to parse {}: empty file unexpected", path.display()))
             .iter()
             .peekable();
 
@@ -72,15 +75,14 @@ impl ExecutionSpec {
                                 name = Some(text.value.clone());
                             } else {
                                 return Err(anyhow!(
-                                    "Unexpected content of level 1 heading in {:?}: {:#?}",
-                                    path,
-                                    heading
+                                    "Unexpected content of level 1 heading in {}: {heading:#?}",
+                                    path.display()
                                 ));
                             }
                         } else {
                             return Err(anyhow!(
-                                "Unexpected double-declaration of test name in {:?}",
-                                path
+                                "Unexpected double-declaration of test name in {}",
+                                path.display()
                             ));
                         }
 
@@ -102,9 +104,9 @@ impl ExecutionSpec {
                                 }
                                 _ => {
                                     return Err(anyhow!(
-                                        "Unexpected header annotation {:?} in {:?}",
+                                        "Unexpected header annotation {:?} in {}",
                                         expect.value,
-                                        path,
+                                        path.display(),
                                     ));
                                 }
                             }
@@ -114,29 +116,28 @@ impl ExecutionSpec {
                         return if runner.is_none() {
                             if let Some(Node::Text(text)) = heading.children.first() {
                                 Err(anyhow!(
-                                    "Unexpected runner annotation {:?} in {:?}",
+                                    "Unexpected runner annotation {:?} in {}",
                                     text.value,
-                                    path,
+                                    path.display(),
                                 ))
                             } else {
                                 Err(anyhow!(
-                                    "Unexpected content of level 5 heading in {:?}: {:#?}",
-                                    path,
-                                    heading
+                                    "Unexpected content of level 5 heading in {}: {heading:#?}",
+                                    path.display()
                                 ))
                             }
                         } else {
                             Err(anyhow!(
-                                "Unexpected double-declaration of runner annotation in {:?}",
-                                path
+                                "Unexpected double-declaration of runner annotation in {}",
+                                path.display()
                             ))
                         };
                     } else if heading.depth == 4 {
                     } else {
                         return Err(anyhow!(
-                            "Unexpected level {} heading in {:?}: {:#?}",
+                            "Unexpected level {} heading in {}: {:#?}",
                             heading.depth,
-                            path,
+                            path.display(),
                             heading
                         ));
                     }
@@ -145,9 +146,9 @@ impl ExecutionSpec {
                     // Parse following code block
                     let (content, lang, meta) = {
                         (
-                            code.value.to_owned(),
-                            code.lang.to_owned(),
-                            code.meta.to_owned(),
+                            code.value.clone(),
+                            code.lang.clone(),
+                            code.meta.clone(),
                         )
                     };
                     if let Some(meta_str) = meta.as_ref().filter(|s| s.contains('@')) {
@@ -156,17 +157,16 @@ impl ExecutionSpec {
                         if let Some(name) = name.strip_prefix("file:") {
                             if files.insert(name.to_string(), content).is_some() {
                                 return Err(anyhow!(
-                                    "Double declaration of file {:?} in {:#?}",
-                                    name,
-                                    path
+                                    "Double declaration of file {name:?} in {}",
+                                    path.display()
                                 ));
                             }
                         } else {
                             let lang = match lang {
                                 Some(x) => Ok(x),
                                 None => Err(anyhow!(
-                                    "Unexpected code block with no specific language in {:?}",
-                                    path
+                                    "Unexpected code block with no specific language in {}",
+                                    path.display()
                                 )),
                             }?;
 
@@ -180,7 +180,7 @@ impl ExecutionSpec {
                                 }
                                 "schema" => {
                                     // Schemas configs are only parsed if the test isn't skipped.
-                                    let name = format!("schema_{}.graphql", links_counter);
+                                    let name = format!("schema_{links_counter}.graphql");
                                     files.insert(name.clone(), content);
                                     config.links.push(Link { src: name, ..Default::default() });
                                     links_counter += 1;
@@ -190,15 +190,15 @@ impl ExecutionSpec {
                                         mock = match source {
                                             Source::Json => Ok(serde_json::from_str(&content)?),
                                             Source::Yml => Ok(serde_yaml_ng::from_str(&content)?),
-                                            _ => Err(anyhow!(
-                                                "Unexpected language in mock block in {:?} (only JSON and YAML are supported)",
-                                                path
+                                            Source::GraphQL => Err(anyhow!(
+                                                "Unexpected language in mock block in {} (only JSON and YAML are supported)",
+                                                path.display()
                                             )),
                                         }?;
                                     } else {
                                         return Err(anyhow!(
-                                            "Unexpected number of mock blocks in {:?} (only one is allowed)",
-                                            path
+                                            "Unexpected number of mock blocks in {} (only one is allowed)",
+                                            path.display()
                                         ));
                                     }
                                 }
@@ -207,15 +207,15 @@ impl ExecutionSpec {
                                         env = match source {
                                             Source::Json => Ok(serde_json::from_str(&content)?),
                                             Source::Yml => Ok(serde_yaml_ng::from_str(&content)?),
-                                            _ => Err(anyhow!(
-                                                "Unexpected language in env block in {:?} (only JSON and YAML are supported)",
-                                                path
+                                            Source::GraphQL => Err(anyhow!(
+                                                "Unexpected language in env block in {} (only JSON and YAML are supported)",
+                                                path.display()
                                             )),
                                         }?;
                                     } else {
                                         return Err(anyhow!(
-                                            "Unexpected number of env blocks in {:?} (only one is allowed)",
-                                            path
+                                            "Unexpected number of env blocks in {} (only one is allowed)",
+                                            path.display()
                                         ));
                                     }
                                 }
@@ -224,33 +224,30 @@ impl ExecutionSpec {
                                         test = match source {
                                             Source::Json => Ok(serde_json::from_str(&content)?),
                                             Source::Yml => Ok(serde_yaml_ng::from_str(&content)?),
-                                            _ => Err(anyhow!(
-                                                "Unexpected language in test block in {:?} (only JSON and YAML are supported)",
-                                                path
+                                            Source::GraphQL => Err(anyhow!(
+                                                "Unexpected language in test block in {} (only JSON and YAML are supported)",
+                                                path.display()
                                             )),
                                         }?;
                                     } else {
                                         return Err(anyhow!(
-                                            "Unexpected number of test blocks in {:?} (only one is allowed)",
-                                            path
+                                            "Unexpected number of test blocks in {} (only one is allowed)",
+                                            path.display()
                                         ));
                                     }
                                 }
                                 _ => {
                                     return Err(anyhow!(
-                                        "Unexpected component {:?} in {:?}: {:#?}",
-                                        name,
-                                        path,
-                                        meta
+                                        "Unexpected component {name:?} in {}: {meta:#?}",
+                                        path.display()
                                     ));
                                 }
                             }
                         }
                     } else {
                         return Err(anyhow!(
-                            "Unexpected content of code in {:?}: {:#?}",
-                            path,
-                            meta
+                            "Unexpected content of code in {}: {meta:#?}",
+                            path.display()
                         ));
                     }
                 }
@@ -264,14 +261,14 @@ impl ExecutionSpec {
                     // above to escape ThematicBreaks like
                     // `---`, `***` or `___`
                 }
-                _ => return Err(anyhow!("Unexpected node in {:?}: {:#?}", path, node)),
+                _ => return Err(anyhow!("Unexpected node in {}: {node:#?}", path.display())),
             }
         }
 
         if links_counter == 0 {
             return Err(anyhow!(
-                "Unexpected blocks in {:?}: You must define a GraphQL Schema in an execution test.",
-                path,
+                "Unexpected blocks in {}: You must define a GraphQL Schema in an execution test.",
+                path.display()
             ));
         }
 

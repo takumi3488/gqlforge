@@ -96,6 +96,7 @@ pub struct Telemetry {
 }
 
 impl Telemetry {
+    #[must_use] 
     pub fn merge_right(mut self, other: Self) -> Self {
         self.export = match (&self.export, other.export) {
             (None, None) => None,
@@ -108,6 +109,10 @@ impl Telemetry {
         self
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn render_mustache(&mut self, reader_ctx: &ConfigReaderContext) -> Result<()> {
         if let Some(TelemetryExporter::Otlp(otlp)) = &mut self.export {
             let url_tmpl = Mustache::parse(&otlp.url);

@@ -27,7 +27,7 @@ const DEFAULT_SCHEMA_DEFINITION: &SchemaDefinition = &SchemaDefinition {
     subscription: None,
 };
 
-pub fn from_document(doc: ServiceDocument) -> Valid<Config, String> {
+pub fn from_document(doc: &ServiceDocument) -> Valid<Config, String> {
     let type_definitions: Vec<_> = doc
         .definitions
         .iter()
@@ -40,8 +40,8 @@ pub fn from_document(doc: ServiceDocument) -> Valid<Config, String> {
     let types = to_types(&type_definitions);
     let unions = to_union_types(&type_definitions);
     let enums = to_enum_types(&type_definitions);
-    let schema = schema_definition(&doc).map(to_root_schema);
-    schema_definition(&doc).and_then(|sd| {
+    let schema = schema_definition(doc).map(to_root_schema);
+    schema_definition(doc).and_then(|sd| {
         server(sd)
             .fuse(upstream(sd))
             .fuse(types)
@@ -53,7 +53,7 @@ pub fn from_document(doc: ServiceDocument) -> Valid<Config, String> {
             .map(
                 |(server, upstream, types, unions, enums, schema, links, telemetry)| {
                     let runtime_config = RuntimeConfig { server, upstream, links, telemetry };
-                    let config = Config { types, unions, enums, schema, ..Default::default() };
+                    let config = Config { schema, types, unions, enums, ..Default::default() };
 
                     config.with_runtime_config(runtime_config)
                 },
@@ -76,7 +76,7 @@ fn process_schema_directives<T: DirectiveCodec + Default>(
     directive_name: &str,
 ) -> Valid<T, String> {
     let mut res = Valid::succeed(T::default());
-    for directive in schema_definition.directives.iter() {
+    for directive in &schema_definition.directives {
         if directive.node.name.node.as_ref() == directive_name {
             res = T::from_directive(&directive.node);
         }
@@ -146,36 +146,34 @@ fn to_types(
         match type_definition.node.kind.clone() {
             TypeKind::Object(object_type) => to_object_type(
                 &object_type,
-                &type_definition.node.description,
+                type_definition.node.description.as_ref(),
                 &type_definition.node.directives,
             )
             .trace(&type_name)
             .some(),
             TypeKind::Interface(interface_type) => to_object_type(
                 &interface_type,
-                &type_definition.node.description,
+                type_definition.node.description.as_ref(),
                 &type_definition.node.directives,
             )
             .trace(&type_name)
             .some(),
-            TypeKind::Enum(_) => Valid::none(),
+            TypeKind::Enum(_) | TypeKind::Union(_) => Valid::none(),
             TypeKind::InputObject(input_object_type) => to_input_object(
-                input_object_type,
-                &type_definition.node.description,
+                &input_object_type,
+                type_definition.node.description.as_ref(),
                 &type_definition.node.directives,
             )
             .trace(&type_name)
             .some(),
-            TypeKind::Union(_) => Valid::none(),
             TypeKind::Scalar => Valid::succeed(Some(to_scalar_type())),
         }
         .map(|option| (type_name, option))
     })
     .map(|vec| {
-        BTreeMap::from_iter(
-            vec.into_iter()
-                .filter_map(|(name, option)| option.map(|tpe| (name, tpe))),
-        )
+        vec.into_iter()
+                .filter_map(|(name, option)| option.map(|tpe| (name, tpe)))
+                .collect::<BTreeMap<_, _>>()
     })
 }
 fn to_scalar_type() -> config::Type {
@@ -188,12 +186,12 @@ fn to_union_types(
         let type_name = pos_name_to_string(&type_definition.node.name);
         let type_opt = match type_definition.node.kind.clone() {
             TypeKind::Union(union_type) => to_union(
-                union_type,
-                &type_definition
+                &union_type,
+                type_definition
                     .node
                     .description
-                    .to_owned()
-                    .map(|pos| pos.node),
+                    .as_ref()
+                    .map(|pos| &pos.node),
             ),
             _ => return Valid::succeed(None),
         };
@@ -209,11 +207,10 @@ fn to_enum_types(
         let type_name = pos_name_to_string(&type_definition.node.name);
         let type_opt = match type_definition.node.kind.clone() {
             TypeKind::Enum(enum_type) => to_enum(
-                enum_type,
+                &enum_type,
                 type_definition
                     .node
-                    .description
-                    .to_owned()
+                    .description.clone()
                     .map(|pos| pos.node),
             ),
             _ => return Valid::succeed(None),
@@ -225,7 +222,7 @@ fn to_enum_types(
 
 fn to_object_type<T>(
     object: &T,
-    description: &Option<Positioned<String>>,
+    description: Option<&Positioned<String>>,
     directives: &[Positioned<ConstDirective>],
 ) -> Valid<config::Type, String>
 where
@@ -242,7 +239,7 @@ where
         .fuse(to_federation_directives(directives))
         .map(
             |(resolvers, cache, fields, protected, added_fields, unknown_directives)| {
-                let doc = description.to_owned().map(|pos| pos.node);
+                let doc = description.map(|pos| pos.node.clone());
                 let implements = implements.iter().map(|pos| pos.node.to_string()).collect();
                 config::Type {
                     fields,
@@ -258,15 +255,15 @@ where
         )
 }
 fn to_input_object(
-    input_object_type: InputObjectType,
-    description: &Option<Positioned<String>>,
+    input_object_type: &InputObjectType,
+    description: Option<&Positioned<String>>,
     directives: &[Positioned<ConstDirective>],
 ) -> Valid<config::Type, String> {
     to_input_object_fields(&input_object_type.fields)
         .fuse(Protected::from_directives(directives.iter()))
         .map(|(fields, protected)| {
-            let doc = description.to_owned().map(|pos| pos.node);
-            config::Type { fields, protected, doc, ..Default::default() }
+            let doc = description.map(|pos| pos.node.clone());
+            config::Type { fields, doc, protected, ..Default::default() }
         })
 }
 
@@ -323,7 +320,7 @@ where
         .transpose()
         .map_err(|err| ValidationError::new(err.to_string()))
         .into();
-    let doc = description.to_owned().map(|pos| pos.node);
+    let doc = description.map(|pos| pos.node.clone());
 
     config::Resolver::from_directives(directives)
         .fuse(Cache::from_directives(directives.iter()))
@@ -363,7 +360,7 @@ where
 fn to_args(field_definition: &FieldDefinition) -> IndexMap<String, config::Arg> {
     let mut args = IndexMap::new();
 
-    for arg in field_definition.arguments.iter() {
+    for arg in &field_definition.arguments {
         let arg_name = pos_name_to_string(&arg.node.name);
         let arg_val = to_arg(&arg.node);
         args.insert(arg_name, arg_val);
@@ -374,8 +371,7 @@ fn to_args(field_definition: &FieldDefinition) -> IndexMap<String, config::Arg> 
 fn to_arg(input_value_definition: &InputValueDefinition) -> config::Arg {
     let type_of = &input_value_definition.ty.node;
     let doc = input_value_definition
-        .description
-        .to_owned()
+        .description.clone()
         .map(|pos| pos.node);
     let modify = Modify::from_directives(input_value_definition.directives.iter())
         .to_result()
@@ -390,17 +386,17 @@ fn to_arg(input_value_definition: &InputValueDefinition) -> config::Arg {
     config::Arg { type_of: type_of.into(), doc, modify, default_value }
 }
 
-fn to_union(union_type: UnionType, doc: &Option<String>) -> Valid<Union, String> {
+fn to_union(union_type: &UnionType, doc: Option<&String>) -> Valid<Union, String> {
     let types = union_type
         .members
         .iter()
         .map(|member| member.node.to_string())
         .collect();
 
-    Valid::succeed(Union { types, doc: doc.clone() })
+    Valid::succeed(Union { types, doc: doc.cloned() })
 }
 
-fn to_enum(enum_type: EnumType, doc: Option<String>) -> Valid<Enum, String> {
+fn to_enum(enum_type: &EnumType, doc: Option<String>) -> Valid<Enum, String> {
     let variants = Valid::from_iter(enum_type.values.iter(), |member| {
         let name = member.node.value.node.as_str().to_owned();
         let alias = member
@@ -463,15 +459,15 @@ impl HasName for InputValueDefinition {
 
 trait FieldLike {
     fn type_of(&self) -> &Type;
-    fn description(&self) -> &Option<Positioned<String>>;
+    fn description(&self) -> Option<&Positioned<String>>;
     fn directives(&self) -> &[Positioned<ConstDirective>];
 }
 impl FieldLike for FieldDefinition {
     fn type_of(&self) -> &Type {
         &self.ty.node
     }
-    fn description(&self) -> &Option<Positioned<String>> {
-        &self.description
+    fn description(&self) -> Option<&Positioned<String>> {
+        self.description.as_ref()
     }
     fn directives(&self) -> &[Positioned<ConstDirective>] {
         &self.directives
@@ -481,8 +477,8 @@ impl FieldLike for InputValueDefinition {
     fn type_of(&self) -> &Type {
         &self.ty.node
     }
-    fn description(&self) -> &Option<Positioned<String>> {
-        &self.description
+    fn description(&self) -> Option<&Positioned<String>> {
+        self.description.as_ref()
     }
     fn directives(&self) -> &[Positioned<ConstDirective>] {
         &self.directives

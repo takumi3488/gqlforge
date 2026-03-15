@@ -130,13 +130,12 @@ pub mod http {
 
     #[async_trait::async_trait]
     impl HttpIO for NativeHttpTest {
-        #[allow(clippy::blocks_in_conditions)]
         async fn execute(&self, request: reqwest::Request) -> Result<Response<Bytes>> {
             let response = self.client.execute(request).await;
             Ok(Response::from_reqwest(
                 response?
                     .error_for_status()
-                    .map_err(|err| err.without_url())?,
+                    .map_err(reqwest::Error::without_url)?,
             )
             .await?)
         }
@@ -262,13 +261,12 @@ pub mod test {
 
         #[async_trait::async_trait]
         impl HttpIO for NativeHttpTest {
-            #[allow(clippy::blocks_in_conditions)]
             async fn execute(&self, request: reqwest::Request) -> Result<Response<Bytes>> {
                 let response = self.client.execute(request).await;
                 Ok(Response::from_reqwest(
                     response?
                         .error_for_status()
-                        .map_err(|err| err.without_url())?,
+                        .map_err(reqwest::Error::without_url)?,
                 )
                 .await?)
             }
@@ -293,13 +291,16 @@ pub mod test {
             let snapshot_name = original_path.to_string_lossy().to_string();
 
             let IO { fs, paths } = spec.configs.into_io().await;
-            let path = paths.first().unwrap().as_str();
+            let path = paths
+                .first()
+                .unwrap_or_else(|| unreachable!("at least one config path is expected"))
+                .as_str();
 
             let mut runtime = gqlforge::cli::runtime::init(&Blueprint::default())?;
             runtime.http = Arc::new(NativeHttpTest::default());
             runtime.file = Arc::new(fs);
             if let Some(env) = spec.env {
-                runtime.env = Arc::new(Env(env))
+                runtime.env = Arc::new(Env(env));
             }
 
             let generator = Generator::new(path, runtime);
@@ -330,7 +331,7 @@ pub mod test {
 
             // remove links since they break snapshot tests
             let mut base_config = cfg_module.config().clone();
-            base_config.links = Default::default();
+            base_config.links = Vec::default();
 
             let config = ConfigModule::from(base_config);
 
@@ -339,10 +340,13 @@ pub mod test {
         }
     }
     async fn test_generator(path: &Path) -> datatest_stable::Result<()> {
-        let spec = ExecutionSpec::from_source(path, std::fs::read_to_string(path)?)?;
+        let spec = ExecutionSpec::from_source(path, &std::fs::read_to_string(path)?)?;
         generator_spec::run_test(path, spec).await?;
         Ok(())
     }
+    /// # Errors
+    ///
+    /// Returns an error if the test fails.
     pub fn run(path: &Path) -> datatest_stable::Result<()> {
         tokio_test::block_on(test_generator(path))
     }

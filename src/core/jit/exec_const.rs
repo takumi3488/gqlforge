@@ -17,7 +17,7 @@ use crate::core::jit::synth::Synth;
 use crate::core::jit::transform::InputResolver;
 use crate::core::json::{JsonLike, JsonLikeList};
 
-/// A specialized executor that executes with async_graphql::Value
+/// A specialized executor that executes with `async_graphql::Value`
 pub struct ConstValueExecutor {
     pub plan: OperationPlan<Value>,
 }
@@ -29,6 +29,10 @@ impl From<OperationPlan<Value>> for ConstValueExecutor {
 }
 
 impl ConstValueExecutor {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_new(request: &Request<ConstValue>, app_ctx: &Arc<AppContext>) -> Result<Self> {
         let plan = request.create_plan(&app_ctx.blueprint)?;
         Ok(Self::from(plan))
@@ -96,7 +100,7 @@ impl ConstValueExecutor {
         let store = exe.store().await;
         let synth = Synth::new(&plan, store, vars);
 
-        let resp: Response<serde_json_borrow::Value> = exe.execute(&synth).await;
+        let resp: Response<serde_json_borrow::Value> = exe.execute(&synth);
 
         if is_introspection_query {
             let async_req = async_graphql::Request::from(request).only_introspection();
@@ -116,7 +120,7 @@ struct ConstValueExec<'a> {
 
 impl<'a> ConstValueExec<'a> {
     pub fn new(plan: &'a OperationPlan<ConstValue>, req_context: &'a RequestContext) -> Self {
-        Self { req_context, plan }
+        Self { plan, req_context }
     }
 
     async fn call(
@@ -130,7 +134,7 @@ impl<'a> ConstValueExec<'a> {
     {
         // if parent value is null do not try to resolve child fields
         if matches!(ctx.value(), Some(v) if v.is_null()) {
-            return Ok(Default::default());
+            return Ok(ConstValue::default());
         }
 
         let req_context = &self.req_context;
@@ -163,7 +167,7 @@ impl IRExecutor for ConstValueExec<'_> {
                     // for fragments on union/interface
                     if self.plan.field_is_part_of_value(field, value) {
                         let ctx = ctx.with_value(value);
-                        tasks.push(async move { self.call(&ctx, ir).await })
+                        tasks.push(async move { self.call(&ctx, ir).await });
                     }
                 });
 

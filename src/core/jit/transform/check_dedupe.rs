@@ -18,16 +18,11 @@ fn check_dedupe(ir: &IR) -> bool {
     match ir {
         IR::IO(io) => io.dedupe(),
         IR::Cache(cache) => cache.io.dedupe(),
-        IR::Path(ir, _) => check_dedupe(ir),
-        IR::Protect(_, _, ir) => check_dedupe(ir),
+        IR::Path(ir, _) | IR::Protect(_, _, ir) | IR::Discriminate(_, ir) => check_dedupe(ir),
         IR::Pipe(ir, ir1) => check_dedupe(ir) && check_dedupe(ir1),
         IR::Merge(vec) => vec.iter().all(check_dedupe),
-        IR::Discriminate(_, ir) => check_dedupe(ir),
         IR::Entity(hash_map) => hash_map.values().all(check_dedupe),
-        IR::Dynamic(_) => true,
-        IR::ContextPath(_) => true,
-        IR::Map(_) => true,
-        IR::Service(_) => true,
+        IR::Dynamic(_) | IR::ContextPath(_) | IR::Map(_) | IR::Service(_) => true,
     }
 }
 

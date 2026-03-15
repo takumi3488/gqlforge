@@ -14,12 +14,12 @@ impl Default for DataPath {
 }
 
 impl DataPath {
-    /// Create default DataPath that resolved to single value
+    /// Create default `DataPath` that resolved to single value
     pub fn new() -> Self {
         Self(Vec::new())
     }
 
-    /// Create new DataPath with specified additional entry
+    /// Create new `DataPath` with specified additional entry
     pub fn with_index(mut self, index: usize) -> Self {
         self.0.push(index);
 
@@ -54,11 +54,11 @@ impl<Data> Store<Data> {
         self.data.insert(field_id.as_usize(), data);
     }
 
-    pub fn set(&mut self, field_id: &FieldId, data: Data) {
+    pub fn set(&mut self, field_id: FieldId, data: Data) {
         self.data.insert(field_id.as_usize(), data);
     }
 
-    pub fn get(&self, field_id: &FieldId) -> Option<&Data> {
+    pub fn get(&self, field_id: FieldId) -> Option<&Data> {
         self.data.get(&field_id.as_usize())
     }
 }

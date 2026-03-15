@@ -58,7 +58,7 @@ pub struct S3 {
     pub operation: S3Operation,
 
     /// The object key (Mustache template supported).
-    /// Required for GET_PRESIGNED_URL, PUT_PRESIGNED_URL, and DELETE.
+    /// Required for `GET_PRESIGNED_URL`, `PUT_PRESIGNED_URL`, and DELETE.
     #[serde(default, skip_serializing_if = "is_default")]
     pub key: Option<String>,
 
@@ -94,12 +94,18 @@ fn default_expiration() -> u64 {
     DEFAULT_EXPIRATION_SECS
 }
 
+fn is_default_expiration_secs(val: u64) -> bool {
+    val == DEFAULT_EXPIRATION_SECS
+}
+
+#[expect(clippy::trivially_copy_pass_by_ref, reason = "serde skip_serializing_if requires &T")]
 fn is_default_expiration(val: &u64) -> bool {
-    *val == DEFAULT_EXPIRATION_SECS
+    is_default_expiration_secs(*val)
 }
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

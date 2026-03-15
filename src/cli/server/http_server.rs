@@ -18,6 +18,7 @@ pub struct Server {
 }
 
 impl Server {
+    #[must_use] 
     pub fn new(config_module: ConfigModule) -> Self {
         Self { config_module, server_up_sender: None }
     }
@@ -31,6 +32,10 @@ impl Server {
     }
 
     /// Starts the server in the current Runtime
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn start(self) -> Result<()> {
         let blueprint = Blueprint::try_from(&self.config_module).map_err(Errata::from)?;
         let endpoints = self.config_module.extensions().endpoint_set.clone();
@@ -49,6 +54,10 @@ impl Server {
     }
 
     /// Starts the server in its own multithreaded Runtime
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn fork_start(self) -> Result<()> {
         let runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(self.config_module.deref().server.get_workers())

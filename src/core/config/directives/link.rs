@@ -58,7 +58,7 @@ pub enum LinkType {
     /// the `@postgres` directive offline (without a live database connection).
     Sql,
 
-    /// Points to a PostgreSQL connection string. The database will be
+    /// Points to a `PostgreSQL` connection string. The database will be
     /// introspected at startup to build a schema for the `@postgres` directive.
     Postgres,
 

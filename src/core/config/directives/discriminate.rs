@@ -32,6 +32,7 @@ pub struct Discriminate {
 }
 
 impl Discriminate {
+    #[must_use] 
     pub fn get_field(&self) -> String {
         self.field.clone().unwrap_or("type".to_string())
     }

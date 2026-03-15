@@ -1,5 +1,5 @@
 use std::fmt::Debug;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use derive_getters::Getters;
 use futures_util::future::join_all;
@@ -37,10 +37,10 @@ where
         let mut ctx = ExecutorInner::new(store.clone(), &self.exec, &self.ctx);
         ctx.init().await;
 
-        std::mem::take(&mut *store.lock().unwrap())
+        std::mem::take(&mut *store.lock().unwrap_or_else(PoisonError::into_inner))
     }
 
-    pub async fn execute<Output>(self, synth: &'a Synth<'a, Value>) -> Response<Output>
+    pub fn execute<Output>(self, synth: &'a Synth<'a, Value>) -> Response<Output>
     where
         Output: JsonLike<'a> + Default,
     {
@@ -108,9 +108,9 @@ where
                 self.iter_field(ctx, value).await?;
             }
 
-            let mut store = self.store.lock().unwrap();
+            let mut store = self.store.lock().unwrap_or_else(PoisonError::into_inner);
 
-            store.set(&field.id, result.map_err(|e| Positioned::new(e, field.pos)));
+            store.set(field.id, result.map_err(|e| Positioned::new(e, field.pos)));
         } else {
             let value = match ctx.value() {
                 Some(value) => value.map_ref(&mut |value| {

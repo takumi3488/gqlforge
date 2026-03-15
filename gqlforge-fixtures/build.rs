@@ -33,7 +33,7 @@ fn write_mod(path: &Path, f: &mut CodeFormatter<String>, dir_name: Option<&str>)
             let name = file.file_name();
             let name = Path::new(&name)
                 .file_stem()
-                .ok_or_else(|| Error::FilenameNotResolved(file.file_name().into_string().unwrap()))?
+                .ok_or_else(|| Error::FilenameNotResolved(file.file_name().to_string_lossy().into_owned()))?
                 .to_string_lossy();
             let name = name.as_ref().to_case(Case::UpperSnake);
             let path = file.path();
@@ -60,14 +60,14 @@ fn write_mod(path: &Path, f: &mut CodeFormatter<String>, dir_name: Option<&str>)
 // modules according to nested directories
 fn main() -> Result<()> {
     let fixtures_path = Path::new(env!("CARGO_MANIFEST_DIR")).join("fixtures");
-    let dest_path = Path::new(&env::var_os("OUT_DIR").unwrap()).join("fixtures.rs");
+    let dest_path = Path::new(&env::var_os("OUT_DIR").ok_or_else(|| Error::FilenameNotResolved("OUT_DIR".to_owned()))?).join("fixtures.rs");
 
     let mut buffer = String::new();
     let formatter = &mut CodeFormatter::new(&mut buffer, "  ");
 
     write_mod(&fixtures_path, formatter, None)?;
 
-    fs::write(dest_path, buffer).unwrap();
+    fs::write(dest_path, buffer)?;
     println!("cargo:rerun-if-changed=fixtures");
 
     Ok(())

@@ -13,7 +13,11 @@ fn redact_url(url: &str) -> String {
     "<redacted>".to_string()
 }
 
-/// Connect to a live PostgreSQL instance and introspect its schema.
+/// Connect to a live `PostgreSQL` instance and introspect its schema.
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
     let tls = super::make_tls_connect()?;
     let (client, connection) = tokio_postgres::connect(connection_url, tls)
@@ -35,13 +39,13 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
     let mut schema = DatabaseSchema::new();
 
     // --- 1. Fetch tables and views ---
-    let tables_query = r#"
+    let tables_query = r"
         SELECT table_schema, table_name, table_type
         FROM information_schema.tables
         WHERE table_schema NOT IN ('pg_catalog', 'information_schema')
           AND table_type IN ('BASE TABLE', 'VIEW')
         ORDER BY table_schema, table_name
-    "#;
+    ";
     let table_rows = client.query(tables_query, &[]).await?;
 
     for row in &table_rows {
@@ -70,12 +74,12 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
     // --- 2. Fetch materialized views ---
     // information_schema.tables does not include materialized views (relkind='m');
     // they must be discovered via pg_catalog.pg_matviews.
-    let matviews_query = r#"
+    let matviews_query = r"
         SELECT schemaname AS table_schema, matviewname AS table_name
         FROM pg_catalog.pg_matviews
         WHERE schemaname NOT IN ('pg_catalog', 'information_schema')
         ORDER BY schemaname, matviewname
-    "#;
+    ";
     let matview_rows = client.query(matviews_query, &[]).await?;
 
     for row in &matview_rows {
@@ -98,15 +102,15 @@ pub async fn introspect(connection_url: &str) -> Result<DatabaseSchema> {
     Ok(schema)
 }
 
-/// Fetch columns for a materialized view using pg_catalog.pg_attribute.
-/// information_schema.columns excludes materialized views (relkind = 'm'),
+/// Fetch columns for a materialized view using `pg_catalog.pg_attribute`.
+/// `information_schema.columns` excludes materialized views (relkind = 'm'),
 /// so we query the system catalog directly.
 async fn fetch_matview_columns(
     client: &tokio_postgres::Client,
     schema: &str,
     table: &str,
 ) -> Result<Vec<Column>> {
-    let query = r#"
+    let query = r"
         SELECT
             a.attname AS column_name,
             pg_catalog.format_type(a.atttypid, a.atttypmod) AS data_type,
@@ -120,7 +124,7 @@ async fn fetch_matview_columns(
           AND a.attnum > 0
           AND NOT a.attisdropped
         ORDER BY a.attnum
-    "#;
+    ";
     let rows = client.query(query, &[&schema, &table]).await?;
 
     let mut columns = Vec::new();
@@ -146,7 +150,7 @@ async fn fetch_columns(
     schema: &str,
     table: &str,
 ) -> Result<Vec<Column>> {
-    let query = r#"
+    let query = r"
         SELECT
             column_name,
             data_type,
@@ -156,7 +160,7 @@ async fn fetch_columns(
         FROM information_schema.columns
         WHERE table_schema = $1 AND table_name = $2
         ORDER BY ordinal_position
-    "#;
+    ";
     let rows = client.query(query, &[&schema, &table]).await?;
 
     let mut columns = Vec::new();
@@ -184,7 +188,7 @@ async fn fetch_primary_key(
     schema: &str,
     table: &str,
 ) -> Result<Option<PrimaryKey>> {
-    let query = r#"
+    let query = r"
         SELECT kcu.column_name
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu
@@ -194,7 +198,7 @@ async fn fetch_primary_key(
           AND tc.table_schema = $1
           AND tc.table_name = $2
         ORDER BY kcu.ordinal_position
-    "#;
+    ";
     let rows = client.query(query, &[&schema, &table]).await?;
 
     if rows.is_empty() {
@@ -210,7 +214,7 @@ async fn fetch_foreign_keys(
     schema: &str,
     table: &str,
 ) -> Result<Vec<ForeignKey>> {
-    let query = r#"
+    let query = r"
         SELECT
             a1.attname AS column_name,
             ns2.nspname AS foreign_table_schema,
@@ -229,7 +233,7 @@ async fn fetch_foreign_keys(
           AND ns.nspname = $1
           AND cl.relname = $2
         ORDER BY con.conname, u.ord
-    "#;
+    ";
     let rows = client.query(query, &[&schema, &table]).await?;
 
     // Group by constraint name.
@@ -260,7 +264,7 @@ async fn fetch_unique_constraints(
     schema: &str,
     table: &str,
 ) -> Result<Vec<UniqueConstraint>> {
-    let query = r#"
+    let query = r"
         SELECT kcu.column_name, tc.constraint_name
         FROM information_schema.table_constraints tc
         JOIN information_schema.key_column_usage kcu
@@ -270,7 +274,7 @@ async fn fetch_unique_constraints(
           AND tc.table_schema = $1
           AND tc.table_name = $2
         ORDER BY tc.constraint_name, kcu.ordinal_position
-    "#;
+    ";
     let rows = client.query(query, &[&schema, &table]).await?;
 
     let mut uc_map: std::collections::BTreeMap<String, Vec<String>> =

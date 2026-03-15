@@ -15,6 +15,15 @@ use crate::core::async_graphql_hyper::{GraphQLBatchRequest, GraphQLRequest, Grap
 use crate::core::http::handle_request;
 use crate::core::http::sse::{SseBody, handle_sse_request};
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
+#[expect(clippy::unwrap_used, reason = "http::Response::builder with static status 500 is infallible")]
 pub async fn start_http_1(
     sc: Arc<ServerConfig>,
     server_up_sender: Option<oneshot::Sender<()>>,
@@ -32,7 +41,7 @@ pub async fn start_http_1(
             .or(Err(anyhow::anyhow!("Failed to send message")))?;
     }
 
-    let graphql_endpoint = sc.blueprint.server.routes.graphql().to_string();
+    let graphql_endpoint = sc.blueprint.server.routes.graphql().clone();
 
     loop {
         let (stream, _addr) = listener.accept().await?;
@@ -62,8 +71,7 @@ pub async fn start_http_1(
                             Err(e) => {
                                 tracing::error!("SSE handler error: {}", e);
                                 let body = Full::new(bytes::Bytes::from(format!(
-                                    r#"{{"error": "{}"}}"#,
-                                    e
+                                    r#"{{"error": "{e}"}}"#
                                 )));
                                 Ok(http::Response::builder()
                                     .status(500)

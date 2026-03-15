@@ -26,7 +26,7 @@ impl Display for JsonSchema {
             JsonSchema::Obj(fields) => {
                 let mut fields = fields
                     .iter()
-                    .map(|(k, v)| format!("{}: {}", k, v))
+                    .map(|(k, v)| format!("{k}: {v}"))
                     .collect::<Vec<String>>();
 
                 fields.sort();
@@ -34,13 +34,13 @@ impl Display for JsonSchema {
                 write!(f, "{{{}}}", fields.join(", "))
             }
             JsonSchema::Arr(schema) => {
-                write!(f, "[{}]", schema)
+                write!(f, "[{schema}]")
             }
             JsonSchema::Opt(schema) => {
-                write!(f, "Option<{}>", schema)
+                write!(f, "Option<{schema}>")
             }
             JsonSchema::Enum(en) => {
-                let mut en = en.iter().map(|a| a.to_string()).collect::<Vec<String>>();
+                let mut en = en.iter().cloned().collect::<Vec<String>>();
                 en.sort();
                 write!(f, "enum {{{}}}", en.join(", "))
             }
@@ -80,13 +80,13 @@ impl Default for JsonSchema {
 }
 
 impl JsonSchema {
+    #[must_use] 
     pub fn from_scalar_type(type_name: &str) -> Self {
         match type_name {
             "String" => JsonSchema::Str,
             "Int" => JsonSchema::Num,
             "Boolean" => JsonSchema::Bool,
             "Empty" => JsonSchema::Empty,
-            "JSON" => JsonSchema::Any,
             _ => JsonSchema::Any,
         }
     }
@@ -111,7 +111,6 @@ impl JsonSchema {
                 async_graphql::Value::Object(obj) if obj.is_empty() => Valid::succeed(()),
                 _ => Valid::fail("expected empty"),
             },
-            JsonSchema::Any => Valid::succeed(()),
             JsonSchema::Arr(schema) => match value {
                 async_graphql::Value::List(list) => {
                     // TODO: add unit tests
@@ -148,11 +147,12 @@ impl JsonSchema {
                 async_graphql::Value::Null => Valid::succeed(()),
                 _ => schema.validate(value),
             },
-            JsonSchema::Enum(_) => Valid::succeed(()),
+            JsonSchema::Any | JsonSchema::Enum(_) => Valid::succeed(()),
         }
     }
 
     /// Check if `self` is a subtype of `other`
+    #[must_use] 
     pub fn is_a(&self, super_type: &JsonSchema, name: &str) -> Valid<(), String> {
         let sub_type = self;
         if let JsonSchema::Any = super_type {
@@ -160,28 +160,12 @@ impl JsonSchema {
         }
 
         let fail = Valid::fail(format!(
-            "Type '{}' is not assignable to type '{}'",
-            sub_type, super_type
+            "Type '{sub_type}' is not assignable to type '{super_type}'"
         ))
         .trace(name);
 
         match super_type {
-            JsonSchema::Str => {
-                if super_type != sub_type {
-                    return fail;
-                }
-            }
-            JsonSchema::Num => {
-                if super_type != sub_type {
-                    return fail;
-                }
-            }
-            JsonSchema::Bool => {
-                if super_type != sub_type {
-                    return fail;
-                }
-            }
-            JsonSchema::Empty => {
+            JsonSchema::Str | JsonSchema::Num | JsonSchema::Bool | JsonSchema::Empty => {
                 if super_type != sub_type {
                     return fail;
                 }
@@ -190,28 +174,25 @@ impl JsonSchema {
             JsonSchema::Obj(expected) => {
                 if let JsonSchema::Obj(actual) = sub_type {
                     return Valid::from_iter(expected.iter(), |(key, expected)| {
-                        Valid::from_option(actual.get(key), format!("missing key: {}", key))
+                        Valid::from_option(actual.get(key), format!("missing key: {key}"))
                             .and_then(|actual| actual.is_a(expected, key))
                     })
                     .trace(name)
                     .unit();
-                } else {
-                    return fail;
                 }
+                return fail;
             }
             JsonSchema::Arr(expected) => {
                 if let JsonSchema::Arr(actual) = sub_type {
                     return actual.is_a(expected, name);
-                } else {
-                    return fail;
                 }
+                return fail;
             }
             JsonSchema::Opt(expected) => {
                 if let JsonSchema::Opt(actual) = sub_type {
                     return actual.is_a(expected, name);
-                } else {
-                    return sub_type.is_a(expected, name);
                 }
+                return sub_type.is_a(expected, name);
             }
             JsonSchema::Enum(expected) => {
                 if let JsonSchema::Enum(actual) = sub_type {
@@ -226,14 +207,17 @@ impl JsonSchema {
         Valid::succeed(())
     }
 
+    #[must_use] 
     pub fn optional(self) -> JsonSchema {
         JsonSchema::Opt(Box::new(self))
     }
 
+    #[must_use] 
     pub fn is_optional(&self) -> bool {
         matches!(self, JsonSchema::Opt(_))
     }
 
+    #[must_use] 
     pub fn is_required(&self) -> bool {
         !self.is_optional()
     }
@@ -285,21 +269,20 @@ impl TryFrom<&FieldDescriptor> for JsonSchema {
 
     fn try_from(value: &FieldDescriptor) -> Result<Self, Self::Error> {
         let field_schema = match value.kind() {
-            Kind::Double => JsonSchema::Num,
-            Kind::Float => JsonSchema::Num,
-            Kind::Int32 => JsonSchema::Num,
-            Kind::Int64 => JsonSchema::Num,
-            Kind::Uint32 => JsonSchema::Num,
-            Kind::Uint64 => JsonSchema::Num,
-            Kind::Sint32 => JsonSchema::Num,
-            Kind::Sint64 => JsonSchema::Num,
-            Kind::Fixed32 => JsonSchema::Num,
-            Kind::Fixed64 => JsonSchema::Num,
-            Kind::Sfixed32 => JsonSchema::Num,
-            Kind::Sfixed64 => JsonSchema::Num,
+            Kind::Double
+            | Kind::Float
+            | Kind::Int32
+            | Kind::Int64
+            | Kind::Uint32
+            | Kind::Uint64
+            | Kind::Sint32
+            | Kind::Sint64
+            | Kind::Fixed32
+            | Kind::Fixed64
+            | Kind::Sfixed32
+            | Kind::Sfixed64 => JsonSchema::Num,
             Kind::Bool => JsonSchema::Bool,
-            Kind::String => JsonSchema::Str,
-            Kind::Bytes => JsonSchema::Str,
+            Kind::String | Kind::Bytes => JsonSchema::Str,
             Kind::Message(msg) => JsonSchema::try_from(&msg)?,
             Kind::Enum(enm) => JsonSchema::try_from(&enm)?,
         };
@@ -322,6 +305,7 @@ impl TryFrom<&FieldDescriptor> for JsonSchema {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::{BTreeMap, BTreeSet};
 
     use async_graphql::Name;
@@ -404,7 +388,7 @@ mod tests {
             let mut map = IndexMap::new();
             map.insert(
                 Name::new("empty1"),
-                async_graphql::Value::Object(Default::default()),
+                async_graphql::Value::Object(IndexMap::new()),
             );
             map.insert(Name::new("empty2"), async_graphql::Value::Null);
             map
@@ -433,7 +417,7 @@ mod tests {
             let mut map = IndexMap::new();
             map.insert(
                 Name::new("any1"),
-                async_graphql::Value::Object(Default::default()),
+                async_graphql::Value::Object(IndexMap::new()),
             );
             map.insert(
                 Name::new("any2"),

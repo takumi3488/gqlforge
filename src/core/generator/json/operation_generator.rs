@@ -10,9 +10,7 @@ use crate::core::{Type, config};
 pub struct OperationTypeGenerator;
 
 impl OperationTypeGenerator {
-    #[allow(clippy::too_many_arguments)]
     pub fn generate(
-        &self,
         request_sample: &RequestSample,
         root_type: &str,
         name_generator: &NameGenerator,
@@ -37,15 +35,14 @@ impl OperationTypeGenerator {
             let root_ty = TypeGenerator::new(name_generator)
                 .generate_types(&request_sample.req_body, &mut config);
             // add input type to field.
-            let prefix = format!("{}Input", PREFIX);
+            let prefix = format!("{PREFIX}Input");
             let arg_name_gen = NameGenerator::new(prefix.as_str());
             let arg_name = arg_name_gen.next();
 
             http_resolver.body = Some(serde_json::Value::String(format!(
-                "{{{{.args.{}}}}}",
-                arg_name
+                "{{{{.args.{arg_name}}}}}"
             )));
-            http_resolver.method = request_sample.method.to_owned();
+            http_resolver.method = request_sample.method;
 
             field.args.insert(
                 arg_name,
@@ -63,12 +60,12 @@ impl OperationTypeGenerator {
         if let Some(type_) = config.types.get_mut(req_op.as_str()) {
             type_
                 .fields
-                .insert(request_sample.field_name.to_owned(), field);
+                .insert(request_sample.field_name.clone(), field);
         } else {
             let mut ty = config::Type::default();
             ty.fields
-                .insert(request_sample.field_name.to_owned(), field);
-            config.types.insert(req_op.to_owned(), ty);
+                .insert(request_sample.field_name.clone(), field);
+            config.types.insert(req_op.clone(), ty);
         }
 
         Valid::succeed(config)
@@ -77,12 +74,14 @@ impl OperationTypeGenerator {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::BTreeMap;
 
     use gqlforge_valid::Validator;
 
     use super::OperationTypeGenerator;
     use crate::core::config::{Config, Field, Type};
+    use serde_json::Value;
     use crate::core::generator::{NameGenerator, RequestSample};
     use crate::core::http::Method;
 
@@ -92,10 +91,9 @@ mod test {
             .parse()
             .unwrap();
 
-        let sample = RequestSample::new(url, Default::default(), "postComments".into());
+        let sample = RequestSample::new(url, Value::default(), "postComments".into());
         let config = Config::default();
-        let config = OperationTypeGenerator
-            .generate(&sample, "T44", &NameGenerator::new("Input"), config)
+        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
             .to_result()
             .unwrap();
 
@@ -108,7 +106,7 @@ mod test {
             .parse()
             .unwrap();
 
-        let sample = RequestSample::new(url, Default::default(), "postComments".into());
+        let sample = RequestSample::new(url, Value::default(), "postComments".into());
         let mut config = Config::default();
         let mut fields = BTreeMap::default();
         fields.insert(
@@ -119,8 +117,7 @@ mod test {
         let type_ = Type { fields, ..Default::default() };
         config.types.insert("Query".to_owned(), type_);
 
-        let config = OperationTypeGenerator
-            .generate(&sample, "T44", &NameGenerator::new("Input"), config)
+        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
             .to_result()
             .unwrap();
 
@@ -142,14 +139,13 @@ mod test {
             .parse()
             .unwrap();
 
-        let sample = RequestSample::new(url, Default::default(), "postComments".into())
+        let sample = RequestSample::new(url, Value::default(), "postComments".into())
             .with_method(Method::POST)
             .with_req_body(serde_json::from_str(body).unwrap())
             .with_is_mutation(true);
 
         let config = Config::default();
-        let config = OperationTypeGenerator
-            .generate(&sample, "T44", &NameGenerator::new("Input"), config)
+        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
             .to_result()
             .unwrap();
 

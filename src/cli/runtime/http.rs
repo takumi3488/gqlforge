@@ -7,7 +7,6 @@ use http_body_util::{BodyExt, Full};
 use http_cache_reqwest::{Cache, CacheMode, HttpCache, HttpCacheOptions};
 use hyper_util::client::legacy::Client as H2Client;
 use hyper_util::rt::TokioExecutor;
-use once_cell::sync::Lazy;
 use opentelemetry::KeyValue;
 use opentelemetry::metrics::Counter;
 use opentelemetry::trace::SpanKind;
@@ -24,7 +23,7 @@ use crate::core::blueprint::Upstream;
 use crate::core::blueprint::telemetry::Telemetry;
 use crate::core::http::Response;
 
-static HTTP_CLIENT_REQUEST_COUNT: Lazy<Counter<u64>> = Lazy::new(|| {
+static HTTP_CLIENT_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> = std::sync::LazyLock::new(|| {
     let meter = opentelemetry::global::meter("http_request");
 
     meter
@@ -65,9 +64,9 @@ impl RequestCounter {
 fn get_response_status(response: &reqwest_middleware::Result<reqwest::Response>) -> KeyValue {
     let status_code = match response {
         Ok(resp) => resp.status().as_u16(),
-        Err(err) => err.status().map(|code| code.as_u16()).unwrap_or(0),
+        Err(err) => err.status().map_or(0, |code| code.as_u16()),
     };
-    KeyValue::new(HTTP_RESPONSE_STATUS_CODE, status_code as i64)
+    KeyValue::new(HTTP_RESPONSE_STATUS_CODE, i64::from(status_code))
 }
 
 type GrpcH2Client = H2Client<
@@ -97,6 +96,12 @@ impl Default for NativeHttp {
 impl NativeHttp {
     /// Initialize the HTTP client with the given upstream configuration and
     /// telemetry settings.
+    #[must_use] 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    #[expect(clippy::expect_used, reason = "initialization failures are fatal")]
     pub fn init(upstream: &Upstream, telemetry: &Telemetry) -> Self {
         let mut builder = Client::builder()
             .tcp_keepalive(Some(Duration::from_secs(upstream.tcp_keep_alive)))
@@ -128,7 +133,7 @@ impl NativeHttp {
                 mode: CacheMode::Default,
                 manager: HttpCacheManager::new(upstream.http_cache),
                 options: HttpCacheOptions::default(),
-            }))
+            }));
         }
 
         // hyper-rustls requires an explicit CryptoProvider (unlike reqwest which
@@ -155,7 +160,6 @@ impl NativeHttp {
 
 #[async_trait::async_trait]
 impl HttpIO for NativeHttp {
-    #[allow(clippy::blocks_in_conditions)]
     // because of the issue with tracing and clippy - https://github.com/rust-lang/rust-clippy/issues/12281
     #[tracing::instrument(
         skip_all,
@@ -259,6 +263,7 @@ impl HttpIO for NativeHttp {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use reqwest::Method;
     use tokio;
 
@@ -284,10 +289,10 @@ mod tests {
             then.status(200).body("Hello");
         });
 
-        let native_http = NativeHttp::init(&Default::default(), &Default::default());
+        let native_http = NativeHttp::init(&Upstream::default(), &Telemetry::default());
         let port = server.port();
         // Build a GET request to the mock server
-        let request_url = format!("http://localhost:{}/test", port);
+        let request_url = format!("http://localhost:{port}/test");
         let response = make_request(&request_url, &native_http).await;
 
         // Assert the response is as expected
@@ -295,7 +300,7 @@ mod tests {
         assert_eq!(response.body, Bytes::from("Hello"));
         assert!(response.headers.get("x-cache-lookup").is_none());
 
-        let request_url = format!("http://localhost:{}/test", port);
+        let request_url = format!("http://localhost:{port}/test");
         let response = make_request(&request_url, &native_http).await;
 
         // Assert the response is as expected
@@ -326,17 +331,17 @@ mod tests {
         });
 
         let upstream = Upstream { http_cache: 2, ..Default::default() };
-        let native_http = NativeHttp::init(&upstream, &Default::default());
+        let native_http = NativeHttp::init(&upstream, &Telemetry::default());
         let port = server.port();
 
-        let url1 = format!("http://localhost:{}/test-1", port);
+        let url1 = format!("http://localhost:{port}/test-1");
         let resp = make_request(&url1, &native_http).await;
         assert_eq!(resp.headers.get("x-cache-lookup").unwrap(), "MISS");
 
         let resp = make_request(&url1, &native_http).await;
         assert_eq!(resp.headers.get("x-cache-lookup").unwrap(), "HIT");
 
-        let url2 = format!("http://localhost:{}/test-2", port);
+        let url2 = format!("http://localhost:{port}/test-2");
         let resp = make_request(&url2, &native_http).await;
         assert_eq!(resp.headers.get("x-cache-lookup").unwrap(), "MISS");
 
@@ -344,7 +349,7 @@ mod tests {
         assert_eq!(resp.headers.get("x-cache-lookup").unwrap(), "HIT");
 
         // now cache is full, let's make 3rd request and cache it and evict url1.
-        let url3 = format!("http://localhost:{}/test-3", port);
+        let url3 = format!("http://localhost:{port}/test-3");
         let resp = make_request(&url3, &native_http).await;
         assert_eq!(resp.headers.get("x-cache-lookup").unwrap(), "MISS");
 
@@ -364,9 +369,9 @@ mod tests {
             then.status(404).body("{\"error\":\"Resource not found\"}");
         });
 
-        let native_http = NativeHttp::init(&Default::default(), &Default::default());
+        let native_http = NativeHttp::init(&Upstream::default(), &Telemetry::default());
         let port = server.port();
-        let request_url = format!("http://localhost:{}/error-with-body", port);
+        let request_url = format!("http://localhost:{port}/error-with-body");
 
         // Create a request that will result in a 404 error
         let request = reqwest::Request::new(Method::GET, request_url.parse().unwrap());
@@ -377,7 +382,7 @@ mod tests {
 
         // Convert the error to a string to check its content
         let error = result.unwrap_err();
-        let error_string = format!("{:?}", error);
+        let error_string = format!("{error:?}");
         // Check that the error contains both the status code and the error message
         assert!(
             error_string.contains("404"),
@@ -400,9 +405,9 @@ mod tests {
             then.status(500).body("");
         });
 
-        let native_http = NativeHttp::init(&Default::default(), &Default::default());
+        let native_http = NativeHttp::init(&Upstream::default(), &Telemetry::default());
         let port = server.port();
-        let request_url = format!("http://localhost:{}/error-without-body", port);
+        let request_url = format!("http://localhost:{port}/error-without-body");
 
         // Create a request that will result in a 500 error
         let request = reqwest::Request::new(Method::GET, request_url.parse().unwrap());
@@ -413,7 +418,7 @@ mod tests {
 
         // Convert the error to a string to check its content
         let error = result.unwrap_err();
-        let error_string = format!("{:?}", error);
+        let error_string = format!("{error:?}");
         // Check that the error contains the status code but the body is empty
         assert!(
             error_string.contains("500"),

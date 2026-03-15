@@ -28,24 +28,22 @@ pub enum Selection {
 
 impl Selection {
     /// Resolves the `Unresolved` variant using the provided `PathString`.
+    #[must_use]
     pub fn resolve(self, p: &impl PathString) -> Selection {
         match self {
             Selection::UnResolved(template) => Selection::Resolved(template.render(p)),
-            resolved => resolved,
+            resolved @ Selection::Resolved(_) => resolved,
         }
     }
 }
 
 impl From<Mustache> for Selection {
     fn from(value: Mustache) -> Self {
-        match value.is_const() {
-            true => Selection::Resolved(value.to_string()),
-            false => Selection::UnResolved(value),
-        }
+        if value.is_const() { Selection::Resolved(value.to_string()) } else { Selection::UnResolved(value) }
     }
 }
 
-/// RequestTemplate for GraphQL requests (See RequestTemplate documentation)
+/// `RequestTemplate` for GraphQL requests (See `RequestTemplate` documentation)
 #[derive(Setters, Debug, Clone)]
 pub struct RequestTemplate {
     // TODO: should be Mustache as for other templates
@@ -90,6 +88,10 @@ impl RequestTemplate {
         req
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_request<C: PathGraphql + HasHeaders + GraphQLOperationContext>(
         &self,
         ctx: &C,
@@ -132,7 +134,7 @@ impl RequestTemplate {
                     if value.is_empty() {
                         None
                     } else {
-                        Some(format!(r#"{}: {}"#, k, value.escape_default()))
+                        Some(format!(r"{}: {}", k, value.escape_default()))
                     }
                 })
                 .collect::<Vec<_>>()
@@ -162,6 +164,10 @@ impl RequestTemplate {
         query
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn new(
         url: String,
         operation_type: &GraphQLOperationType,
@@ -175,7 +181,7 @@ impl RequestTemplate {
         if let Some(args) = args.as_ref() {
             operation_arguments = Some(
                 args.iter()
-                    .map(|kv| Ok((kv.key.to_owned(), Mustache::parse(&kv.value))))
+                    .map(|kv| Ok((kv.key.clone(), Mustache::parse(&kv.value))))
                     .collect::<anyhow::Result<Vec<_>>>()?,
             );
         }
@@ -203,6 +209,7 @@ impl<Ctx: PathGraphql + HasHeaders + GraphQLOperationContext> CacheKey<Ctx> for 
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashSet;
 
     use async_graphql::Value;
@@ -226,7 +233,7 @@ mod tests {
 
     impl PathGraphql for Context {
         fn path_graphql<T: AsRef<str>>(&self, path: &[T]) -> Option<String> {
-            self.value.get_path(path).map(|v| v.to_string())
+            self.value.get_path(path).map(std::string::ToString::to_string)
         }
     }
 
@@ -265,7 +272,7 @@ mod tests {
               }
             }))
             .unwrap(),
-            headers: Default::default(),
+            headers: HeaderMap::default(),
         };
 
         let req = tmpl.to_request(&ctx).unwrap();
@@ -302,7 +309,7 @@ mod tests {
               }
             }))
             .unwrap(),
-            headers: Default::default(),
+            headers: HeaderMap::default(),
         };
 
         let req = tmpl.to_request(&ctx).unwrap();
@@ -332,7 +339,7 @@ mod tests {
             RelatedFields::default(),
         )
             .unwrap();
-        let ctx = Context { value, headers: Default::default() };
+        let ctx = Context { value, headers: HeaderMap::default() };
 
         (tmpl, ctx)
     }

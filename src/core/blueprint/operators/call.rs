@@ -1,11 +1,12 @@
 use gqlforge_valid::{Valid, Validator};
 use serde_json::Value;
 
-use crate::core::blueprint::*;
+use crate::core::blueprint::{ConfigModule, BlueprintError, to_field_definition, DynamicValue};
 use crate::core::config;
 use crate::core::config::{Field, GraphQLOperationType};
 use crate::core::ir::model::IR;
 
+#[must_use] 
 pub fn compile_call(
     config_module: &ConfigModule,
     call: &config::Call,
@@ -32,7 +33,7 @@ pub fn compile_call(
                 return Valid::fail(BlueprintError::ArgumentNotFound(
                     empties
                         .into_iter()
-                        .map(|k| format!("'{}'", k))
+                        .map(|k| format!("'{k}'"))
                         .collect::<Vec<String>>()
                         .join(", "),
                 ))

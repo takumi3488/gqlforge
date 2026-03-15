@@ -14,6 +14,10 @@ pub struct WorkerHooks {
 }
 
 impl WorkerHooks {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_new(
         on_request: Option<String>,
         on_response: Option<String>,
@@ -27,6 +31,10 @@ impl WorkerHooks {
 
     /// on request hook called before the request is sent and it sends the
     /// request to the worker for modification.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn on_request(
         &self,
         worker: &Arc<dyn WorkerIO<worker::Event, worker::Command>>,
@@ -36,7 +44,7 @@ impl WorkerHooks {
             Some(on_request) => {
                 let js_request = WorkerRequest::try_from(request)?;
                 let event = worker::Event::Request(js_request);
-                worker.call(on_request, event).await.map_err(|e| e.into())
+                worker.call(on_request, event).await.map_err(std::convert::Into::into)
             }
             None => Ok(None),
         }
@@ -44,6 +52,10 @@ impl WorkerHooks {
 
     /// on response hook called after the response is received and it sends the
     /// response body to the worker and returns the response.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn on_response(
         &self,
         worker: &Arc<

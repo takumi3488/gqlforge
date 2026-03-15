@@ -37,7 +37,7 @@ impl<'cfg> Visitor<'cfg> {
 
             self.walk_union(union_, &mut union_types, &mut HashSet::new())
                 .trace(union_name)
-                .map(|_| {
+                .map(|()| {
                     let new_union = Union { types: union_types, ..union_.clone() };
 
                     result.insert(union_name.clone(), new_union);
@@ -71,6 +71,7 @@ impl<'cfg> Visitor<'cfg> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
     use insta::assert_snapshot;
 

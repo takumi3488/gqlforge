@@ -1,4 +1,4 @@
-use lazy_static::lazy_static;
+use std::sync::LazyLock;
 
 use crate::cli::fmt::Fmt;
 use crate::core::blueprint::Blueprint;
@@ -10,9 +10,8 @@ pub const GQLFORGE_RC: &str = ".gqlforgerc.graphql";
 pub const GRAPHQL_RC: &str = ".graphqlrc.yml";
 pub const GQLFORGE_RC_SCHEMA: &str = ".gqlforgerc.schema.json";
 
-lazy_static! {
-    pub static ref TRACKER: gqlforge_tracker::Tracker = gqlforge_tracker::Tracker::default();
-}
+pub static TRACKER: LazyLock<gqlforge_tracker::Tracker> =
+    LazyLock::new(gqlforge_tracker::Tracker::default);
 
 pub(super) fn log_endpoint_set(endpoint_set: &EndpointSet<Unchecked>) {
     let mut endpoints = endpoint_set.get_endpoints().clone();
@@ -36,7 +35,7 @@ pub(super) fn log_endpoint_set(endpoint_set: &EndpointSet<Unchecked>) {
 }
 
 pub(super) fn display_schema(blueprint: &Blueprint) {
-    Fmt::display(Fmt::heading("GraphQL Schema:\n"));
+    Fmt::display(&Fmt::heading("GraphQL Schema:\n"));
     let sdl = blueprint.to_schema();
-    Fmt::display(format!("{}\n", print_schema::print_schema(sdl)));
+    Fmt::display(&format!("{}\n", print_schema::print_schema(&sdl)));
 }

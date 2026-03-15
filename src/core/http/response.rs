@@ -51,6 +51,10 @@ impl FromValue for ConstValue {
 impl Response<Bytes> {
     /// Handle error responses with body extraction for better error messages
     /// This is a common pattern used across different HTTP clients
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn from_reqwest_with_error_handling(
         response: reqwest::Response,
     ) -> anyhow::Result<Self> {
@@ -70,6 +74,10 @@ impl Response<Bytes> {
         Self::from_reqwest(response).await
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn from_reqwest(resp: reqwest::Response) -> Result<Self> {
         let status = resp.status();
         let headers = resp.headers().to_owned();
@@ -77,6 +85,10 @@ impl Response<Bytes> {
         Ok(Response { status, headers, body })
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn from_hyper(resp: http::Response<Full<Bytes>>) -> Result<Self> {
         use http_body_util::BodyExt;
         let status = resp.status();
@@ -85,6 +97,7 @@ impl Response<Bytes> {
         Ok(Response { status, headers, body })
     }
 
+    #[must_use] 
     pub fn empty() -> Self {
         Response {
             status: reqwest::StatusCode::OK,
@@ -93,6 +106,10 @@ impl Response<Bytes> {
         }
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_json<T: Default + FromValue>(self) -> Result<Response<T>> {
         if self.body.is_empty() {
             return Ok(Response {
@@ -109,6 +126,10 @@ impl Response<Bytes> {
         Ok(Response { status: self.status, headers: self.headers, body })
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_grpc_value(
         self,
         operation: &ProtobufOperation,
@@ -122,9 +143,8 @@ impl Response<Bytes> {
     }
 
     pub fn to_grpc_error(&self, operation: &ProtobufOperation) -> anyhow::Error {
-        let grpc_status = match Status::from_header_map(&self.headers) {
-            Some(status) => status,
-            None => return Error::IO("Error while parsing upstream headers".to_owned()).into(),
+        let Some(grpc_status) = Status::from_header_map(&self.headers) else {
+            return Error::IO("Error while parsing upstream headers".to_owned()).into();
         };
 
         let mut obj: IndexMap<Name, async_graphql::Value> = IndexMap::new();
@@ -173,6 +193,10 @@ impl Response<Bytes> {
         anyhow::Error::new(error)
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_resp_string(self) -> Result<Response<String>> {
         Ok(Response::<String> {
             body: String::from_utf8(self.body.to_vec())?,

@@ -19,11 +19,11 @@ impl<E: Display> Display for Cause<E> {
             if i > 0 {
                 write!(f, ", ")?;
             }
-            write!(f, "{}", entry)?;
+            write!(f, "{entry}")?;
         }
         write!(f, "] {}", self.message)?;
         if let Some(desc) = self.description.as_ref() {
-            write!(f, ": {}", desc)?;
+            write!(f, ": {desc}")?;
         }
         Ok(())
     }
@@ -44,10 +44,11 @@ impl<E> Cause<E> {
         }
     }
 
-    pub fn trace<T: Display>(mut self, trace: Vec<T>) -> Self {
+    #[must_use]
+    pub fn trace<T: Display>(mut self, trace: &[T]) -> Self {
         self.trace = trace
             .iter()
-            .map(|t| t.to_string())
+            .map(ToString::to_string)
             .collect::<VecDeque<String>>();
         self
     }
@@ -59,7 +60,7 @@ mod tests {
     fn test_display() {
         use super::Cause;
         let cause = Cause::new("error")
-            .trace(vec!["trace0", "trace1"])
+            .trace(&["trace0", "trace1"])
             .description("description");
         assert_eq!(cause.to_string(), "[trace0, trace1] error: description");
     }

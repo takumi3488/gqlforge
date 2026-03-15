@@ -18,15 +18,11 @@ impl<A> CheckConst<A> {
 pub fn is_const(ir: &IR) -> bool {
     match ir {
         IR::Dynamic(dynamic_value) => dynamic_value.is_const(),
-        IR::IO(_) => false,
-        IR::Cache(_) => false,
-        IR::Path(ir, _) => is_const(ir),
-        IR::ContextPath(_) => false,
-        IR::Protect(_, _, ir) => is_const(ir),
+        IR::IO(_) | IR::Cache(_) | IR::ContextPath(_) => false,
+        IR::Path(ir, _) | IR::Protect(_, _, ir) | IR::Discriminate(_, ir) => is_const(ir),
         IR::Map(map) => is_const(&map.input),
         IR::Pipe(ir, ir1) => is_const(ir) && is_const(ir1),
         IR::Merge(vec) => vec.iter().all(is_const),
-        IR::Discriminate(_, ir) => is_const(ir),
         IR::Entity(hash_map) => hash_map.values().all(is_const),
         IR::Service(_) => true,
     }

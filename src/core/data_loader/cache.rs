@@ -1,7 +1,11 @@
 use std::borrow::Cow;
+#[cfg(test)]
 use std::collections::HashMap;
+#[cfg(test)]
 use std::collections::hash_map::RandomState;
-use std::hash::{BuildHasher, Hash};
+use std::hash::Hash;
+#[cfg(test)]
+use std::hash::BuildHasher;
 use std::marker::PhantomData;
 use std::num::NonZeroUsize;
 
@@ -45,7 +49,6 @@ where
     fn insert(&mut self, _key: Cow<'_, Self::Key>, _val: Cow<'_, Self::Value>) {}
 
     #[inline]
-    #[allow(dead_code)]
     fn remove(&mut self, _key: &K) {}
 
     #[inline]
@@ -56,18 +59,20 @@ where
     }
 }
 
-/// [std::collections::HashMap] cache.
-#[allow(dead_code)]
+/// [`std::collections::HashMap`] cache.
+#[cfg(test)]
 pub struct HashMapCache<S = RandomState> {
     _mark: PhantomData<S>,
 }
 
+#[cfg(test)]
 impl Default for HashMapCache<RandomState> {
     fn default() -> Self {
         Self { _mark: PhantomData }
     }
 }
 
+#[cfg(test)]
 impl<K, V, S: Send + Sync + BuildHasher + Default + 'static> CacheFactory<K, V> for HashMapCache<S>
 where
     K: Send + Sync + Clone + Eq + Hash + 'static,
@@ -80,9 +85,10 @@ where
     }
 }
 
-#[allow(dead_code)]
+#[cfg(test)]
 pub struct HashMapCacheImpl<K, V, S>(HashMap<K, V, S>);
 
+#[cfg(test)]
 impl<K, V, S> CacheStorage for HashMapCacheImpl<K, V, S>
 where
     K: Send + Sync + Clone + Eq + Hash + 'static,
@@ -130,7 +136,7 @@ where
     type Storage = LruCacheImpl<K, V>;
 
     fn create(&self) -> Self::Storage {
-        LruCacheImpl(lru::LruCache::new(NonZeroUsize::new(self.cap).unwrap()))
+        LruCacheImpl(lru::LruCache::new(NonZeroUsize::new(self.cap.max(1)).unwrap_or(NonZeroUsize::MIN)))
     }
 }
 

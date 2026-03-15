@@ -9,7 +9,7 @@ use crate::core::json::JsonLike;
 
 /// Resolver for `__typename` of Union and Interface types.
 ///
-/// The [TypeFieldDiscriminator] expects an object with a specific field, the
+/// The [`TypeFieldDiscriminator`] expects an object with a specific field, the
 /// type of the value. For example `{ "type": "Buzz", "bar": "test" }` the
 /// `__typename` will resolve to "Buzz".
 ///
@@ -21,12 +21,12 @@ pub struct TypeFieldDiscriminator {
     typename_field: String,
     /// List of all types that are members of the union or interface
     types: BTreeSet<String>,
-    /// The name of TypeFieldDiscriminator is used for error reporting
+    /// The name of `TypeFieldDiscriminator` is used for error reporting
     type_name: String,
 }
 
 impl TypeFieldDiscriminator {
-    /// Constructs a new [TypeFieldDiscriminator] resolver.
+    /// Constructs a new [`TypeFieldDiscriminator`] resolver.
     ///
     /// `type_name`: The name of the type that this discriminator is applied at.
     /// `types`: The possible types that this discriminator can resolve.
@@ -36,7 +36,7 @@ impl TypeFieldDiscriminator {
         types: BTreeSet<String>,
         typename_field: String,
     ) -> Valid<Self, String> {
-        let discriminator = Self { type_name, types, typename_field };
+        let discriminator = Self { typename_field, types, type_name };
 
         Valid::succeed(discriminator)
     }
@@ -71,7 +71,7 @@ impl TypeFieldDiscriminator {
         };
 
         if self.types.contains(type_name) {
-            Ok(type_name.to_string())
+            Ok(type_name.clone())
         } else {
             let types: Vec<_> = self.types.clone().into_iter().collect();
             bail!(
@@ -94,6 +94,7 @@ impl TypeFieldDiscriminator {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::Value;
     use gqlforge_valid::Validator;
     use serde_json::json;

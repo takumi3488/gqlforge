@@ -85,7 +85,7 @@
 //! - Actual transformation is deferred until materialization
 //! - No immediate computation is performed on elements
 //!
-//! ### as_vec Operation
+//! ### `as_vec` Operation
 //! The `as_vec` operation is O(n) because:
 //! - It must process all elements to create the final vector
 //! - For a chunk with n elements:

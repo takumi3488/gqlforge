@@ -11,6 +11,14 @@ use crate::core::runtime::TargetRuntime;
 
 /// Execute a GraphQL subscription request against an upstream SSE endpoint
 /// and return a stream of decoded field values.
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
 pub async fn execute_graphql_streaming_request(
     runtime: &TargetRuntime,
     stream_url: &str,
@@ -25,7 +33,7 @@ pub async fn execute_graphql_streaming_request(
     // Add SSE accept header
     request.headers_mut().insert(
         reqwest::header::ACCEPT,
-        "text/event-stream".parse().unwrap(),
+        "text/event-stream".parse().unwrap_or_else(|_| unreachable!("text/event-stream is a valid HeaderValue")),
     );
 
     let response = runtime.http.execute_raw(request).await?;
@@ -47,7 +55,7 @@ pub async fn execute_graphql_streaming_request(
         while let Some(chunk_result) = byte_stream.next().await {
             match chunk_result {
                 Ok(chunk) => {
-                    let events = parser.decode(chunk);
+                    let events = parser.decode(&chunk);
                     for event_data in events {
                         match parse_sse_graphql_event(&event_data, &field_name) {
                             Ok(value) => yield Ok(value),
@@ -103,6 +111,7 @@ fn parse_sse_graphql_event(event_data: &str, field_name: &str) -> Result<ConstVa
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

@@ -11,8 +11,8 @@ struct DirectiveDefinitionAttr {
 }
 
 fn get_directive_definition_attr(input: &DeriveInput) -> syn::Result<DirectiveDefinitionAttr> {
-    let mut directive_definition_attr: DirectiveDefinitionAttr = Default::default();
-    for attr in input.attrs.iter() {
+    let mut directive_definition_attr = DirectiveDefinitionAttr::default();
+    for attr in &input.attrs {
         if attr.path().is_ident("directive_definition") {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident("repeatable") {
@@ -41,17 +41,15 @@ pub fn expand_directive_definition(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
     let struct_identifier = &input.ident;
 
-    let directive_definition_attr = get_directive_definition_attr(&input);
-    if let Err(err) = directive_definition_attr {
-        panic!("{}", err);
-    }
-
-    let directive_definition_attr = directive_definition_attr.unwrap();
+    let directive_definition_attr = match get_directive_definition_attr(&input) {
+        Ok(attr) => attr,
+        Err(err) => panic!("{err}"),
+    };
     let is_repeatable = directive_definition_attr.is_repeatable;
     let is_lowercase_name = directive_definition_attr.is_lowercase_name;
     let locations = if let Some(locations) = directive_definition_attr.locations {
         locations
-            .split(",")
+            .split(',')
             .map(|location| location.trim().to_string())
             .collect::<Vec<String>>()
     } else {
@@ -68,7 +66,7 @@ pub fn expand_directive_definition(input: TokenStream) -> TokenStream {
                     locations: vec![#(#locations),*],
                     is_lowercase_name: #is_lowercase_name
                 };
-                gqlforge_typedefs_common::directive_definition::into_directive_definition(schemars, attr, generated_types)
+                gqlforge_typedefs_common::directive_definition::into_directive_definition(&schemars, attr, generated_types)
             }
         }
     };
@@ -84,7 +82,7 @@ pub fn expand_input_definition(input: TokenStream) -> TokenStream {
         impl gqlforge_typedefs_common::input_definition::InputDefinition for #struct_identifier {
             fn input_definition() -> async_graphql::parser::types::TypeSystemDefinition {
                 let schemars = gqlforge_typedefs_common::into_schemars::<Self>();
-                gqlforge_typedefs_common::input_definition::into_input_definition_from_schema(schemars, stringify!(#struct_identifier))
+                gqlforge_typedefs_common::input_definition::into_input_definition_from_schema(&schemars, stringify!(#struct_identifier))
             }
         }
     };

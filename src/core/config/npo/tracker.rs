@@ -11,6 +11,7 @@ use crate::core::config::Config;
 pub struct QueryPath(Vec<Vec<String>>);
 
 impl QueryPath {
+    #[must_use] 
     pub fn size(&self) -> usize {
         self.0.len()
     }
@@ -26,7 +27,7 @@ impl<'a> From<Chunk<Chunk<Name<'a>>>> for QueryPath {
                     chunk
                         .as_vec()
                         .iter()
-                        .map(|chunk_name| chunk_name.to_string())
+                        .map(std::string::ToString::to_string)
                         .collect()
                 })
                 .collect(),
@@ -46,9 +47,9 @@ impl Display for QueryPath {
                         .iter()
                         .rfold(String::new(), |s, field_name| {
                             if s.is_empty() {
-                                field_name.to_string()
+                                field_name.clone()
                             } else {
-                                format!("{} {{ {} }}", field_name, s)
+                                format!("{field_name} {{ {s} }}")
                             }
                         })
                         .as_str(),
@@ -60,9 +61,9 @@ impl Display for QueryPath {
 
         let val = query_data.iter().fold(String::new(), |s, query| {
             if s.is_empty() {
-                query.to_string()
+                query.clone()
             } else {
-                format!("{}\n{}", s, query)
+                format!("{s}\n{query}")
             }
         });
 
@@ -108,11 +109,10 @@ enum Name<'a> {
 impl Display for Name<'_> {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Name::Field(field_name) => write!(f, "{}", field_name),
+            Name::Field(field_name) => write!(f, "{field_name}"),
             Name::Entity(type_name) => write!(
                 f,
-                "__entities(representations: [{{ __typename: \"{}\"}}])",
-                type_name
+                "__entities(representations: [{{ __typename: \"{type_name}\"}}])"
             ),
         }
     }
@@ -129,10 +129,10 @@ pub struct PathTracker<'a> {
 
 impl<'a> PathTracker<'a> {
     pub fn new(config: &'a Config) -> PathTracker<'a> {
-        PathTracker { config, cache: Default::default() }
+        PathTracker { config, cache: HashMap::new() }
     }
 
-    fn iter(
+    fn traverse(
         &mut self,
         parent_name: Option<Name<'a>>,
         type_name: TypeName<'a>,
@@ -146,18 +146,18 @@ impl<'a> PathTracker<'a> {
 
             let mut chunks = Chunk::default();
             if let Some(type_of) = self.config.find_type(type_name.as_str()) {
-                for (name, field) in type_of.fields.iter() {
+                for (name, field) in &type_of.fields {
                     let field_name = Name::Field(FieldName::new(name));
 
                     if is_list && field.has_resolver() && !field.has_batched_resolver() {
                         chunks = chunks.append(Chunk::new(field_name));
                     } else {
                         let is_list = is_list | field.type_of.is_list();
-                        chunks = chunks.concat(self.iter(
+                        chunks = chunks.concat(self.traverse(
                             Some(field_name),
                             TypeName::new(field.type_of.name()),
                             is_list,
-                        ))
+                        ));
                     }
                 }
             }
@@ -172,7 +172,7 @@ impl<'a> PathTracker<'a> {
         if let Some(path) = parent_name {
             let vec = chunks.as_vec();
 
-            Chunk::from_iter(vec.into_iter().map(|chunk| chunk.prepend(path)))
+            vec.into_iter().map(|chunk| chunk.prepend(path)).collect::<Chunk<_>>()
         } else {
             chunks
         }
@@ -181,7 +181,7 @@ impl<'a> PathTracker<'a> {
     fn find_chunks(&mut self) -> Chunk<Chunk<Name<'a>>> {
         let mut chunks = match &self.config.schema.query {
             None => Chunk::default(),
-            Some(query) => self.iter(None, TypeName::new(query.as_str()), false),
+            Some(query) => self.traverse(None, TypeName::new(query.as_str()), false),
         };
 
         for (type_name, type_of) in &self.config.types {
@@ -191,7 +191,7 @@ impl<'a> PathTracker<'a> {
                 // and therefore the resolver itself should be batched to avoid n + 1
                 if type_of.has_batched_resolver() {
                     // if batched resolver is present traverse inner fields
-                    chunks = chunks.concat(self.iter(
+                    chunks = chunks.concat(self.traverse(
                         Some(parent_path),
                         TypeName::new(type_name.as_str()),
                         // entities are basically returning list of data
@@ -213,6 +213,7 @@ impl<'a> PathTracker<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use crate::include_config;
 
     #[macro_export]

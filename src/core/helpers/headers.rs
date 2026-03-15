@@ -6,6 +6,7 @@ use crate::core::mustache::Mustache;
 
 pub type MustacheHeaders = Vec<(HeaderName, Mustache)>;
 
+#[must_use] 
 pub fn to_mustache_headers(headers: &[KeyValue]) -> Valid<MustacheHeaders, String> {
     Valid::from_iter(headers.iter(), |key_value| {
         let name = Valid::from(
@@ -23,6 +24,7 @@ pub fn to_mustache_headers(headers: &[KeyValue]) -> Valid<MustacheHeaders, Strin
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use anyhow::Result;
     use gqlforge_valid::Validator;
     use http::header::HeaderName;

@@ -26,6 +26,7 @@ pub struct Generator {
 }
 
 impl Generator {
+    #[must_use] 
     pub fn new(config_path: &str, runtime: TargetRuntime) -> Self {
         Self { config_path: config_path.to_string(), runtime }
     }
@@ -38,7 +39,7 @@ impl Generator {
             _ => return Err(anyhow!("Only graphql output format is currently supported")),
         };
 
-        if self.should_overwrite(output_path)? {
+        if Self::should_overwrite(output_path)? {
             self.runtime
                 .file
                 .write(output_path, config.as_bytes())
@@ -52,12 +53,11 @@ impl Generator {
 
     /// Checks if the output file already exists and prompts for overwrite
     /// confirmation.
-    fn should_overwrite(&self, output_path: &str) -> anyhow::Result<bool> {
+    fn should_overwrite(output_path: &str) -> anyhow::Result<bool> {
         if is_exists(output_path) {
             let should_overwrite = Confirm::new(
                 format!(
-                    "The output file '{}' already exists. Do you want to overwrite it?",
-                    output_path
+                    "The output file '{output_path}' already exists. Do you want to overwrite it?"
                 )
                 .as_str(),
             )
@@ -70,6 +70,10 @@ impl Generator {
         Ok(true)
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read(&self) -> anyhow::Result<Config<Resolved>> {
         let config_path = &self.config_path;
         let source = ConfigSource::detect(config_path)?;
@@ -90,6 +94,10 @@ impl Generator {
 
     /// performs all the i/o's required in the config file and generates
     /// concrete vec containing data for generator.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn resolve_io(&self, config: Config<Resolved>) -> anyhow::Result<Vec<Input>> {
         let mut input_samples = vec![];
 
@@ -131,7 +139,7 @@ impl Generator {
                         let mut header_map = HeaderMap::new();
                         for (key, value) in headers_inner {
                             let header_name = HeaderName::try_from(key)?;
-                            let header_value = HeaderValue::try_from(value.to_string())?;
+                            let header_value = HeaderValue::try_from(value.clone())?;
                             header_map.insert(header_name, header_value);
                         }
                         *request.headers_mut() = header_map;
@@ -173,9 +181,13 @@ impl Generator {
     }
 
     /// generates the final configuration.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn generate(self) -> anyhow::Result<ConfigModule> {
         let config = self.read().await?;
-        let path = config.output.path.0.to_owned();
+        let path = config.output.path.0.clone();
         let query_type = config.schema.query.clone();
         let mutation_type_name = config.schema.mutation.clone();
         let subscription_type_name = config.schema.subscription.clone();
@@ -207,7 +219,7 @@ fn is_exists(path: &str) -> bool {
 }
 
 /// Expects both paths to be absolute and returns a relative path from `from` to
-/// `to`. expects `from`` to be directory.
+/// `to`. expects `from` to be directory.
 fn to_relative_path(from: &Path, to: &str) -> Option<String> {
     let from_path = Path::new(from).to_path_buf();
     let to_path = Path::new(to).to_path_buf();

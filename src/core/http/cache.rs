@@ -11,7 +11,7 @@ pub fn cache_policy(res: &Response<async_graphql::Value>) -> Option<CacheControl
 
 #[cfg(test)]
 mod tests {
-
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::time::Duration;
 
     use cache_control::Cachability;
@@ -32,7 +32,7 @@ mod tests {
 
         for res in res_vec {
             if let Some(max_age) = max_age(res) {
-                let ttl = max_age.as_secs() as i32;
+                let ttl = i32::try_from(max_age.as_secs()).unwrap_or(i32::MAX);
                 if min == -1 || ttl < min {
                     min = ttl;
                 }
@@ -54,7 +54,7 @@ mod tests {
 
     fn cache_control_header(i: i32) -> HeaderMap {
         let mut headers = headers::HeaderMap::default();
-        headers.append("Cache-Control", format!("max-age={}", i).parse().unwrap());
+        headers.append("Cache-Control", format!("max-age={i}").parse().unwrap());
         headers
     }
 
@@ -62,7 +62,7 @@ mod tests {
         let mut headers = headers::HeaderMap::default();
         headers.append(
             "Cache-Control",
-            format!("max-age={}, {}", i, visibility).parse().unwrap(),
+            format!("max-age={i}, {visibility}").parse().unwrap(),
         );
         headers
     }

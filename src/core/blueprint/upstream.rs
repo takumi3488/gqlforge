@@ -34,6 +34,7 @@ pub struct Upstream {
 impl Upstream {
     /// If the delay is set to 0, then batching is disabled. By default delay is
     /// set to 0.
+    #[must_use] 
     pub fn is_batching_enabled(&self) -> bool {
         if let Some(batch) = self.batch.as_ref() {
             batch.delay >= 1
@@ -46,6 +47,7 @@ impl Upstream {
 impl Default for Upstream {
     fn default() -> Self {
         // NOTE: Using unwrap because try_from default will never fail
+        #[expect(clippy::unwrap_used, reason = "try_from default will never fail")]
         Upstream::try_from(&ConfigModule::default()).unwrap()
     }
 }

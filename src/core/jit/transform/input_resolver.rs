@@ -6,12 +6,12 @@ use super::super::{Arg, Field, OperationPlan, ResolveInputError, Variables};
 use crate::core::Type;
 use crate::core::blueprint::Index;
 use crate::core::ir::model::IO;
-use crate::core::json::{JsonLikeOwned, JsonObjectLike};
+use crate::core::json::{JsonLike, JsonLikeOwned, JsonObjectLike};
 
 /// Trait to represent conversion from some dynamic type (with variables)
 /// to the resolved variant based on the additional provided info.
-/// E.g. conversion from [async_graphql_value::Value] ->
-/// [async_graphql_value::ConstValue]
+/// E.g. conversion from [`async_graphql_value::Value`] ->
+/// [`async_graphql_value::ConstValue`]
 pub trait InputResolvable {
     type Output;
 
@@ -34,8 +34,8 @@ impl InputResolvable for Value {
     }
 }
 
-/// Transforms [OperationPlan] values the way that all the input values
-/// are transformed to const variant with the help of [InputResolvable] trait
+/// Transforms [`OperationPlan`] values the way that all the input values
+/// are transformed to const variant with the help of [`InputResolvable`] trait
 pub struct InputResolver<Input> {
     plan: OperationPlan<Input>,
 }
@@ -76,7 +76,7 @@ where
         Self::resolve_graphql_selection_set(&mut selection, variables);
 
         Ok(OperationPlan {
-            root_name: self.plan.root_name.to_string(),
+            root_name: self.plan.root_name.clone(),
             operation_type: self.plan.operation_type,
             index,
             is_introspection_query: self.plan.is_introspection_query,
@@ -123,7 +123,7 @@ where
                     &field.name,
                     &arg.name,
                     &arg.type_of,
-                    &arg.default_value,
+                    arg.default_value.as_ref(),
                     arg.value,
                 )?;
                 Ok(Arg { value, ..arg })
@@ -139,18 +139,18 @@ where
         Ok(Field { args, selection, ..field })
     }
 
-    #[allow(clippy::too_many_arguments)]
+    #[expect(clippy::expect_used, reason = "conversions here are guaranteed by type-system invariants")]
     fn recursive_parse_arg(
         index: &Index,
         parent_name: &str,
         arg_name: &str,
         type_of: &Type,
-        default_value: &Option<Output>,
+        default_value: Option<&Output>,
         value: Option<Output>,
     ) -> Result<Option<Output>, ResolveInputError> {
-        let is_value_null = value.as_ref().map(|val| val.is_null()).unwrap_or(true);
+        let is_value_null = value.as_ref().is_none_or(JsonLike::is_null);
         let value = if !type_of.is_nullable() && value.is_none() {
-            let default_value = default_value.clone();
+            let default_value = default_value.cloned();
 
             Some(default_value.ok_or(ResolveInputError::ArgumentIsRequired {
                 arg_name: arg_name.to_string(),
@@ -162,7 +162,7 @@ where
                 field_name: parent_name.to_string(),
             });
         } else if value.is_none() {
-            default_value.clone()
+            default_value.cloned()
         } else {
             value
         };
@@ -177,7 +177,7 @@ where
 
         if let Some(obj) = value.as_object_mut() {
             for arg_field in &def.fields {
-                let parent_name = format!("{}.{}", parent_name, arg_name);
+                let parent_name = format!("{parent_name}.{arg_name}");
                 let field_value = obj.get_key(&arg_field.name).cloned();
                 let field_default = arg_field
                     .default_value
@@ -188,7 +188,7 @@ where
                     &parent_name,
                     &arg_field.name,
                     &arg_field.of_type,
-                    &field_default,
+                    field_default.as_ref(),
                     field_value,
                 )?;
                 if let Some(value) = value {
@@ -197,14 +197,14 @@ where
             }
         } else if let Some(arr) = value.as_array_mut() {
             for (i, item) in arr.iter_mut().enumerate() {
-                let parent_name = format!("{}.{}.{}", parent_name, arg_name, i);
+                let parent_name = format!("{parent_name}.{arg_name}.{i}");
 
                 *item = Self::recursive_parse_arg(
                     index,
                     &parent_name,
                     &i.to_string(),
                     type_of,
-                    &None,
+                    None,
                     Some(item.clone()),
                 )?
                 .expect("Because we start with `Some`, we will end with `Some`");

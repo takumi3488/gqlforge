@@ -143,7 +143,7 @@ impl From<&Blueprint> for ServiceDocument {
         })));
 
         for def in &blueprint.definitions {
-            definitions.push(to_definition(def))
+            definitions.push(to_definition(def));
         }
 
         Self { definitions }

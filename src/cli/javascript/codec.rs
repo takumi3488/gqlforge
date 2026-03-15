@@ -6,7 +6,7 @@ use rquickjs::{FromJs, IntoJs};
 
 use super::create_header_map;
 use crate::core::http::Response;
-use crate::core::worker::*;
+use crate::core::worker::{Command, WorkerRequest, WorkerResponse, Uri, Scheme};
 
 impl<'js> FromJs<'js> for Command {
     fn from_js(ctx: &rquickjs::Ctx<'js>, value: rquickjs::Value<'js>) -> rquickjs::Result<Self> {
@@ -189,7 +189,7 @@ impl<'js> FromJs<'js> for WorkerResponse {
                 to: "reqwest::StatusCode",
                 message: Some("invalid status code".to_string()),
             })?,
-            headers: create_header_map(headers).map_err(|e| rquickjs::Error::FromJs {
+            headers: create_header_map(&headers).map_err(|e| rquickjs::Error::FromJs {
                 from: "BTreeMap<String, String>",
                 to: "headers::HeaderMap",
                 message: Some(e.to_string()),
@@ -202,6 +202,7 @@ impl<'js> FromJs<'js> for WorkerResponse {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::BTreeMap;
 
     use anyhow::Result;

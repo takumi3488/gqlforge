@@ -19,7 +19,7 @@ use gqlforge::core::worker::{Command, Event};
 use super::env::Env;
 use super::file::TestFileIO;
 use super::http::Http;
-use super::model::*;
+use super::model::{Mock, APIRequest, Annotation};
 
 #[derive(Clone, Setters)]
 pub struct ExecutionSpec {
@@ -58,11 +58,11 @@ impl ExecutionMock {
         assert_eq!(
             expected_hits,
             actual_hits,
-            "expected mock for {} to be hit exactly {} times, but it was hit {} times for file: {:?}",
+            "expected mock for {} to be hit exactly {} times, but it was hit {} times for file: {}",
             url,
             expected_hits,
             actual_hits,
-            path.as_ref()
+            path.as_ref().display()
         );
     }
 }
@@ -74,9 +74,9 @@ pub struct RuntimeIO {
 }
 
 pub fn create_runtime(
-    http_client: Arc<Http>,
+    http_client: &Arc<Http>,
     env: Option<HashMap<String, String>>,
-    script: Option<Script>,
+    script: Option<&Script>,
     io: RuntimeIO,
 ) -> TargetRuntime {
     let http = http_client.clone();
@@ -93,11 +93,11 @@ pub fn create_runtime(
         file: Arc::new(file),
         cache: Arc::new(InMemoryCache::default()),
         extensions: Arc::new(vec![]),
-        cmd_worker: match &script {
+        cmd_worker: match script {
             Some(script) => Some(init_worker_io::<Event, Command>(script.to_owned())),
             None => None,
         },
-        worker: match &script {
+        worker: match script {
             Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
             None => None,
         },

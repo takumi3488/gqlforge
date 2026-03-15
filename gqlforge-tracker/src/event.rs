@@ -48,10 +48,11 @@ pub enum EventKind {
 }
 
 impl EventKind {
+    #[must_use]
     pub fn name(&self) -> Name {
         match self {
             Self::Ping => Name::from("ping".to_string()),
-            Self::Command(name) => Name::from(name.to_string()),
+            Self::Command(name) => Name::from(name.clone()),
         }
     }
 }

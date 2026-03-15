@@ -8,7 +8,7 @@ use self::telemetry::to_opentelemetry;
 use super::Server;
 use crate::core::Type;
 use crate::core::blueprint::compress::compress;
-use crate::core::blueprint::*;
+use crate::core::blueprint::{telemetry, Blueprint, BlueprintError, TryFoldConfig, to_schema, to_definitions, Upstream, Links, update_federation, Definition};
 use crate::core::config::transformer::Required;
 use crate::core::config::{Arg, Batch, Config, ConfigModule};
 use crate::core::ir::model::{IO, IR};
@@ -74,9 +74,9 @@ pub fn config_blueprint<'a>() -> TryFold<'a, ConfigModule, Blueprint, BlueprintE
 // Apply batching if any of the fields have a @http directive with groupBy field
 
 pub fn apply_batching(mut blueprint: Blueprint) -> Blueprint {
-    for def in blueprint.definitions.iter() {
+    for def in &blueprint.definitions {
         if let Definition::Object(object_type_definition) = def {
-            for field in object_type_definition.fields.iter() {
+            for field in &object_type_definition.fields {
                 if let Some(IR::IO(io)) = field.resolver.as_ref()
                     && matches!(io.as_ref(), IO::Http { group_by: Some(_), .. })
                 {
@@ -89,13 +89,15 @@ pub fn apply_batching(mut blueprint: Blueprint) -> Blueprint {
     blueprint
 }
 
+#[must_use] 
 pub fn to_json_schema_for_args(args: &IndexMap<String, Arg>, config: &Config) -> JsonSchema {
     let mut schema_fields = BTreeMap::new();
-    for (name, arg) in args.iter() {
+    for (name, arg) in args {
         schema_fields.insert(name.clone(), to_json_schema(&arg.type_of, config));
     }
     JsonSchema::Obj(schema_fields)
 }
+#[must_use] 
 pub fn to_json_schema(type_of: &Type, config: &Config) -> JsonSchema {
     let json_schema = match type_of {
         Type::Named { name, .. } => {
@@ -104,7 +106,7 @@ pub fn to_json_schema(type_of: &Type, config: &Config) -> JsonSchema {
 
             if let Some(type_) = type_ {
                 let mut schema_fields = BTreeMap::new();
-                for (name, field) in type_.fields.iter() {
+                for (name, field) in &type_.fields {
                     if field.resolvers.is_empty() {
                         schema_fields.insert(name.clone(), to_json_schema(&field.type_of, config));
                     }
@@ -141,9 +143,9 @@ impl TryFrom<&ConfigModule> for Blueprint {
                 // Apply required transformers to the configuration
                 &config_module
                     .to_owned()
-                    .transform(Required)
+                    .transform(&Required)
                     .to_result()
-                    .map_err(BlueprintError::from_validation_string)?,
+                    .map_err(|e| BlueprintError::from_validation_string(&e))?,
                 Blueprint::default(),
             )
             .and_then(|blueprint| {

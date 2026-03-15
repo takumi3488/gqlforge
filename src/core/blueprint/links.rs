@@ -75,13 +75,14 @@ impl TryFrom<Vec<Link>> for Links {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     fn pg_link(id: Option<&str>, src: &str) -> Link {
         Link {
             src: src.to_string(),
             type_of: LinkType::Postgres,
-            id: id.map(|s| s.to_string()),
+            id: id.map(std::string::ToString::to_string),
             ..Default::default()
         }
     }
@@ -115,8 +116,7 @@ mod tests {
             messages
                 .iter()
                 .any(|m| m.contains("Multiple @link(type: Postgres)")),
-            "Expected PostgresMultipleLinksRequireId error, got: {:?}",
-            messages
+            "Expected PostgresMultipleLinksRequireId error, got: {messages:?}"
         );
     }
 
@@ -142,8 +142,7 @@ mod tests {
         let messages: Vec<String> = err.as_vec().iter().map(|c| c.message.to_string()).collect();
         assert!(
             messages.iter().any(|m| m.contains("Duplicated")),
-            "Expected Duplicated error, got: {:?}",
-            messages
+            "Expected Duplicated error, got: {messages:?}"
         );
     }
 }

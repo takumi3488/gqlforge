@@ -9,3 +9,6 @@ license = "Apache-2.0"
 async-graphql = { workspace = true }
 schemars = { version = "1.0.0" }
 serde_json = { workspace = true }
+
+[lints]
+workspace = true

@@ -26,7 +26,8 @@ pub struct GrpcDataLoader {
 }
 
 impl GrpcDataLoader {
-    pub fn into_data_loader(self, batch: Batch) -> DataLoader<DataLoaderRequest, GrpcDataLoader> {
+    #[must_use] 
+    pub fn into_data_loader(self, batch: &Batch) -> DataLoader<DataLoaderRequest, GrpcDataLoader> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))
             .max_batch_size(batch.max_size.unwrap_or_default())
@@ -49,7 +50,6 @@ impl GrpcDataLoader {
 
         let results = join_all(results).await;
 
-        #[allow(clippy::mutable_key_type)]
         let mut hashmap = HashMap::new();
         for (key, value) in results {
             hashmap.insert(key, value?);
@@ -71,7 +71,7 @@ impl GrpcDataLoader {
         let first_request = keys[0].clone();
         let multiple_request = create_grpc_request(
             first_request.template.url,
-            first_request.template.headers,
+            &first_request.template.headers,
             multiple_body,
         );
 
@@ -87,7 +87,7 @@ impl GrpcDataLoader {
             let res = response.clone().body(
                 response_body
                     .get(&id)
-                    .and_then(|a| a.first().cloned().cloned())
+                    .and_then(|a| a.first().copied().cloned())
                     .unwrap_or(ConstValue::Null),
             );
 

@@ -53,7 +53,7 @@ impl Transform for Subgraph {
             if let Some(resolver) = ty.resolvers.first() {
                 resolver_by_type.insert(type_name.clone(), resolver.clone());
 
-                KeysExtractor::validate(&config_types, resolver, type_name).and_then(|_| {
+                KeysExtractor::validate(&config_types, resolver, type_name).and_then(|()| {
                     KeysExtractor::extract_keys(resolver).and_then(|fields| match fields {
                         Some(fields) => {
                             let key = Key { fields };
@@ -92,12 +92,9 @@ impl Transform for Subgraph {
             .types
             .insert(SERVICE_TYPE_NAME.to_owned(), service_type);
 
-        let query_type_name = match config.schema.query.as_ref() {
-            Some(name) => name,
-            None => {
-                config.schema.query = Some("Query".to_string());
-                "Query"
-            }
+        let query_type_name = if let Some(name) = config.schema.query.as_ref() { name } else {
+            config.schema.query = Some("Query".to_string());
+            "Query"
         };
 
         let query_type = config.types.entry(query_type_name.to_owned()).or_default();
@@ -187,7 +184,7 @@ impl Display for Keys {
             f.write_str(key)?;
 
             if !value.0.is_empty() {
-                write!(f, " {{ {} }}", value)?;
+                write!(f, " {{ {value} }}")?;
             }
 
             if i < self.0.len() - 1 {
@@ -201,7 +198,7 @@ impl Display for Keys {
 
 fn combine_keys(v: Vec<Keys>) -> Keys {
     v.into_iter()
-        .fold(Keys::new(), |acc, keys| acc.merge_right(keys))
+        .fold(Keys::new(), crate::core::merge_right::MergeRight::merge_right)
 }
 
 struct KeysExtractor;
@@ -236,13 +233,12 @@ impl KeysExtractor {
             if let Some(type_def) = type_map.get(current_type) {
                 if !type_def.fields.contains_key(key) {
                     return Valid::fail(format!(
-                        "Invalid key at index {}: '{}' is not a field of '{}'",
-                        index, key, current_type
+                        "Invalid key at index {index}: '{key}' is not a field of '{current_type}'"
                     ));
                 }
                 current_type = type_def.fields[key].type_of.name();
             } else {
-                return Valid::fail(format!("Type '{}' not found in config", current_type));
+                return Valid::fail(format!("Type '{current_type}' not found in config"));
             }
             Valid::succeed(())
         })
@@ -283,8 +279,8 @@ impl KeysExtractor {
                         Self::parse_json_option(http.body.as_ref()).trace("body"),
                         Self::parse_key_value_iter(http.headers.iter()).trace("headers"),
                         Self::parse_key_value_iter(http.query.iter().map(|q| KeyValue {
-                            key: q.key.to_string(),
-                            value: q.value.to_string(),
+                            key: q.key.clone(),
+                            value: q.value.clone(),
                         }))
                         .trace("query"),
                     ],
@@ -296,7 +292,7 @@ impl KeysExtractor {
                 [
                     Self::parse_str(grpc.url.as_str()),
                     Self::parse_str(&grpc.method),
-                    Self::parse_value_option(&grpc.body),
+                    Self::parse_value_option(grpc.body.as_ref()),
                     Self::parse_key_value_iter(grpc.headers.iter()),
                 ],
                 identity,
@@ -407,11 +403,11 @@ impl KeysExtractor {
         .map(|keys_vec| {
             keys_vec
                 .into_iter()
-                .fold(Keys::new(), |acc, keys| acc.merge_right(keys))
+                .fold(Keys::new(), crate::core::merge_right::MergeRight::merge_right)
         })
     }
 
-    fn parse_value_option(value: &Option<serde_json::Value>) -> Valid<Keys, String> {
+    fn parse_value_option(value: Option<&serde_json::Value>) -> Valid<Keys, String> {
         if let Some(value) = value {
             Self::parse_value(value)
         } else {

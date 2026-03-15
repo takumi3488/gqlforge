@@ -49,18 +49,27 @@ pub enum Command {
 }
 
 impl WorkerResponse {
+    #[must_use] 
     pub fn status(&self) -> u16 {
         self.0.status.as_u16()
     }
 
+    #[must_use] 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn headers(&self) -> BTreeMap<String, String> {
         let mut headers = BTreeMap::new();
-        for (key, value) in self.0.headers.iter() {
-            headers.insert(key.to_string(), value.to_str().unwrap().to_string());
+        for (key, value) in &self.0.headers {
+            if let Ok(v) = value.to_str() {
+                headers.insert(key.to_string(), v.to_string());
+            }
         }
         headers
     }
 
+    #[must_use] 
     pub fn body(&self) -> Option<String> {
         let b = self.0.body.as_bytes();
         Some(String::from_utf8_lossy(b).to_string())
@@ -122,23 +131,23 @@ impl TryFrom<Response<async_graphql::Value>> for WorkerResponse {
 impl Display for Uri {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         let host = self.host.as_deref().unwrap_or("localhost");
-        let port = self.port.map(|p| format!(":{}", p)).unwrap_or_default();
+        let port = self.port.map(|p| format!(":{p}")).unwrap_or_default();
         let scheme = match self.scheme {
             Scheme::Https => "https",
-            _ => "http",
+            Scheme::Http => "http",
         };
         let path = self.path.as_str();
         let query = self
             .query
             .iter()
-            .map(|(k, v)| format!("{}={}", k, v))
+            .map(|(k, v)| format!("{k}={v}"))
             .collect::<Vec<String>>()
             .join("&");
 
-        write!(f, "{}://{}{}{}", scheme, host, port, path)?;
+        write!(f, "{scheme}://{host}{port}{path}")?;
 
         if !query.is_empty() {
-            write!(f, "?{}", query)?;
+            write!(f, "?{query}")?;
         }
 
         Ok(())
@@ -154,10 +163,14 @@ impl WorkerRequest {
         self.0.method().to_string()
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn headers(&self) -> Result<BTreeMap<String, String>> {
         let headers = self.0.headers();
         let mut map = BTreeMap::new();
-        for (k, v) in headers.iter() {
+        for (k, v) in headers {
             map.insert(k.to_string(), v.to_str()?.to_string());
         }
         Ok(map)
@@ -205,7 +218,7 @@ impl From<&reqwest::Url> for Uri {
                 "https" => Scheme::Https,
                 _ => Scheme::Http,
             },
-            host: value.host_str().map(|u| u.to_string()),
+            host: value.host_str().map(std::string::ToString::to_string),
             port: value.port(),
         }
     }

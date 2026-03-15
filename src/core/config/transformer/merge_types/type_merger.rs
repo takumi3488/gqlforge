@@ -17,10 +17,12 @@ pub struct TypeMerger {
 }
 
 impl TypeMerger {
+    #[must_use] 
     pub fn new(threshold: f32) -> Self {
         Self { threshold }
     }
 
+    #[must_use] 
     pub fn is_enabled(threshold: f32) -> bool {
         threshold > 0.0
     }
@@ -33,6 +35,7 @@ impl Default for TypeMerger {
 }
 
 impl TypeMerger {
+    #[expect(clippy::too_many_lines, reason = "type merging algorithm spans multiple phases")]
     fn merger(&self, mut merge_counter: u32, mut config: Config) -> Config {
         let mut type_to_merge_type_mapping = IndexMap::new();
         let mut similar_type_group_list: Vec<IndexSet<String>> = vec![];
@@ -47,7 +50,7 @@ impl TypeMerger {
 
         // step 1: identify all the types that satisfies the thresh criteria and group
         // them.
-        for type_name_1 in types.iter() {
+        for type_name_1 in &types {
             let type_name_1 = type_name_1.as_str();
             if let Some(type_info_1) = config.types.get(type_name_1) {
                 if visited_types.contains(type_name_1) {
@@ -98,7 +101,7 @@ impl TypeMerger {
         // step 2: merge similar types into single merged type.
         for same_types in similar_type_group_list {
             let mut merged_into = Type::default();
-            let merged_type_name = format!("{}M{}", PREFIX, merge_counter);
+            let merged_type_name = format!("{PREFIX}M{merge_counter}");
             let mut did_we_merge = false;
             for type_name in same_types {
                 if let Some(type_) = config.types.get(type_name.as_str()) {
@@ -127,7 +130,7 @@ impl TypeMerger {
                     actual_field.type_of = actual_field
                         .type_of
                         .clone()
-                        .with_name(merged_into_type_name.to_string());
+                        .with_name(merged_into_type_name.clone());
                 }
 
                 // make the changes in the input arguments as well.
@@ -161,7 +164,7 @@ impl TypeMerger {
             let mut types_to_remove = HashSet::new();
             let mut types_to_add = HashSet::new();
 
-            for type_name in union_type_.types.iter() {
+            for type_name in &union_type_.types {
                 if let Some(merge_into_type_name) = type_to_merge_type_mapping.get(type_name) {
                     types_to_remove.insert(type_name.clone());
                     types_to_add.insert(merge_into_type_name.clone());
@@ -244,6 +247,7 @@ impl Transform for TypeMerger {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_fixtures;
     use gqlforge_valid::Validator;
 
@@ -424,7 +428,7 @@ mod test {
 
     #[test]
     fn test_merge_to_supertype() {
-        let sdl = r#"
+        let sdl = r"
             schema {
                 query: Query
             }
@@ -441,7 +445,7 @@ mod test {
                 foo: Foo
                 bar: Bar
             }
-        "#;
+        ";
 
         let config = Config::from_sdl(sdl).to_result().unwrap();
         let config = TypeMerger::default().transform(config).to_result().unwrap();

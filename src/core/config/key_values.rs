@@ -30,15 +30,16 @@ pub struct KeyValue {
 // where both current and other have the same key, we use the value
 // from other. This simplifies the merge_right_vars function in
 // server.rs.
+#[must_use] 
 pub fn merge_key_value_vecs(current: &[KeyValue], other: &[KeyValue]) -> Vec<KeyValue> {
     let mut res = BTreeMap::new();
 
     for kv in current {
-        res.insert(kv.key.to_owned(), kv.value.to_owned());
+        res.insert(kv.key.clone(), kv.value.clone());
     }
 
     for kv in other {
-        res.insert(kv.key.to_owned(), kv.value.to_owned());
+        res.insert(kv.key.clone(), kv.value.clone());
     }
 
     res.into_iter()
@@ -73,6 +74,7 @@ impl<'de> Deserialize<'de> for KeyValues {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

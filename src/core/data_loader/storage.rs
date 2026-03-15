@@ -1,7 +1,7 @@
 use std::borrow::Cow;
 use std::hash::Hash;
 
-/// Cache storage for [DataLoader](crate::dataloader::DataLoader).
+/// Cache storage for [`DataLoader`](crate::dataloader::DataLoader).
 pub trait CacheStorage: Send + Sync + 'static {
     /// The key type of the record.
     type Key: Send + Sync + Clone + Eq + Hash + 'static;
@@ -17,8 +17,8 @@ pub trait CacheStorage: Send + Sync + 'static {
     /// cache, then it updates the key's value.
     fn insert(&mut self, key: Cow<'_, Self::Key>, val: Cow<'_, Self::Value>);
 
-    #[allow(dead_code)]
     /// Removes the value corresponding to the key from the cache.
+    #[expect(dead_code, reason = "part of the CacheStorage interface, reserved for future use")]
     fn remove(&mut self, key: &Self::Key);
 
     /// Clears the cache, removing all key-value pairs.

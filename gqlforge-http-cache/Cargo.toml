@@ -20,3 +20,6 @@ url = { workspace = true }
 reqwest = { workspace = true }
 http = "1"
 http-cache = "1.0.0-alpha.5"
+
+[lints]
+workspace = true

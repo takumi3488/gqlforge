@@ -1,6 +1,6 @@
 use std::num::NonZeroU64;
 use std::str::FromStr;
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use async_graphql_value::ConstValue;
 use cache_control::{Cachability, CacheControl};
@@ -39,10 +39,11 @@ pub struct RequestContext {
 }
 
 impl RequestContext {
+    #[must_use] 
     pub fn new(target_runtime: TargetRuntime) -> RequestContext {
         RequestContext {
-            server: Default::default(),
-            upstream: Default::default(),
+            server: Server::default(),
+            upstream: Upstream::default(),
             x_response_headers: Arc::new(Mutex::new(HeaderMap::new())),
             cookie_headers: None,
             http_data_loaders: Arc::new(vec![]),
@@ -58,18 +59,30 @@ impl RequestContext {
         }
     }
     fn set_min_max_age_conc(&self, min_max_age: i32) {
-        *self.min_max_age.lock().unwrap() = Some(min_max_age);
+        *self.min_max_age.lock().unwrap_or_else(PoisonError::into_inner) = Some(min_max_age);
     }
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn get_min_max_age(&self) -> Option<i32> {
-        *self.min_max_age.lock().unwrap()
+        *self.min_max_age.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn set_cache_public_false(&self) {
-        *self.cache_public.lock().unwrap() = Some(false);
+        *self.cache_public.lock().unwrap_or_else(PoisonError::into_inner) = Some(false);
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn is_cache_public(&self) -> Option<bool> {
-        *self.cache_public.lock().unwrap()
+        *self.cache_public.lock().unwrap_or_else(PoisonError::into_inner)
     }
 
     pub fn set_min_max_age(&self, max_age: i32) {
@@ -87,13 +100,13 @@ impl RequestContext {
 
     pub fn set_cache_visibility(&self, cachability: &Option<Cachability>) {
         if let Some(Cachability::Private) = cachability {
-            self.set_cache_public_false()
+            self.set_cache_public_false();
         }
     }
 
-    pub fn set_cache_control(&self, cache_policy: CacheControl) {
+    pub fn set_cache_control(&self, cache_policy: &CacheControl) {
         if let Some(max_age) = cache_policy.max_age {
-            self.set_min_max_age(max_age.as_secs() as i32);
+            self.set_min_max_age(i32::try_from(max_age.as_secs()).unwrap_or(i32::MAX));
         }
         self.set_cache_visibility(&cache_policy.cachability);
         if Some(Cachability::NoCache) == cache_policy.cachability {
@@ -101,15 +114,19 @@ impl RequestContext {
         }
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn set_cookie_headers(&self, headers: &HeaderMap) {
         // TODO fix execution_spec test and use append method
         // to allow multiple set cookie
         if let Some(map) = &self.cookie_headers {
-            let map = &mut map.lock().unwrap();
+            let map = &mut map.lock().unwrap_or_else(PoisonError::into_inner);
 
             // Check if the incoming headers contain 'set-cookie'
             if let Some(new_cookies) = headers.get("set-cookie") {
-                let cookie_name = HeaderName::from_str("set-cookie").unwrap();
+                let cookie_name = HeaderName::from_str("set-cookie").unwrap_or_else(|_| unreachable!("set-cookie is a valid header name"));
 
                 // Check if 'set-cookie' already exists in our map
                 if let Some(existing_cookies) = map.get(&cookie_name) {
@@ -120,12 +137,12 @@ impl RequestContext {
                         && let Ok(new_cookies_str) = new_cookies.to_str()
                     {
                         // Create a new value by appending the new cookies to the existing ones
-                        let combined_cookies = format!("{}; {}", existing_str, new_cookies_str);
+                        let combined_cookies = format!("{existing_str}; {new_cookies_str}");
 
                         // Replace the old value with the new, combined value
                         map.insert(
                             cookie_name,
-                            HeaderValue::from_str(&combined_cookies).unwrap(),
+                            HeaderValue::from_str(&combined_cookies).unwrap_or_else(|_| unreachable!("combined cookies from valid header values are always valid")),
                         );
                     }
                 } else {
@@ -136,10 +153,18 @@ impl RequestContext {
         }
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn cache_get(&self, key: &IoId) -> Result<Option<ConstValue>, cache::Error> {
         self.runtime.cache.get(key).await
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn cache_insert(
         &self,
         key: IoId,
@@ -149,12 +174,20 @@ impl RequestContext {
         self.runtime.cache.set(key, value, ttl).await
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn set_auth_claims(&self, claims: serde_json::Value) {
-        *self.auth_claims.lock().unwrap() = Some(claims);
+        *self.auth_claims.lock().unwrap_or_else(PoisonError::into_inner) = Some(claims);
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn get_auth_claims(&self) -> Option<serde_json::Value> {
-        self.auth_claims.lock().unwrap().clone()
+        self.auth_claims.lock().unwrap_or_else(PoisonError::into_inner).clone()
     }
 
     pub fn is_batching_enabled(&self) -> bool {
@@ -166,10 +199,14 @@ impl RequestContext {
         !self.server.experimental_headers.is_empty()
     }
 
-    /// Inserts the experimental headers into the x_response_headers map
+    /// Inserts the experimental headers into the `x_response_headers` map
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn add_x_headers(&self, headers: &HeaderMap) {
         if self.has_experimental_headers() {
-            let mut x_response_headers = self.x_response_headers.lock().unwrap();
+            let mut x_response_headers = self.x_response_headers.lock().unwrap_or_else(PoisonError::into_inner);
             for name in &self.server.experimental_headers {
                 if let Some(value) = headers.get(name) {
                     x_response_headers.insert(name, value.clone());
@@ -179,9 +216,13 @@ impl RequestContext {
     }
 
     /// Modifies existing headers to include the experimental headers
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn extend_x_headers(&self, headers: &mut HeaderMap) {
         if self.has_experimental_headers() {
-            let x_response_headers = &self.x_response_headers.lock().unwrap();
+            let x_response_headers = &self.x_response_headers.lock().unwrap_or_else(PoisonError::into_inner);
             for (header, value) in x_response_headers.iter() {
                 headers.insert(header, value.clone());
             }
@@ -217,6 +258,7 @@ impl From<&AppContext> for RequestContext {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use cache_control::Cachability;
 
     use crate::core::blueprint::{Server, Upstream};
@@ -229,7 +271,7 @@ mod test {
 
             let upstream = Upstream::try_from(&config_module).unwrap();
             let server = Server::try_from(config_module).unwrap();
-            RequestContext::new(crate::core::runtime::test::init(None))
+            RequestContext::new(crate::core::runtime::test::init(&None))
                 .upstream(upstream)
                 .server(server)
         }
@@ -282,7 +324,7 @@ mod test {
 
     #[test]
     fn test_is_batching_disabled_default() {
-        let req_ctx = create_req_ctx_with_batch(Default::default());
+        let req_ctx = create_req_ctx_with_batch(Batch::default());
         assert!(!req_ctx.is_batching_enabled());
     }
 

@@ -1,5 +1,4 @@
 use anyhow::anyhow;
-use once_cell::sync::Lazy;
 use opentelemetry::trace::TracerProvider as _;
 use opentelemetry::{KeyValue, global};
 use opentelemetry_appender_tracing::layer::OpenTelemetryTracingBridge;
@@ -26,7 +25,7 @@ use crate::core::tracing::{
     default_tracing, default_tracing_gqlforge, get_log_level, gqlforge_filter_target,
 };
 
-static RESOURCE: Lazy<Resource> = Lazy::new(|| {
+static RESOURCE: std::sync::LazyLock<Resource> = std::sync::LazyLock::new(|| {
     Resource::builder()
         .with_service_name("gqlforge")
         .with_attributes([KeyValue::new(
@@ -137,7 +136,7 @@ fn build_otlp_span_exporter(
         .with_endpoint(config.url.as_str())
         .with_metadata(MetadataMap::from_headers(config.headers.clone()))
         .build()
-        .map_err(|e| anyhow!("Failed to create OTLP span exporter: {}", e))
+        .map_err(|e| anyhow!("Failed to create OTLP span exporter: {e}"))
 }
 
 fn build_otlp_log_exporter(
@@ -148,7 +147,7 @@ fn build_otlp_log_exporter(
         .with_endpoint(config.url.as_str())
         .with_metadata(MetadataMap::from_headers(config.headers.clone()))
         .build()
-        .map_err(|e| anyhow!("Failed to create OTLP log exporter: {}", e))
+        .map_err(|e| anyhow!("Failed to create OTLP log exporter: {e}"))
 }
 
 fn build_otlp_metric_exporter(
@@ -159,7 +158,7 @@ fn build_otlp_metric_exporter(
         .with_endpoint(config.url.as_str())
         .with_metadata(MetadataMap::from_headers(config.headers.clone()))
         .build()
-        .map_err(|e| anyhow!("Failed to create OTLP metric exporter: {}", e))
+        .map_err(|e| anyhow!("Failed to create OTLP metric exporter: {e}"))
 }
 
 fn set_tracing_subscriber(subscriber: impl Subscriber + Send + Sync) {
@@ -169,6 +168,10 @@ fn set_tracing_subscriber(subscriber: impl Subscriber + Send + Sync) {
     let _ = tracing::subscriber::set_global_default(subscriber);
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn init_opentelemetry(config: Telemetry, runtime: &TargetRuntime) -> anyhow::Result<()> {
     if let Some(export) = &config.export {
         let trace_layer = set_trace_provider(export)?;

@@ -70,6 +70,9 @@ impl Transform for BodyBatching<'_> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, clippy::expect_used, reason = "test code")]
+    use std::collections::BTreeSet;
+
     use gqlforge_valid::Validator;
     use http::Method;
     use reqwest::Request;
@@ -85,7 +88,7 @@ mod tests {
             request.body_mut().replace(reqwest::Body::from(bytes_body));
         }
 
-        DataLoaderRequest::new(request, Default::default())
+        DataLoaderRequest::new(request, BTreeSet::new())
     }
 
     fn create_base_request() -> Request {

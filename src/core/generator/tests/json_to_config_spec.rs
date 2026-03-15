@@ -52,6 +52,10 @@ datatest_stable::harness! {
     { test = run_json_to_config_spec, root = "src/core/generator/tests/fixtures/json", pattern = r"^.*\.json" },
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the test fails.
 pub fn run_json_to_config_spec(path: &Path) -> datatest_stable::Result<()> {
     let json_data = load_json(path)?;
     test_spec(path, json_data)?;
@@ -60,7 +64,7 @@ pub fn run_json_to_config_spec(path: &Path) -> datatest_stable::Result<()> {
 
 fn load_json(path: &Path) -> anyhow::Result<JsonFixture> {
     let contents = fs::read_to_string(path)?;
-    let json_data: JsonFixture = serde_json::from_str(&contents).unwrap();
+    let json_data: JsonFixture = serde_json::from_str(&contents)?;
     Ok(json_data)
 }
 

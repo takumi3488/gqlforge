@@ -31,8 +31,11 @@ pub struct Generator {
     transformers: Vec<Box<dyn Transform<Value = Config, Error = String>>>,
 }
 
-#[allow(clippy::large_enum_variant)]
 #[derive(Clone)]
+#[expect(
+    clippy::large_enum_variant,
+    reason = "Json variant is intentionally large; boxing would complicate usage"
+)]
 pub enum Input {
     Json {
         url: Url,
@@ -66,6 +69,7 @@ impl Default for Generator {
 }
 
 impl Generator {
+    #[must_use] 
     pub fn new() -> Generator {
         Generator {
             query: "Query".into(),
@@ -73,7 +77,7 @@ impl Generator {
             subscription: None,
             inputs: Vec::new(),
             type_name_prefix: PREFIX.into(),
-            transformers: Default::default(),
+            transformers: Vec::new(),
         }
     }
 
@@ -96,7 +100,6 @@ impl Generator {
 
     /// Generates the configuration from the provided protobuf.
     fn generate_from_proto(
-        &self,
         metadata: &ProtoMetadata,
         operation_name: &str,
         url: &str,
@@ -105,7 +108,7 @@ impl Generator {
         let mut config = from_proto(&[descriptor_set], operation_name, url)?;
         config.links.push(Link {
             id: None,
-            src: metadata.path.to_owned(),
+            src: metadata.path.clone(),
             type_of: LinkType::Protobuf,
             headers: None,
             meta: None,
@@ -115,14 +118,18 @@ impl Generator {
     }
 
     /// Generated the actual configuratio from provided samples.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn generate(&self, use_transformers: bool) -> anyhow::Result<ConfigModule> {
         let mut config: Config = Config::default();
         let type_name_generator = NameGenerator::new(&self.type_name_prefix);
 
-        for input in self.inputs.iter() {
+        for input in &self.inputs {
             match input {
                 Input::Config { source, schema } => {
-                    config = config.merge_right(Config::from_source(source.clone(), schema)?);
+                    config = config.merge_right(Config::from_source(*source, schema)?);
                 }
                 Input::Json {
                     url,
@@ -149,7 +156,7 @@ impl Generator {
                         .merge_right(self.generate_from_json(&type_name_generator, &[req_sample])?);
                 }
                 Input::Proto { metadata, url, connect_rpc } => {
-                    let proto_config = self.generate_from_proto(metadata, &self.query, url)?;
+                    let proto_config = Self::generate_from_proto(metadata, &self.query, url)?;
                     let proto_config = if connect_rpc == &Some(true) {
                         ConnectRPC.transform(proto_config).to_result()?
                     } else {
@@ -194,6 +201,7 @@ fn resolve_file_descriptor_set(
 
 #[cfg(test)]
 pub mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::BTreeMap;
 
     use prost_reflect::prost_types::FileDescriptorSet;
@@ -259,12 +267,12 @@ pub mod test {
             // if is mutation isn't present, then mark it as false.
             let is_mutation = json_content
                 .get("is_mutation")
-                .and_then(|is_mutation| is_mutation.as_bool().to_owned())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or_default();
 
             let is_subscription = json_content
                 .get("is_subscription")
-                .and_then(|v| v.as_bool())
+                .and_then(serde_json::Value::as_bool)
                 .unwrap_or_default();
 
             let field_name = json_content

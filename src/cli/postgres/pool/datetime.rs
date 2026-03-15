@@ -43,6 +43,7 @@ pub(super) fn parse_uuid_to_bytes(
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

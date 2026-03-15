@@ -1,6 +1,6 @@
 use std::collections::BTreeSet;
 use std::ops::Deref;
-use std::sync::Arc;
+use std::sync::{Arc, PoisonError};
 
 use anyhow::Result;
 use async_graphql::ServerError;
@@ -34,9 +34,9 @@ fn prometheus_metrics(prometheus_exporter: &PrometheusExporter) -> Result<Respon
     match prometheus_exporter.format {
         PrometheusFormat::Text => TextEncoder::new().encode(&metric_families, &mut buffer)?,
         PrometheusFormat::Protobuf => {
-            ProtobufEncoder::new().encode(&metric_families, &mut buffer)?
+            ProtobufEncoder::new().encode(&metric_families, &mut buffer)?;
         }
-    };
+    }
 
     let content_type = match prometheus_exporter.format {
         PrometheusFormat::Text => TEXT_FORMAT,
@@ -74,7 +74,7 @@ pub fn update_response_headers(
 
     // Insert Cookie Headers
     if let Some(ref cookie_headers) = req_ctx.cookie_headers {
-        let cookie_headers = cookie_headers.lock().unwrap();
+        let cookie_headers = cookie_headers.lock().unwrap_or_else(PoisonError::into_inner);
         resp.headers_mut().extend(cookie_headers.deref().clone());
     }
 
@@ -96,10 +96,10 @@ pub async fn graphql_request<T: DeserializeOwned + GraphQLRequestLike>(
         == Some(&HeaderValue::from_str("application/graphql")?)
     {
         let decoded_str = String::from_utf8_lossy(&bytes).clone();
-        let enriched_str = if decoded_str.contains("\\") {
-            format!(r#"{{"query": {} }}"#, decoded_str)
+        let enriched_str = if decoded_str.contains('\\') {
+            format!(r#"{{"query": {decoded_str} }}"#)
         } else {
-            format!(r#"{{"query": {:?} }}"#, decoded_str)
+            format!(r#"{{"query": {decoded_str:?} }}"#)
         };
         Bytes::from(enriched_str)
     } else {
@@ -114,12 +114,12 @@ pub async fn graphql_request<T: DeserializeOwned + GraphQLRequestLike>(
         Err(err) => {
             tracing::error!(
                 "Failed to parse request: {}",
-                String::from_utf8(bytes.to_vec()).unwrap()
+                String::from_utf8_lossy(&bytes)
             );
 
             let mut response = async_graphql::Response::default();
             let server_error =
-                ServerError::new(format!("Unexpected GraphQL Request: {}", err), None);
+                ServerError::new(format!("Unexpected GraphQL Request: {err}"), None);
             response.errors = vec![server_error];
 
             Ok(GraphQLResponse::from(response).into_response()?)
@@ -151,7 +151,7 @@ async fn execute_query<T: DeserializeOwned + GraphQLRequestLike>(
 
 fn create_allowed_headers(headers: &HeaderMap, allowed: &BTreeSet<String>) -> HeaderMap {
     let mut new_headers = HeaderMap::with_capacity(allowed.len());
-    for (k, v) in headers.iter() {
+    for (k, v) in headers {
         if allowed
             .iter()
             .any(|allowed_key| allowed_key.eq_ignore_ascii_case(k.as_str()))
@@ -201,6 +201,7 @@ async fn handle_request_with_cors<T: DeserializeOwned + GraphQLRequestLike>(
 ) -> Result<Response<Full<Bytes>>> {
     // Safe to call `.unwrap()` because this method will only be called when
     // `cors` is `Some`
+    #[expect(clippy::unwrap_used, reason = "called only when cors is Some")]
     let cors = app_ctx.blueprint.server.cors.as_ref().unwrap();
     let (parts, body) = req.into_parts();
     let origin = parts.headers.get(&header::ORIGIN);
@@ -330,7 +331,7 @@ async fn handle_request_inner<T: DeserializeOwned + GraphQLRequestLike>(
                 && req.uri().path() == prometheus.path
             {
                 return prometheus_metrics(prometheus);
-            };
+            }
 
             #[cfg(feature = "cli")]
             if let Some(ref spa_dir) = app_ctx.blueprint.server.spa_dir {
@@ -353,6 +354,10 @@ async fn handle_request_inner<T: DeserializeOwned + GraphQLRequestLike>(
         http.request.method = %req.method()
     )
 )]
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
     req: Request<Full<Bytes>>,
     app_ctx: Arc<AppContext>,
@@ -379,13 +384,14 @@ pub async fn handle_request<T: DeserializeOwned + GraphQLRequestLike>(
     if let Ok(response) = &response {
         let status = get_response_status_code(response);
         tracing::Span::current().set_attribute(status.key, status.value);
-    };
+    }
 
     response
 }
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
 
     use super::*;
@@ -403,7 +409,7 @@ mod test {
         blueprint.server.routes = Routes::default().with_status("/health");
         let app_ctx = Arc::new(AppContext::new(
             blueprint,
-            init(None),
+            init(&None),
             EndpointSet::default(),
         ));
 
@@ -429,7 +435,7 @@ mod test {
         blueprint.server.routes = Routes::default().with_graphql("/gql");
         let app_ctx = Arc::new(AppContext::new(
             blueprint,
-            init(None),
+            init(&None),
             EndpointSet::default(),
         ));
 

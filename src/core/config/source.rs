@@ -5,7 +5,7 @@ use schemars::JsonSchema;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-#[derive(Clone, Default, Debug, Serialize, Deserialize, JsonSchema)]
+#[derive(Clone, Copy, Default, Debug, Serialize, Deserialize, JsonSchema)]
 #[serde(rename_all = "camelCase")]
 pub enum Source {
     Json,
@@ -51,6 +51,7 @@ impl std::str::FromStr for Source {
 
 impl Source {
     /// Get the file extension for the given format
+    #[must_use] 
     pub fn ext(&self) -> &'static str {
         match self {
             Source::Json => JSON_EXT,
@@ -60,6 +61,10 @@ impl Source {
     }
 
     /// Detect the config format from the file name
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn detect(name: &str) -> Result<Source, SourceError> {
         Path::new(name)
             .extension()

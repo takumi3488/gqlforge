@@ -6,7 +6,7 @@ use gqlforge_valid::ValidationError;
 
 use crate::core::error::Error as CoreError;
 
-/// The moral equivalent of a serde_json::Value but for errors.
+/// The moral equivalent of a `serde_json::Value` but for errors.
 /// It's a data structure like Value that can hold any error in an untyped
 /// manner.
 #[derive(Debug, thiserror::Error, Setters, PartialEq, Clone)]
@@ -24,21 +24,23 @@ pub struct Errata {
 }
 
 impl Errata {
+    #[must_use] 
     pub fn new(message: &str) -> Self {
         Errata {
             is_root: true,
             color: false,
             message: message.to_string(),
-            description: Default::default(),
-            trace: Default::default(),
-            caused_by: Default::default(),
+            description: None,
+            trace: Vec::new(),
+            caused_by: Vec::new(),
         }
     }
 
+    #[must_use] 
     pub fn caused_by(mut self, error: Vec<Errata>) -> Self {
         self.caused_by = error;
 
-        for error in self.caused_by.iter_mut() {
+        for error in &mut self.caused_by {
             error.is_root = false;
         }
 
@@ -61,9 +63,10 @@ impl Errata {
         }
     }
 
+    #[must_use] 
     pub fn color(mut self, color: bool) -> Self {
         self.color = color;
-        for inner in self.caused_by.iter_mut() {
+        for inner in &mut self.caused_by {
             inner.color = color;
         }
         self
@@ -71,9 +74,11 @@ impl Errata {
 }
 
 fn margin(str: &str, margin: usize) -> String {
+    let pad = " ".repeat(margin);
     let mut result = String::new();
     for line in str.split_inclusive('\n') {
-        result.push_str(&format!("{}{}", " ".repeat(margin), line));
+        result.push_str(&pad);
+        result.push_str(line);
     }
     result
 }
@@ -99,7 +104,7 @@ impl Display for Errata {
 
         if let Some(description) = &self.description {
             f.write_str(&self.colored(": ", message_color))?;
-            f.write_str(&self.colored(description.to_string().as_str(), colored::Color::White))?;
+            f.write_str(&self.colored(description.clone().as_str(), colored::Color::White))?;
         }
 
         if !self.trace.is_empty() {
@@ -107,7 +112,7 @@ impl Display for Errata {
             buf.push_str(" [at ");
             let len = self.trace.len();
             for (i, trace) in self.trace.iter().enumerate() {
-                buf.push_str(&trace.to_string());
+                buf.push_str(&trace.clone());
                 if i < len - 1 {
                     buf.push('.');
                 }
@@ -368,7 +373,7 @@ mod tests {
     fn test_from_validation() {
         let cause = Cause::new("URL needs to be specified")
             .description("Set `url` in @http or @server directives")
-            .trace(vec!["Query", "users", "@http", "url"]);
+            .trace(&["Query", "users", "@http", "url"]);
         let valid = ValidationError::from(cause);
         let error = Errata::from(valid);
         let expected = "|Invalid Configuration
@@ -395,7 +400,7 @@ mod tests {
     #[test]
     fn test_validation_error_identity() {
         let validation_error = ValidationError::from(
-            Cause::new("Test Error".to_string()).trace(vec!["Query".to_string()]),
+            Cause::new("Test Error".to_string()).trace(&["Query".to_string()]),
         );
         let anyhow_error: anyhow::Error = validation_error.clone().into();
 

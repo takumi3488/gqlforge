@@ -31,7 +31,7 @@ pub enum PostgresOperation {
     Delete,
 }
 
-/// The `@postgres` directive maps a GraphQL field to a PostgreSQL table
+/// The `@postgres` directive maps a GraphQL field to a `PostgreSQL` table
 /// operation.
 ///
 /// Supports CRUD operations with Mustache-templated filter expressions,
@@ -75,7 +75,7 @@ pub struct Postgres {
     #[serde(default, skip_serializing_if = "is_default")]
     pub input: Option<String>,
 
-    /// Columns used for DataLoader batch keys (N+1 prevention).
+    /// Columns used for `DataLoader` batch keys (N+1 prevention).
     #[serde(rename = "batchKey", default, skip_serializing_if = "is_default")]
     pub batch_key: Vec<String>,
 

@@ -41,7 +41,7 @@ impl<'a> WorkerContext<'a> {
 ///
 /// Executing a HTTP request is a bit more complex than just sending a request
 /// and getting a response. There are optimizations and customizations that the
-/// user might have configured. HttpRequestExecutor is responsible for handling
+/// user might have configured. `HttpRequestExecutor` is responsible for handling
 /// all of that.
 pub struct EvalHttp<'a, 'ctx, Context: ResolverContextLike + Sync> {
     evaluation_ctx: &'ctx EvalContext<'a, Context>,
@@ -53,7 +53,7 @@ impl<'a, 'ctx, Context: ResolverContextLike + Sync> EvalHttp<'a, 'ctx, Context> 
     pub fn new(
         evaluation_ctx: &'ctx EvalContext<'a, Context>,
         request_template: &'a RequestTemplate,
-        id: &Option<DataLoaderId>,
+        id: Option<&DataLoaderId>,
     ) -> Self {
         let data_loader = if evaluation_ctx.request_ctx.is_batching_enabled() {
             id.and_then(|id| {
@@ -145,11 +145,10 @@ impl<'a, 'ctx, Context: ResolverContextLike + Sync> EvalHttp<'a, 'ctx, Context> 
 }
 
 pub async fn execute_request_with_dl<
-    'ctx,
     Ctx: ResolverContextLike,
     Dl: Loader<DataLoaderRequest, Value = Response<async_graphql::Value>, Error = Arc<anyhow::Error>>,
 >(
-    ctx: &EvalContext<'ctx, Ctx>,
+    ctx: &EvalContext<'_, Ctx>,
     req: DynamicRequest<String>,
     data_loader: Option<&DataLoader<DataLoaderRequest, Dl>>,
 ) -> Result<Response<async_graphql::Value>, Error> {
@@ -166,7 +165,7 @@ pub async fn execute_request_with_dl<
         crate::core::http::DataLoaderRequest::new(req, headers).with_batching_value(batching_value);
 
     Ok(data_loader
-        .unwrap()
+        .unwrap_or_else(|| unreachable!("data_loader must be Some when called with DL path"))
         .load_one(endpoint_key)
         .await
         .map_err(Error::from)?
@@ -190,7 +189,7 @@ pub fn set_cache_control<Ctx: ResolverContextLike>(
         && res.status.is_success()
         && let Some(policy) = cache_policy(res)
     {
-        ctx.request_ctx.set_cache_control(policy);
+        ctx.request_ctx.set_cache_control(&policy);
     }
 }
 
@@ -258,7 +257,7 @@ pub async fn execute_grpc_request_with_dl<
     let endpoint_key = grpc::DataLoaderRequest::new(rendered, headers);
 
     Ok(data_loader
-        .unwrap()
+        .unwrap_or_else(|| unreachable!("data_loader must be Some when called with DL path"))
         .load_one(endpoint_key)
         .await
         .map_err(Error::from)?
@@ -280,6 +279,6 @@ pub fn parse_graphql_response<Ctx: ResolverContextLike>(
     Ok(res
         .data
         .get_key(field_name)
-        .map(|v| v.to_owned())
+        .map(std::borrow::ToOwned::to_owned)
         .unwrap_or_default())
 }

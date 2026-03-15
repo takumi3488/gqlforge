@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::hash::{Hash, Hasher};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, PoisonError};
 
 use futures_util::TryFutureExt;
 use futures_util::future::join_all;
@@ -21,6 +21,7 @@ pub struct FileRead {
 
 impl FileRead {
     /// Renders the content of the file using the given context
+    #[must_use]
     pub fn render(mut self, context: &impl PathString) -> Self {
         let mustache = Mustache::parse(&self.content);
         let schema = PathStringEval::new().eval_partial(&mustache, context);
@@ -36,6 +37,7 @@ pub enum Resource {
 }
 
 impl Resource {
+    #[must_use] 
     pub fn calculate_hash(&self) -> u64 {
         let mut hasher = GqlforgeHasher::default();
         self.hash(&mut hasher);
@@ -50,7 +52,7 @@ impl Hash for Resource {
             Resource::Request(request) => {
                 request.method().hash(state);
                 request.url().hash(state);
-                for (key, value) in request.headers().iter() {
+                for (key, value) in request.headers() {
                     key.hash(state);
                     value.hash(state);
                 }
@@ -89,6 +91,10 @@ pub trait Reader {
 pub struct ResourceReader<A>(A);
 
 impl<A: Reader + Send + Sync> ResourceReader<A> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read_files<T>(&self, paths: &[T]) -> anyhow::Result<Vec<FileRead>>
     where
         T: Into<Resource> + Clone + Send,
@@ -104,6 +110,10 @@ impl<A: Reader + Send + Sync> ResourceReader<A> {
         files.into_iter().collect::<anyhow::Result<Vec<_>>>()
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read_file<T>(&self, path: T) -> anyhow::Result<FileRead>
     where
         T: Into<Resource> + Send,
@@ -113,6 +123,7 @@ impl<A: Reader + Send + Sync> ResourceReader<A> {
 }
 
 impl ResourceReader<Cached> {
+    #[must_use] 
     pub fn cached(runtime: TargetRuntime) -> Self {
         ResourceReader(Cached::init(runtime))
     }
@@ -121,7 +132,7 @@ impl ResourceReader<Cached> {
 impl std::fmt::Display for Resource {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Resource::RawPath(file_path) => write!(f, "{}", file_path),
+            Resource::RawPath(file_path) => write!(f, "{file_path}"),
             Resource::Request(request_path) => write!(f, "{}", request_path.url()),
         }
     }
@@ -134,6 +145,7 @@ pub struct Direct {
 }
 
 impl Direct {
+    #[must_use] 
     pub fn init(runtime: TargetRuntime) -> Self {
         Self { runtime }
     }
@@ -188,8 +200,9 @@ pub struct Cached {
 }
 
 impl Cached {
+    #[must_use] 
     pub fn init(runtime: TargetRuntime) -> Self {
-        Self { direct: Direct::init(runtime), cache: Default::default() }
+        Self { direct: Direct::init(runtime), cache: Arc::default() }
     }
 }
 
@@ -204,18 +217,18 @@ impl Reader for Cached {
             .cache
             .as_ref()
             .lock()
-            .unwrap()
+            .unwrap_or_else(PoisonError::into_inner)
             .get(&resource.calculate_hash().to_string())
-            .map(|v| v.to_owned());
+            .map(std::borrow::ToOwned::to_owned);
         let content = if let Some(content) = content {
-            content.to_owned()
+            content.clone()
         } else {
             let file_read = self.direct.read(resource).await?;
             self.cache
                 .as_ref()
                 .lock()
-                .unwrap()
-                .insert(file_path.to_owned(), file_read.content.clone());
+                .unwrap_or_else(PoisonError::into_inner)
+                .insert(file_path.clone(), file_read.content.clone());
             file_read.content
         };
 
@@ -225,20 +238,21 @@ impl Reader for Cached {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     impl Resource {
         fn as_request(&self) -> Option<&reqwest::Request> {
             match self {
                 Resource::Request(request) => Some(request),
-                _ => None,
+                Resource::RawPath(_) => None,
             }
         }
 
         fn as_raw_path(&self) -> Option<&str> {
             match self {
                 Resource::RawPath(path) => Some(path),
-                _ => None,
+                Resource::Request(_) => None,
             }
         }
     }

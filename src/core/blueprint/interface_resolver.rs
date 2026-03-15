@@ -12,9 +12,9 @@ use crate::core::try_fold::TryFold;
 fn compile_interface_resolver(
     interface_name: &str,
     interface_types: &BTreeSet<String>,
-    discriminate: &Option<Discriminate>,
+    discriminate: Option<&Discriminate>,
 ) -> Valid<Discriminator, BlueprintError> {
-    let typename_field = discriminate.as_ref().map(|d| d.get_field());
+    let typename_field = discriminate.map(Discriminate::get_field);
 
     match Discriminator::new(
         interface_name.to_string(),
@@ -24,7 +24,7 @@ fn compile_interface_resolver(
     .to_result()
     {
         Ok(data) => Valid::succeed(data),
-        Err(err) => Valid::from_validation_err(BlueprintError::from_validation_string(err)),
+        Err(err) => Valid::from_validation_err(BlueprintError::from_validation_string(&err)),
     }
 }
 
@@ -37,7 +37,7 @@ pub fn update_interface_resolver<'a>()
                 return Valid::succeed(b_field);
             };
 
-            compile_interface_resolver(field.type_of.name(), interface_types, &field.discriminate)
+            compile_interface_resolver(field.type_of.name(), interface_types, field.discriminate.as_ref())
                 .map(|discriminator| {
                     b_field.resolver = Some(
                         b_field

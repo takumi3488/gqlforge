@@ -12,7 +12,7 @@ pub fn apply_select(input: (IR, &Option<Value>)) -> Valid<IR, BlueprintError> {
             Ok(dynamic_value) => dynamic_value.prepend("args"),
             Err(e) => {
                 return Valid::fail_with(
-                    BlueprintError::SyntaxErrorWhenParsing(format!("{:?}", select)),
+                    BlueprintError::SyntaxErrorWhenParsing(format!("{select:?}")),
                     BlueprintError::Error(e),
                 );
             }

@@ -20,7 +20,7 @@ use crate::core::transform::TransformerOps;
 fn get_body_value_single(body_value: &HashMap<String, Vec<&ConstValue>>, id: &str) -> ConstValue {
     body_value
         .get(id)
-        .and_then(|a| a.first().cloned().cloned())
+        .and_then(|a| a.first().copied().cloned())
         .unwrap_or(ConstValue::Null)
 }
 
@@ -42,11 +42,13 @@ pub struct HttpDataLoader {
     is_list: bool,
 }
 impl HttpDataLoader {
+    #[must_use] 
     pub fn new(runtime: TargetRuntime, group_by: Option<GroupBy>, is_list: bool) -> Self {
         HttpDataLoader { runtime, group_by, is_list }
     }
 
-    pub fn to_data_loader(self, batch: Batch) -> DataLoader<DataLoaderRequest, HttpDataLoader> {
+    #[must_use] 
+    pub fn to_data_loader(self, batch: &Batch) -> DataLoader<DataLoaderRequest, HttpDataLoader> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))
             .max_batch_size(batch.max_size.unwrap_or_default())
@@ -96,7 +98,6 @@ impl Loader<DataLoaderRequest> for HttpDataLoader {
                     .to_json::<ConstValue>()?;
 
                 // Create a response HashMap
-                #[allow(clippy::mutable_key_type)]
                 let mut hashmap = HashMap::with_capacity(dl_requests.len());
 
                 // Parse the response body and group it by batchKey
@@ -114,12 +115,11 @@ impl Loader<DataLoaderRequest> for HttpDataLoader {
 
                 // For each request and insert its corresponding value
                 if base_dl_request.method() == reqwest::Method::GET {
-                    for dl_req in dl_requests.iter() {
+                    for dl_req in &dl_requests {
                         let url = dl_req.url();
                         let query_set: HashMap<_, _> = url.query_pairs().collect();
                         let id = query_set.get(query_name).ok_or(anyhow::anyhow!(
-                            "Unable to find key {} in query params",
-                            query_name
+                            "Unable to find key {query_name} in query params"
                         ))?;
 
                         // Clone the response and set the body
@@ -129,7 +129,7 @@ impl Loader<DataLoaderRequest> for HttpDataLoader {
                         hashmap.insert(dl_req.clone(), res);
                     }
                 } else {
-                    for dl_req in dl_requests.into_iter() {
+                    for dl_req in dl_requests {
                         let body_key = dl_req.batching_value().ok_or(anyhow::anyhow!(
                             "Unable to find batching value in the body for data loader request {}",
                             dl_req.url().as_str()
@@ -153,7 +153,6 @@ impl Loader<DataLoaderRequest> for HttpDataLoader {
 
             let results = join_all(results).await;
 
-            #[allow(clippy::mutable_key_type)]
             let mut hashmap = HashMap::with_capacity(results.len());
             for (key, value) in results {
                 hashmap.insert(key, value?.to_json()?);

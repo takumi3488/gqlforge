@@ -21,7 +21,7 @@ impl From<JwkSet> for Jwks {
 }
 
 impl Jwks {
-    fn decode_with_jwk(&self, token: &str, jwk: &Jwk) -> Result<JwtClaim, Error> {
+    fn decode_with_jwk(token: &str, jwk: &Jwk) -> Result<JwtClaim, Error> {
         let key = DecodingKey::from_jwk(jwk).map_err(|err| Error::Parse(err.to_string()))?;
         let algorithm = jwk.common.key_algorithm.ok_or(Error::Parse(
             "Key algorithm is not specified in JWKS".to_owned(),
@@ -46,7 +46,7 @@ impl Jwks {
                 "Couldn't find JWK entry with specified kid".to_owned(),
             ))?;
 
-            self.decode_with_jwk(token, jwk)
+            Self::decode_with_jwk(token, jwk)
         } else {
             if !self.optional_kid {
                 return Err(Error::Invalid);
@@ -54,8 +54,8 @@ impl Jwks {
 
             // iterate over all available jwk and try to decode incoming token with it
             // if any succeeds return the data
-            for jwk in self.set.keys.iter() {
-                if let Ok(claims) = self.decode_with_jwk(token, jwk) {
+            for jwk in &self.set.keys {
+                if let Ok(claims) = Self::decode_with_jwk(token, jwk) {
                     return Ok(claims);
                 }
             }
@@ -67,6 +67,7 @@ impl Jwks {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
     use crate::core::auth::jwt::jwt_verify::OneOrMany;
     use crate::core::auth::jwt::jwt_verify::tests::{

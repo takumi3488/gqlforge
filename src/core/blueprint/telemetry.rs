@@ -36,7 +36,7 @@ fn to_url(url: &str) -> Valid<Url, BlueprintError> {
     .trace("url")
 }
 
-fn to_headers(headers: Vec<KeyValue>) -> Valid<HeaderMap, BlueprintError> {
+fn to_headers(headers: &[KeyValue]) -> Valid<HeaderMap, BlueprintError> {
     Valid::from_iter(headers.iter(), |key_value| {
         match HeaderName::from_str(&key_value.key).map_err(BlueprintError::InvalidHeaderName) {
             Ok(name) => Valid::succeed(name),
@@ -55,6 +55,7 @@ fn to_headers(headers: Vec<KeyValue>) -> Valid<HeaderMap, BlueprintError> {
     .trace("headers")
 }
 
+#[must_use] 
 pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintError> {
     TryFoldConfig::<Telemetry>::new(|config, up| {
         if let Some(export) = config.telemetry.export.as_ref() {
@@ -63,7 +64,7 @@ pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintE
                     Valid::succeed(TelemetryExporter::Stdout(config.clone()))
                 }
                 config::TelemetryExporter::Otlp(config) => to_url(&config.url)
-                    .zip(to_headers(config.headers.clone()))
+                    .zip(to_headers(&config.headers))
                     .map(|(url, headers)| TelemetryExporter::Otlp(OtlpExporter { url, headers }))
                     .trace("otlp"),
                 config::TelemetryExporter::Prometheus(config) => {

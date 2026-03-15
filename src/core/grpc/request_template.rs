@@ -37,7 +37,7 @@ impl RequestBody {
         if let Some(mustache) = &self.mustache {
             mustache.render(ctx)
         } else {
-            self.value.to_string()
+            self.value.clone()
         }
     }
 }
@@ -67,7 +67,7 @@ impl RequestTemplate {
     fn create_headers<C: PathString>(&self, ctx: &C) -> HeaderMap {
         let mut header_map = HeaderMap::new();
 
-        header_map.insert(CONTENT_TYPE, GRPC_MIME_TYPE.to_owned());
+        header_map.insert(CONTENT_TYPE, GRPC_MIME_TYPE.clone());
         header_map.insert(
             HeaderName::from_static("te"),
             HeaderValue::from_static("trailers"),
@@ -82,6 +82,10 @@ impl RequestTemplate {
         header_map
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> Result<RenderedRequestTemplate> {
         let url = self.create_url(ctx)?;
         let headers = self.render_headers(ctx);
@@ -112,10 +116,14 @@ impl RequestTemplate {
 }
 
 impl RenderedRequestTemplate {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_request(&self) -> Result<reqwest::Request> {
         Ok(create_grpc_request(
             self.url.clone(),
-            self.headers.clone(),
+            &self.headers,
             self.operation.convert_input(self.body.as_str())?,
         ))
     }
@@ -124,7 +132,7 @@ impl RenderedRequestTemplate {
 impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
     fn cache_key(&self, ctx: &Ctx) -> Option<IoId> {
         let mut hasher = GqlforgeHasher::default();
-        let rendered_req = self.render(ctx).unwrap();
+        let rendered_req = self.render(ctx).ok()?;
         rendered_req.hash(&mut hasher);
         Some(IoId::new(hasher.finish()))
     }
@@ -132,6 +140,7 @@ impl<Ctx: PathString + HasHeaders> CacheKey<Ctx> for RequestTemplate {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::borrow::Cow;
     use std::collections::HashSet;
 
@@ -156,7 +165,7 @@ mod tests {
 
         let id = "greetings".to_string();
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let reader = ConfigReader::init(runtime);
         let mut config = Config::default().links(vec![Link {
             id: Some(id.clone()),
@@ -167,7 +176,7 @@ mod tests {
             proto_paths: None,
         }]);
         let method = GrpcMethod {
-            package: id.to_string(),
+            package: id.clone(),
             service: "a".to_string(),
             name: "b".to_string(),
         };
@@ -257,7 +266,7 @@ mod tests {
         );
 
         if let Some(body) = req.body() {
-            assert_eq!(body.as_bytes(), Some(b"\0\0\0\0\0".as_ref()))
+            assert_eq!(body.as_bytes(), Some(b"\0\0\0\0\0".as_ref()));
         }
     }
 
@@ -269,7 +278,7 @@ mod tests {
             operation: get_protobuf_op().await,
             body: Some(RequestBody {
                 mustache: Some(Mustache::parse(r#"{ "name": "test" }"#)),
-                value: Default::default(),
+                value: String::new(),
             }),
             operation_type: GraphQLOperationType::Query,
         };
@@ -278,7 +287,7 @@ mod tests {
         let req = rendered.to_request().unwrap();
 
         if let Some(body) = req.body() {
-            assert_eq!(body.as_bytes(), Some(b"\0\0\0\0\x06\n\x04test".as_ref()))
+            assert_eq!(body.as_bytes(), Some(b"\0\0\0\0\x06\n\x04test".as_ref()));
         }
     }
 
@@ -289,7 +298,7 @@ mod tests {
             operation: get_protobuf_op().await,
             body: Some(RequestBody {
                 mustache: Some(Mustache::parse(body_str)),
-                value: Default::default(),
+                value: String::new(),
             }),
             operation_type: GraphQLOperationType::Query,
         }
@@ -306,7 +315,7 @@ mod tests {
 
         let ctx = Context::default();
         let tmpl_set: HashSet<_> =
-            futures_util::future::join_all(arr.iter().cloned().zip(std::iter::repeat(&ctx)).map(
+            futures_util::future::join_all(arr.iter().copied().zip(std::iter::repeat(&ctx)).map(
                 |(body_str, ctx)| async {
                     let tmpl = request_template_with_body(body_str).await;
                     tmpl.cache_key(ctx)

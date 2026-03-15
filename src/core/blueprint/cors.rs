@@ -44,16 +44,11 @@ impl Cors {
         &self,
         parts: &Parts,
     ) -> Option<(HeaderName, HeaderValue)> {
-        #[allow(clippy::declare_interior_mutable_const)]
-        const REQUEST_PRIVATE_NETWORK: HeaderName =
+        let request_private_network =
             HeaderName::from_static("access-control-request-private-network");
-
-        #[allow(clippy::declare_interior_mutable_const)]
-        const ALLOW_PRIVATE_NETWORK: HeaderName =
+        let allow_private_network =
             HeaderName::from_static("access-control-allow-private-network");
-
-        #[allow(clippy::declare_interior_mutable_const)]
-        const TRUE: HeaderValue = HeaderValue::from_static("true");
+        let true_val = HeaderValue::from_static("true");
 
         if !self.allow_private_network {
             return None;
@@ -61,13 +56,12 @@ impl Cors {
 
         // Access-Control-Allow-Private-Network is only relevant if the request
         // has the Access-Control-Request-Private-Network header set, else skip
-        #[allow(clippy::borrow_interior_mutable_const)]
-        if parts.headers.get(REQUEST_PRIVATE_NETWORK) != Some(&TRUE) {
+        if parts.headers.get(&request_private_network) != Some(&true_val) {
             return None;
         }
 
         self.allow_private_network
-            .then_some((ALLOW_PRIVATE_NETWORK, TRUE))
+            .then_some((allow_private_network, true_val))
     }
 
     pub fn allow_methods_to_header(&self) -> Option<(HeaderName, HeaderValue)> {
@@ -110,9 +104,8 @@ impl Cors {
         Some((header::VARY, header_val))
     }
 
-    #[allow(clippy::borrow_interior_mutable_const)]
     pub fn expose_headers_is_wildcard(&self) -> bool {
-        matches!(&self.expose_headers, Some(v) if v == WILDCARD)
+        matches!(&self.expose_headers, Some(v) if v == HeaderValue::from_static("*"))
     }
 }
 
@@ -213,7 +206,7 @@ impl TryFrom<config::cors::Cors> for Cors {
                     .parse()
                     .map_err(|e: InvalidHeaderValue| ValidationError::new(e.into()))?,
             ),
-            max_age: value.max_age.map(|val| val.into()),
+            max_age: value.max_age.map(std::convert::Into::into),
             vary: value
                 .vary
                 .iter()
@@ -228,12 +221,8 @@ impl TryFrom<config::cors::Cors> for Cors {
     }
 }
 
-#[allow(clippy::declare_interior_mutable_const)]
-const WILDCARD: HeaderValue = HeaderValue::from_static("*");
-
-#[allow(clippy::borrow_interior_mutable_const)]
 pub fn is_wildcard(header_value: &HeaderValue) -> bool {
-    header_value == WILDCARD
+    header_value == HeaderValue::from_static("*")
 }
 
 #[cfg(test)]

@@ -36,8 +36,8 @@ impl From<async_graphql::ServerError> for GraphQLError {
 
         Self {
             message: value.message,
-            locations: value.locations.into_iter().map(|l| l.into()).collect(),
-            path: value.path.into_iter().map(|p| p.into()).collect(),
+            locations: value.locations.into_iter().map(std::convert::Into::into).collect(),
+            path: value.path.into_iter().map(std::convert::Into::into).collect(),
             extensions,
         }
     }
@@ -96,7 +96,7 @@ impl From<async_graphql::parser::Error> for GraphQLError {
     fn from(e: async_graphql::parser::Error) -> Self {
         Self {
             message: e.to_string(),
-            locations: e.positions().map(|p| p.into()).collect(),
+            locations: e.positions().map(std::convert::Into::into).collect(),
             path: Vec::new(),
             extensions: None,
         }
@@ -123,6 +123,10 @@ impl PartialEq for GraphQLError {
     }
 }
 
+#[expect(
+    clippy::ref_option,
+    reason = "serde skip_serializing_if requires fn(&T) -> bool"
+)]
 fn error_extensions_is_empty(values: &Option<ErrorExtensionValues>) -> bool {
     values.as_ref().is_none_or(|values| values.0.is_empty())
 }
@@ -183,7 +187,7 @@ impl Debug for Error {
 impl Display for Error {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         // Delegate to the Debug implementation
-        write!(f, "{:?}", self)
+        write!(f, "{self:?}")
     }
 }
 
@@ -221,7 +225,7 @@ pub trait ErrorExtensions: Sized {
     where
         C: FnOnce(&Self, &mut ErrorExtensionValues),
     {
-        let mut new_extensions = Default::default();
+        let mut new_extensions = ErrorExtensionValues::default();
         cb(&self, &mut new_extensions);
 
         let Error { message, extensions } = self.extend();
@@ -249,6 +253,7 @@ impl<E: Display> ErrorExtensions for &E {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::{ErrorExtensionValues, ServerError};
 
     #[test]

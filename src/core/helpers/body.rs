@@ -4,6 +4,7 @@ use serde_json::Value;
 use crate::core::grpc::request_template::RequestBody;
 use crate::core::mustache::Mustache;
 
+#[must_use] 
 pub fn to_body(body: Option<&Value>) -> Valid<Option<RequestBody>, String> {
     let Some(body) = body else {
         return Valid::succeed(None);

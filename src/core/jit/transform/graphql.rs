@@ -67,13 +67,13 @@ fn format_selection_set<'a, A: 'a + Display + JsonLikeOwned>(
     let mut normal_fields = vec![];
     let mut is_typename_requested = false;
     let set = selection_set
-        .filter(|field| !matches!(&field.ir, Some(IR::IO(_)) | Some(IR::Dynamic(_))))
+        .filter(|field| !matches!(&field.ir, Some(IR::IO(_) | IR::Dynamic(_))))
         .map(|field| {
             // handle @modify directive scenario.
             let field_name = if let Some(IR::ContextPath(data)) = &field.ir {
-                data.first().cloned().unwrap_or(field.name.to_string())
+                data.first().cloned().unwrap_or(field.name.clone())
             } else {
-                field.name.to_string()
+                field.name.clone()
             };
             let is_this_field_interface = interfaces.contains(field.type_of.name());
             let formatted_selection_fields =
@@ -123,7 +123,7 @@ fn format_selection_field<A: Display + JsonLikeOwned>(
     let selection_set =
         format_selection_set(field.selection.iter(), interfaces, is_parent_interface);
 
-    let mut output = format!("{}{}", name, arguments);
+    let mut output = format!("{name}{arguments}");
 
     if !field.directives.is_empty() {
         let directives = print_directives(field.directives.iter());
@@ -147,7 +147,7 @@ fn format_selection_field_arguments<A: Display>(field: &Field<A>) -> Cow<'static
         .args
         .iter()
         .filter(|a| a.value.is_some())
-        .map(|arg| arg.to_string())
+        .map(std::string::ToString::to_string)
         .collect::<Vec<_>>()
         .join(",");
 

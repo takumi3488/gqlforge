@@ -22,6 +22,7 @@ impl<A> DynamicValue<A> {
     /// This function is used to prepend a string to every Mustache Expression.
     /// This is useful when we want to hide a Mustache data argument from the
     /// user and make the use of Gqlforge easier
+    #[must_use]
     pub fn prepend(self, name: &str) -> Self {
         match self {
             DynamicValue::Value(value) => DynamicValue::Value(value),
@@ -65,7 +66,7 @@ impl TryFrom<&DynamicValue<ConstValue>> for ConstValue {
             DynamicValue::Object(obj) => {
                 let out: Result<IndexMap<Name, ConstValue>, anyhow::Error> = obj
                     .into_iter()
-                    .map(|(k, v)| Ok((k.to_owned(), ConstValue::try_from(v)?.to_owned())))
+                    .map(|(k, v)| Ok((k.to_owned(), ConstValue::try_from(v)?.clone())))
                     .collect();
                 Ok(ConstValue::Object(out?))
             }
@@ -83,9 +84,9 @@ impl<A> DynamicValue<A> {
     pub fn is_const(&self) -> bool {
         match self {
             DynamicValue::Mustache(m) => m.is_const(),
-            DynamicValue::Object(obj) => obj.values().all(|v| v.is_const()),
-            DynamicValue::Array(arr) => arr.iter().all(|v| v.is_const()),
-            _ => true,
+            DynamicValue::Object(obj) => obj.values().all(DynamicValue::is_const),
+            DynamicValue::Array(arr) => arr.iter().all(DynamicValue::is_const),
+            DynamicValue::Value(_) => true,
         }
     }
 }

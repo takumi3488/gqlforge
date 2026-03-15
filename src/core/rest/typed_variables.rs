@@ -47,7 +47,7 @@ impl TryFrom<&Type> for UrlParamType {
                 _ => Err(Error::UnexpectedNamedType(name.to_owned())),
             },
             // TODO: support for list types
-            _ => Err(Error::UnexpectedType(value.to_owned())),
+            BaseType::List(_) => Err(Error::UnexpectedType(value.to_owned())),
         }
     }
 }

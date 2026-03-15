@@ -49,7 +49,7 @@ impl JwtVerifier {
         }
     }
 
-    fn resolve_token(&self, request: &RequestContext) -> anyhow::Result<Option<String>> {
+    fn resolve_token(request: &RequestContext) -> anyhow::Result<Option<String>> {
         let value = request
             .allowed_headers
             .typed_try_get::<Authorization<Bearer>>()?;
@@ -57,7 +57,7 @@ impl JwtVerifier {
         Ok(value.map(|token| token.token().to_owned()))
     }
 
-    async fn validate_token(&self, token: &str) -> Verification {
+    fn validate_token(&self, token: &str) -> Verification {
         Verification::from_result(
             self.decoder.decode(token),
             |claims| self.validate_claims(&claims),
@@ -77,7 +77,7 @@ impl JwtVerifier {
 #[async_trait::async_trait]
 impl Verify for JwtVerifier {
     async fn verify(&self, request: &RequestContext) -> Verification {
-        let token = self.resolve_token(request);
+        let token = Self::resolve_token(request);
         let Ok(token) = token else {
             return Verification::fail(Error::Invalid);
         };
@@ -85,7 +85,7 @@ impl Verify for JwtVerifier {
             return Verification::fail(Error::Missing);
         };
 
-        self.validate_token(&token).await
+        self.validate_token(&token)
     }
 }
 
@@ -93,14 +93,12 @@ pub fn validate_iss(options: &blueprint::Jwt, claims: &JwtClaim) -> bool {
     options
         .issuer
         .as_ref()
-        .map(|issuer| {
+        .is_none_or(|issuer| {
             claims
                 .iss
                 .as_ref()
-                .map(|iss| iss == issuer)
-                .unwrap_or(false)
+                .is_some_and(|iss| iss == issuer)
         })
-        .unwrap_or(true)
 }
 
 pub fn validate_aud(options: &blueprint::Jwt, claims: &JwtClaim) -> bool {
@@ -124,10 +122,11 @@ pub fn validate_aud(options: &blueprint::Jwt, claims: &JwtClaim) -> bool {
 
 #[cfg(test)]
 pub mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashSet;
 
     use jsonwebtoken::jwk::JwkSet;
-    use once_cell::sync::Lazy;
+    
 
     use super::*;
 
@@ -140,7 +139,7 @@ pub mod tests {
     // token without kid, issuer = "me" and audience = "some"
     pub const JWT_VALID_TOKEN_NO_KID: &str = "eyJhbGciOiJSUzI1NiJ9.eyJleHAiOjIwMTkwNTY0NDEsImlzcyI6Im1lIiwiYXVkIjoic29tZSJ9.E_3s1MCdyRPDvpTtM4woHmSrRxU3_zRMSIbGSQYe3zyRQ-d2Tw6jVVleZ39GJ88l3yw0pGrrkdGkRBi1lammrUryoe0Sp8_FQ-tZ1jrkCV3qd75n3X_WYnG8CRiPaDZX5VDEFlF30h1x3gyEBpDloOa657AYqwG20XTG5xgicvOGY7SGsyO6IwNWXbbiJnH5cStNPb5mQ97cY8QDKryT5InWHWMO1USByqUYoj-AL4HdIrr5HUaZqDIJEberLddIIHW446pd55PhW6PXS9voLmJv9in9ckCTij_AVOdr7shDlQqZhfIZAVYFSqG64Vs4GM1jEwHVoP_EK-4L7nq3TQ";
 
-    pub static JWK_SET: Lazy<JwkSet> = Lazy::new(|| {
+    pub static JWK_SET: std::sync::LazyLock<JwkSet> = std::sync::LazyLock::new(|| {
         let value = serde_json::json!({
           "keys": [
             {
@@ -166,8 +165,8 @@ pub mod tests {
     impl blueprint::Jwt {
         pub fn test_value() -> Self {
             Self {
-                issuer: Default::default(),
-                audiences: Default::default(),
+                issuer: None,
+                audiences: HashSet::new(),
                 optional_kid: false,
                 jwks: JWK_SET.clone(),
             }
@@ -189,7 +188,7 @@ pub mod tests {
             Verification::Succeed(Some(claims)) => {
                 assert!(claims.is_object(), "claims should be an object");
             }
-            other => panic!("expected Succeed with claims, got {:?}", other),
+            other => panic!("expected Succeed with claims, got {other:?}"),
         }
     }
 

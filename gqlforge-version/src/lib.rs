@@ -3,14 +3,17 @@ pub struct Version {
 }
 
 impl Version {
+    #[must_use]
     pub const fn new(version: &'static str) -> Self {
         Version { version }
     }
 
+    #[must_use]
     pub const fn as_str(&self) -> &'static str {
         self.version
     }
 
+    #[must_use]
     pub fn is_dev(&self) -> bool {
         self.version.contains("dev")
     }

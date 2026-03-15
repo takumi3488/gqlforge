@@ -5,6 +5,7 @@ use super::binary_format::{
     parse_pg_numeric,
 };
 
+#[expect(clippy::unwrap_used, reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid")]
 pub(super) fn raw_element_to_const(
     ty: &postgres_types::Type,
     raw: &[u8],
@@ -32,15 +33,13 @@ pub(super) fn raw_element_to_const(
         }
         Type::FLOAT4 => {
             let v = f32::from_be_bytes(raw.try_into()?);
-            Ok(serde_json::Number::from_f64(v as f64)
-                .map(ConstValue::Number)
-                .unwrap_or(ConstValue::Null))
+            Ok(serde_json::Number::from_f64(f64::from(v))
+                .map_or(ConstValue::Null, ConstValue::Number))
         }
         Type::FLOAT8 => {
             let v = f64::from_be_bytes(raw.try_into()?);
             Ok(serde_json::Number::from_f64(v)
-                .map(ConstValue::Number)
-                .unwrap_or(ConstValue::Null))
+                .map_or(ConstValue::Null, ConstValue::Number))
         }
         Type::TEXT | Type::VARCHAR | Type::BPCHAR | Type::NAME => {
             let s = std::str::from_utf8(raw)?;
@@ -75,14 +74,14 @@ pub(super) fn raw_element_to_const(
             // i32 days since 2000-01-01.
             let days = i32::from_be_bytes(raw.try_into()?);
             let epoch = chrono::NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-            let d = epoch + chrono::Duration::days(days as i64);
+            let d = epoch + chrono::Duration::days(i64::from(days));
             Ok(ConstValue::String(d.to_string()))
         }
         Type::TIME => {
             // i64 microseconds since midnight.
             let us = i64::from_be_bytes(raw.try_into()?);
-            let total_secs = (us / 1_000_000) as u32;
-            let micro = (us % 1_000_000) as u32;
+            let total_secs = u32::try_from(us / 1_000_000).unwrap_or(0);
+            let micro = u32::try_from(us % 1_000_000).unwrap_or(0);
             let t = chrono::NaiveTime::from_num_seconds_from_midnight_opt(total_secs, micro * 1000)
                 .unwrap_or_default();
             Ok(ConstValue::String(t.to_string()))
@@ -111,6 +110,46 @@ pub(super) fn raw_element_to_const(
     }
 }
 
+fn read_elements(
+    raw: &[u8],
+    pos: &mut usize,
+    dims: &[usize],
+    dim_idx: usize,
+    elem_type: &postgres_types::Type,
+) -> anyhow::Result<ConstValue> {
+    if dim_idx == dims.len() - 1 {
+        // Leaf dimension: read actual elements.
+        let mut items = Vec::with_capacity(dims[dim_idx]);
+        for _ in 0..dims[dim_idx] {
+            if *pos + 4 > raw.len() {
+                anyhow::bail!("array binary truncated");
+            }
+            let elem_len = i64::from(i32::from_be_bytes(raw[*pos..*pos + 4].try_into()?));
+            *pos += 4;
+            if elem_len < 0 {
+                // NULL element.
+                items.push(ConstValue::Null);
+            } else {
+                let len = usize::try_from(elem_len).unwrap_or(0);
+                if *pos + len > raw.len() {
+                    anyhow::bail!("array element data truncated");
+                }
+                let elem_data = &raw[*pos..*pos + len];
+                *pos += len;
+                items.push(raw_element_to_const(elem_type, elem_data)?);
+            }
+        }
+        Ok(ConstValue::List(items))
+    } else {
+        // Nested dimension.
+        let mut items = Vec::with_capacity(dims[dim_idx]);
+        for _ in 0..dims[dim_idx] {
+            items.push(read_elements(raw, pos, dims, dim_idx + 1, elem_type)?);
+        }
+        Ok(ConstValue::List(items))
+    }
+}
+
 pub(super) fn parse_pg_array(
     raw: &[u8],
     elem_type: &postgres_types::Type,
@@ -131,71 +170,32 @@ pub(super) fn parse_pg_array(
     }
 
     // Read dimension sizes and lower bounds.
-    let header_end = 12 + ndim as usize * 8;
+    let ndim_usize = usize::try_from(ndim).unwrap_or(0);
+    let header_end = 12 + ndim_usize * 8;
     if raw.len() < header_end {
         anyhow::bail!("array binary too short for dimensions");
     }
 
-    let mut dims = Vec::with_capacity(ndim as usize);
-    for i in 0..ndim as usize {
+    let mut dims = Vec::with_capacity(ndim_usize);
+    for i in 0..ndim_usize {
         let offset = 12 + i * 8;
         let dim_size_i32 = i32::from_be_bytes(raw[offset..offset + 4].try_into()?);
         if dim_size_i32 < 0 {
             anyhow::bail!("array dim_size is negative: {dim_size_i32}");
         }
-        let dim_size = dim_size_i32 as usize;
+        let dim_size = usize::try_from(dim_size_i32).unwrap_or(0);
         // lower_bound at offset+4..offset+8 - not needed for value parsing.
         dims.push(dim_size);
     }
 
     let mut pos = header_end;
 
-    #[allow(clippy::too_many_arguments)]
-    fn read_elements(
-        raw: &[u8],
-        pos: &mut usize,
-        dims: &[usize],
-        dim_idx: usize,
-        elem_type: &postgres_types::Type,
-    ) -> anyhow::Result<ConstValue> {
-        if dim_idx == dims.len() - 1 {
-            // Leaf dimension: read actual elements.
-            let mut items = Vec::with_capacity(dims[dim_idx]);
-            for _ in 0..dims[dim_idx] {
-                if *pos + 4 > raw.len() {
-                    anyhow::bail!("array binary truncated");
-                }
-                let elem_len = i32::from_be_bytes(raw[*pos..*pos + 4].try_into()?) as i64;
-                *pos += 4;
-                if elem_len < 0 {
-                    // NULL element.
-                    items.push(ConstValue::Null);
-                } else {
-                    let len = elem_len as usize;
-                    if *pos + len > raw.len() {
-                        anyhow::bail!("array element data truncated");
-                    }
-                    let elem_data = &raw[*pos..*pos + len];
-                    *pos += len;
-                    items.push(raw_element_to_const(elem_type, elem_data)?);
-                }
-            }
-            Ok(ConstValue::List(items))
-        } else {
-            // Nested dimension.
-            let mut items = Vec::with_capacity(dims[dim_idx]);
-            for _ in 0..dims[dim_idx] {
-                items.push(read_elements(raw, pos, dims, dim_idx + 1, elem_type)?);
-            }
-            Ok(ConstValue::List(items))
-        }
-    }
-
     read_elements(raw, &mut pos, &dims, 0, elem_type)
 }
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     fn build_pg_array(elem_oid: i32, elements: &[Option<&[u8]>]) -> Vec<u8> {
@@ -203,16 +203,12 @@ mod tests {
         // ndim=1
         buf.extend_from_slice(&1i32.to_be_bytes());
         // has_null
-        let has_null = if elements.iter().any(|e| e.is_none()) {
-            1i32
-        } else {
-            0i32
-        };
+        let has_null = i32::from(elements.iter().any(std::option::Option::is_none));
         buf.extend_from_slice(&has_null.to_be_bytes());
         // elem_oid
         buf.extend_from_slice(&elem_oid.to_be_bytes());
         // dim_size
-        buf.extend_from_slice(&(elements.len() as i32).to_be_bytes());
+        buf.extend_from_slice(&(i32::try_from(elements.len()).unwrap_or(i32::MAX)).to_be_bytes());
         // lower_bound
         buf.extend_from_slice(&1i32.to_be_bytes());
         // elements
@@ -222,7 +218,7 @@ mod tests {
                     buf.extend_from_slice(&(-1i32).to_be_bytes());
                 }
                 Some(data) => {
-                    buf.extend_from_slice(&(data.len() as i32).to_be_bytes());
+                    buf.extend_from_slice(&(i32::try_from(data.len()).unwrap_or(i32::MAX)).to_be_bytes());
                     buf.extend_from_slice(data);
                 }
             }
@@ -333,7 +329,7 @@ mod tests {
                 let v: f64 = n.as_f64().unwrap();
                 assert!((v - 1.23_f64).abs() < 1e-10);
             }
-            other => panic!("expected Number, got {:?}", other),
+            other => panic!("expected Number, got {other:?}"),
         }
     }
 
@@ -366,9 +362,9 @@ mod tests {
     #[test]
     fn test_raw_element_int8() {
         let result =
-            raw_element_to_const(&postgres_types::Type::INT8, &9999999999i64.to_be_bytes())
+            raw_element_to_const(&postgres_types::Type::INT8, &9_999_999_999_i64.to_be_bytes())
                 .unwrap();
-        assert_eq!(result, ConstValue::Number(9999999999i64.into()));
+        assert_eq!(result, ConstValue::Number(9_999_999_999_i64.into()));
     }
 
     #[test]
@@ -380,7 +376,7 @@ mod tests {
                 let v = n.as_f64().unwrap();
                 assert!((v - 1.5).abs() < 1e-6);
             }
-            other => panic!("expected Number, got {:?}", other),
+            other => panic!("expected Number, got {other:?}"),
         }
     }
 
@@ -408,7 +404,7 @@ mod tests {
             ConstValue::String(s) => {
                 assert!(s.starts_with("2024-01-15T10:30:00"));
             }
-            other => panic!("expected String, got {:?}", other),
+            other => panic!("expected String, got {other:?}"),
         }
     }
 
@@ -423,7 +419,7 @@ mod tests {
                 assert!(s.contains("2024-01-15"));
                 assert!(s.contains("+00:00"));
             }
-            other => panic!("expected String, got {:?}", other),
+            other => panic!("expected String, got {other:?}"),
         }
     }
 
@@ -455,7 +451,7 @@ mod tests {
                     Some(&ConstValue::String("value".to_string()))
                 );
             }
-            other => panic!("expected Object, got {:?}", other),
+            other => panic!("expected Object, got {other:?}"),
         }
     }
 
@@ -472,7 +468,7 @@ mod tests {
                     Some(&ConstValue::String("value".to_string()))
                 );
             }
-            other => panic!("expected Object, got {:?}", other),
+            other => panic!("expected Object, got {other:?}"),
         }
     }
 

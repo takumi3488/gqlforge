@@ -16,7 +16,7 @@ impl QueryEncoder {
         if let Some(value) = raw_value {
             match &value {
                 ValueString::Value(val) => self.encode_const_value(key, val),
-                ValueString::String(val) => format!("{}={}", key, val),
+                ValueString::String(val) => format!("{key}={val}"),
             }
         } else {
             key.to_owned()
@@ -36,7 +36,7 @@ impl QueryEncoder {
                     }
                 }
                 _ => convert_value(value)
-                    .map(|val| format!("{}={}", key, val))
+                    .map(|val| format!("{key}={val}"))
                     .unwrap_or(key.to_string()),
             },
             QueryEncoder::RepeatedKey => match value {
@@ -52,7 +52,7 @@ impl QueryEncoder {
                     }
                 }
                 _ => convert_value(value)
-                    .map(|val| format!("{}={}", key, val))
+                    .map(|val| format!("{key}={val}"))
                     .unwrap_or(key.to_string()),
             },
         }
@@ -61,7 +61,7 @@ impl QueryEncoder {
 
 pub fn convert_value(value: &async_graphql::Value) -> Option<String> {
     match value {
-        async_graphql::Value::String(s) => Some(s.to_string()),
+        async_graphql::Value::String(s) => Some(s.clone()),
         async_graphql::Value::Number(n) => Some(n.to_string()),
         async_graphql::Value::Boolean(b) => Some(b.to_string()),
         async_graphql::Value::Enum(e) => Some(e.to_string()),

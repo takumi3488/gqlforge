@@ -22,8 +22,8 @@ pub(super) async fn init_command(runtime: TargetRuntime, folder_path: &str) -> R
         vec![Source::Json, Source::Yml],
     )?;
 
-    let gqlforgerc = include_str!("../../../generated/.gqlforgerc.graphql");
-    let gqlforgerc_json: &str = include_str!("../../../generated/.gqlforgerc.schema.json");
+    let rc_content = include_str!("../../../generated/.gqlforgerc.graphql");
+    let rc_schema_content: &str = include_str!("../../../generated/.gqlforgerc.schema.json");
 
     let gqlforge_rc = Path::new(folder_path).join(GQLFORGE_RC);
     let gqlforge_rc_schema = Path::new(folder_path).join(GQLFORGE_RC_SCHEMA);
@@ -33,7 +33,7 @@ pub(super) async fn init_command(runtime: TargetRuntime, folder_path: &str) -> R
     confirm_and_write(
         runtime.clone(),
         &gqlforge_rc.display().to_string(),
-        gqlforgerc.as_bytes(),
+        rc_content.as_bytes(),
     )
     .await?;
 
@@ -44,7 +44,7 @@ pub(super) async fn init_command(runtime: TargetRuntime, folder_path: &str) -> R
     confirm_and_write(
         runtime.clone(),
         &gqlforge_rc_schema.display().to_string(),
-        gqlforgerc_json.as_bytes(),
+        rc_schema_content.as_bytes(),
     )
     .await?;
 
@@ -68,17 +68,14 @@ async fn confirm_and_write_yml(
 
     let mut final_graphqlrc = default_graphqlrc();
 
-    match runtime.file.read(yml_file_path.as_ref()).await {
-        Ok(yml_content) => {
-            let graphqlrc: serde_yaml_ng::Value = serde_yaml_ng::from_str(&yml_content)?;
-            final_graphqlrc = graphqlrc.merge_right(final_graphqlrc);
-            let content = serde_yaml_ng::to_string(&final_graphqlrc)?;
-            confirm_and_write(runtime.clone(), &yml_file_path, content.as_bytes()).await
-        }
-        Err(_) => {
-            let content = serde_yaml_ng::to_string(&final_graphqlrc)?;
-            runtime.file.write(&yml_file_path, content.as_bytes()).await
-        }
+    if let Ok(yml_content) = runtime.file.read(yml_file_path.as_ref()).await {
+        let graphqlrc: serde_yaml_ng::Value = serde_yaml_ng::from_str(&yml_content)?;
+        final_graphqlrc = graphqlrc.merge_right(final_graphqlrc);
+        let content = serde_yaml_ng::to_string(&final_graphqlrc)?;
+        confirm_and_write(runtime.clone(), &yml_file_path, content.as_bytes()).await
+    } else {
+        let content = serde_yaml_ng::to_string(&final_graphqlrc)?;
+        runtime.file.write(&yml_file_path, content.as_bytes()).await
     }
 }
 
@@ -123,7 +120,7 @@ async fn create_main(
     let runtime_config = match source {
         Source::Json => runtime_config.to_json(true)?,
         Source::Yml => runtime_config.to_yaml()?,
-        _ => {
+        Source::GraphQL => {
             return Err(anyhow!(
                 "Only json/yaml formats are supported for json configs"
             ));

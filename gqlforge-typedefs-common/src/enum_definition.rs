@@ -30,7 +30,7 @@ pub fn into_enum_definition(enum_value: EnumValue, name: &str) -> TypeSystemDefi
     for enum_variant in enum_value.variants {
         let formatted_value: String = enum_variant
             .value
-            .to_string()
+            .clone()
             .chars()
             .filter(|ch| ch != &'"')
             .collect();
@@ -83,8 +83,9 @@ pub fn into_enum_value(schema: &Schema) -> Option<EnumValue> {
                 into_enum_value(one_of_schema).and_then(|mut en| {
                     // if it has only single variant it's our high-level enum
                     if en.variants.len() == 1 {
+                        let variant = en.variants.pop()?;
                         Some(EnumVariant {
-                            value: en.variants.pop().unwrap().value,
+                            value: variant.value,
                             description: en.description,
                         })
                     } else {

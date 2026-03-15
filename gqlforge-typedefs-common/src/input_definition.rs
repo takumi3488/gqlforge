@@ -12,14 +12,15 @@ pub trait InputDefinition {
     fn input_definition() -> TypeSystemDefinition;
 }
 
-pub fn into_input_definition_from_schema(schema: Schema, name: &str) -> TypeSystemDefinition {
+#[must_use]
+pub fn into_input_definition_from_schema(schema: &Schema, name: &str) -> TypeSystemDefinition {
     let empty = Map::new();
     let obj = schema.as_object().unwrap_or(&empty);
     into_input_definition(obj, name)
 }
 
 pub fn into_input_definition(schema: &Map<String, Value>, name: &str) -> TypeSystemDefinition {
-    let description = get_description(schema).map(|s| s.to_owned());
+    let description = get_description(schema).map(std::borrow::ToOwned::to_owned);
 
     TypeSystemDefinition::Type(pos(TypeDefinition {
         name: pos(Name::new(name)),
@@ -32,6 +33,7 @@ pub fn into_input_definition(schema: &Map<String, Value>, name: &str) -> TypeSys
     }))
 }
 
+#[must_use]
 pub fn into_input_value_definition(
     schema: &Map<String, Value>,
 ) -> Vec<Positioned<InputValueDefinition>> {
@@ -57,10 +59,7 @@ pub fn into_input_value_definition(
 fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValueDefinition>> {
     let mut arguments = vec![];
 
-    let properties = match schema.get("properties").and_then(Value::as_object) {
-        Some(p) => p,
-        None => return arguments,
-    };
+    let Some(properties) = schema.get("properties").and_then(Value::as_object) else { return arguments };
 
     let required_arr = schema.get("required").and_then(Value::as_array);
     let is_required = |name: &str| -> bool {
@@ -74,10 +73,7 @@ fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValu
             continue;
         };
 
-        let property_obj = match property_obj {
-            Some(o) => o,
-            None => continue,
-        };
+        let Some(property_obj) = property_obj else { continue };
 
         let description = get_description(property_obj);
         let nullable = !is_required(name) || nullable_from_anyof;
@@ -85,7 +81,7 @@ fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValu
             description: description.map(|inner| pos(inner.to_owned())),
             name: pos(Name::new(name)),
             ty: pos(determine_input_value_type_from_schema(
-                name.to_string(),
+                name.clone(),
                 property_obj,
                 nullable,
             )),
@@ -202,7 +198,11 @@ fn determine_type_from_schema(name: String, schema: &Map<String, Value>) -> Type
 }
 
 fn determine_type_from_reference(reference: &str) -> Type {
-    let mut name = reference.split('/').next_back().unwrap().to_string();
+    let mut name = reference
+        .split('/')
+        .next_back()
+        .unwrap_or(reference)
+        .to_string();
     first_char_to_upper(&mut name);
     Type { nullable: true, base: BaseType::Named(Name::new(name)) }
 }

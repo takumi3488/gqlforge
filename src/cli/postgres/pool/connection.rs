@@ -12,7 +12,11 @@ pub struct PostgresPool {
 }
 
 impl PostgresPool {
-    /// Create a new pool from a PostgreSQL connection string.
+    /// Create a new pool from a `PostgreSQL` connection string.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn new(connection_url: &str) -> anyhow::Result<Self> {
         let mut cfg = Config::new();
         cfg.url = Some(connection_url.to_string());

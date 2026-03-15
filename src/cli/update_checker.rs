@@ -38,7 +38,7 @@ impl InstallationMethod {
         InstallationMethod::default()
     }
 
-    fn format_upgrade_message(&self, command: &str) -> String {
+    fn format_upgrade_message(command: &str) -> String {
         format!("{} {}", "Please run:".white(), command.yellow())
     }
 
@@ -46,11 +46,11 @@ impl InstallationMethod {
     /// installation method used.
     pub fn display_message(&self) -> String {
         match self {
-            InstallationMethod::Npx => self.format_upgrade_message("npx @gqlforge/gqlforge@latest"),
+            InstallationMethod::Npx => Self::format_upgrade_message("npx @gqlforge/gqlforge@latest"),
             InstallationMethod::Npm => {
-                self.format_upgrade_message("npm update -g @gqlforge/gqlforge")
+                Self::format_upgrade_message("npm update -g @gqlforge/gqlforge")
             }
-            InstallationMethod::Brew => self.format_upgrade_message("brew upgrade gqlforge"),
+            InstallationMethod::Brew => Self::format_upgrade_message("brew upgrade gqlforge"),
             InstallationMethod::Direct => {
                 "Please update by downloading the latest release from GitHub".to_string()
             }
@@ -58,7 +58,7 @@ impl InstallationMethod {
     }
 }
 
-fn show_update_message(name: &str, latest_version: Version) {
+fn show_update_message(name: &str, latest_version: &Version) {
     let github_release_url = format!("https://github.com/{name}/releases/tag/{latest_version}",);
     tracing::warn!(
         "{} {} {} {}. {}. Release notes: {}",
@@ -71,7 +71,7 @@ fn show_update_message(name: &str, latest_version: Version) {
     );
 }
 
-pub async fn check_for_update() {
+pub fn check_for_update() {
     if VERSION.is_dev() {
         // skip validation if it's not a release
         return;
@@ -84,7 +84,7 @@ pub async fn check_for_update() {
     if let Some(latest_version) = informer.check_version().ok().flatten() {
         // schedules the update message to be shown when the user presses Ctrl+C on cli.
         let _ = set_handler(move || {
-            show_update_message(name, latest_version.clone());
+            show_update_message(name, &latest_version);
             std::process::exit(exitcode::OK);
         });
     }

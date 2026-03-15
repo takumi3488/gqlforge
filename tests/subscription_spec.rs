@@ -1,10 +1,11 @@
-/// Test runtime with streaming support (execute_raw).
+/// Test runtime with streaming support (`execute_raw`).
 ///
 /// This is a copy of the `test` module from `server_spec.rs` with an added
 /// `execute_raw` implementation so that HTTP SSE subscription streaming works
 /// end-to-end.
 #[cfg(test)]
 pub mod test {
+    #![expect(clippy::expect_used, reason = "test code")]
     use std::borrow::Cow;
     use std::collections::HashMap;
     use std::sync::Arc;
@@ -74,7 +75,7 @@ pub mod test {
             Response::from_reqwest(
                 response?
                     .error_for_status()
-                    .map_err(|err| err.without_url())?,
+                    .map_err(reqwest::Error::without_url)?,
             )
             .await
         }
@@ -99,7 +100,7 @@ pub mod test {
             let mut file = tokio::fs::File::create(path).await?;
             file.write_all(content)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(())
         }
 
@@ -108,7 +109,7 @@ pub mod test {
             let mut buffer = Vec::new();
             file.read_to_end(&mut buffer)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(String::from_utf8(buffer)?)
         }
     }
@@ -130,8 +131,9 @@ pub mod test {
         }
     }
 
-    pub fn init(script: Option<Script>) -> TargetRuntime {
-        let http = TestHttp::init(&Default::default());
+    #[must_use] 
+    pub fn init(script: &Option<Script>) -> TargetRuntime {
+        let http = TestHttp::init(&Upstream::default());
         let http2 = TestHttp::init(&Upstream::default().http2_only(true));
 
         let file = TestFileIO::init();
@@ -160,6 +162,7 @@ pub mod test {
 
 #[cfg(test)]
 mod subscription_spec {
+    #![expect(clippy::unwrap_used, clippy::expect_used, reason = "test code")]
     use std::time::Duration;
 
     use gqlforge::cli::server::Server;
@@ -247,7 +250,7 @@ type SensorData {{
     /// Write the schema to a temp `.graphql` file, build config, and start the
     /// gqlforge server. Blocks until the server is ready to accept connections.
     async fn start_gqlforge_server(schema: &str) {
-        let runtime = crate::test::init(None);
+        let runtime = crate::test::init(&None);
         let reader = ConfigReader::init(runtime);
 
         let mut temp_file = tempfile::Builder::new()

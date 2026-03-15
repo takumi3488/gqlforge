@@ -10,7 +10,7 @@ use crate::core::schema_extension::SchemaExtension;
 use crate::core::worker::{Command, Event};
 use crate::core::{Cache, EnvIO, FileIO, HttpIO, WorkerIO};
 
-/// The TargetRuntime struct unifies the available runtime-specific
+/// The `TargetRuntime` struct unifies the available runtime-specific
 /// IO implementations. This is used to reduce piping IO structs all
 /// over the codebase.
 #[derive(Clone)]
@@ -35,7 +35,7 @@ pub struct TargetRuntime {
     pub cmd_worker: Option<Arc<dyn WorkerIO<Event, Command>>>,
     /// Worker middleware for resolving data.
     pub worker: Option<Arc<dyn WorkerIO<ConstValue, ConstValue>>>,
-    /// PostgreSQL connection pools for `@postgres` directives, keyed by
+    /// `PostgreSQL` connection pools for `@postgres` directives, keyed by
     /// connection id.
     pub postgres: HashMap<String, Arc<dyn PostgresIO>>,
     /// S3 clients keyed by @link id for `@s3` directives.
@@ -50,6 +50,7 @@ impl TargetRuntime {
 
 #[cfg(test)]
 pub mod test {
+    #![expect(clippy::expect_used, reason = "test code")]
     use std::borrow::Cow;
     use std::collections::HashMap;
     use std::sync::Arc;
@@ -117,7 +118,7 @@ pub mod test {
                     mode: CacheMode::Default,
                     manager: HttpCacheManager::new(upstream.http_cache),
                     options: HttpCacheOptions::default(),
-                }))
+                }));
             }
             Arc::new(Self { client: client.build() })
         }
@@ -146,7 +147,7 @@ pub mod test {
             let mut file = tokio::fs::File::create(path).await?;
             file.write_all(content)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(())
         }
 
@@ -155,7 +156,7 @@ pub mod test {
             let mut buffer = Vec::new();
             file.read_to_end(&mut buffer)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(String::from_utf8(buffer)?)
         }
     }
@@ -177,8 +178,9 @@ pub mod test {
         }
     }
 
-    pub fn init(script: Option<blueprint::Script>) -> TargetRuntime {
-        let http = TestHttp::init(&Default::default());
+    #[must_use] 
+    pub fn init(script: &Option<blueprint::Script>) -> TargetRuntime {
+        let http = TestHttp::init(&Upstream::default());
         let http2 = TestHttp::init(&Upstream::default().http2_only(true));
 
         let file = TestFileIO::init();
@@ -191,11 +193,11 @@ pub mod test {
             file: Arc::new(file),
             cache: Arc::new(InMemoryCache::default()),
             extensions: Arc::new(vec![]),
-            cmd_worker: match &script {
+            cmd_worker: match script {
                 Some(script) => Some(init_worker_io::<Event, Command>(script.to_owned())),
                 None => None,
             },
-            worker: match &script {
+            worker: match script {
                 Some(script) => Some(init_worker_io::<Value, Value>(script.to_owned())),
                 None => None,
             },

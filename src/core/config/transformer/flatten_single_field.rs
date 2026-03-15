@@ -60,11 +60,11 @@ impl Transform for FlattenSingleField {
 
         let input_types = config.input_types();
 
-        for (ty_name, ty) in config.types.iter_mut() {
+        for (ty_name, ty) in &mut config.types {
             if input_types.contains(ty_name) {
                 continue;
             }
-            for (field_name, field) in ty.fields.iter_mut() {
+            for (field_name, field) in &mut ty.fields {
                 let mut visited_types = HashSet::<String>::new();
                 if let Some(path) = get_single_field_path(
                     &origin_config,
@@ -85,6 +85,7 @@ impl Transform for FlattenSingleField {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::fs;
 
     use gqlforge_fixtures::configs;

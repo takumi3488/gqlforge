@@ -7,11 +7,13 @@ use crate::core::ir::model::{IO, IR};
 use crate::core::mustache::Mustache;
 use crate::core::postgres::request_template::RequestTemplate;
 
+#[derive(Clone, Copy)]
 pub struct CompilePostgres<'a> {
     pub config_module: &'a ConfigModule,
     pub postgres: &'a Postgres,
 }
 
+#[must_use] 
 pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
     let pg = inputs.postgres;
     let dedupe = pg.dedupe.unwrap_or_default();
@@ -74,7 +76,7 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
         Valid::succeed(())
     };
 
-    table_valid.map(|_| {
+    table_valid.map(|()| {
         let filter = pg.filter.as_ref().map(|v| Mustache::parse(&v.to_string()));
         let input = pg.input.as_ref().map(|v| Mustache::parse(v));
         let limit = pg.limit.as_ref().map(|v| Mustache::parse(v));
@@ -98,10 +100,10 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
             columns,
         };
 
-        let io = if !pg.batch_key.is_empty() {
+        let io = if pg.batch_key.is_empty() {
             IO::Postgres {
                 req_template,
-                group_by: Some(GroupBy::new(pg.batch_key.clone(), None)),
+                group_by: None,
                 dl_id: None,
                 dedupe,
                 connection_id,
@@ -109,7 +111,7 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
         } else {
             IO::Postgres {
                 req_template,
-                group_by: None,
+                group_by: Some(GroupBy::new(pg.batch_key.clone(), None)),
                 dl_id: None,
                 dedupe,
                 connection_id,
@@ -122,6 +124,7 @@ pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
 
     use super::*;
@@ -202,9 +205,9 @@ mod tests {
                 IO::Postgres { connection_id, .. } => {
                     assert_eq!(connection_id, "default");
                 }
-                other => panic!("Expected IO::Postgres, got: {:?}", other),
+                other => panic!("Expected IO::Postgres, got: {other:?}"),
             },
-            other => panic!("Expected IR::IO, got: {:?}", other),
+            other => panic!("Expected IR::IO, got: {other:?}"),
         }
     }
 

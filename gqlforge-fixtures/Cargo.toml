@@ -8,3 +8,6 @@ publish = false
 convert_case = "0.11.0"
 indenter = { version = "0.3.4", features = ["std"] }
 derive_more = { workspace = true }
+
+[lints]
+workspace = true

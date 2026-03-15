@@ -17,6 +17,7 @@ impl<A> Default for PathStringEval<A> {
 }
 
 impl<A> PathStringEval<A> {
+    #[must_use] 
     pub fn new() -> Self {
         Self(std::marker::PhantomData)
     }
@@ -36,7 +37,7 @@ impl<A> PathStringEval<A> {
                     .path_string(parts)
                     .map(|a| a.to_string())
                     .unwrap_or(
-                        Mustache::from(vec![Segment::Expression(parts.to_vec())]).to_string(),
+                        Mustache::from(vec![Segment::Expression(parts.clone())]).to_string(),
                     ),
             })
             .collect()
@@ -62,41 +63,6 @@ impl<A: PathString> Eval<'_> for PathStringEval<A> {
     }
 }
 
-pub trait Path {
-    fn get_path<S: AsRef<str>>(&self, in_value: &[S]) -> Option<&Self>;
-}
-
-pub struct PathEval<A>(std::marker::PhantomData<A>);
-
-impl<A> PathEval<A> {
-    #[allow(unused)]
-    pub fn new() -> Self {
-        Self(std::marker::PhantomData)
-    }
-}
-
-#[allow(unused)]
-pub enum Exit<'a, A> {
-    Text(&'a str),
-    Value(&'a A),
-}
-
-impl<'a, A: Path + 'a> Eval<'a> for PathEval<&'a A> {
-    type In = &'a A;
-    type Out = Vec<Exit<'a, A>>;
-
-    fn eval(&'a self, mustache: &'a Mustache, in_value: &'a Self::In) -> Self::Out {
-        mustache
-            .segments()
-            .iter()
-            .filter_map(|segment| match segment {
-                Segment::Literal(text) => Some(Exit::Text(text)),
-                Segment::Expression(parts) => in_value.get_path(parts).map(Exit::Value),
-            })
-            .collect::<Vec<_>>()
-    }
-}
-
 pub struct PathGraphqlEval<A>(std::marker::PhantomData<A>);
 
 impl<A> PathGraphqlEval<A> {
@@ -114,7 +80,7 @@ impl<A: PathGraphql> Eval<'_> for PathGraphqlEval<A> {
             .segments()
             .iter()
             .map(|segment| match segment {
-                Segment::Literal(text) => text.to_string(),
+                Segment::Literal(text) => text.clone(),
                 Segment::Expression(parts) => in_value.path_graphql(parts).unwrap_or_default(),
             })
             .collect()

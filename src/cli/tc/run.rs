@@ -11,16 +11,19 @@ use crate::core::blueprint::Blueprint;
 use crate::core::config::reader::ConfigReader;
 use crate::core::runtime::TargetRuntime;
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn run() -> Result<()> {
     if let Ok(path) = dotenv() {
         tracing::info!("Env file: {:?} loaded", path);
     }
     let cli = Cli::parse();
-    tokio::task::spawn(update_checker::check_for_update());
+    std::thread::spawn(update_checker::check_for_update);
     // Initialize ping event every 60 seconds
-    let _ = TRACKER
-        .init_ping(tokio::time::Duration::from_secs(60))
-        .await;
+    let () = TRACKER
+        .init_ping(tokio::time::Duration::from_secs(60));
 
     // Dispatch the command as an event
     let _ = TRACKER

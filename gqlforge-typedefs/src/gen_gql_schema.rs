@@ -23,7 +23,7 @@ mod tests {
     impl ScalarDefinition for FooScalar {
         fn scalar_definition() -> async_graphql::parser::types::TypeSystemDefinition {
             let schema = into_schemars::<Self>();
-            into_scalar_definition(schema, "FooScalar")
+            into_scalar_definition(&schema, "FooScalar")
         }
     }
 
@@ -41,7 +41,7 @@ mod tests {
             let root_schema = into_schemars::<Self>();
 
             into_directive_definition(
-                root_schema,
+                &root_schema,
                 Attrs {
                     name: "ComplexDirective",
                     repeatable: true,

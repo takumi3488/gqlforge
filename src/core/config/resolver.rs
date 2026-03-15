@@ -49,7 +49,6 @@ impl Resolver {
             Resolver::Grpc(grpc) => !grpc.batch_key.is_empty(),
             Resolver::Graphql(graphql) => graphql.batch,
             Resolver::Postgres(pg) => !pg.batch_key.is_empty(),
-            Resolver::S3(_) => false,
             Resolver::ApolloFederation(ApolloFederation::EntityResolver(entity_resolver)) => {
                 entity_resolver
                     .resolver_by_type
@@ -65,6 +64,7 @@ impl Resolver {
 pub struct ResolverSet(pub Vec<Resolver>);
 
 impl ResolverSet {
+    #[must_use] 
     pub fn has_resolver(&self) -> bool {
         !self.0.is_empty()
     }
@@ -90,8 +90,8 @@ impl Serialize for ResolverSet {
     {
         let resolvers = &self.0;
 
-        if resolvers.len() == 1 {
-            resolvers.first().unwrap().serialize(serializer)
+        if let [single] = resolvers.as_slice() {
+            single.serialize(serializer)
         } else {
             resolvers.serialize(serializer)
         }
@@ -147,7 +147,7 @@ impl Deref for ResolverSet {
 
 impl MergeRight for ResolverSet {
     fn merge_right(mut self, other: Self) -> Self {
-        for resolver in other.0.into_iter() {
+        for resolver in other.0 {
             if !self.0.contains(&resolver) {
                 self.0.push(resolver);
             }

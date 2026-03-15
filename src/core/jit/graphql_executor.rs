@@ -31,7 +31,7 @@ impl JITExecutor {
         Self { app_ctx, req_ctx, operation_id }
     }
 
-    #[inline(always)]
+    #[inline]
     async fn exec(
         &self,
         exec: ConstValueExecutor,
@@ -41,7 +41,7 @@ impl JITExecutor {
             .await
     }
 
-    #[inline(always)]
+    #[inline]
     async fn dedupe_and_exec(
         &self,
         exec: ConstValueExecutor,
@@ -61,7 +61,7 @@ impl JITExecutor {
         out.unwrap_or_default()
     }
 
-    #[inline(always)]
+    #[inline]
     fn req_hash(request: &async_graphql::Request) -> OPHash {
         let mut hasher = GqlforgeHasher::default();
         request.query.hash(&mut hasher);
@@ -85,22 +85,19 @@ impl JITExecutor {
             }
 
             let jit_request = jit::Request::from(request);
-            let exec = match self.app_ctx.operation_plans.get(&hash) {
-                Some(op) => ConstValueExecutor::from(op.value().clone()),
-                _ => {
-                    let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
-                        Ok(exec) => exec,
-                        Err(error) => {
-                            return Response::<async_graphql::Value>::default()
-                                .with_errors(vec![Positioned::new(error, Pos::default())])
-                                .into();
-                        }
-                    };
-                    self.app_ctx
-                        .operation_plans
-                        .insert(hash.clone(), exec.plan.clone());
-                    exec
-                }
+            let exec = if let Some(op) = self.app_ctx.operation_plans.get(&hash) { ConstValueExecutor::from(op.value().clone()) } else {
+                let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
+                    Ok(exec) => exec,
+                    Err(error) => {
+                        return Response::<async_graphql::Value>::default()
+                            .with_errors(vec![Positioned::new(error, Pos::default())])
+                            .into();
+                    }
+                };
+                self.app_ctx
+                    .operation_plans
+                    .insert(hash.clone(), exec.plan.clone());
+                exec
             };
 
             let is_const = exec.plan.is_const;
@@ -128,9 +125,10 @@ impl JITExecutor {
         match batch_request {
             BatchRequest::Single(request) => BatchResponse::Single(self.execute(request).await),
             BatchRequest::Batch(requests) => {
-                let futs = FuturesOrdered::from_iter(
-                    requests.into_iter().map(|request| self.execute(request)),
-                );
+                let futs: FuturesOrdered<_> = requests
+                    .into_iter()
+                    .map(|request| self.execute(request))
+                    .collect();
                 let responses = futs.collect::<Vec<_>>().await;
                 BatchResponse::Batch(responses)
             }

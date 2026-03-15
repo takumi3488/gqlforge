@@ -5,7 +5,7 @@ use async_graphql::Name;
 use async_graphql_value::{ConstValue, Value};
 use indexmap::IndexMap;
 
-use super::*;
+use super::{JsonObjectLike, JsonLike, JsonPrimitive, gather_path_matches, group_by_key};
 
 impl<'obj, Value: JsonLike<'obj>> JsonObjectLike<'obj> for IndexMap<Name, Value> {
     type Value = Value;
@@ -19,7 +19,7 @@ impl<'obj, Value: JsonLike<'obj>> JsonObjectLike<'obj> for IndexMap<Name, Value>
     }
 
     fn from_vec(v: Vec<(&'obj str, Self::Value)>) -> Self {
-        IndexMap::from_iter(v.into_iter().map(|(k, v)| (Name::new(k), v)))
+        v.into_iter().map(|(k, v)| (Name::new(k), v)).collect::<IndexMap<_, _>>()
     }
 
     fn get_key(&self, key: &str) -> Option<&Self::Value> {
@@ -160,7 +160,7 @@ impl<'json> JsonLike<'json> for ConstValue {
     }
 
     fn null() -> Self {
-        Default::default()
+        ConstValue::Null
     }
 
     fn as_object(&self) -> Option<&Self::JsonObject> {
@@ -310,7 +310,7 @@ impl<'json> JsonLike<'json> for Value {
     }
 
     fn null() -> Self {
-        Default::default()
+        Value::default()
     }
 
     fn as_object(&self) -> Option<&Self::JsonObject> {

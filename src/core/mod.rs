@@ -62,6 +62,7 @@ pub use transform::Transform;
 pub use wrapping_type::Type;
 
 const DEFAULT_VERIFY_SSL: bool = true;
+#[must_use] 
 pub const fn default_verify_ssl() -> Option<bool> {
     Some(DEFAULT_VERIFY_SSL)
 }
@@ -136,12 +137,18 @@ pub fn pos<A>(a: A) -> Positioned<A> {
     Positioned::new(a, Pos::default())
 }
 
+#[must_use] 
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
 pub fn verify_ssl_is_default(val: &Option<bool>) -> bool {
-    val.is_none() || val.unwrap()
+    val.as_ref().is_none_or(|&v| v)
 }
 
 #[cfg(test)]
 pub mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashMap;
 
     use super::*;
@@ -163,6 +170,7 @@ pub mod tests {
     pub struct TestEnvIO(HashMap<String, String>);
 
     impl TestEnvIO {
+        #[must_use] 
         pub fn init(env_vars: HashMap<String, String>) -> Self {
             Self(env_vars)
         }

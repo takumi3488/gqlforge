@@ -92,7 +92,7 @@ impl Endpoint {
 
     fn get_default_variables(endpoint: &Endpoint) -> Variables {
         let mut variables = Variables::default();
-        for segment in endpoint.path.segments.iter() {
+        for segment in &endpoint.path.segments {
             match segment {
                 Segment::Literal(_) => {}
                 Segment::Param(p) => {
@@ -104,7 +104,7 @@ impl Endpoint {
                                     ConstValue::Number(async_graphql_value::Number::from(0u8))
                                 }
                                 N::Float => ConstValue::Number(
-                                    async_graphql_value::Number::from_f64(0.0f64).unwrap(),
+                                    async_graphql_value::Number::from_f64(0.0f64).unwrap_or_else(|| unreachable!("0.0f64 is always a valid finite number")),
                                 ),
                             },
                             UrlParamType::Boolean => ConstValue::Boolean(false),
@@ -133,7 +133,7 @@ impl Endpoint {
 
     fn drop_rest_directive(directives: &mut Vec<Positioned<Directive>>) {
         let name = Name::new("rest");
-        directives.retain(|v| v.node.name.node != name)
+        directives.retain(|v| v.node.name.node != name);
     }
 
     pub fn matches<'a>(&'a self, request: &Request) -> Option<PartialRequest<'a>> {
@@ -154,11 +154,11 @@ impl Endpoint {
         let path = self.path.matches(request.uri().path())?;
 
         // Query
-        let query = self.query_params.matches(query_params)?;
+        let query = self.query_params.matches(&query_params)?;
 
         // TODO: Too much cloning is happening via merge_variables
-        variables = merge_variables(variables, path);
-        variables = merge_variables(variables, query);
+        variables = merge_variables(&variables, &path);
+        variables = merge_variables(&variables, &query);
 
         Some(PartialRequest {
             body: self.body.as_ref(),
@@ -169,7 +169,7 @@ impl Endpoint {
     }
 }
 
-fn merge_variables(a: Variables, b: Variables) -> Variables {
+fn merge_variables(a: &Variables, b: &Variables) -> Variables {
     let mut variables = Variables::default();
 
     for (k, v) in a.iter() {
@@ -185,6 +185,7 @@ fn merge_variables(a: Variables, b: Variables) -> Variables {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::parser::types::Directive;
     use maplit::btreemap;
     use pretty_assertions::assert_eq;
@@ -272,11 +273,11 @@ mod tests {
     fn test_remove_rest_directives() {
         let endpoint = Endpoint::try_new(TEST_QUERY).unwrap()[0].clone();
         let doc = Endpoint::remove_rest_directives(endpoint.doc);
-        assert!(!format!("{:?}", doc).contains("rest"));
+        assert!(!format!("{doc:?}").contains("rest"));
 
         let endpoint = Endpoint::try_new(MULTIPLE_TEST_QUERY).unwrap()[0].clone();
         let doc = Endpoint::remove_rest_directives(endpoint.doc);
-        assert!(!format!("{:?}", doc).contains("rest"));
+        assert!(!format!("{doc:?}").contains("rest"));
     }
     mod matches {
         use std::str::FromStr;
@@ -321,7 +322,7 @@ mod tests {
                 Name::new("c") => ConstValue::from(true),
                 Name::new("d") => ConstValue::from(1.25),
             };
-            pretty_assertions::assert_eq!(actual.as_deref(), Some(expected))
+            pretty_assertions::assert_eq!(actual.as_deref(), Some(expected));
         }
 
         #[test]
@@ -349,7 +350,7 @@ mod tests {
                 Method::POST,
                 "http://localhost:8080/foo/a?b=b&c=true",
             );
-            pretty_assertions::assert_eq!(actual, None)
+            pretty_assertions::assert_eq!(actual, None);
         }
 
         #[test]
@@ -365,7 +366,7 @@ mod tests {
                 Name::new("a") => ConstValue::from(1),
                 Name::new("b") => ConstValue::from("b"),
             };
-            pretty_assertions::assert_eq!(actual.as_deref(), Some(expected))
+            pretty_assertions::assert_eq!(actual.as_deref(), Some(expected));
         }
 
         #[test]
@@ -375,7 +376,7 @@ mod tests {
                 Method::POST,
                 "http://localhost:8080/foo/1?b=b&c=c",
             );
-            assert_eq!(actual, None)
+            assert_eq!(actual, None);
         }
 
         #[test]
@@ -385,7 +386,7 @@ mod tests {
                 Method::GET,
                 "http://localhost:8080/foo/1?b=b&c=true",
             );
-            assert_eq!(actual, None)
+            assert_eq!(actual, None);
         }
     }
 }

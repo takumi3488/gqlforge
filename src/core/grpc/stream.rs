@@ -18,13 +18,14 @@ impl Default for GrpcFrameDecoder {
 }
 
 impl GrpcFrameDecoder {
+    #[must_use] 
     pub fn new() -> Self {
         Self { buffer: BytesMut::new() }
     }
 
     /// Feed a chunk of bytes and extract any complete gRPC frames.
-    pub fn decode(&mut self, chunk: Bytes) -> Vec<Bytes> {
-        self.buffer.extend_from_slice(&chunk);
+    pub fn decode(&mut self, chunk: &Bytes) -> Vec<Bytes> {
+        self.buffer.extend_from_slice(chunk);
         let mut frames = Vec::new();
 
         loop {
@@ -62,7 +63,7 @@ mod tests {
     use super::GrpcFrameDecoder;
 
     fn make_frame(payload: &[u8]) -> Vec<u8> {
-        let len = payload.len() as u32;
+        let len = u32::try_from(payload.len()).unwrap_or(u32::MAX);
         let mut frame = Vec::with_capacity(5 + payload.len());
         frame.push(0); // compressed flag
         frame.extend_from_slice(&len.to_be_bytes());
@@ -74,7 +75,7 @@ mod tests {
     fn test_single_frame() {
         let mut decoder = GrpcFrameDecoder::new();
         let data = make_frame(b"hello");
-        let frames = decoder.decode(Bytes::from(data));
+        let frames = decoder.decode(&Bytes::from(data));
         assert_eq!(frames.len(), 1);
         assert_eq!(frames[0].as_ref(), b"hello");
     }
@@ -84,7 +85,7 @@ mod tests {
         let mut decoder = GrpcFrameDecoder::new();
         let mut data = make_frame(b"first");
         data.extend_from_slice(&make_frame(b"second"));
-        let frames = decoder.decode(Bytes::from(data));
+        let frames = decoder.decode(&Bytes::from(data));
         assert_eq!(frames.len(), 2);
         assert_eq!(frames[0].as_ref(), b"first");
         assert_eq!(frames[1].as_ref(), b"second");
@@ -96,11 +97,11 @@ mod tests {
         let data = make_frame(b"split-test");
 
         // Feed first 3 bytes (partial header)
-        let frames = decoder.decode(Bytes::from(data[..3].to_vec()));
+        let frames = decoder.decode(&Bytes::from(data[..3].to_vec()));
         assert_eq!(frames.len(), 0);
 
         // Feed the rest
-        let frames = decoder.decode(Bytes::from(data[3..].to_vec()));
+        let frames = decoder.decode(&Bytes::from(data[3..].to_vec()));
         assert_eq!(frames.len(), 1);
         assert_eq!(frames[0].as_ref(), b"split-test");
     }
@@ -109,7 +110,7 @@ mod tests {
     fn test_empty_payload() {
         let mut decoder = GrpcFrameDecoder::new();
         let data = make_frame(b"");
-        let frames = decoder.decode(Bytes::from(data));
+        let frames = decoder.decode(&Bytes::from(data));
         assert_eq!(frames.len(), 1);
         assert_eq!(frames[0].as_ref(), b"");
     }
@@ -117,7 +118,7 @@ mod tests {
     #[test]
     fn test_empty_chunk() {
         let mut decoder = GrpcFrameDecoder::new();
-        let frames = decoder.decode(Bytes::new());
+        let frames = decoder.decode(&Bytes::new());
         assert_eq!(frames.len(), 0);
     }
 }

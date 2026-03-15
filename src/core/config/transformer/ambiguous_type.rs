@@ -9,13 +9,14 @@ use crate::core::transform::Transform;
 /// output types. The resolver function is called whenever is a conflict is
 /// detected with the name that has a conflict. The returned value should return
 /// a Resolution object containing the new input and output types.
-/// The function will return a new ConfigModule with the resolved types.
+/// The function will return a new `ConfigModule` with the resolved types.
 pub struct Resolution {
     pub input: String,
     pub output: String,
 }
 
 impl Resolution {
+    #[must_use] 
     pub fn is_unique(&self) -> bool {
         self.input.ne(&self.output)
     }
@@ -27,7 +28,7 @@ pub struct AmbiguousType {
 
 impl Default for AmbiguousType {
     fn default() -> Self {
-        Self::new(|v: &str| Resolution { input: format!("{}Input", v), output: v.to_owned() })
+        Self::new(|v: &str| Resolution { input: format!("{v}Input"), output: v.to_owned() })
     }
 }
 
@@ -66,13 +67,7 @@ impl Transform for AmbiguousType {
             // Iterate over intersection of input and output types
             let resolution = (self.resolver)(current_name);
 
-            if !resolution.is_unique() {
-                Valid::fail(format!(
-                    "Unable to auto resolve Input: {} and Output: {} are same",
-                    resolution.input, resolution.output,
-                ))
-                .trace(current_name)
-            } else {
+            if resolution.is_unique() {
                 let mut resolution_map = HashMap::new();
                 if let Some(ty) = config.types.get(current_name) {
                     resolution_map = insert_resolution(resolution_map, current_name, resolution);
@@ -94,6 +89,12 @@ impl Transform for AmbiguousType {
                     }
                 }
                 Valid::succeed(resolution_map)
+            } else {
+                Valid::fail(format!(
+                    "Unable to auto resolve Input: {} and Output: {} are same",
+                    resolution.input, resolution.output,
+                ))
+                .trace(current_name)
             }
         })
         .map(|v| v.into_iter().flatten().collect::<HashMap<_, _>>())
@@ -129,10 +130,10 @@ impl Transform for AmbiguousType {
                                 field.type_of = field
                                     .type_of
                                     .clone()
-                                    .with_name(resolution.output.to_owned());
+                                    .with_name(resolution.output.clone());
                             } else if input_types.contains(&k) {
                                 field.type_of =
-                                    field.type_of.clone().with_name(resolution.input.to_owned());
+                                    field.type_of.clone().with_name(resolution.input.clone());
                             }
                         }
                         for arg in field.args.values_mut() {
@@ -151,6 +152,7 @@ impl Transform for AmbiguousType {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_fixtures::protobuf;
     use gqlforge_valid::Validator;
     use insta::assert_snapshot;
@@ -261,7 +263,7 @@ mod tests {
             .to_result()?;
 
         // remove links since they break snapshot tests
-        config.links = Default::default();
+        config.links = Vec::new();
 
         assert_snapshot!(config.to_sdl());
         Ok(())

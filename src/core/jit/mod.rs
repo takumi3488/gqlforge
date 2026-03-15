@@ -5,8 +5,8 @@ mod store;
 mod synth;
 mod transform;
 
-use builder::*;
-use store::*;
+use builder::Builder;
+use store::Store;
 mod context;
 mod error;
 mod exec_const;

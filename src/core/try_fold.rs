@@ -34,6 +34,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// # Returns
     /// Returns a combined `And` structure that represents the sequential
     /// folding operation.
+    #[must_use] 
     pub fn and(self, other: TryFold<'a, I, O, E>) -> Self {
         TryFold(Box::new(move |input, state| {
             self.try_fold(input, state.clone()).fold(
@@ -54,7 +55,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
         TryFold(Box::new(f))
     }
 
-    /// Transforms a TryFold<I, O, E> to TryFold<I, O1, E> by applying
+    /// Transforms a `TryFold`<I, O, E> to `TryFold`<I, O1, E> by applying
     /// transformations. Check `transform_valid` if you want to return a
     /// `Valid` instead of an `O1`.
     ///
@@ -63,7 +64,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// - `down`: A function that uses O1 to create a new O.
     ///
     /// # Returns
-    /// Returns a new TryFold<I, O1, E> that applies the transformations.
+    /// Returns a new `TryFold`<I, O1, E> that applies the transformations.
     pub fn transform<O1: Clone>(
         self,
         up: impl Fn(O, O1) -> O1 + 'a,
@@ -75,7 +76,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
         )
     }
 
-    /// Transforms a TryFold<I, O, E> to TryFold<I, O1, E> by applying
+    /// Transforms a `TryFold`<I, O, E> to `TryFold`<I, O1, E> by applying
     /// transformations. Check `transform` if you want to return an `O1`
     /// instead of a `Valid`.
     ///
@@ -84,7 +85,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// - `down`: A function that uses O1 to create a new Valid<O, E>.
     ///
     /// # Returns
-    /// Returns a new TryFold<I, O1, E> that applies the transformations.
+    /// Returns a new `TryFold`<I, O1, E> that applies the transformations.
     pub fn transform_valid<O1: Clone>(
         self,
         up: impl Fn(O, O1) -> Valid<O1, E> + 'a,
@@ -97,6 +98,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
         }))
     }
 
+    #[must_use]
     pub fn update(self, f: impl Fn(O) -> O + 'a) -> TryFold<'a, I, O, E> {
         self.transform(move |o, _| f(o), |o| o)
     }
@@ -105,6 +107,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     ///
     /// # Returns
     /// Returns a `TryFold` that doesn't do anything.
+    #[must_use] 
     pub fn empty() -> Self {
         TryFold::new(|_, o| Valid::succeed(o))
     }
@@ -118,6 +121,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// # Returns
     ///
     /// Returns a new `TryFold` with trace logging added.
+    #[must_use] 
     pub fn trace(self, msg: &'a str) -> Self {
         TryFold::new(move |i, o| self.try_fold(i, o).trace(msg))
     }
@@ -129,7 +133,7 @@ impl<'a, I, O: Clone, E> FromIterator<TryFold<'a, I, O, E>> for TryFold<'a, I, O
         let head = iter.next();
 
         if let Some(head) = head {
-            head.and(TryFold::from_iter(iter))
+            head.and(iter.collect::<TryFold<_, _, _>>())
         } else {
             TryFold::empty()
         }
@@ -138,6 +142,7 @@ impl<'a, I, O: Clone, E> FromIterator<TryFold<'a, I, O, E>> for TryFold<'a, I, O
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::cell::RefCell;
 
     use gqlforge_valid::{Valid, ValidationError, Validator};
@@ -166,7 +171,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap();
         let expected = 10;
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -178,7 +183,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(5);
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -190,7 +195,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(5).combine(ValidationError::new(6));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -223,7 +228,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(5).combine(ValidationError::new(600));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -236,7 +241,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(5).combine(ValidationError::new(1200));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -249,7 +254,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(10).combine(ValidationError::new(1000));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -262,7 +267,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(10).combine(ValidationError::new(1000));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -275,7 +280,7 @@ mod tests {
         let actual = t.try_fold(&2, 3).to_result().unwrap_err();
         let expected = ValidationError::new(5).combine(ValidationError::new(1200));
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -288,7 +293,7 @@ mod tests {
         let actual = t.try_fold(&2, "3".to_string()).to_result().unwrap();
         let expected = "5".to_string();
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -302,7 +307,7 @@ mod tests {
         let actual = t.try_fold(&2, "3".to_string()).to_result().unwrap();
         let expected = "5".to_string();
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]

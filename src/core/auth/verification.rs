@@ -24,19 +24,11 @@ impl Verification {
         Verification::Succeed(Some(claims))
     }
 
-    #[allow(dead_code)]
+    #[cfg_attr(not(test), expect(dead_code, reason = "used in auth tests"))]
     pub fn claims(&self) -> Option<&serde_json::Value> {
         match self {
             Verification::Succeed(claims) => claims.as_ref(),
             Verification::Fail(_) => None,
-        }
-    }
-
-    #[allow(dead_code)]
-    pub fn fold(self, on_success: Self, on_error: impl Fn(Error) -> Self) -> Self {
-        match self {
-            Verification::Succeed(_) => on_success,
-            Verification::Fail(err) => on_error(err),
         }
     }
 
@@ -57,7 +49,7 @@ impl Verification {
                     let merged = merge_claims(left_claims, right_claims);
                     Verification::Succeed(merged)
                 }
-                fail => fail,
+                fail @ Verification::Fail(_) => fail,
             },
             Verification::Fail(_) => self,
         }
@@ -74,13 +66,6 @@ impl Verification {
         }
     }
 
-    #[allow(dead_code)]
-    pub fn to_result(&self) -> Result<(), Error> {
-        match self {
-            Verification::Succeed(_) => Ok(()),
-            Verification::Fail(err) => Err(err.clone()),
-        }
-    }
 
     pub fn to_result_with_claims(&self) -> Result<Option<serde_json::Value>, Error> {
         match self {

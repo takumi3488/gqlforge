@@ -26,9 +26,9 @@ impl<V: Default> Default for Response<V> {
     fn default() -> Self {
         Self {
             data: Default::default(),
-            errors: Default::default(),
-            extensions: Default::default(),
-            cache_control: Default::default(),
+            errors: Vec::new(),
+            extensions: Vec::new(),
+            cache_control: CacheControl::default(),
         }
     }
 }
@@ -41,19 +41,21 @@ impl<Value: Default> Response<Value> {
         }
     }
 
+    #[must_use]
     pub fn with_value(self, value: Value) -> Self {
         Self { data: value, ..self }
     }
 
+    #[must_use]
     pub fn with_errors<E: Into<GraphQLError>>(self, errors: Vec<E>) -> Self {
         Self {
-            errors: errors.into_iter().map(|e| e.into()).collect(),
+            errors: errors.into_iter().map(std::convert::Into::into).collect(),
             ..self
         }
     }
 
     pub fn add_errors(&mut self, new_errors: Vec<Positioned<jit::Error>>) {
-        self.errors.extend(new_errors.into_iter().map(|e| e.into()));
+        self.errors.extend(new_errors.into_iter().map(std::convert::Into::into));
     }
 }
 
@@ -61,6 +63,7 @@ impl<'a, Value> Response<Value>
 where
     Value: JsonLike<'a>,
 {
+    #[must_use]
     pub fn merge_with(mut self, other: &'a async_graphql::Response) -> Self {
         if let async_graphql::Value::Object(other_obj) = &other.data {
             if let Some(self_obj) = self.data.as_object_mut() {
@@ -69,7 +72,7 @@ where
                     // introspection result from async_graphql.
                     // But async_graphql response in that case
                     if self_obj.get_key(k.as_str()).is_none() {
-                        self_obj.insert_key(k.as_str(), Value::clone_from(v))
+                        self_obj.insert_key(k.as_str(), Value::clone_from(v));
                     }
                 }
             } else {
@@ -78,12 +81,12 @@ where
         }
 
         self.errors
-            .extend(other.errors.iter().cloned().map(|e| e.into()));
+            .extend(other.errors.iter().cloned().map(std::convert::Into::into));
         self.extensions.extend(
             other
                 .extensions
                 .iter()
-                .map(|(k, v)| (k.to_string(), Value::clone_from(v))),
+                .map(|(k, v)| (k.clone(), Value::clone_from(v))),
         );
 
         self
@@ -110,8 +113,8 @@ where
 {
     fn default() -> Self {
         Self {
-            body: Default::default(),
-            cache_control: Default::default(),
+            body: Arc::default(),
+            cache_control: CacheControl::default(),
             is_ok: true,
         }
     }
@@ -140,6 +143,7 @@ pub enum BatchResponse<Body> {
 }
 
 impl<Body> BatchResponse<Body> {
+    #[must_use] 
     pub fn is_ok(&self) -> bool {
         match self {
             BatchResponse::Single(s) => s.is_ok,
@@ -148,6 +152,7 @@ impl<Body> BatchResponse<Body> {
     }
 
     /// Modifies the cache control values with the provided one.
+    #[must_use] 
     pub fn cache_control(&self, cache_control: Option<&CacheControl>) -> CacheControl {
         match self {
             BatchResponse::Single(resp) => cache_control.unwrap_or(&resp.cache_control).clone(),
@@ -166,6 +171,7 @@ impl<Body> BatchResponse<Body> {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql_value::ConstValue;
 
     use super::Response;

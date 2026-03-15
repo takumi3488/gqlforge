@@ -1,10 +1,10 @@
-use std::sync::{Arc, Mutex, MutexGuard};
+use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
 
 use async_graphql::{Name, ServerError};
 use async_graphql_value::ConstValue;
 use indexmap::IndexMap;
 
-use super::error::*;
+use super::error::Error;
 use super::{Field, OperationPlan, Positioned};
 use crate::core::ir::{ResolverContextLike, SelectionField};
 
@@ -25,7 +25,7 @@ impl<'a, Input> RequestContext<'a, Input> {
         self.plan
     }
     pub fn errors(&self) -> MutexGuard<'_, Vec<Positioned<Error>>> {
-        self.errors.lock().unwrap()
+        self.errors.lock().unwrap_or_else(PoisonError::into_inner)
     }
 }
 
@@ -41,14 +41,14 @@ pub struct Context<'a, Input, Output> {
 }
 impl<'a, Input: Clone, Output> Context<'a, Input, Output> {
     pub fn new(field: &'a Field<Input>, request: &'a RequestContext<Input>) -> Self {
-        Self { request, value: None, args: Self::build_args(field), field }
+        Self { request, value: None, args: Some(Self::build_args(field)), field }
     }
 
     pub fn with_value(&self, value: &'a Output) -> Self {
         Self {
             request: self.request,
             // TODO: no need to build again?
-            args: Self::build_args(self.field),
+            args: Some(Self::build_args(self.field)),
             value: Some(value),
             field: self.field,
         }
@@ -57,7 +57,7 @@ impl<'a, Input: Clone, Output> Context<'a, Input, Output> {
     pub fn with_value_and_field(&self, value: &'a Output, field: &'a Field<Input>) -> Self {
         Self {
             request: self.request,
-            args: Self::build_args(field),
+            args: Some(Self::build_args(field)),
             value: Some(value),
             field,
         }
@@ -71,17 +71,17 @@ impl<'a, Input: Clone, Output> Context<'a, Input, Output> {
         self.field
     }
 
-    fn build_args(field: &Field<Input>) -> Option<IndexMap<Name, Input>> {
+    fn build_args(field: &Field<Input>) -> IndexMap<Name, Input> {
         let mut arg_map = IndexMap::new();
 
-        for arg in field.args.iter() {
+        for arg in &field.args {
             let name = arg.name.as_str();
             let value = arg.value.clone();
             if let Some(value) = value {
                 arg_map.insert(Name::new(name), value);
             }
         }
-        Some(arg_map)
+        arg_map
     }
 }
 
@@ -104,12 +104,13 @@ impl ResolverContextLike for Context<'_, ConstValue, ConstValue> {
     }
 
     fn add_error(&self, error: ServerError) {
-        self.request.add_error(error.into())
+        self.request.add_error(error.into());
     }
 }
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql_value::ConstValue;
     use gqlforge_valid::Validator;
 
@@ -118,7 +119,7 @@ mod test {
     use crate::core::config::{Config, ConfigModule};
     use crate::core::ir::ResolverContextLike;
     use crate::core::jit::transform::InputResolver;
-    use crate::core::jit::{OperationPlan, Request};
+    use crate::core::jit::{OperationPlan, Request, Variables};
 
     fn setup(query: &str) -> anyhow::Result<OperationPlan<ConstValue>> {
         let sdl = std::fs::read_to_string(gqlforge_fixtures::configs::JSONPLACEHOLDER)?;
@@ -127,7 +128,7 @@ mod test {
         let request = Request::new(query);
         let plan = request.clone().create_plan(&blueprint)?;
         let input_resolver = InputResolver::new(plan);
-        let plan = input_resolver.resolve_input(&Default::default()).unwrap();
+        let plan = input_resolver.resolve_input(&Variables::default()).unwrap();
 
         Ok(plan)
     }

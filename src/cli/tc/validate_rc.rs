@@ -15,9 +15,8 @@ pub async fn validate_rc_config_files(runtime: TargetRuntime, file_paths: &[Stri
     ];
 
     for path in file_paths {
-        let parent_dir = match Path::new(path).parent() {
-            Some(dir) => dir,
-            None => continue,
+        let Some(parent_dir) = Path::new(path).parent() else {
+            continue;
         };
 
         let mut outdated_files = Vec::with_capacity(rc_config_files.len());
@@ -45,7 +44,7 @@ pub async fn validate_rc_config_files(runtime: TargetRuntime, file_paths: &[Stri
             tracing::warn!(
                 "[{}] {} outdated, reinitialize using gqlforge init.",
                 outdated_files,
-                pluralizer::pluralize("is", outdated_files.len() as isize, false)
+                pluralizer::pluralize("is", outdated_files.len().cast_signed(), false)
             );
         }
     }

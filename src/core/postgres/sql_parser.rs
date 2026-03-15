@@ -11,6 +11,10 @@ use super::schema::{
 };
 
 /// Parse one or more SQL migration strings (in order) into a `DatabaseSchema`.
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub fn parse_migrations(sql_contents: &[String]) -> Result<DatabaseSchema> {
     let mut schema = DatabaseSchema::new();
     let dialect = PostgreSqlDialect {};
@@ -20,14 +24,15 @@ pub fn parse_migrations(sql_contents: &[String]) -> Result<DatabaseSchema> {
             .with_context(|| format!("Failed to parse migration #{idx}"))?;
 
         for stmt in statements {
-            apply_statement(&mut schema, &stmt)?;
+            apply_statement(&mut schema, &stmt);
         }
     }
 
     Ok(schema)
 }
 
-fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> {
+#[expect(clippy::too_many_lines, reason = "handles all SQL statement variants")]
+fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) {
     match stmt {
         Statement::CreateTable(create) => {
             let (table_schema, table_name) = extract_schema_and_name(&create.name);
@@ -149,7 +154,7 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
             };
             if let Some(table) = key.and_then(|k| schema.tables.get_mut(&k)) {
                 for op in &alter_table.operations {
-                    apply_alter_op(table, op)?;
+                    apply_alter_op(table, op);
                 }
             }
         }
@@ -201,10 +206,9 @@ fn apply_statement(schema: &mut DatabaseSchema, stmt: &Statement) -> Result<()> 
             // DROP, INSERT, etc. are ignored.
         }
     }
-    Ok(())
 }
 
-fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
+fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) {
     match op {
         AlterTableOperation::AddColumn { column_def, .. } => {
             table.columns.push(column_from_def(column_def));
@@ -222,7 +226,6 @@ fn apply_alter_op(table: &mut Table, op: &AlterTableOperation) -> Result<()> {
         }
         _ => {}
     }
-    Ok(())
 }
 
 fn column_from_def(col: &ColumnDef) -> Column {
@@ -296,13 +299,9 @@ fn data_type_to_pg_type(dt: &DataType) -> PgType {
         DataType::Bytea => PgType::Bytea,
         DataType::Array(arr_inner) => {
             let inner = match arr_inner {
-                sqlparser::ast::ArrayElemTypeDef::AngleBracket(inner_dt) => {
-                    data_type_to_pg_type(inner_dt)
-                }
-                sqlparser::ast::ArrayElemTypeDef::SquareBracket(inner_dt, _) => {
-                    data_type_to_pg_type(inner_dt)
-                }
-                sqlparser::ast::ArrayElemTypeDef::Parenthesis(inner_dt) => {
+                sqlparser::ast::ArrayElemTypeDef::AngleBracket(inner_dt)
+                | sqlparser::ast::ArrayElemTypeDef::SquareBracket(inner_dt, _)
+                | sqlparser::ast::ArrayElemTypeDef::Parenthesis(inner_dt) => {
                     data_type_to_pg_type(inner_dt)
                 }
                 sqlparser::ast::ArrayElemTypeDef::None => PgType::Text,
@@ -343,6 +342,7 @@ fn collect_from_table_names(query: &sqlparser::ast::Query) -> Vec<String> {
 /// Handles explicit column references (`SELECT id, name`), compound identifiers
 /// (`SELECT t.id`), aliased expressions (`SELECT id AS user_id`), bare
 /// wildcards (`SELECT *`), and qualified wildcards (`SELECT t.*`).
+#[expect(clippy::too_many_lines, reason = "infers columns from all projection expression kinds")]
 fn infer_view_columns_from_projection(
     query: &sqlparser::ast::Query,
     from_tables: &[String],
@@ -435,10 +435,10 @@ fn infer_view_columns_from_projection(
                     sqlparser::ast::SelectItemQualifiedWildcardKind::ObjectName(name) => {
                         name.0.last().and_then(|p| match p {
                             sqlparser::ast::ObjectNamePart::Identifier(i) => Some(i.value.clone()),
-                            _ => None,
+                            sqlparser::ast::ObjectNamePart::Function(_) => None,
                         })
                     }
-                    _ => None,
+                    sqlparser::ast::SelectItemQualifiedWildcardKind::Expr(_) => None,
                 };
                 if let Some(qual) = qual {
                     for table_name in from_tables {
@@ -459,7 +459,7 @@ fn infer_view_columns_from_projection(
                     }
                 }
             }
-            _ => {
+            SelectItem::UnnamedExpr(_) => {
                 // Complex expressions without aliases (functions, arithmetic,
                 // etc.) cannot have their column name or type
                 // inferred; they are skipped.
@@ -548,7 +548,7 @@ fn extract_schema_and_name(name: &ObjectName) -> (String, String) {
         .iter()
         .filter_map(|p| match p {
             sqlparser::ast::ObjectNamePart::Identifier(ident) => Some(ident.value.clone()),
-            _ => None,
+            sqlparser::ast::ObjectNamePart::Function(_) => None,
         })
         .collect();
     match parts.as_slice() {
@@ -569,18 +569,19 @@ fn format_object_name(name: &ObjectName) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]
     fn parse_simple_create_table() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
                 email TEXT,
                 created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW()
             );
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -615,14 +616,14 @@ mod tests {
 
     #[test]
     fn parse_foreign_key() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE posts (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL,
                 title TEXT NOT NULL,
                 FOREIGN KEY (user_id) REFERENCES users(id)
             );
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -648,7 +649,7 @@ mod tests {
 
     #[test]
     fn parse_alter_table_add_constraint_does_not_panic() {
-        let m1 = r#"
+        let m1 = r"
             CREATE TABLE orders (
                 id SERIAL PRIMARY KEY,
                 user_id INTEGER NOT NULL
@@ -656,7 +657,7 @@ mod tests {
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY
             );
-        "#
+        "
         .to_string();
         let m2 =
             "ALTER TABLE orders ADD CONSTRAINT fk_user FOREIGN KEY (user_id) REFERENCES users(id);"
@@ -672,7 +673,7 @@ mod tests {
 
     #[test]
     fn parse_create_view() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name VARCHAR(255) NOT NULL,
@@ -680,7 +681,7 @@ mod tests {
             );
             CREATE VIEW adult_users AS
                 SELECT id, name, age FROM users WHERE age >= 18;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -706,10 +707,10 @@ mod tests {
 
     #[test]
     fn parse_create_or_replace_view() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT NOT NULL);
             CREATE OR REPLACE VIEW user_names AS SELECT id, name FROM users;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -720,13 +721,13 @@ mod tests {
 
     #[test]
     fn parse_create_materialized_view() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE orders (
                 id SERIAL PRIMARY KEY,
                 total NUMERIC NOT NULL
             );
             CREATE MATERIALIZED VIEW order_totals AS SELECT id, total FROM orders;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -739,14 +740,14 @@ mod tests {
 
     #[test]
     fn parse_view_with_wildcard_select() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL,
                 age INTEGER
             );
             CREATE VIEW all_users AS SELECT * FROM users;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -762,13 +763,13 @@ mod tests {
 
     #[test]
     fn parse_view_with_qualified_wildcard() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL
             );
             CREATE VIEW user_view AS SELECT users.* FROM users;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -783,7 +784,7 @@ mod tests {
     fn parse_view_join_qualifier_disambiguates_columns() {
         // Both tables have an `id` column; qualifier should resolve to the
         // correct type rather than always picking the first table's column.
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (
                 id SERIAL PRIMARY KEY,
                 name TEXT NOT NULL
@@ -796,7 +797,7 @@ mod tests {
             CREATE VIEW post_details AS
                 SELECT posts.id, users.name
                 FROM users JOIN posts ON users.id = posts.user_id;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();
@@ -811,11 +812,11 @@ mod tests {
 
     #[test]
     fn parse_view_overwrite_with_or_replace() {
-        let sql = r#"
+        let sql = r"
             CREATE TABLE users (id SERIAL PRIMARY KEY, name TEXT NOT NULL, email TEXT);
             CREATE VIEW user_info AS SELECT id, name FROM users;
             CREATE OR REPLACE VIEW user_info AS SELECT id, name, email FROM users;
-        "#
+        "
         .to_string();
 
         let schema = parse_migrations(&[sql]).unwrap();

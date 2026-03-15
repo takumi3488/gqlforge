@@ -46,6 +46,7 @@ impl ValueExt for DynamicValue<async_graphql::Value> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use serde_json::json;
 
     use crate::core::blueprint::DynamicValue;

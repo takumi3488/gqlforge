@@ -36,9 +36,11 @@ impl Http {
             })
             .unwrap_or_default();
 
+        let cwd = std::env::current_dir()
+            .unwrap_or_else(|_| std::path::PathBuf::from("."));
         let spec_path = spec
             .path
-            .strip_prefix(std::env::current_dir().unwrap())
+            .strip_prefix(&cwd)
             .unwrap_or(&spec.path)
             .to_string_lossy()
             .into_owned();
@@ -68,14 +70,13 @@ impl HttpIO for Http {
                     .0
                     .body
                     .as_ref()
-                    .map(|body| {
+                    .is_none_or(|body| {
                         let mock_body = body.to_bytes();
 
                         req.body()
                             .and_then(|body| body.as_bytes().map(|req_body| req_body == mock_body))
                             .unwrap_or(false)
-                    })
-                    .unwrap_or(true);
+                    });
 
                 let headers_match = req
                     .headers()
@@ -84,8 +85,8 @@ impl HttpIO for Http {
                     .all(|(key, value)| {
                         let header_name = key.to_string();
 
-                        let header_value = value.to_str().unwrap();
-                        let mock_header_value = "".to_string();
+                        let header_value = value.to_str().unwrap_or_default();
+                        let mock_header_value = String::new();
                         let mock_header_value = mock_req
                             .0
                             .headers
@@ -104,7 +105,7 @@ impl HttpIO for Http {
 
         if let Some(delay) = execution_mock.mock.delay {
             // add delay to the request if there's a delay in the mock.
-            let _ = tokio::time::sleep(tokio::time::Duration::from_millis(delay)).await;
+            let () = tokio::time::sleep(tokio::time::Duration::from_millis(delay)).await;
         }
 
         execution_mock.actual_hits.fetch_add(1, Ordering::Relaxed);
@@ -126,7 +127,7 @@ impl HttpIO for Http {
             // Return the JSON error body directly as the error so it can be processed in
             // the error module
             let error = Error::HTTP {
-                message: format!("{}: {}", status_code, error_body),
+                message: format!("{status_code}: {error_body}"),
                 body: error_body,
             };
             return Err(error.into());

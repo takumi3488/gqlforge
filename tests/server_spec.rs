@@ -1,5 +1,6 @@
 #[cfg(test)]
 pub mod test {
+    #![expect(clippy::expect_used, reason = "test code")]
     use std::borrow::Cow;
     use std::collections::HashMap;
     use std::sync::Arc;
@@ -66,7 +67,7 @@ pub mod test {
                     mode: CacheMode::Default,
                     manager: HttpCacheManager::new(upstream.http_cache),
                     options: HttpCacheOptions::default(),
-                }))
+                }));
             }
             Arc::new(Self { client: client.build() })
         }
@@ -79,7 +80,7 @@ pub mod test {
             Response::from_reqwest(
                 response?
                     .error_for_status()
-                    .map_err(|err| err.without_url())?,
+                    .map_err(reqwest::Error::without_url)?,
             )
             .await
         }
@@ -100,7 +101,7 @@ pub mod test {
             let mut file = tokio::fs::File::create(path).await?;
             file.write_all(content)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(())
         }
 
@@ -109,7 +110,7 @@ pub mod test {
             let mut buffer = Vec::new();
             file.read_to_end(&mut buffer)
                 .await
-                .map_err(|e| anyhow!("{}", e))?;
+                .map_err(|e| anyhow!("{e}"))?;
             Ok(String::from_utf8(buffer)?)
         }
     }
@@ -131,8 +132,9 @@ pub mod test {
         }
     }
 
-    pub fn init(script: Option<Script>) -> TargetRuntime {
-        let http = TestHttp::init(&Default::default());
+    #[must_use] 
+    pub fn init(script: &Option<Script>) -> TargetRuntime {
+        let http = TestHttp::init(&Upstream::default());
         let http2 = TestHttp::init(&Upstream::default().http2_only(true));
 
         let file = TestFileIO::init();
@@ -161,13 +163,14 @@ pub mod test {
 
 #[cfg(test)]
 mod server_spec {
+    #![expect(clippy::unwrap_used, clippy::expect_used, reason = "test code")]
     use gqlforge::cli::server::Server;
     use gqlforge::core::config::reader::ConfigReader;
     use reqwest::Client;
     use serde_json::json;
 
     async fn test_server(configs: &[&str], url: &str) {
-        let runtime = crate::test::init(None);
+        let runtime = crate::test::init(&None);
         let reader = ConfigReader::init(runtime);
         let config = reader.read_all(configs).await.unwrap();
         let mut server = Server::new(config);
@@ -229,7 +232,7 @@ mod server_spec {
             &["tests/server/config/server-start.graphql"],
             "http://localhost:8800/graphql",
         )
-        .await
+        .await;
     }
 
     #[tokio::test]
@@ -238,7 +241,7 @@ mod server_spec {
             &["tests/server/config/server-start-http2-pkcs8.graphql"],
             "https://localhost:8801/graphql",
         )
-        .await
+        .await;
     }
 
     #[tokio::test]
@@ -247,17 +250,17 @@ mod server_spec {
             &["tests/server/config/server-start-http2-rsa.graphql"],
             "https://localhost:8802/graphql",
         )
-        .await
+        .await;
     }
 
     #[tokio::test]
     async fn server_start_http2_nokey() {
         let configs = &["tests/server/config/server-start-http2-nokey.graphql"];
-        let runtime = crate::test::init(None);
+        let runtime = crate::test::init(&None);
         let reader = ConfigReader::init(runtime);
         let config = reader.read_all(configs).await.unwrap();
         let server = Server::new(config);
-        assert!(server.start().await.is_err())
+        assert!(server.start().await.is_err());
     }
 
     #[tokio::test]
@@ -266,6 +269,6 @@ mod server_spec {
             &["tests/server/config/server-start-http2-ec.graphql"],
             "https://localhost:8804/graphql",
         )
-        .await
+        .await;
     }
 }

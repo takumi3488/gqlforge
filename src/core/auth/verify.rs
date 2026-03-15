@@ -25,7 +25,7 @@ pub enum AuthVerifier {
 impl From<blueprint::Provider> for Verifier {
     fn from(provider: blueprint::Provider) -> Self {
         match provider {
-            blueprint::Provider::Basic(options) => Verifier::Basic(BasicVerifier::new(options)),
+            blueprint::Provider::Basic(options) => Verifier::Basic(BasicVerifier::new(&options)),
             blueprint::Provider::Jwt(options) => Verifier::Jwt(JwtVerifier::new(options)),
         }
     }

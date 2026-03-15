@@ -2,7 +2,7 @@ use anyhow::{Result, anyhow};
 
 use crate::core::runtime::TargetRuntime;
 
-fn cache_metrics(runtime: &TargetRuntime) -> Result<()> {
+fn cache_metrics(runtime: &TargetRuntime) {
     let meter = opentelemetry::global::meter("cache");
     let cache = runtime.cache.clone();
     let _gauge = meter
@@ -14,8 +14,6 @@ fn cache_metrics(runtime: &TargetRuntime) -> Result<()> {
             }
         })
         .build();
-
-    Ok(())
 }
 
 async fn process_resources_metrics() -> Result<()> {
@@ -26,8 +24,12 @@ async fn process_resources_metrics() -> Result<()> {
         .map_err(|err| anyhow!(err))
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn init_metrics(runtime: &TargetRuntime) -> Result<()> {
-    cache_metrics(runtime)?;
+    cache_metrics(runtime);
     process_resources_metrics().await?;
 
     Ok(())

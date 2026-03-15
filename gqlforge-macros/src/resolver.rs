@@ -30,7 +30,7 @@ fn parse_attrs(attributes: &Vec<Attribute>) -> syn::Result<Attrs> {
     Ok(result)
 }
 
-pub fn expand_resolver_derive(input: DeriveInput) -> syn::Result<TokenStream> {
+pub fn expand_resolver_derive(input: &DeriveInput) -> syn::Result<TokenStream> {
     let name = &input.ident;
 
     let variants = if let Data::Enum(data_enum) = &input.data {

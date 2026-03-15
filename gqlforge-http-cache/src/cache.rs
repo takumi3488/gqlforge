@@ -25,6 +25,7 @@ pub struct Store {
 }
 
 impl HttpCacheManager {
+    #[must_use]
     pub fn new(cache_size: u64) -> Self {
         let cache = Cache::builder()
             .eviction_policy(EvictionPolicy::lru())
@@ -33,6 +34,9 @@ impl HttpCacheManager {
         Self { cache: Arc::new(cache) }
     }
 
+    /// # Errors
+    ///
+    /// Returns an error if cache invalidation fails.
     pub async fn clear(&self) -> Result<()> {
         self.cache.invalidate_all();
         self.cache.run_pending_tasks().await;

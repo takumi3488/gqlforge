@@ -50,9 +50,9 @@ impl Context {
         Self {
             query: query.to_string(),
             subscription: subscription.to_string(),
-            namespace: Default::default(),
-            config: Default::default(),
-            map_types: Default::default(),
+            namespace: Vec::new(),
+            config: Config::default(),
+            map_types: HashSet::new(),
             is_proto3: false,
             comments_builder: CommentsBuilder::new(None),
         }
@@ -65,8 +65,8 @@ impl Context {
     }
 
     /// Resolves the actual name and inserts the type.
-    fn insert_type(mut self, name: String, ty: config::Type) -> Self {
-        self.config.types.insert(name.to_string(), ty);
+    fn insert_type(mut self, name: &str, ty: config::Type) -> Self {
+        self.config.types.insert(name.to_owned(), ty);
         self
     }
 
@@ -75,7 +75,7 @@ impl Context {
         mut self,
         type_name: String,       // name of the message
         base_type: config::Type, // that's the type with fields that are not oneofs
-        oneof_fields: Vec<Vec<(String, Field)>>, /* there is multiple oneof definitions every
+        oneof_fields: &[Vec<(String, Field)>], /* there is multiple oneof definitions every
                                   * one of which contains multiple fields */
     ) -> Self {
         fn collect_types(
@@ -137,14 +137,14 @@ impl Context {
         collect_types(
             type_name.clone(),
             base_type.clone(),
-            &oneof_fields,
+            oneof_fields,
             &mut union_types,
         );
 
         // if there is only one type in union no need
         // to actually create union and use just this type
         if union_types.len() == 1 {
-            let (_, ty) = union_types.pop().unwrap();
+            let Some((_, ty)) = union_types.pop() else { return self; };
             self.config.types.insert(type_name, ty);
             return self;
         }
@@ -156,7 +156,7 @@ impl Context {
             ty.implements.insert(interface_name.clone());
             union_.types.insert(type_name.clone());
 
-            self = self.insert_type(type_name, ty);
+            self = self.insert_type(&type_name, ty);
         }
 
         // base interface type
@@ -177,9 +177,9 @@ impl Context {
             let enum_name = enum_.name();
 
             let enum_type_path = if is_nested {
-                parent_path.extend(PathField::NestedEnum, index as i32)
+                parent_path.extend(PathField::NestedEnum, i32::try_from(index).unwrap_or(0))
             } else {
-                parent_path.extend(PathField::EnumType, index as i32)
+                parent_path.extend(PathField::EnumType, i32::try_from(index).unwrap_or(0))
             };
 
             let mut variants_with_comments = BTreeSet::new();
@@ -189,7 +189,7 @@ impl Context {
 
                 // Path to the enum value's comments
                 let value_path = PathBuilder::new(&enum_type_path)
-                    .extend(PathField::EnumValue, value_index as i32); // 2: value field
+                    .extend(PathField::EnumValue, i32::try_from(value_index).unwrap_or(0)); // 2: value field
 
                 // Get comments for the enum value
                 let comment = self.comments_builder.get_comments(&value_path);
@@ -199,7 +199,7 @@ impl Context {
                     // TODO: better support for enum variant descriptions [There is no way to define
                     // description for enum variant in current config structure]
                     let variant_with_comment =
-                        format!("\"\"\n  {}\n  \"\"\n  {}", comment, variant_name);
+                        format!("\"\"\n  {comment}\n  \"\"\n  {variant_name}");
                     variants_with_comments.insert(variant_with_comment);
                 } else {
                     variants_with_comments.insert(variant_name);
@@ -254,9 +254,9 @@ impl Context {
             }
 
             let msg_path = if is_nested {
-                parent_path.extend(PathField::NestedType, index as i32)
+                parent_path.extend(PathField::NestedType, i32::try_from(index).unwrap_or(0))
             } else {
-                parent_path.extend(PathField::MessageType, index as i32)
+                parent_path.extend(PathField::MessageType, i32::try_from(index).unwrap_or(0))
             };
 
             // first append the name of current message as namespace
@@ -325,20 +325,20 @@ impl Context {
                 }
 
                 let field_path =
-                    PathBuilder::new(&msg_path).extend(PathField::Field, field_index as i32);
+                    PathBuilder::new(&msg_path).extend(PathField::Field, i32::try_from(field_index).unwrap_or(0));
                 cfg_field.doc = self.comments_builder.get_comments(&field_path);
 
                 if let Some(oneof_index) = field.oneof_index {
-                    oneof_fields[oneof_index as usize].push((field_name.to_string(), cfg_field));
+                    oneof_fields[usize::try_from(oneof_index).unwrap_or(0)].push((field_name.to_string(), cfg_field));
                 } else {
                     ty.fields.insert(field_name.to_string(), cfg_field);
                 }
             }
 
             if message.oneof_decl.is_empty() {
-                self = self.insert_type(msg_type.to_string(), ty);
+                self = self.insert_type(&msg_type.to_string(), ty);
             } else {
-                self = self.insert_oneofs(msg_type.to_string(), ty, oneof_fields);
+                self = self.insert_oneofs(msg_type.to_string(), ty, &oneof_fields);
             }
         }
         Ok(self)
@@ -357,7 +357,7 @@ impl Context {
 
         for (index, service) in services.iter().enumerate() {
             let service_name = service.name();
-            let path = parent_path.extend(PathField::Service, index as i32);
+            let path = parent_path.extend(PathField::Service, i32::try_from(index).unwrap_or(0));
 
             for (method_index, method) in service.method.iter().enumerate() {
                 let is_server_streaming = method.server_streaming.unwrap_or(false);
@@ -415,7 +415,7 @@ impl Context {
                 .into();
 
                 let method_path =
-                    PathBuilder::new(&path).extend(PathField::Method, method_index as i32);
+                    PathBuilder::new(&path).extend(PathField::Method, i32::try_from(method_index).unwrap_or(0));
                 cfg_field.doc = self.comments_builder.get_comments(&method_path);
 
                 let root_type_name = if is_server_streaming {
@@ -504,8 +504,8 @@ fn get_input_type(input_ty: &str) -> Result<Option<GraphQLType<Unparsed>>> {
 /// The main entry point that builds a Config object from proto descriptor sets.
 pub fn from_proto(descriptor_sets: &[FileDescriptorSet], query: &str, url: &str) -> Result<Config> {
     let mut ctx = Context::new(query, "Subscription");
-    for descriptor_set in descriptor_sets.iter() {
-        for file_descriptor in descriptor_set.file.iter() {
+    for descriptor_set in descriptor_sets {
+        for file_descriptor in &descriptor_set.file {
             ctx.namespace = vec![file_descriptor.package().to_string()];
             ctx.is_proto3 = file_descriptor.syntax() == "proto3";
 
