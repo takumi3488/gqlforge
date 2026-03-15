@@ -221,14 +221,11 @@ fn parse_email(text: &str) -> Vec<String> {
 
 #[cfg(test)]
 mod tests {
-
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
 
     use super::*;
 
-    lazy_static! {
-        static ref TRACKER: Tracker = Tracker::default();
-    }
+    static TRACKER: LazyLock<Tracker> = LazyLock::new(Tracker::default);
 
     #[tokio::test]
     async fn test_tracker() {
@@ -236,7 +233,7 @@ mod tests {
             .dispatch(EventKind::Command("ping".to_string()))
             .await
         {
-            panic!("Tracker dispatch error: {:?}", e);
+            panic!("Tracker dispatch error: {e:?}");
         }
     }
 }
