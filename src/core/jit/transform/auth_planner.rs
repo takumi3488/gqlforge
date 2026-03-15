@@ -51,8 +51,8 @@ fn update_field<A>(auth: &mut Vec<Auth>, field: &mut Field<A>) {
 }
 
 /// This function modifies an IR pipe chain by detecting and removing any
-/// instances of `IR::Protect` from the chain. Returns `true` when it modifies the
-/// IR.
+/// instances of `IR::Protect` from the chain. Returns `true` when it modifies
+/// the IR.
 pub fn update_ir(ir: &mut IR, vec: &mut Vec<Auth>) {
     match ir {
         IR::Dynamic(_)

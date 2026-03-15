@@ -77,12 +77,12 @@ mod test {
     use std::collections::BTreeMap;
 
     use gqlforge_valid::Validator;
+    use serde_json::Value;
 
     use super::OperationTypeGenerator;
     use crate::core::config::{Config, Field, Type};
     use crate::core::generator::{NameGenerator, RequestSample};
     use crate::core::http::Method;
-    use serde_json::Value;
 
     #[test]
     fn test_query() {

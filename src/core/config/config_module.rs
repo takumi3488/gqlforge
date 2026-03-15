@@ -158,7 +158,8 @@ pub struct Extensions {
 
     pub jwks: Vec<Content<JwkSet>>,
 
-    /// Raw SQL migration contents, applied in order to build a `DatabaseSchema`.
+    /// Raw SQL migration contents, applied in order to build a
+    /// `DatabaseSchema`.
     pub sql_migrations: Vec<String>,
 
     /// Resolved database schemas for `@postgres` directives.

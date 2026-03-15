@@ -6,7 +6,8 @@ use super::path::Path;
 use super::{Request, Result};
 use crate::core::async_graphql_hyper::GraphQLRequest;
 
-/// A partial `GraphQLRequest` that contains a parsed executable GraphQL document.
+/// A partial `GraphQLRequest` that contains a parsed executable GraphQL
+/// document.
 #[derive(Debug)]
 pub struct PartialRequest<'a> {
     pub body: Option<&'a String>,

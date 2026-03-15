@@ -19,8 +19,8 @@ use crate::core::json::{JsonLike, JsonObjectLike};
 /// There are two types of discriminators:
 ///
 /// * [`KeyedDiscriminator`]: Uses the keys of an object to determine its type.
-/// * [`TypeFieldDiscriminator`]: Uses a specific field of an object to determine
-///   its type.
+/// * [`TypeFieldDiscriminator`]: Uses a specific field of an object to
+///   determine its type.
 ///
 /// The [Discriminator] enum provides a way to construct and use these
 /// discriminators.

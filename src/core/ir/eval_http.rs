@@ -41,8 +41,8 @@ impl<'a> WorkerContext<'a> {
 ///
 /// Executing a HTTP request is a bit more complex than just sending a request
 /// and getting a response. There are optimizations and customizations that the
-/// user might have configured. `HttpRequestExecutor` is responsible for handling
-/// all of that.
+/// user might have configured. `HttpRequestExecutor` is responsible for
+/// handling all of that.
 pub struct EvalHttp<'a, 'ctx, Context: ResolverContextLike + Sync> {
     evaluation_ctx: &'ctx EvalContext<'a, Context>,
     data_loader: Option<&'a DataLoader<DataLoaderRequest, HttpDataLoader>>,
