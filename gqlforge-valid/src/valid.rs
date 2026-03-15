@@ -302,7 +302,7 @@ mod tests {
     #[test]
     fn test_validate_fold_err() {
         let valid = Valid::<(), i32>::fail(1);
-        let result = valid.fold(|_| Valid::<(), i32>::fail(2), || Valid::<(), i32>::fail(3));
+        let result = valid.fold(|()| Valid::<(), i32>::fail(2), || Valid::<(), i32>::fail(3));
         assert_eq!(
             result,
             Valid::from_vec_cause(vec![Cause::new(1), Cause::new(3)])
@@ -317,6 +317,7 @@ mod tests {
     }
 
     #[test]
+    #[expect(clippy::unwrap_used, reason = "test code")]
     fn test_to_result() {
         let result = Valid::<(), i32>::fail(1).to_result().unwrap_err();
         assert_eq!(result, ValidationError::new(1));

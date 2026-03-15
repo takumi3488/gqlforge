@@ -160,10 +160,11 @@ mod tests {
             Cause::new("3"),
         ]);
         let expected_output = "Validation Error\n\u{2022} 1 [a, b]\n\u{2022} 2\n\u{2022} 3\n";
-        assert_eq!(format!("{}", error), expected_output);
+        assert_eq!(format!("{error}"), expected_output);
     }
 
     #[test]
+    #[expect(clippy::unwrap_used, reason = "test code")]
     fn test_from_serde_error() {
         let foo = &mut serde_json::Deserializer::from_str("{ \"a\": true }");
         let actual =
