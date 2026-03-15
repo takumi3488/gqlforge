@@ -1,16 +1,21 @@
 use std::env::{set_var, var};
 use std::path::{Path, PathBuf};
 
-fn main() {
-    let path = protoc_bin_vendored::protoc_bin_path().expect("Failed to find protoc binary");
+fn main() -> Result<(), Box<dyn std::error::Error>> {
+    let path = protoc_bin_vendored::protoc_bin_path()?;
     unsafe { set_var("PROTOC", format!("{}", path.display())) };
 
     let news = Path::new(gqlforge_fixtures::protobuf::NEWS);
 
-    let out_dir = PathBuf::from(var("OUT_DIR").unwrap());
+    let out_dir = PathBuf::from(var("OUT_DIR")?);
+
+    let parent = news
+        .parent()
+        .ok_or_else(|| format!("no parent for {}", news.display()))?;
 
     tonic_prost_build::configure()
         .file_descriptor_set_path(out_dir.join("news_descriptor.bin"))
-        .compile_protos(&[&news], &[&news.parent().unwrap()])
-        .unwrap();
+        .compile_protos(&[&news], &[parent])?;
+
+    Ok(())
 }
