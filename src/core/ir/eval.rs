@@ -58,7 +58,9 @@ impl IR {
                     let io = &**io;
                     let key = io.cache_key(ctx);
                     if let Some(key) = key {
-                        if let Some(val) = ctx.request_ctx.runtime.cache.get(&key).await? { Ok(val) } else {
+                        if let Some(val) = ctx.request_ctx.runtime.cache.get(&key).await? {
+                            Ok(val)
+                        } else {
                             let val = eval_io(io, ctx).await?;
                             ctx.request_ctx
                                 .runtime

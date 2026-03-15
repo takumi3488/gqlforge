@@ -97,7 +97,7 @@ impl Response<Bytes> {
         Ok(Response { status, headers, body })
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn empty() -> Self {
         Response {
             status: reqwest::StatusCode::OK,

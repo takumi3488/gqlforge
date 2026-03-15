@@ -12,12 +12,12 @@ pub struct GroupBy {
 }
 
 impl GroupBy {
-    #[must_use] 
+    #[must_use]
     pub fn new(path: Vec<String>, key: Option<String>) -> Self {
         Self { path, key }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn path(&self) -> Vec<String> {
         if self.path.is_empty() {
             return vec![String::from(ID)];
@@ -25,13 +25,15 @@ impl GroupBy {
         self.path.clone()
     }
 
-    #[must_use] 
+    #[must_use]
     ///
     /// # Panics
     ///
     /// Panics if an internal assertion fails.
     pub fn key(&self) -> &str {
-        if let Some(value) = &self.key { value } else {
+        if let Some(value) = &self.key {
+            value
+        } else {
             if self.path.is_empty() {
                 return ID;
             }

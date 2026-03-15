@@ -84,13 +84,8 @@ impl ExecutionSpec {
                     }
                 }
                 Node::Code(code) => {
-                    let (content, lang, meta) = {
-                        (
-                            code.value.clone(),
-                            code.lang.clone(),
-                            code.meta.clone(),
-                        )
-                    };
+                    let (content, lang, meta) =
+                        { (code.value.clone(), code.lang.clone(), code.meta.clone()) };
                     if let Some(meta_str) = meta.as_ref().filter(|s| s.contains('@')) {
                         let temp_cleaned_meta = meta_str.replace('@', "");
                         let name: &str = &temp_cleaned_meta;

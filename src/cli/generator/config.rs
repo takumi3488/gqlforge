@@ -179,12 +179,12 @@ impl Location<UnResolved> {
 }
 
 impl Headers {
-    #[must_use] 
+    #[must_use]
     pub fn into_btree_map(self) -> Option<BTreeMap<String, String>> {
         self.0
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn as_btree_map(&self) -> &Option<BTreeMap<String, String>> {
         &self.0
     }

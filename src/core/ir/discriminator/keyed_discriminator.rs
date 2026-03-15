@@ -44,7 +44,9 @@ impl KeyedDiscriminator {
             Value::Object(index_map) => {
                 let index_map_len = index_map.len();
                 if index_map_len == 1 {
-                    let (name, _) = index_map.iter().next().unwrap_or_else(|| unreachable!("len == 1 guarantees first element exists"));
+                    let (name, _) = index_map.iter().next().unwrap_or_else(|| {
+                        unreachable!("len == 1 guarantees first element exists")
+                    });
                     let type_name = name.to_string();
                     if self.types.contains(&type_name) {
                         Ok(type_name)
@@ -83,7 +85,9 @@ impl KeyedDiscriminator {
         let mut value = match value {
             Value::Object(index_map) => {
                 // this is safe to unwrap because we already validated it in `resolve_type`
-                let (_, value) = index_map.into_iter().next().unwrap_or_else(|| unreachable!("resolve_type already validated Object has exactly one entry"));
+                let (_, value) = index_map.into_iter().next().unwrap_or_else(|| {
+                    unreachable!("resolve_type already validated Object has exactly one entry")
+                });
                 value
             }
             _ => bail!(

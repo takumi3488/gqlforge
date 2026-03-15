@@ -36,8 +36,7 @@ impl Http {
             })
             .unwrap_or_default();
 
-        let cwd = std::env::current_dir()
-            .unwrap_or_else(|_| std::path::PathBuf::from("."));
+        let cwd = std::env::current_dir().unwrap_or_else(|_| std::path::PathBuf::from("."));
         let spec_path = spec
             .path
             .strip_prefix(&cwd)
@@ -66,17 +65,13 @@ impl HttpIO for Http {
                 let mock_req = &mock.mock.request;
                 let method_match = req.method() == mock_req.0.method.to_hyper();
                 let url_match = req.url().as_str() == mock_req.0.url.clone().as_str();
-                let body_match = mock_req
-                    .0
-                    .body
-                    .as_ref()
-                    .is_none_or(|body| {
-                        let mock_body = body.to_bytes();
+                let body_match = mock_req.0.body.as_ref().is_none_or(|body| {
+                    let mock_body = body.to_bytes();
 
-                        req.body()
-                            .and_then(|body| body.as_bytes().map(|req_body| req_body == mock_body))
-                            .unwrap_or(false)
-                    });
+                    req.body()
+                        .and_then(|body| body.as_bytes().map(|req_body| req_body == mock_body))
+                        .unwrap_or(false)
+                });
 
                 let headers_match = req
                     .headers()

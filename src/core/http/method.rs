@@ -28,7 +28,7 @@ pub enum Method {
 }
 
 impl Method {
-    #[must_use] 
+    #[must_use]
     pub fn to_hyper(self) -> http::Method {
         match self {
             Method::GET => http::Method::GET,

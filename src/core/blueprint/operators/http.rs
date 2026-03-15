@@ -1,7 +1,7 @@
 use gqlforge_valid::{Valid, Validator};
 use template_validation::validate_argument;
 
-use crate::core::blueprint::{template_validation, BlueprintError, apply_select};
+use crate::core::blueprint::{BlueprintError, apply_select, template_validation};
 use crate::core::config::group_by::GroupBy;
 use crate::core::config::{Field, GraphQLOperationType};
 use crate::core::endpoint::Endpoint;
@@ -10,7 +10,10 @@ use crate::core::ir::model::{IO, IR};
 use crate::core::worker_hooks::WorkerHooks;
 use crate::core::{Mustache, config, helpers};
 
-#[expect(clippy::too_many_lines, reason = "HTTP compilation handles many field variants")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "HTTP compilation handles many field variants"
+)]
 pub fn compile_http(
     config_module: &config::ConfigModule,
     http: &config::Http,

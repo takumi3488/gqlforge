@@ -6,7 +6,7 @@ use rquickjs::{FromJs, IntoJs};
 
 use super::create_header_map;
 use crate::core::http::Response;
-use crate::core::worker::{Command, WorkerRequest, WorkerResponse, Uri, Scheme};
+use crate::core::worker::{Command, Scheme, Uri, WorkerRequest, WorkerResponse};
 
 impl<'js> FromJs<'js> for Command {
     fn from_js(ctx: &rquickjs::Ctx<'js>, value: rquickjs::Value<'js>) -> rquickjs::Result<Self> {

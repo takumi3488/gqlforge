@@ -44,7 +44,10 @@ impl WorkerHooks {
             Some(on_request) => {
                 let js_request = WorkerRequest::try_from(request)?;
                 let event = worker::Event::Request(js_request);
-                worker.call(on_request, event).await.map_err(std::convert::Into::into)
+                worker
+                    .call(on_request, event)
+                    .await
+                    .map_err(std::convert::Into::into)
             }
             None => Ok(None),
         }

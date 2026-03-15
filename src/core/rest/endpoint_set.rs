@@ -35,7 +35,7 @@ impl From<Endpoint> for EndpointSet<Unchecked> {
 }
 
 impl EndpointSet<Unchecked> {
-    #[must_use] 
+    #[must_use]
     pub fn get_endpoints(&self) -> &Vec<Endpoint> {
         &self.endpoints
     }

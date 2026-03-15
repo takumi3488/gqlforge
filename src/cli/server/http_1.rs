@@ -23,7 +23,10 @@ use crate::core::http::sse::{SseBody, handle_sse_request};
 /// # Panics
 ///
 /// Panics if an internal assertion fails.
-#[expect(clippy::unwrap_used, reason = "http::Response::builder with static status 500 is infallible")]
+#[expect(
+    clippy::unwrap_used,
+    reason = "http::Response::builder with static status 500 is infallible"
+)]
 pub async fn start_http_1(
     sc: Arc<ServerConfig>,
     server_up_sender: Option<oneshot::Sender<()>>,
@@ -70,9 +73,8 @@ pub async fn start_http_1(
                             Ok(resp) => Ok(resp.map(Either::Right)),
                             Err(e) => {
                                 tracing::error!("SSE handler error: {}", e);
-                                let body = Full::new(bytes::Bytes::from(format!(
-                                    r#"{{"error": "{e}"}}"#
-                                )));
+                                let body =
+                                    Full::new(bytes::Bytes::from(format!(r#"{{"error": "{e}"}}"#)));
                                 Ok(http::Response::builder()
                                     .status(500)
                                     .body(Either::<Full<bytes::Bytes>, SseBody>::Left(body))

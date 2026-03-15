@@ -90,7 +90,7 @@ impl RequestTemplate {
 
     /// Checks if the template has any mustache templates or not
     /// Returns true if there are not templates
-    #[must_use] 
+    #[must_use]
     pub fn is_const(&self) -> bool {
         self.root_url.is_const()
             && self.body_path.as_ref().is_none_or(Mustache::is_const)
@@ -217,7 +217,7 @@ impl RequestTemplate {
         Ok(Self::new(url)?.encoding(Encoding::ApplicationXWwwFormUrlencoded))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_body(mut self, body: Mustache) -> Self {
         self.body_path = Some(body);
         self

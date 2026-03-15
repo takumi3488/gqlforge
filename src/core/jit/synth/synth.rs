@@ -48,7 +48,8 @@ where
             }
             // TODO: in case of error set `child.output_name` to null
             // and append error to response error array
-            let val = self.process_node(child, None, &DataPath::new(), &mut path, Some(root_name))?;
+            let val =
+                self.process_node(child, None, &DataPath::new(), &mut path, Some(root_name))?;
             data.insert_key(&child.output_name, val);
         }
 
@@ -148,17 +149,13 @@ where
                 Err(ValidationError::ValueRequired.into())
             }
         } else if let Some(scalar) = node.scalar.as_ref() {
-
             // TODO: add validation for input type as well. But input types are not checked
             // by async_graphql anyway so it should be done after replacing
             // default engine with JIT
             if scalar.validate(value) {
                 Ok(Output::clone_from(value))
             } else {
-                Err(
-                    ValidationError::ScalarInvalid { type_of: node.type_of.name().clone() }
-                        .into(),
-                )
+                Err(ValidationError::ScalarInvalid { type_of: node.type_of.name().clone() }.into())
             }
         } else if node.is_enum {
             let check_valid_enum = |value: &Value| -> bool {
@@ -176,10 +173,7 @@ where
             if is_valid_enum {
                 Ok(Output::clone_from(value))
             } else {
-                Err(
-                    ValidationError::EnumInvalid { type_of: node.type_of.name().clone() }
-                        .into(),
-                )
+                Err(ValidationError::EnumInvalid { type_of: node.type_of.name().clone() }.into())
             }
         } else {
             match (value.as_array(), value.as_object()) {

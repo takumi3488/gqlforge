@@ -14,7 +14,7 @@ pub struct Preset {
 }
 
 impl Preset {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self {
             merge_type: 0.0,

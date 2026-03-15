@@ -37,7 +37,7 @@ pub enum Resource {
 }
 
 impl Resource {
-    #[must_use] 
+    #[must_use]
     pub fn calculate_hash(&self) -> u64 {
         let mut hasher = GqlforgeHasher::default();
         self.hash(&mut hasher);
@@ -123,7 +123,7 @@ impl<A: Reader + Send + Sync> ResourceReader<A> {
 }
 
 impl ResourceReader<Cached> {
-    #[must_use] 
+    #[must_use]
     pub fn cached(runtime: TargetRuntime) -> Self {
         ResourceReader(Cached::init(runtime))
     }
@@ -145,7 +145,7 @@ pub struct Direct {
 }
 
 impl Direct {
-    #[must_use] 
+    #[must_use]
     pub fn init(runtime: TargetRuntime) -> Self {
         Self { runtime }
     }
@@ -200,7 +200,7 @@ pub struct Cached {
 }
 
 impl Cached {
-    #[must_use] 
+    #[must_use]
     pub fn init(runtime: TargetRuntime) -> Self {
         Self { direct: Direct::init(runtime), cache: Arc::default() }
     }

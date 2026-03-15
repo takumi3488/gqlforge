@@ -1,4 +1,7 @@
-#![expect(clippy::similar_names, reason = "test helper uses similar variable names for clarity")]
+#![expect(
+    clippy::similar_names,
+    reason = "test helper uses similar variable names for clarity"
+)]
 #![expect(clippy::unwrap_used, reason = "test code")]
 
 use std::collections::BTreeMap;
@@ -28,7 +31,7 @@ use serde::{Deserialize, Serialize};
 
 use super::file::File;
 use super::http::Http;
-use super::model::{APIResponse, APIBody, Annotation, APIRequest};
+use super::model::{APIBody, APIRequest, APIResponse, Annotation};
 use super::runtime::ExecutionSpec;
 use crate::core::runtime;
 
@@ -230,8 +233,7 @@ async fn test_spec(spec: ExecutionSpec) {
     let config_module = config_module.to_result().unwrap();
     let merged = config_module.to_sdl();
 
-    let formatter = gqlforge_formatter::format(merged, &Parser::Gql)
-        .unwrap();
+    let formatter = gqlforge_formatter::format(merged, &Parser::Gql).unwrap();
 
     let snapshot_name = format!("{}_merged", spec.safe_name);
 
@@ -247,8 +249,7 @@ async fn test_spec(spec: ExecutionSpec) {
         .to_schema(),
     );
 
-    let formatted = gqlforge_formatter::format(client, &Parser::Gql)
-        .unwrap();
+    let formatted = gqlforge_formatter::format(client, &Parser::Gql).unwrap();
     let snapshot_name = format!("{}_client", spec.safe_name);
 
     insta::assert_snapshot!(snapshot_name, formatted);

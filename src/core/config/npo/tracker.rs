@@ -11,7 +11,7 @@ use crate::core::config::Config;
 pub struct QueryPath(Vec<Vec<String>>);
 
 impl QueryPath {
-    #[must_use] 
+    #[must_use]
     pub fn size(&self) -> usize {
         self.0.len()
     }
@@ -172,7 +172,9 @@ impl<'a> PathTracker<'a> {
         if let Some(path) = parent_name {
             let vec = chunks.as_vec();
 
-            vec.into_iter().map(|chunk| chunk.prepend(path)).collect::<Chunk<_>>()
+            vec.into_iter()
+                .map(|chunk| chunk.prepend(path))
+                .collect::<Chunk<_>>()
         } else {
             chunks
         }

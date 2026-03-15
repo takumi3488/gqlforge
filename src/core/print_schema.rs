@@ -3,7 +3,7 @@ use async_graphql::dynamic::Schema;
 
 /// SDL returned from `AsyncSchemaInner` isn't standard
 /// We clean it up before returning.
-#[must_use] 
+#[must_use]
 pub fn print_schema(schema: &Schema) -> String {
     let sdl = schema.sdl_with_options(SDLExportOptions::new().sorted_fields());
     let lines: Vec<&str> = sdl.lines().collect();

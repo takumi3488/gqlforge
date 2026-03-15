@@ -17,7 +17,7 @@ impl<A> Default for PathStringEval<A> {
 }
 
 impl<A> PathStringEval<A> {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self(std::marker::PhantomData)
     }

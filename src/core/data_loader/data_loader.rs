@@ -102,7 +102,11 @@ where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         T: Loader<K>,
     {
-        let mut requests = self.inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests.disable_cache = !enable;
     }
 
@@ -142,7 +146,11 @@ where
         }
 
         let (action, rx) = {
-            let mut requests = self.inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+            let mut requests = self
+                .inner
+                .requests
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner);
             let prev_count = requests.keys.len();
             let mut keys_set = HashSet::new();
             let mut use_cache_values = HashMap::new();
@@ -203,7 +211,10 @@ where
                     tokio::time::sleep(delay).await;
 
                     let keys = {
-                        let mut requests = inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+                        let mut requests = inner
+                            .requests
+                            .lock()
+                            .unwrap_or_else(PoisonError::into_inner);
                         requests.take()
                     };
 
@@ -216,7 +227,8 @@ where
             Action::Delay => {}
         }
 
-        rx.await.unwrap_or_else(|_| unreachable!("data loader channel was unexpectedly dropped"))
+        rx.await
+            .unwrap_or_else(|_| unreachable!("data loader channel was unexpectedly dropped"))
     }
 
     /// Feed some data into the cache.
@@ -233,7 +245,11 @@ where
         I: IntoIterator<Item = (K, T::Value)>,
         T: Loader<K>,
     {
-        let mut requests = self.inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         for (key, value) in values {
             requests
                 .cache_storage
@@ -267,7 +283,11 @@ where
         T: Loader<K>,
     {
         let _tid = TypeId::of::<K>();
-        let mut requests = self.inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests.cache_storage.clear();
     }
 
@@ -282,7 +302,11 @@ where
         T: Loader<K>,
     {
         let _tid = TypeId::of::<K>();
-        let requests = self.inner.requests.lock().unwrap_or_else(PoisonError::into_inner);
+        let requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests
             .cache_storage
             .iter()

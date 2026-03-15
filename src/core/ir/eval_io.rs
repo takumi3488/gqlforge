@@ -163,19 +163,21 @@ where
                 return Err(Error::IO("S3 bucket name must not be empty".to_string()));
             }
             let link_id = rendered.link_id.as_deref();
-            let s3 =
-                match link_id {
-                    Some(id) => ctx.request_ctx.runtime.s3.get(id).ok_or_else(|| {
-                        Error::IO(format!("S3 link '{id}' not found in runtime"))
-                    })?,
-                    None => ctx
-                        .request_ctx
-                        .runtime
-                        .s3
-                        .get("")
-                        .or_else(|| ctx.request_ctx.runtime.s3.values().next())
-                        .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?,
-                };
+            let s3 = match link_id {
+                Some(id) => ctx
+                    .request_ctx
+                    .runtime
+                    .s3
+                    .get(id)
+                    .ok_or_else(|| Error::IO(format!("S3 link '{id}' not found in runtime")))?,
+                None => ctx
+                    .request_ctx
+                    .runtime
+                    .s3
+                    .get("")
+                    .or_else(|| ctx.request_ctx.runtime.s3.values().next())
+                    .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?,
+            };
 
             match rendered.operation {
                 S3Operation::GetPresignedUrl => {

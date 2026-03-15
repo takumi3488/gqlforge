@@ -28,7 +28,10 @@ pub(super) fn sanitize_graphql_name(name: &str) -> String {
     result
 }
 
-#[expect(clippy::too_many_lines, reason = "handles all Postgres type conversions")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "handles all Postgres type conversions"
+)]
 pub(super) fn row_value_to_const(
     row: &tokio_postgres::Row,
     idx: usize,
@@ -68,16 +71,16 @@ pub(super) fn row_value_to_const(
         }
         Type::JSON | Type::JSONB => {
             let v: Option<serde_json::Value> = row.try_get(idx)?;
-            Ok(
-                v.map_or(ConstValue::Null, |j| ConstValue::from_json(j).unwrap_or(ConstValue::Null)),
-            )
+            Ok(v.map_or(ConstValue::Null, |j| {
+                ConstValue::from_json(j).unwrap_or(ConstValue::Null)
+            }))
         }
         // --- chrono-based datetime types ---
         Type::TIMESTAMP => {
             let v: Option<chrono::NaiveDateTime> = row.try_get(idx)?;
-            Ok(
-                v.map_or(ConstValue::Null, |dt| ConstValue::String(dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string())),
-            )
+            Ok(v.map_or(ConstValue::Null, |dt| {
+                ConstValue::String(dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string())
+            }))
         }
         Type::TIMESTAMPTZ => {
             let v: Option<chrono::DateTime<chrono::Utc>> = row.try_get(idx)?;
@@ -145,8 +148,7 @@ pub(super) fn row_value_to_const(
             // Check for enum types.
             if matches!(ty.kind(), Kind::Enum(_)) {
                 let v: Option<EnumText> = row.try_get(idx)?;
-                return Ok(v
-                    .map_or(ConstValue::Null, |e| ConstValue::String(e.0)));
+                return Ok(v.map_or(ConstValue::Null, |e| ConstValue::String(e.0)));
             }
 
             // Check for array types.
@@ -160,7 +162,9 @@ pub(super) fn row_value_to_const(
 
             // Fallback: try to get as String (works for TEXT, VARCHAR, BPCHAR, NAME,
             // UNKNOWN).
-            if let Ok(v) = row.try_get::<_, Option<String>>(idx) { Ok(v.map_or(ConstValue::Null, ConstValue::String)) } else {
+            if let Ok(v) = row.try_get::<_, Option<String>>(idx) {
+                Ok(v.map_or(ConstValue::Null, ConstValue::String))
+            } else {
                 tracing::warn!(
                     column = col.name(),
                     pg_type = %ty,

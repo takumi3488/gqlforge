@@ -17,7 +17,7 @@ pub struct ConfigReaderContext<'a> {
 }
 
 impl<'a> ConfigReaderContext<'a> {
-    #[must_use] 
+    #[must_use]
     pub fn new(runtime: &'a TargetRuntime) -> Self {
         Self { runtime, vars: None, headers: HeaderMap::default() }
     }
@@ -31,7 +31,10 @@ impl PathString for ConfigReaderContext<'_> {
 
         path.split_first()
             .and_then(|(head, tail)| match head.as_ref() {
-                "vars" => self.vars?.get(tail[0].as_ref()).map(std::convert::Into::into),
+                "vars" => self
+                    .vars?
+                    .get(tail[0].as_ref())
+                    .map(std::convert::Into::into),
                 "env" => self.runtime.env.get(tail[0].as_ref()),
                 _ => None,
             })

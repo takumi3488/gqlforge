@@ -25,7 +25,7 @@ pub enum QueryField {
 }
 
 impl QueryField {
-    #[must_use] 
+    #[must_use]
     pub fn get_arg(&self, arg_name: &str) -> Option<&InputFieldDefinition> {
         match self {
             QueryField::Field(inner) => inner.1.get(arg_name),
@@ -35,14 +35,14 @@ impl QueryField {
 }
 
 impl Index {
-    #[must_use] 
+    #[must_use]
     pub fn type_is_scalar(&self, type_name: &str) -> bool {
         let def = self.map.get(type_name).map(|(def, _)| def);
 
         matches!(def, Some(Definition::Scalar(_))) || scalar::Scalar::is_predefined(type_name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_interfaces(&self) -> HashSet<String> {
         self.map
             .iter()
@@ -53,14 +53,14 @@ impl Index {
             .collect()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn type_is_enum(&self, type_name: &str) -> bool {
         let def = self.map.get(type_name).map(|(def, _)| def);
 
         matches!(def, Some(Definition::Enum(_)))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn validate_enum_value(&self, type_name: &str, value: &str) -> bool {
         let def = self.map.get(type_name).map(|(def, _)| def);
 
@@ -74,29 +74,29 @@ impl Index {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_field(&self, type_name: &str, field_name: &str) -> Option<&QueryField> {
         self.map
             .get(type_name)
             .and_then(|(_, fields_map)| fields_map.get(field_name))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_query(&self) -> &String {
         &self.schema.query
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_mutation(&self) -> Option<&str> {
         self.schema.mutation.as_deref()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_subscription(&self) -> Option<&str> {
         self.schema.subscription.as_deref()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_type_implements(&self, type_name: &str, type_or_interface: &str) -> bool {
         if type_name == type_or_interface {
             return true;
@@ -114,7 +114,7 @@ impl Index {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_input_type_definition(&self, type_name: &str) -> Option<&InputObjectTypeDefinition> {
         match self.map.get(type_name) {
             Some((Definition::InputObject(input), _)) => Some(input),

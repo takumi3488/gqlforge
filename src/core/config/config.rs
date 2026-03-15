@@ -144,17 +144,17 @@ impl Display for Type {
 }
 
 impl Type {
-    #[must_use] 
+    #[must_use]
     pub fn has_resolver(&self) -> bool {
         self.resolvers.has_resolver()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn has_batched_resolver(&self) -> bool {
         self.resolvers.is_batched()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn fields(mut self, fields: Vec<(&str, Field)>) -> Self {
         let mut graphql_fields = BTreeMap::new();
         for (name, field) in fields {
@@ -164,7 +164,7 @@ impl Type {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn scalar(&self) -> bool {
         self.fields.is_empty()
     }
@@ -237,42 +237,42 @@ impl MergeRight for Field {
 }
 
 impl Field {
-    #[must_use] 
+    #[must_use]
     pub fn has_resolver(&self) -> bool {
         self.resolvers.has_resolver()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn has_batched_resolver(&self) -> bool {
         self.resolvers.is_batched()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn int() -> Self {
         Self { type_of: "Int".to_string().into(), ..Default::default() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn string() -> Self {
         Self { type_of: "String".to_string().into(), ..Default::default() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn float() -> Self {
         Self { type_of: "Float".to_string().into(), ..Default::default() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn boolean() -> Self {
         Self { type_of: "Boolean".to_string().into(), ..Default::default() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn id() -> Self {
         Self { type_of: "ID".to_string().into(), ..Default::default() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_omitted(&self) -> bool {
         self.omit.is_some()
             || self
@@ -386,7 +386,7 @@ impl RuntimeConfig {
 }
 
 impl Config {
-    #[must_use] 
+    #[must_use]
     pub fn with_runtime_config(self, runtime_config: RuntimeConfig) -> Self {
         Self {
             server: runtime_config.server,
@@ -397,7 +397,7 @@ impl Config {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_root_operation_type(&self, type_name: &str) -> bool {
         let type_name = type_name.to_lowercase();
 
@@ -411,39 +411,39 @@ impl Config {
         .any(|root_name| root_name.to_lowercase() == type_name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn port(&self) -> u16 {
         self.server.port.unwrap_or(8000)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn find_type(&self, name: &str) -> Option<&Type> {
         self.types.get(name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn find_union(&self, name: &str) -> Option<&Union> {
         self.unions.get(name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn find_enum(&self, name: &str) -> Option<&Enum> {
         self.enums.get(name)
     }
 
     /// Renders current config to graphQL string
-    #[must_use] 
+    #[must_use]
     pub fn to_sdl(&self) -> String {
         crate::core::document::print(&self.into())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn query(mut self, query: &str) -> Self {
         self.schema.query = Some(query.to_string());
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn types(mut self, types: Vec<(&str, Type)>) -> Self {
         let mut graphql_types = BTreeMap::new();
         for (name, type_) in types {
@@ -453,14 +453,14 @@ impl Config {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn contains(&self, name: &str) -> bool {
         self.types.contains_key(name)
             || self.unions.contains_key(name)
             || self.enums.contains_key(name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn from_sdl(sdl: &str) -> Valid<Self, String> {
         let doc = async_graphql::parser::parse_schema(sdl);
         match doc {
@@ -480,7 +480,7 @@ impl Config {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn n_plus_one(&self) -> QueryPath {
         super::npo::PathTracker::new(self).find()
     }
@@ -510,7 +510,7 @@ impl Config {
 
     ///
     /// Checks if a type is a scalar or not.
-    #[must_use] 
+    #[must_use]
     pub fn is_scalar(&self, type_name: &str) -> bool {
         self.types
             .get(type_name)
@@ -520,7 +520,7 @@ impl Config {
     ///
     /// Goes through the complete config and finds all the types that are used
     /// as inputs directly ot indirectly.
-    #[must_use] 
+    #[must_use]
     pub fn input_types(&self) -> HashSet<String> {
         self.arguments()
             .iter()
@@ -532,7 +532,7 @@ impl Config {
     }
 
     /// finds the all types which are present in union.
-    #[must_use] 
+    #[must_use]
     pub fn union_types(&self) -> HashSet<String> {
         self.unions
             .values()
@@ -541,7 +541,7 @@ impl Config {
     }
 
     /// Returns a list of all the types that are used as output types
-    #[must_use] 
+    #[must_use]
     pub fn output_types(&self) -> HashSet<String> {
         let mut types = HashSet::new();
 
@@ -560,7 +560,7 @@ impl Config {
         types
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn interfaces_types_map(&self) -> BTreeMap<String, BTreeSet<String>> {
         fn recursive_interface_type_merging(
             types_set: &BTreeSet<String>,
@@ -629,7 +629,7 @@ impl Config {
             .collect::<Vec<_>>()
     }
     /// Removes all types that are passed in the set
-    #[must_use] 
+    #[must_use]
     pub fn remove_types(mut self, types: HashSet<String>) -> Self {
         for unused_type in types {
             self.types.remove(&unused_type);
@@ -639,7 +639,7 @@ impl Config {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn unused_types(&self) -> HashSet<String> {
         let used_types = self.get_all_used_type_names();
         let all_types: HashSet<String> = self
@@ -652,7 +652,7 @@ impl Config {
     }
 
     /// Gets all the type names used in the schema.
-    #[must_use] 
+    #[must_use]
     pub fn get_all_used_type_names(&self) -> HashSet<String> {
         let mut set = HashSet::new();
         let mut stack = Vec::new();
@@ -689,7 +689,7 @@ impl Config {
         set
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn graphql_schema() -> ServiceDocument {
         // Multiple structs may contain a field of the same type when creating directive
         // definitions. To avoid generating the same GraphQL type multiple times,

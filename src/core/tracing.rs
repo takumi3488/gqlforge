@@ -71,17 +71,17 @@ where
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn default_tracing_gqlforge() -> impl Subscriber {
     default_tracing_for_name("gqlforge")
 }
 
-#[must_use] 
+#[must_use]
 pub fn default_tracing_for_name(name: &'static str) -> impl Subscriber {
     registry().with(default_tracing().with_filter(filter_target(name)))
 }
 
-#[must_use] 
+#[must_use]
 pub fn get_log_level() -> Option<LevelFilter> {
     const LONG_ENV_FILTER_VAR_NAME: &str = "GQLFORGE_LOG_LEVEL";
     const SHORT_ENV_FILTER_VAR_NAME: &str = "GF_LOG_LEVEL";
@@ -92,7 +92,7 @@ pub fn get_log_level() -> Option<LevelFilter> {
         .and_then(|v| LevelFilter::from_str(&v).ok())
 }
 
-#[must_use] 
+#[must_use]
 pub fn default_tracing<S>() -> impl Layer<S>
 where
     S: Subscriber,
@@ -105,12 +105,12 @@ where
         .with_filter(get_log_level().unwrap_or(LevelFilter::INFO))
 }
 
-#[must_use] 
+#[must_use]
 pub fn gqlforge_filter_target() -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {
     filter_target("gqlforge")
 }
 
-#[must_use] 
+#[must_use]
 pub fn filter_target(name: &'static str) -> FilterFn<impl Fn(&Metadata<'_>) -> bool> {
     filter_fn(move |metadata: &Metadata<'_>| metadata.target().starts_with(name))
 }

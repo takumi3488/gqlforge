@@ -29,10 +29,11 @@ impl Extension for GlobalTimeoutExtension {
             let timeout_duration = number.as_u64().unwrap_or(0);
             if timeout_duration > 0 {
                 let result = timeout(Duration::from_millis(timeout_duration), future).await;
-                if let Ok(result) = result { result } else {
+                if let Ok(result) = result {
+                    result
+                } else {
                     let mut response = Response::new(ConstValue::Null);
-                    response.errors =
-                        vec![ServerError::new("Global timeout".to_string(), None)];
+                    response.errors = vec![ServerError::new("Global timeout".to_string(), None)];
                     response
                 }
             } else {

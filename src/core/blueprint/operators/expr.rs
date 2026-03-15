@@ -1,7 +1,7 @@
 use async_graphql_value::ConstValue;
 use gqlforge_valid::{Valid, Validator};
 
-use crate::core::blueprint::{BlueprintError, to_json_schema, DynamicValue};
+use crate::core::blueprint::{BlueprintError, DynamicValue, to_json_schema};
 use crate::core::config;
 use crate::core::config::Expr;
 use crate::core::ir::model::IR;
@@ -29,7 +29,7 @@ pub struct CompileExpr<'a> {
     pub validate: bool,
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_expr(inputs: CompileExpr) -> Valid<IR, BlueprintError> {
     let config_module = inputs.config_module;
     let field = inputs.field;

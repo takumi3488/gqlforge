@@ -20,24 +20,26 @@ fn get_attrs(attrs: &[syn::Attribute]) -> syn::Result<Attrs> {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident(MERGE_RIGHT_FN) {
                     let p: syn::Expr = meta.value()?.parse()?;
-                    let lit =
-                        if let syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Str(lit), .. }) = p {
-                            let suffix = lit.suffix();
-                            if !suffix.is_empty() {
-                                return Err(syn::Error::new(
-                                    lit.span(),
-                                    format!("unexpected suffix `{suffix}` on string literal"),
-                                ));
-                            }
-                            lit
-                        } else {
+                    let lit = if let syn::Expr::Lit(syn::ExprLit {
+                        lit: syn::Lit::Str(lit), ..
+                    }) = p
+                    {
+                        let suffix = lit.suffix();
+                        if !suffix.is_empty() {
                             return Err(syn::Error::new(
-                                p.span(),
-                                format!(
-                                    "expected merge_right {MERGE_RIGHT_FN} attribute to be a string.",
-                                ),
+                                lit.span(),
+                                format!("unexpected suffix `{suffix}` on string literal"),
                             ));
-                        };
+                        }
+                        lit
+                    } else {
+                        return Err(syn::Error::new(
+                            p.span(),
+                            format!(
+                                "expected merge_right {MERGE_RIGHT_FN} attribute to be a string.",
+                            ),
+                        ));
+                    };
                     let expr_path: syn::ExprPath = lit.parse()?;
                     attrs_ret.merge_right_fn = Some(expr_path);
                     Ok(())

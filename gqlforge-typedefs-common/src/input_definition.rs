@@ -59,7 +59,9 @@ pub fn into_input_value_definition(
 fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValueDefinition>> {
     let mut arguments = vec![];
 
-    let Some(properties) = schema.get("properties").and_then(Value::as_object) else { return arguments };
+    let Some(properties) = schema.get("properties").and_then(Value::as_object) else {
+        return arguments;
+    };
 
     let required_arr = schema.get("required").and_then(Value::as_array);
     let is_required = |name: &str| -> bool {
@@ -73,7 +75,9 @@ fn build_arguments_type(schema: &Map<String, Value>) -> Vec<Positioned<InputValu
             continue;
         };
 
-        let Some(property_obj) = property_obj else { continue };
+        let Some(property_obj) = property_obj else {
+            continue;
+        };
 
         let description = get_description(property_obj);
         let nullable = !is_required(name) || nullable_from_anyof;

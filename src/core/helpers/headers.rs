@@ -6,7 +6,7 @@ use crate::core::mustache::Mustache;
 
 pub type MustacheHeaders = Vec<(HeaderName, Mustache)>;
 
-#[must_use] 
+#[must_use]
 pub fn to_mustache_headers(headers: &[KeyValue]) -> Valid<MustacheHeaders, String> {
     Valid::from_iter(headers.iter(), |key_value| {
         let name = Valid::from(

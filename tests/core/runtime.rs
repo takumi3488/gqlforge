@@ -19,7 +19,7 @@ use gqlforge::core::worker::{Command, Event};
 use super::env::Env;
 use super::file::TestFileIO;
 use super::http::Http;
-use super::model::{Mock, APIRequest, Annotation};
+use super::model::{APIRequest, Annotation, Mock};
 
 #[derive(Clone, Setters)]
 pub struct ExecutionSpec {

@@ -84,10 +84,7 @@ pub fn into_enum_value(schema: &Schema) -> Option<EnumValue> {
                     // if it has only single variant it's our high-level enum
                     if en.variants.len() == 1 {
                         let variant = en.variants.pop()?;
-                        Some(EnumVariant {
-                            value: variant.value,
-                            description: en.description,
-                        })
+                        Some(EnumVariant { value: variant.value, description: en.description })
                     } else {
                         None
                     }

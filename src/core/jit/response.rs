@@ -55,7 +55,8 @@ impl<Value: Default> Response<Value> {
     }
 
     pub fn add_errors(&mut self, new_errors: Vec<Positioned<jit::Error>>) {
-        self.errors.extend(new_errors.into_iter().map(std::convert::Into::into));
+        self.errors
+            .extend(new_errors.into_iter().map(std::convert::Into::into));
     }
 }
 
@@ -143,7 +144,7 @@ pub enum BatchResponse<Body> {
 }
 
 impl<Body> BatchResponse<Body> {
-    #[must_use] 
+    #[must_use]
     pub fn is_ok(&self) -> bool {
         match self {
             BatchResponse::Single(s) => s.is_ok,
@@ -152,7 +153,7 @@ impl<Body> BatchResponse<Body> {
     }
 
     /// Modifies the cache control values with the provided one.
-    #[must_use] 
+    #[must_use]
     pub fn cache_control(&self, cache_control: Option<&CacheControl>) -> CacheControl {
         match self {
             BatchResponse::Single(resp) => cache_control.unwrap_or(&resp.cache_control).clone(),

@@ -87,11 +87,7 @@ pub(super) fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
     } else {
         let int_digits_usize = usize::try_from(int_digits_count).unwrap_or(0);
         for i in 0..int_digits_usize {
-            let d = if i < digits.len() {
-                digits[i]
-            } else {
-                0
-            };
+            let d = if i < digits.len() { digits[i] } else { 0 };
             if i == 0 {
                 let _ = write!(int_part, "{d}");
             } else {
@@ -336,9 +332,7 @@ pub(super) fn format_timetz(raw: &[u8]) -> anyhow::Result<String> {
     };
 
     if tz_minutes > 0 {
-        Ok(format!(
-            "{time_str}{tz_sign}{tz_hours:02}:{tz_minutes:02}"
-        ))
+        Ok(format!("{time_str}{tz_sign}{tz_hours:02}:{tz_minutes:02}"))
     } else {
         Ok(format!("{time_str}{tz_sign}{tz_hours:02}"))
     }

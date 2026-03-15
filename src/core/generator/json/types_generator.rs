@@ -130,9 +130,7 @@ impl<'a> TypeGenerator<'a> {
                     // merge the generated types of list into single concrete type.
                     let merged_type = TypeMerger::merge_fields(object_types);
                     let generate_type_name = self.type_name_generator.next();
-                    config
-                        .types
-                        .insert(generate_type_name.clone(), merged_type);
+                    config.types.insert(generate_type_name.clone(), merged_type);
                     return generate_type_name;
                 }
 

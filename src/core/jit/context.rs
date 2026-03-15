@@ -41,7 +41,12 @@ pub struct Context<'a, Input, Output> {
 }
 impl<'a, Input: Clone, Output> Context<'a, Input, Output> {
     pub fn new(field: &'a Field<Input>, request: &'a RequestContext<Input>) -> Self {
-        Self { request, value: None, args: Some(Self::build_args(field)), field }
+        Self {
+            request,
+            value: None,
+            args: Some(Self::build_args(field)),
+            field,
+        }
     }
 
     pub fn with_value(&self, value: &'a Output) -> Self {

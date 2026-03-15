@@ -144,7 +144,9 @@ impl Context {
         // if there is only one type in union no need
         // to actually create union and use just this type
         if union_types.len() == 1 {
-            let Some((_, ty)) = union_types.pop() else { return self; };
+            let Some((_, ty)) = union_types.pop() else {
+                return self;
+            };
             self.config.types.insert(type_name, ty);
             return self;
         }
@@ -188,8 +190,10 @@ impl Context {
                 let variant_name = GraphQLType::new(v.name()).into_enum_variant().to_string();
 
                 // Path to the enum value's comments
-                let value_path = PathBuilder::new(&enum_type_path)
-                    .extend(PathField::EnumValue, i32::try_from(value_index).unwrap_or(0)); // 2: value field
+                let value_path = PathBuilder::new(&enum_type_path).extend(
+                    PathField::EnumValue,
+                    i32::try_from(value_index).unwrap_or(0),
+                ); // 2: value field
 
                 // Get comments for the enum value
                 let comment = self.comments_builder.get_comments(&value_path);
@@ -324,12 +328,13 @@ impl Context {
                     cfg_field.type_of = cfg_field.type_of.with_name(type_of);
                 }
 
-                let field_path =
-                    PathBuilder::new(&msg_path).extend(PathField::Field, i32::try_from(field_index).unwrap_or(0));
+                let field_path = PathBuilder::new(&msg_path)
+                    .extend(PathField::Field, i32::try_from(field_index).unwrap_or(0));
                 cfg_field.doc = self.comments_builder.get_comments(&field_path);
 
                 if let Some(oneof_index) = field.oneof_index {
-                    oneof_fields[usize::try_from(oneof_index).unwrap_or(0)].push((field_name.to_string(), cfg_field));
+                    oneof_fields[usize::try_from(oneof_index).unwrap_or(0)]
+                        .push((field_name.to_string(), cfg_field));
                 } else {
                     ty.fields.insert(field_name.to_string(), cfg_field);
                 }
@@ -414,8 +419,8 @@ impl Context {
                 })
                 .into();
 
-                let method_path =
-                    PathBuilder::new(&path).extend(PathField::Method, i32::try_from(method_index).unwrap_or(0));
+                let method_path = PathBuilder::new(&path)
+                    .extend(PathField::Method, i32::try_from(method_index).unwrap_or(0));
                 cfg_field.doc = self.comments_builder.get_comments(&method_path);
 
                 let root_type_name = if is_server_streaming {

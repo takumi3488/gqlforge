@@ -19,7 +19,7 @@ pub struct Endpoint {
 }
 
 impl Endpoint {
-    #[must_use] 
+    #[must_use]
     pub fn new(url: String) -> Endpoint {
         Self {
             path: url,

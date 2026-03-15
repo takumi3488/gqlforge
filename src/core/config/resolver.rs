@@ -64,7 +64,7 @@ impl Resolver {
 pub struct ResolverSet(pub Vec<Resolver>);
 
 impl ResolverSet {
-    #[must_use] 
+    #[must_use]
     pub fn has_resolver(&self) -> bool {
         !self.0.is_empty()
     }

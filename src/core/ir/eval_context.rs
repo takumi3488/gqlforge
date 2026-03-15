@@ -41,7 +41,7 @@ impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
         ctx
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_query(&self) -> bool {
         self.graphql_ctx.is_query()
     }
@@ -55,7 +55,7 @@ impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn value(&self) -> Option<&Value> {
         self.graphql_ctx.value()
     }
@@ -83,31 +83,31 @@ impl<'a, Ctx: ResolverContextLike> EvalContext<'a, Ctx> {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn headers(&self) -> &HeaderMap {
         &self.request_ctx.allowed_headers
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn header(&self, key: &str) -> Option<&str> {
         let value = self.headers().get(key)?;
 
         value.to_str().ok()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn env_var(&self, key: &str) -> Option<Cow<'_, str>> {
         self.request_ctx.runtime.env.get(key)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn var(&self, key: &str) -> Option<&str> {
         let vars = &self.request_ctx.server.vars;
 
         vars.get(key).map(std::string::String::as_str)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn vars(&self) -> &BTreeMap<String, String> {
         &self.request_ctx.server.vars
     }

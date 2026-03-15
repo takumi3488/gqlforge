@@ -24,7 +24,7 @@ use markdown::mdast::Node;
 
 use super::file::File;
 use super::http::Http;
-use super::model::{Mock, APIRequest, Annotation};
+use super::model::{APIRequest, Annotation, Mock};
 use super::runtime::ExecutionSpec;
 
 struct Env {
@@ -144,13 +144,8 @@ impl ExecutionSpec {
                 }
                 Node::Code(code) => {
                     // Parse following code block
-                    let (content, lang, meta) = {
-                        (
-                            code.value.clone(),
-                            code.lang.clone(),
-                            code.meta.clone(),
-                        )
-                    };
+                    let (content, lang, meta) =
+                        { (code.value.clone(), code.lang.clone(), code.meta.clone()) };
                     if let Some(meta_str) = meta.as_ref().filter(|s| s.contains('@')) {
                         let temp_cleaned_meta = meta_str.replace('@', "");
                         let name: &str = &temp_cleaned_meta;

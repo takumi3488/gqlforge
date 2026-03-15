@@ -1,12 +1,12 @@
 use gqlforge_valid::{Valid, Validator};
 use serde_json::Value;
 
-use crate::core::blueprint::{ConfigModule, BlueprintError, to_field_definition, DynamicValue};
+use crate::core::blueprint::{BlueprintError, ConfigModule, DynamicValue, to_field_definition};
 use crate::core::config;
 use crate::core::config::{Field, GraphQLOperationType};
 use crate::core::ir::model::IR;
 
-#[must_use] 
+#[must_use]
 pub fn compile_call(
     config_module: &ConfigModule,
     call: &config::Call,

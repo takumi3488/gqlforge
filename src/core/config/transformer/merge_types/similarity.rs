@@ -124,10 +124,12 @@ impl<'a> Similarity<'a> {
                 }
             }
 
-            let total_field_count =
-                u32::try_from(type_1.fields.len() + type_2.fields.len()).unwrap_or(u32::MAX) - same_field_count;
+            let total_field_count = u32::try_from(type_1.fields.len() + type_2.fields.len())
+                .unwrap_or(u32::MAX)
+                - same_field_count;
 
-            let is_similar = (f64::from(same_field_count) / f64::from(total_field_count)) >= f64::from(threshold);
+            let is_similar = (f64::from(same_field_count) / f64::from(total_field_count))
+                >= f64::from(threshold);
 
             self.type_similarity_cache.add(
                 type_1_name.to_owned(),

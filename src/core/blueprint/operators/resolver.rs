@@ -63,7 +63,7 @@ pub fn compile_resolver(
     .map(Some)
 }
 
-#[must_use] 
+#[must_use]
 ///
 /// # Panics
 ///
@@ -86,7 +86,10 @@ pub fn update_resolver<'a>(
             })
             .map(|resolvers| match resolvers.len() {
                 0 => None,
-                1 => resolvers.into_iter().next().unwrap_or_else(|| unreachable!("len == 1")),
+                1 => resolvers
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| unreachable!("len == 1")),
                 _ => Some(IR::Merge(resolvers.into_iter().flatten().collect())),
             })
             .map(|resolver| b_field.resolver(resolver))

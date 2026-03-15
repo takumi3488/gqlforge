@@ -99,9 +99,7 @@ pub mod test {
     impl FileIO for TestFileIO {
         async fn write<'a>(&'a self, path: &'a str, content: &'a [u8]) -> anyhow::Result<()> {
             let mut file = tokio::fs::File::create(path).await?;
-            file.write_all(content)
-                .await
-                .map_err(|e| anyhow!("{e}"))?;
+            file.write_all(content).await.map_err(|e| anyhow!("{e}"))?;
             Ok(())
         }
 
@@ -132,7 +130,7 @@ pub mod test {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn init(script: &Option<Script>) -> TargetRuntime {
         let http = TestHttp::init(&Upstream::default());
         let http2 = TestHttp::init(&Upstream::default().http2_only(true));

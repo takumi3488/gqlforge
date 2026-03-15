@@ -29,7 +29,10 @@ impl From<async_graphql::Request> for Request<ConstValue> {
         Self {
             query: value.query,
             operation_name: value.operation_name,
-            variables: variables.into_iter().map(|(k, v)| (k.to_string(), v)).collect::<Variables<_>>(),
+            variables: variables
+                .into_iter()
+                .map(|(k, v)| (k.to_string(), v))
+                .collect::<Variables<_>>(),
             extensions: value.extensions.0,
         }
     }
@@ -64,7 +67,7 @@ impl Request<ConstValue> {
 }
 
 impl<V> Request<V> {
-    #[must_use] 
+    #[must_use]
     pub fn new(query: &str) -> Self {
         Self {
             query: query.to_string(),

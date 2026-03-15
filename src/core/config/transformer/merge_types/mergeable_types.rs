@@ -202,19 +202,24 @@ mod tests {
         let comparable_types = MergeableTypes::default();
 
         assert!(
-            (comparable_types.get_threshold("InputType1", "InputType2") - 1.0_f32).abs() < f32::EPSILON
+            (comparable_types.get_threshold("InputType1", "InputType2") - 1.0_f32).abs()
+                < f32::EPSILON
         );
         assert!(
-            (comparable_types.get_threshold("OutputType1", "OutputType2") - 0.5_f32).abs() < f32::EPSILON
+            (comparable_types.get_threshold("OutputType1", "OutputType2") - 0.5_f32).abs()
+                < f32::EPSILON
         );
         assert!(
-            (comparable_types.get_threshold("UnionType1", "UnionType2") - 1.0_f32).abs() < f32::EPSILON
+            (comparable_types.get_threshold("UnionType1", "UnionType2") - 1.0_f32).abs()
+                < f32::EPSILON
         );
         assert!(
-            (comparable_types.get_threshold("InterfaceType1", "InterfaceType1") - 1.0_f32).abs() < f32::EPSILON
+            (comparable_types.get_threshold("InterfaceType1", "InterfaceType1") - 1.0_f32).abs()
+                < f32::EPSILON
         );
         assert!(
-            (comparable_types.get_threshold("InputType1", "UnionType1") - 0.5_f32).abs() < f32::EPSILON
+            (comparable_types.get_threshold("InputType1", "UnionType1") - 0.5_f32).abs()
+                < f32::EPSILON
         );
     }
 

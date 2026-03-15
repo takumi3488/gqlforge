@@ -16,7 +16,7 @@ pub struct Resolution {
 }
 
 impl Resolution {
-    #[must_use] 
+    #[must_use]
     pub fn is_unique(&self) -> bool {
         self.input.ne(&self.output)
     }
@@ -127,10 +127,8 @@ impl Transform for AmbiguousType {
                     for field in ty.fields.values_mut() {
                         if let Some(resolution) = resolution_map.get(field.type_of.name()) {
                             if output_types.contains(&k) {
-                                field.type_of = field
-                                    .type_of
-                                    .clone()
-                                    .with_name(resolution.output.clone());
+                                field.type_of =
+                                    field.type_of.clone().with_name(resolution.output.clone());
                             } else if input_types.contains(&k) {
                                 field.type_of =
                                     field.type_of.clone().with_name(resolution.input.clone());

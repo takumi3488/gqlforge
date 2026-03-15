@@ -55,7 +55,7 @@ fn to_headers(headers: &[KeyValue]) -> Valid<HeaderMap, BlueprintError> {
     .trace("headers")
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_opentelemetry<'a>() -> TryFold<'a, ConfigModule, Telemetry, BlueprintError> {
     TryFoldConfig::<Telemetry>::new(|config, up| {
         if let Some(export) = config.telemetry.export.as_ref() {

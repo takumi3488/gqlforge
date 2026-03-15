@@ -15,7 +15,7 @@ use crate::core::runtime::TargetRuntime;
 
 pub static GRPC_STATUS: &str = "grpc-status";
 
-#[must_use] 
+#[must_use]
 pub fn create_grpc_request(url: Url, headers: &HeaderMap, body: Vec<u8>) -> Request {
     let mut req = Request::new(Method::POST, url);
     req.headers_mut().extend(headers.clone());
@@ -163,9 +163,7 @@ mod tests {
             }
         }
     }
-    fn prepare_args(
-        test_http: TestHttp,
-    ) -> Result<(TargetRuntime, ProtobufOperation, Request)> {
+    fn prepare_args(test_http: TestHttp) -> Result<(TargetRuntime, ProtobufOperation, Request)> {
         let mut runtime = crate::core::runtime::test::init(&None);
         runtime.http2_only = Arc::new(test_http);
 

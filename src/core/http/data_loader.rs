@@ -42,12 +42,12 @@ pub struct HttpDataLoader {
     is_list: bool,
 }
 impl HttpDataLoader {
-    #[must_use] 
+    #[must_use]
     pub fn new(runtime: TargetRuntime, group_by: Option<GroupBy>, is_list: bool) -> Self {
         HttpDataLoader { runtime, group_by, is_list }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn to_data_loader(self, batch: &Batch) -> DataLoader<DataLoaderRequest, HttpDataLoader> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))

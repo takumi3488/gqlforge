@@ -56,8 +56,14 @@ fn to_field_value(value: async_graphql::Value) -> FieldValue<'static> {
     }
 }
 
-#[expect(clippy::too_many_lines, reason = "handles all type definition variants")]
-#[expect(clippy::unwrap_used, reason = "RequestContext is always present in the GraphQL resolver context")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "handles all type definition variants"
+)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "RequestContext is always present in the GraphQL resolver context"
+)]
 fn to_type(def: &Definition) -> dynamic::Type {
     match def {
         Definition::Object(def) => {
@@ -84,7 +90,10 @@ fn to_type(def: &Definition) -> dynamic::Type {
                                 let ctx: ResolverContext = ctx.into();
                                 let ctx = EvalContext::new(req_ctx, &ctx);
 
-                                match ctx.path_value(&[field_name]).map(std::borrow::Cow::into_owned) {
+                                match ctx
+                                    .path_value(&[field_name])
+                                    .map(std::borrow::Cow::into_owned)
+                                {
                                     Some(ConstValue::Null) => FieldFuture::Value(FieldValue::NONE),
                                     a => FieldFuture::from_value(a),
                                 }
@@ -199,8 +208,14 @@ fn to_type(def: &Definition) -> dynamic::Type {
     }
 }
 
-#[expect(clippy::too_many_lines, reason = "handles all subscription field types")]
-#[expect(clippy::unwrap_used, reason = "RequestContext is always present in the GraphQL subscription context")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "handles all subscription field types"
+)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "RequestContext is always present in the GraphQL subscription context"
+)]
 fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
     let mut subscription = dynamic::Subscription::new(def.name.clone());
 

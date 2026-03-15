@@ -8,7 +8,10 @@ use self::telemetry::to_opentelemetry;
 use super::Server;
 use crate::core::Type;
 use crate::core::blueprint::compress::compress;
-use crate::core::blueprint::{telemetry, Blueprint, BlueprintError, TryFoldConfig, to_schema, to_definitions, Upstream, Links, update_federation, Definition};
+use crate::core::blueprint::{
+    Blueprint, BlueprintError, Definition, Links, TryFoldConfig, Upstream, telemetry,
+    to_definitions, to_schema, update_federation,
+};
 use crate::core::config::transformer::Required;
 use crate::core::config::{Arg, Batch, Config, ConfigModule};
 use crate::core::ir::model::{IO, IR};
@@ -89,7 +92,7 @@ pub fn apply_batching(mut blueprint: Blueprint) -> Blueprint {
     blueprint
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_json_schema_for_args(args: &IndexMap<String, Arg>, config: &Config) -> JsonSchema {
     let mut schema_fields = BTreeMap::new();
     for (name, arg) in args {
@@ -97,7 +100,7 @@ pub fn to_json_schema_for_args(args: &IndexMap<String, Arg>, config: &Config) ->
     }
     JsonSchema::Obj(schema_fields)
 }
-#[must_use] 
+#[must_use]
 pub fn to_json_schema(type_of: &Type, config: &Config) -> JsonSchema {
     let json_schema = match type_of {
         Type::Named { name, .. } => {

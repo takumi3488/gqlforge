@@ -76,8 +76,14 @@ fn resolve_operand<Ctx: ResolverContextLike + Sync>(
     match operand {
         Operand::Path(segments) => {
             // For claims paths, resolve directly from serde_json::Value to preserve types
-            if segments.first().map(std::string::String::as_str) == Some("claims") && segments.len() > 1 {
-                let guard = ctx.request_ctx.auth_claims.lock().unwrap_or_else(PoisonError::into_inner);
+            if segments.first().map(std::string::String::as_str) == Some("claims")
+                && segments.len() > 1
+            {
+                let guard = ctx
+                    .request_ctx
+                    .auth_claims
+                    .lock()
+                    .unwrap_or_else(PoisonError::into_inner);
                 let claims = guard.as_ref()?;
                 let mut current = claims;
                 for segment in &segments[1..] {

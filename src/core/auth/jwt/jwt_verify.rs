@@ -93,12 +93,7 @@ pub fn validate_iss(options: &blueprint::Jwt, claims: &JwtClaim) -> bool {
     options
         .issuer
         .as_ref()
-        .is_none_or(|issuer| {
-            claims
-                .iss
-                .as_ref()
-                .is_some_and(|iss| iss == issuer)
-        })
+        .is_none_or(|issuer| claims.iss.as_ref().is_some_and(|iss| iss == issuer))
 }
 
 pub fn validate_aud(options: &blueprint::Jwt, claims: &JwtClaim) -> bool {
@@ -126,7 +121,6 @@ pub mod tests {
     use std::collections::HashSet;
 
     use jsonwebtoken::jwk::JwkSet;
-    
 
     use super::*;
 

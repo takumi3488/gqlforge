@@ -39,7 +39,11 @@ impl Selection {
 
 impl From<Mustache> for Selection {
     fn from(value: Mustache) -> Self {
-        if value.is_const() { Selection::Resolved(value.to_string()) } else { Selection::UnResolved(value) }
+        if value.is_const() {
+            Selection::Resolved(value.to_string())
+        } else {
+            Selection::UnResolved(value)
+        }
     }
 }
 
@@ -233,7 +237,9 @@ mod tests {
 
     impl PathGraphql for Context {
         fn path_graphql<T: AsRef<str>>(&self, path: &[T]) -> Option<String> {
-            self.value.get_path(path).map(std::string::ToString::to_string)
+            self.value
+                .get_path(path)
+                .map(std::string::ToString::to_string)
         }
     }
 

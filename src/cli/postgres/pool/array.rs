@@ -5,7 +5,10 @@ use super::binary_format::{
     parse_pg_numeric,
 };
 
-#[expect(clippy::unwrap_used, reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid")]
+#[expect(
+    clippy::unwrap_used,
+    reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid"
+)]
 pub(super) fn raw_element_to_const(
     ty: &postgres_types::Type,
     raw: &[u8],
@@ -38,8 +41,7 @@ pub(super) fn raw_element_to_const(
         }
         Type::FLOAT8 => {
             let v = f64::from_be_bytes(raw.try_into()?);
-            Ok(serde_json::Number::from_f64(v)
-                .map_or(ConstValue::Null, ConstValue::Number))
+            Ok(serde_json::Number::from_f64(v).map_or(ConstValue::Null, ConstValue::Number))
         }
         Type::TEXT | Type::VARCHAR | Type::BPCHAR | Type::NAME => {
             let s = std::str::from_utf8(raw)?;
@@ -218,7 +220,9 @@ mod tests {
                     buf.extend_from_slice(&(-1i32).to_be_bytes());
                 }
                 Some(data) => {
-                    buf.extend_from_slice(&(i32::try_from(data.len()).unwrap_or(i32::MAX)).to_be_bytes());
+                    buf.extend_from_slice(
+                        &(i32::try_from(data.len()).unwrap_or(i32::MAX)).to_be_bytes(),
+                    );
                     buf.extend_from_slice(data);
                 }
             }
@@ -361,9 +365,11 @@ mod tests {
 
     #[test]
     fn test_raw_element_int8() {
-        let result =
-            raw_element_to_const(&postgres_types::Type::INT8, &9_999_999_999_i64.to_be_bytes())
-                .unwrap();
+        let result = raw_element_to_const(
+            &postgres_types::Type::INT8,
+            &9_999_999_999_i64.to_be_bytes(),
+        )
+        .unwrap();
         assert_eq!(result, ConstValue::Number(9_999_999_999_i64.into()));
     }
 

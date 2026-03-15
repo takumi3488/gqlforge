@@ -41,7 +41,7 @@ impl PartialEq for DataLoaderRequest {
 }
 
 impl DataLoaderRequest {
-    #[must_use] 
+    #[must_use]
     pub fn new(template: RenderedRequestTemplate, batch_headers: BTreeSet<String>) -> Self {
         Self { template, batch_headers }
     }

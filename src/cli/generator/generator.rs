@@ -26,7 +26,7 @@ pub struct Generator {
 }
 
 impl Generator {
-    #[must_use] 
+    #[must_use]
     pub fn new(config_path: &str, runtime: TargetRuntime) -> Self {
         Self { config_path: config_path.to_string(), runtime }
     }

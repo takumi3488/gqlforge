@@ -10,7 +10,7 @@ use async_graphql::parser::types::{
 use async_graphql_value::Value;
 
 use super::BuildError;
-use super::model::{Directive as JitDirective, Variable, Field, ArgId, Arg, FieldId};
+use super::model::{Arg, ArgId, Directive as JitDirective, Field, FieldId, Variable};
 use crate::core::blueprint::{Blueprint, Index, QueryField};
 use crate::core::counter::{Count, Counter};
 use crate::core::jit::model::OperationPlan;
@@ -85,9 +85,7 @@ impl<'a> Builder<'a> {
     }
 
     #[inline]
-    fn include(
-        directives: &[Positioned<async_graphql::parser::types::Directive>],
-    ) -> Conditions {
+    fn include(directives: &[Positioned<async_graphql::parser::types::Directive>]) -> Conditions {
         fn get_condition(dir: &Directive) -> Option<Condition> {
             let arg = dir.get_argument("if").map(|pos| &pos.node);
             match arg {
@@ -125,7 +123,10 @@ impl<'a> Builder<'a> {
     }
 
     #[inline]
-    #[expect(clippy::too_many_lines, reason = "JIT field collection handles all selection variants")]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "JIT field collection handles all selection variants"
+    )]
     fn collect_fields(
         &self,
         parent_fragment: Option<&str>,
@@ -338,7 +339,10 @@ impl<'a> Builder<'a> {
             match &self.document.operations {
                 DocumentOperations::Single(operation) => Ok(&operation.node),
                 DocumentOperations::Multiple(map) if map.len() == 1 => {
-                    let (_, operation) = map.iter().next().unwrap_or_else(|| unreachable!("len == 1 guarantees first entry"));
+                    let (_, operation) = map
+                        .iter()
+                        .next()
+                        .unwrap_or_else(|| unreachable!("len == 1 guarantees first entry"));
                     Ok(&operation.node)
                 }
                 DocumentOperations::Multiple(_) => Err(BuildError::OperationNameRequired),

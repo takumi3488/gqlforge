@@ -24,7 +24,7 @@ pub struct Errata {
 }
 
 impl Errata {
-    #[must_use] 
+    #[must_use]
     pub fn new(message: &str) -> Self {
         Errata {
             is_root: true,
@@ -36,7 +36,7 @@ impl Errata {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn caused_by(mut self, error: Vec<Errata>) -> Self {
         self.caused_by = error;
 
@@ -63,7 +63,7 @@ impl Errata {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn color(mut self, color: bool) -> Self {
         self.color = color;
         for inner in &mut self.caused_by {

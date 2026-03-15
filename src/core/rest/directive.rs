@@ -91,7 +91,6 @@ mod tests {
     use std::collections::HashMap;
 
     use async_graphql::parser::types::Directive;
-    
 
     use super::*;
 

@@ -53,7 +53,7 @@ fn create_related_fields(
     RelatedFields(map)
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_graphql(
     config: &ConfigModule,
     operation_type: &GraphQLOperationType,

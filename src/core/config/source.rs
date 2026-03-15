@@ -51,7 +51,7 @@ impl std::str::FromStr for Source {
 
 impl Source {
     /// Get the file extension for the given format
-    #[must_use] 
+    #[must_use]
     pub fn ext(&self) -> &'static str {
         match self {
             Source::Json => JSON_EXT,

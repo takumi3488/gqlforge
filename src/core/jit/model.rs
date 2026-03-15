@@ -34,15 +34,15 @@ impl<Value> Default for Variables<Value> {
 }
 
 impl<Value> Variables<Value> {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self(HashMap::new())
     }
-    #[must_use] 
+    #[must_use]
     pub fn get(&self, key: &str) -> Option<&Value> {
         self.0.get(key)
     }
-    #[must_use] 
+    #[must_use]
     pub fn into_hashmap(self) -> HashMap<String, Value> {
         self.0
     }
@@ -113,14 +113,15 @@ pub struct Arg<Input> {
 
 impl<Input: Display> Display for Arg<Input> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let v = self
-            .value
-            .as_ref().map_or_else(|| {
+        let v = self.value.as_ref().map_or_else(
+            || {
                 self.default_value
                     .as_ref()
                     .map(std::string::ToString::to_string)
                     .unwrap_or_default()
-            }, std::string::ToString::to_string);
+            },
+            std::string::ToString::to_string,
+        );
         write!(f, "{}: {}", self.name, v)
     }
 }
@@ -154,7 +155,7 @@ impl Debug for ArgId {
 }
 
 impl ArgId {
-    #[must_use] 
+    #[must_use]
     pub fn new(id: usize) -> Self {
         ArgId(id)
     }
@@ -170,11 +171,11 @@ impl Debug for FieldId {
 }
 
 impl FieldId {
-    #[must_use] 
+    #[must_use]
     pub fn new(id: usize) -> Self {
         FieldId(id)
     }
-    #[must_use] 
+    #[must_use]
     pub fn as_usize(&self) -> usize {
         self.0
     }
@@ -229,15 +230,15 @@ impl<'a, Input> Iterator for DFS<'a, Input> {
 pub struct Variable(String);
 
 impl Variable {
-    #[must_use] 
+    #[must_use]
     pub fn new(name: String) -> Self {
         Variable(name)
     }
-    #[must_use] 
+    #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
     }
-    #[must_use] 
+    #[must_use]
     pub fn into_string(self) -> String {
         self.0
     }
@@ -321,7 +322,7 @@ impl<Input: Debug> Debug for Field<Input> {
 pub struct OPHash(u64);
 
 impl OPHash {
-    #[must_use] 
+    #[must_use]
     pub fn new(hash: u64) -> Self {
         OPHash(hash)
     }
@@ -379,7 +380,7 @@ impl<Input> OperationPlan<Input> {
 }
 
 impl<Input> OperationPlan<Input> {
-    #[must_use] 
+    #[must_use]
     pub fn new(
         root_name: &str,
         selection: Vec<Field<Input>>,

@@ -1,21 +1,27 @@
 use std::collections::HashSet;
 
 use async_graphql_value::ConstValue;
-use indexmap::IndexMap;
 use directive::Directive;
 use gqlforge_valid::{Valid, Validator};
+use indexmap::IndexMap;
 use interface_resolver::update_interface_resolver;
 use regex::Regex;
 use union_resolver::update_union_resolver;
 
-use crate::core::blueprint::{interface_resolver, union_resolver, directive, Definition, BlueprintError, ScalarTypeDefinition, UnionTypeDefinition, ObjectTypeDefinition, InputObjectTypeDefinition, InputFieldDefinition, InterfaceTypeDefinition, ConfigModule, EnumTypeDefinition, EnumValueDefinition, FieldDefinition, blueprint, validate_field_has_resolver, DynamicValue, update_resolver, update_modify, update_protected, update_enum_alias};
+use crate::core::blueprint::{
+    BlueprintError, ConfigModule, Definition, DynamicValue, EnumTypeDefinition,
+    EnumValueDefinition, FieldDefinition, InputFieldDefinition, InputObjectTypeDefinition,
+    InterfaceTypeDefinition, ObjectTypeDefinition, ScalarTypeDefinition, UnionTypeDefinition,
+    blueprint, directive, interface_resolver, union_resolver, update_enum_alias, update_modify,
+    update_protected, update_resolver, validate_field_has_resolver,
+};
 use crate::core::config::{Config, Enum, Field, GraphQLOperationType, Protected, Union};
 use crate::core::directive::DirectiveCodec;
 use crate::core::ir::model::{Cache, IR};
 use crate::core::try_fold::TryFold;
 use crate::core::{Type, config, scalar};
 
-#[must_use] 
+#[must_use]
 pub fn to_scalar_type_definition(name: &str) -> Valid<Definition, BlueprintError> {
     if scalar::Scalar::is_predefined(name) {
         Valid::fail(BlueprintError::ScalarTypeIsPredefined(name.to_string()))
@@ -31,7 +37,7 @@ pub fn to_scalar_type_definition(name: &str) -> Valid<Definition, BlueprintError
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_union_type_definition((name, u): (&String, &Union)) -> Definition {
     Definition::Union(UnionTypeDefinition {
         name: name.to_owned(),
@@ -41,7 +47,7 @@ pub fn to_union_type_definition((name, u): (&String, &Union)) -> Definition {
     })
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_input_object_type_definition(
     definition: ObjectTypeDefinition,
 ) -> Valid<Definition, BlueprintError> {
@@ -62,7 +68,7 @@ pub fn to_input_object_type_definition(
     }))
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_interface_type_definition(
     definition: ObjectTypeDefinition,
 ) -> Valid<Definition, BlueprintError> {
@@ -347,7 +353,7 @@ fn update_resolver_from_path(
 /// resolvers that cannot be resolved from the root of the schema. This function
 /// finds such dangling resolvers and creates a resolvable path from the root
 /// schema.
-#[must_use] 
+#[must_use]
 pub fn fix_dangling_resolvers<'a>() -> TryFold<
     'a,
     (&'a ConfigModule, &'a Field, &'a config::Type, &'a str),
@@ -372,7 +378,7 @@ pub fn fix_dangling_resolvers<'a>() -> TryFold<
 
 /// Wraps the IO Expression with `Expression::Cached`
 /// if `Field::cache` is present for that field
-#[must_use] 
+#[must_use]
 pub fn update_cache_resolvers<'a>() -> TryFold<
     'a,
     (&'a ConfigModule, &'a Field, &'a config::Type, &'a str),
@@ -550,7 +556,7 @@ fn to_fields(
     })
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_field_definition(
     field: &Field,
     operation_type: &GraphQLOperationType,
@@ -574,7 +580,7 @@ pub fn to_field_definition(
         )
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_definitions<'a>() -> TryFold<'a, ConfigModule, Vec<Definition>, BlueprintError> {
     TryFold::<ConfigModule, Vec<Definition>, BlueprintError>::new(|config_module, _| {
         Valid::from_iter(config_module.types.iter(), |(name, type_)| {

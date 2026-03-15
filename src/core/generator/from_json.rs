@@ -24,7 +24,7 @@ pub struct RequestSample {
 }
 
 impl RequestSample {
-    #[must_use] 
+    #[must_use]
     pub fn new(url: Url, response_body: Value, field_name: String) -> Self {
         Self {
             url,
@@ -37,25 +37,25 @@ impl RequestSample {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_method(mut self, method: Method) -> Self {
         self.method = method;
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_req_body(mut self, req_body: Value) -> Self {
         self.req_body = req_body;
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_headers(mut self, headers: Option<BTreeMap<String, String>>) -> Self {
         self.headers = headers;
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_is_mutation(mut self, is_mutation: bool) -> Self {
         let operation_type = if is_mutation {
             GraphQLOperationType::Mutation
@@ -66,7 +66,7 @@ impl RequestSample {
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn with_is_subscription(mut self, is_subscription: bool) -> Self {
         if is_subscription {
             self.operation_type = GraphQLOperationType::Subscription;

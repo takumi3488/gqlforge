@@ -80,7 +80,7 @@ impl Default for JsonSchema {
 }
 
 impl JsonSchema {
-    #[must_use] 
+    #[must_use]
     pub fn from_scalar_type(type_name: &str) -> Self {
         match type_name {
             "String" => JsonSchema::Str,
@@ -152,7 +152,7 @@ impl JsonSchema {
     }
 
     /// Check if `self` is a subtype of `other`
-    #[must_use] 
+    #[must_use]
     pub fn is_a(&self, super_type: &JsonSchema, name: &str) -> Valid<(), String> {
         let sub_type = self;
         if let JsonSchema::Any = super_type {
@@ -207,17 +207,17 @@ impl JsonSchema {
         Valid::succeed(())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn optional(self) -> JsonSchema {
         JsonSchema::Opt(Box::new(self))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_optional(&self) -> bool {
         matches!(self, JsonSchema::Opt(_))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_required(&self) -> bool {
         !self.is_optional()
     }

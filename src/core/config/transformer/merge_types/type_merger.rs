@@ -17,12 +17,12 @@ pub struct TypeMerger {
 }
 
 impl TypeMerger {
-    #[must_use] 
+    #[must_use]
     pub fn new(threshold: f32) -> Self {
         Self { threshold }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn is_enabled(threshold: f32) -> bool {
         threshold > 0.0
     }
@@ -35,7 +35,10 @@ impl Default for TypeMerger {
 }
 
 impl TypeMerger {
-    #[expect(clippy::too_many_lines, reason = "type merging algorithm spans multiple phases")]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "type merging algorithm spans multiple phases"
+    )]
     fn merger(&self, mut merge_counter: u32, mut config: Config) -> Config {
         let mut type_to_merge_type_mapping = IndexMap::new();
         let mut similar_type_group_list: Vec<IndexSet<String>> = vec![];

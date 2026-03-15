@@ -19,7 +19,10 @@ use crate::core::postgres::schema::{Column, DatabaseSchema, PgType, PrimaryKey, 
 /// # Errors
 ///
 /// Returns an error if the operation fails.
-#[expect(clippy::too_many_lines, reason = "generates config for all database tables and columns")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "generates config for all database tables and columns"
+)]
 pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::Result<Config> {
     let mut config = Config::default();
     config.schema.query = Some("Query".to_string());
@@ -340,8 +343,7 @@ fn build_pk_args_and_filter(
     let mut filter_map = serde_json::Map::new();
     for pk_col in &pk.columns {
         let col = table.find_column(pk_col);
-        let gql_type = col
-            .map_or("ID".to_string(), |c| scalar_type(&c.pg_type));
+        let gql_type = col.map_or("ID".to_string(), |c| scalar_type(&c.pg_type));
 
         args.insert(
             pk_col.to_case(Case::Camel),

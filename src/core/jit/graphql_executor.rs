@@ -85,7 +85,9 @@ impl JITExecutor {
             }
 
             let jit_request = jit::Request::from(request);
-            let exec = if let Some(op) = self.app_ctx.operation_plans.get(&hash) { ConstValueExecutor::from(op.value().clone()) } else {
+            let exec = if let Some(op) = self.app_ctx.operation_plans.get(&hash) {
+                ConstValueExecutor::from(op.value().clone())
+            } else {
                 let exec = match ConstValueExecutor::try_new(&jit_request, &self.app_ctx) {
                     Ok(exec) => exec,
                     Err(error) => {

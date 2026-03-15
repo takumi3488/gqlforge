@@ -13,7 +13,7 @@ pub struct CompilePostgres<'a> {
     pub postgres: &'a Postgres,
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_postgres(inputs: CompilePostgres) -> Valid<IR, BlueprintError> {
     let pg = inputs.postgres;
     let dedupe = pg.dedupe.unwrap_or_default();

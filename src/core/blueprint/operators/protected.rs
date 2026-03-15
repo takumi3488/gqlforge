@@ -6,7 +6,7 @@ use crate::core::ir::access_expr::AccessExpr;
 use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
-#[must_use] 
+#[must_use]
 pub fn update_protected<'a>(
     type_name: &'a str,
 ) -> TryFold<

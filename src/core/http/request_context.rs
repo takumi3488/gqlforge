@@ -39,7 +39,7 @@ pub struct RequestContext {
 }
 
 impl RequestContext {
-    #[must_use] 
+    #[must_use]
     pub fn new(target_runtime: TargetRuntime) -> RequestContext {
         RequestContext {
             server: Server::default(),
@@ -59,14 +59,20 @@ impl RequestContext {
         }
     }
     fn set_min_max_age_conc(&self, min_max_age: i32) {
-        *self.min_max_age.lock().unwrap_or_else(PoisonError::into_inner) = Some(min_max_age);
+        *self
+            .min_max_age
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner) = Some(min_max_age);
     }
     ///
     /// # Panics
     ///
     /// Panics if an internal assertion fails.
     pub fn get_min_max_age(&self) -> Option<i32> {
-        *self.min_max_age.lock().unwrap_or_else(PoisonError::into_inner)
+        *self
+            .min_max_age
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
     }
 
     ///
@@ -74,7 +80,10 @@ impl RequestContext {
     ///
     /// Panics if an internal assertion fails.
     pub fn set_cache_public_false(&self) {
-        *self.cache_public.lock().unwrap_or_else(PoisonError::into_inner) = Some(false);
+        *self
+            .cache_public
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner) = Some(false);
     }
 
     ///
@@ -82,7 +91,10 @@ impl RequestContext {
     ///
     /// Panics if an internal assertion fails.
     pub fn is_cache_public(&self) -> Option<bool> {
-        *self.cache_public.lock().unwrap_or_else(PoisonError::into_inner)
+        *self
+            .cache_public
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
     }
 
     pub fn set_min_max_age(&self, max_age: i32) {
@@ -126,7 +138,8 @@ impl RequestContext {
 
             // Check if the incoming headers contain 'set-cookie'
             if let Some(new_cookies) = headers.get("set-cookie") {
-                let cookie_name = HeaderName::from_str("set-cookie").unwrap_or_else(|_| unreachable!("set-cookie is a valid header name"));
+                let cookie_name = HeaderName::from_str("set-cookie")
+                    .unwrap_or_else(|_| unreachable!("set-cookie is a valid header name"));
 
                 // Check if 'set-cookie' already exists in our map
                 if let Some(existing_cookies) = map.get(&cookie_name) {
@@ -142,7 +155,11 @@ impl RequestContext {
                         // Replace the old value with the new, combined value
                         map.insert(
                             cookie_name,
-                            HeaderValue::from_str(&combined_cookies).unwrap_or_else(|_| unreachable!("combined cookies from valid header values are always valid")),
+                            HeaderValue::from_str(&combined_cookies).unwrap_or_else(|_| {
+                                unreachable!(
+                                    "combined cookies from valid header values are always valid"
+                                )
+                            }),
                         );
                     }
                 } else {
@@ -179,7 +196,10 @@ impl RequestContext {
     ///
     /// Panics if an internal assertion fails.
     pub fn set_auth_claims(&self, claims: serde_json::Value) {
-        *self.auth_claims.lock().unwrap_or_else(PoisonError::into_inner) = Some(claims);
+        *self
+            .auth_claims
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner) = Some(claims);
     }
 
     ///
@@ -187,7 +207,10 @@ impl RequestContext {
     ///
     /// Panics if an internal assertion fails.
     pub fn get_auth_claims(&self) -> Option<serde_json::Value> {
-        self.auth_claims.lock().unwrap_or_else(PoisonError::into_inner).clone()
+        self.auth_claims
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .clone()
     }
 
     pub fn is_batching_enabled(&self) -> bool {
@@ -206,7 +229,10 @@ impl RequestContext {
     /// Panics if an internal assertion fails.
     pub fn add_x_headers(&self, headers: &HeaderMap) {
         if self.has_experimental_headers() {
-            let mut x_response_headers = self.x_response_headers.lock().unwrap_or_else(PoisonError::into_inner);
+            let mut x_response_headers = self
+                .x_response_headers
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner);
             for name in &self.server.experimental_headers {
                 if let Some(value) = headers.get(name) {
                     x_response_headers.insert(name, value.clone());
@@ -222,7 +248,10 @@ impl RequestContext {
     /// Panics if an internal assertion fails.
     pub fn extend_x_headers(&self, headers: &mut HeaderMap) {
         if self.has_experimental_headers() {
-            let x_response_headers = &self.x_response_headers.lock().unwrap_or_else(PoisonError::into_inner);
+            let x_response_headers = &self
+                .x_response_headers
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner);
             for (header, value) in x_response_headers.iter() {
                 headers.insert(header, value.clone());
             }

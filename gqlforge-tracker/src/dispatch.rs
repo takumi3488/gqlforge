@@ -211,16 +211,12 @@ fn os_name() -> String {
 fn parse_email(text: &str) -> Vec<String> {
     static RE: std::sync::OnceLock<Option<regex::Regex>> = std::sync::OnceLock::new();
     let Some(re) = RE
-        .get_or_init(|| {
-            regex::Regex::new(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").ok()
-        })
+        .get_or_init(|| regex::Regex::new(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").ok())
         .as_ref()
     else {
         return vec![];
     };
-    re.find_iter(text)
-        .map(|m| m.as_str().to_string())
-        .collect()
+    re.find_iter(text).map(|m| m.as_str().to_string()).collect()
 }
 
 #[cfg(test)]

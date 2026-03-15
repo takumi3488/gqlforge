@@ -16,7 +16,7 @@ impl<A: IntoIterator<Item = Segment>> From<A> for Mustache {
 }
 
 impl Mustache {
-    #[must_use] 
+    #[must_use]
     pub fn is_const(&self) -> bool {
         match self {
             Mustache(segments) => {
@@ -30,7 +30,7 @@ impl Mustache {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn segments(&self) -> &Vec<Segment> {
         &self.0
     }
@@ -39,7 +39,7 @@ impl Mustache {
         &mut self.0
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn expression_segments(&self) -> Vec<&Vec<String>> {
         self.segments()
             .iter()
@@ -51,7 +51,7 @@ impl Mustache {
     }
 
     /// Checks if the mustache template contains the given expression
-    #[must_use] 
+    #[must_use]
     pub fn expression_contains(&self, expression: &str) -> bool {
         self.segments()
             .iter()

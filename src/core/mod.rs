@@ -62,7 +62,7 @@ pub use transform::Transform;
 pub use wrapping_type::Type;
 
 const DEFAULT_VERIFY_SSL: bool = true;
-#[must_use] 
+#[must_use]
 pub const fn default_verify_ssl() -> Option<bool> {
     Some(DEFAULT_VERIFY_SSL)
 }
@@ -137,7 +137,7 @@ pub fn pos<A>(a: A) -> Positioned<A> {
     Positioned::new(a, Pos::default())
 }
 
-#[must_use] 
+#[must_use]
 ///
 /// # Panics
 ///
@@ -170,7 +170,7 @@ pub mod tests {
     pub struct TestEnvIO(HashMap<String, String>);
 
     impl TestEnvIO {
-        #[must_use] 
+        #[must_use]
         pub fn init(env_vars: HashMap<String, String>) -> Self {
             Self(env_vars)
         }

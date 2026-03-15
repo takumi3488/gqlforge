@@ -36,8 +36,16 @@ impl From<async_graphql::ServerError> for GraphQLError {
 
         Self {
             message: value.message,
-            locations: value.locations.into_iter().map(std::convert::Into::into).collect(),
-            path: value.path.into_iter().map(std::convert::Into::into).collect(),
+            locations: value
+                .locations
+                .into_iter()
+                .map(std::convert::Into::into)
+                .collect(),
+            path: value
+                .path
+                .into_iter()
+                .map(std::convert::Into::into)
+                .collect(),
             extensions,
         }
     }

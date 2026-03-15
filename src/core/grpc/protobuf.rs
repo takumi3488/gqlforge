@@ -164,7 +164,7 @@ impl PartialEq for ProtobufOperation {
 
 // TODO: support compression
 impl ProtobufOperation {
-    #[must_use] 
+    #[must_use]
     pub fn new(
         method: MethodDescriptor,
         input_type: MessageDescriptor,
@@ -177,12 +177,12 @@ impl ProtobufOperation {
             serialize_options: SerializeOptions::default().skip_default_fields(false),
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn name(&self) -> &str {
         self.method.name()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn service_name(&self) -> &str {
         self.method.parent_service().name()
     }
@@ -286,7 +286,7 @@ impl ProtobufOperation {
         Ok(json)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn find_message(&self, name: &str) -> Option<ProtobufMessage> {
         let message_descriptor = self.method.parent_pool().get_message_by_name(name)?;
 

@@ -17,12 +17,12 @@ pub struct GraphqlDataLoader {
 }
 
 impl GraphqlDataLoader {
-    #[must_use] 
+    #[must_use]
     pub fn new(runtime: TargetRuntime, batch: bool) -> Self {
         GraphqlDataLoader { runtime, batch }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn into_data_loader(
         self,
         batch: &Batch,
@@ -79,7 +79,10 @@ fn collect_request_bodies(dataloader_requests: &[DataLoaderRequest]) -> String {
     format!("[{batched_query}]")
 }
 
-#[expect(clippy::unwrap_used, reason = "data loader always passes non-empty slices")]
+#[expect(
+    clippy::unwrap_used,
+    reason = "data loader always passes non-empty slices"
+)]
 fn create_batched_request(dataloader_requests: &[DataLoaderRequest]) -> reqwest::Request {
     let batched_query = collect_request_bodies(dataloader_requests);
 

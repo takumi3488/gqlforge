@@ -33,8 +33,14 @@ fn run_blocking() -> anyhow::Result<()> {
     rt.block_on(async { gqlforge::cli::run().await })
 }
 
-#[expect(clippy::unnecessary_wraps, reason = "main returns Ok(()) after explicit process::exit on error")]
-#[expect(clippy::expect_used, reason = "rustls provider initialization failure is fatal")]
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "main returns Ok(()) after explicit process::exit on error"
+)]
+#[expect(
+    clippy::expect_used,
+    reason = "rustls provider initialization failure is fatal"
+)]
 fn main() -> anyhow::Result<()> {
     // Initialize rustls CryptoProvider first (using aws_lc_rs)
     // Explicit configuration required when both aws-lc-rs and ring are present as

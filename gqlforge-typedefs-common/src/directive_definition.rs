@@ -46,7 +46,9 @@ pub fn into_directive_definition<S: BuildHasher>(
     attrs: Attrs,
     generated_types: &mut HashSet<String, S>,
 ) -> Vec<TypeSystemDefinition> {
-    let Some(root_obj) = root_schema.as_object() else { return vec![] };
+    let Some(root_obj) = root_schema.as_object() else {
+        return vec![];
+    };
 
     let mut service_doc_definitions = vec![];
     let description = get_description(root_obj);

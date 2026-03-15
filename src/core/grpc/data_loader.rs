@@ -26,7 +26,7 @@ pub struct GrpcDataLoader {
 }
 
 impl GrpcDataLoader {
-    #[must_use] 
+    #[must_use]
     pub fn into_data_loader(self, batch: &Batch) -> DataLoader<DataLoaderRequest, GrpcDataLoader> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))

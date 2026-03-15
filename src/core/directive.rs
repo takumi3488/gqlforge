@@ -11,7 +11,7 @@ pub trait DirectiveCodec: Sized {
     fn directive_name() -> String;
     fn from_directive(directive: &ConstDirective) -> Valid<Self, String>;
     fn to_directive(&self) -> ConstDirective;
-    #[must_use] 
+    #[must_use]
     fn trace_name() -> String {
         format!("@{}", Self::directive_name())
     }
@@ -68,7 +68,10 @@ impl<'a, A: Deserialize<'a> + Serialize + 'a> DirectiveCodec for A {
         })
     }
 
-    #[expect(clippy::unwrap_used, reason = "serde serialization of directive types is always valid")]
+    #[expect(
+        clippy::unwrap_used,
+        reason = "serde serialization of directive types is always valid"
+    )]
     fn to_directive(&self) -> ConstDirective {
         let name = Self::directive_name();
         let value = serde_json::to_value(self).unwrap();

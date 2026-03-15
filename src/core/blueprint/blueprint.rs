@@ -41,7 +41,7 @@ pub enum Definition {
 }
 impl Definition {
     /// gets the name of the definition
-    #[must_use] 
+    #[must_use]
     pub fn name(&self) -> &str {
         match self {
             Definition::Interface(def) => &def.name,
@@ -54,7 +54,7 @@ impl Definition {
     }
 
     /// gets directives associated with definition
-    #[must_use] 
+    #[must_use]
     pub fn directives(&self) -> &[Directive] {
         match self {
             Definition::Interface(def) => &def.directives,
@@ -173,7 +173,7 @@ pub struct SchemaModifiers {
 }
 
 impl SchemaModifiers {
-    #[must_use] 
+    #[must_use]
     pub fn with_no_resolver(mut self) -> Self {
         self.no_resolver = true;
         self
@@ -264,7 +264,10 @@ impl Blueprint {
 
         // We should safely assume the blueprint is correct and,
         // generation of schema cannot fail.
-        #[expect(clippy::unwrap_used, reason = "schema.finish() cannot fail for a valid blueprint")]
+        #[expect(
+            clippy::unwrap_used,
+            reason = "schema.finish() cannot fail for a valid blueprint"
+        )]
         schema.finish().unwrap()
     }
 

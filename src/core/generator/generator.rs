@@ -69,7 +69,7 @@ impl Default for Generator {
 }
 
 impl Generator {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Generator {
         Generator {
             query: "Query".into(),

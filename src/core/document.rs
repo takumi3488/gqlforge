@@ -2,7 +2,10 @@ use std::borrow::Cow;
 use std::fmt::Display;
 
 use async_graphql::Positioned;
-use async_graphql::parser::types::{ConstDirective, SchemaDefinition, TypeDefinition, TypeKind, DirectiveDefinition, ServiceDocument, TypeSystemDefinition};
+use async_graphql::parser::types::{
+    ConstDirective, DirectiveDefinition, SchemaDefinition, ServiceDocument, TypeDefinition,
+    TypeKind, TypeSystemDefinition,
+};
 use async_graphql_value::ConstValue;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -118,9 +121,7 @@ fn print_schema(schema: &SchemaDefinition) -> String {
     if mutation.is_empty() && query.is_empty() {
         return String::new();
     }
-    format!(
-        "schema {directives}{{\n{query}{mutation}{subscription}}}\n"
-    )
+    format!("schema {directives}{{\n{query}{mutation}{subscription}}}\n")
 }
 
 #[expect(clippy::too_many_lines, reason = "prints all type definition variants")]
@@ -371,7 +372,7 @@ fn print_directive_type_def(directive: &DirectiveDefinition) -> String {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn print(sd: &ServiceDocument) -> String {
     // Separate the definitions by type
     let definitions_len = sd.definitions.len();
@@ -453,7 +454,8 @@ impl<'a> From<&'a ConstDirective> for Directive<'a> {
 impl<'a, Input: JsonLikeOwned + Display> From<&'a JitDirective<Input>> for Directive<'a> {
     fn from(value: &'a JitDirective<Input>) -> Self {
         let to_mustache = |s: &str| -> String {
-            s.strip_prefix('$').map_or_else(|| s.to_string(), |v| format!("{{{{{v}}}}}"))
+            s.strip_prefix('$')
+                .map_or_else(|| s.to_string(), |v| format!("{{{{{v}}}}}"))
         };
         Self {
             name: Cow::Borrowed(value.name.as_str()),

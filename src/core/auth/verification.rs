@@ -66,7 +66,6 @@ impl Verification {
         }
     }
 
-
     pub fn to_result_with_claims(&self) -> Result<Option<serde_json::Value>, Error> {
         match self {
             Verification::Succeed(claims) => Ok(claims.clone()),

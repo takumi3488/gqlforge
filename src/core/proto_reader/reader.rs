@@ -28,7 +28,7 @@ pub struct ProtoMetadata {
 
 impl ProtoReader {
     /// Initializes the proto reader with a resource reader and target runtime
-    #[must_use] 
+    #[must_use]
     pub fn init(reader: ResourceReader<Cached>, runtime: TargetRuntime) -> Self {
         Self { reader, runtime }
     }
@@ -51,7 +51,9 @@ impl ProtoReader {
                 self.runtime.clone(),
                 GRPC_REFLECTION_V1,
             );
-            if let Ok(services) = v1.list_all_files().await { (v1, services) } else {
+            if let Ok(services) = v1.list_all_files().await {
+                (v1, services)
+            } else {
                 let v1alpha = GrpcReflection::new(
                     url.as_ref(),
                     headers,

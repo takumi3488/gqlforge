@@ -46,7 +46,9 @@ impl InstallationMethod {
     /// installation method used.
     pub fn display_message(&self) -> String {
         match self {
-            InstallationMethod::Npx => Self::format_upgrade_message("npx @gqlforge/gqlforge@latest"),
+            InstallationMethod::Npx => {
+                Self::format_upgrade_message("npx @gqlforge/gqlforge@latest")
+            }
             InstallationMethod::Npm => {
                 Self::format_upgrade_message("npm update -g @gqlforge/gqlforge")
             }

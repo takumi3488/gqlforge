@@ -49,7 +49,7 @@ impl From<Content<JwkSet>> for Content<Provider> {
 
 impl Provider {
     /// Used to collect all auth providers from the config module
-    #[must_use] 
+    #[must_use]
     pub fn from_config(config_module: &ConfigModule) -> Vec<Content<Provider>> {
         config_module
             .extensions()
@@ -75,7 +75,7 @@ pub enum Auth {
 }
 
 impl Auth {
-    #[must_use] 
+    #[must_use]
     pub fn from_config(config_module: &ConfigModule) -> Option<Auth> {
         Provider::from_config(config_module)
             .into_iter()
@@ -83,12 +83,12 @@ impl Auth {
             .reduce(Auth::and)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn and(self, other: Self) -> Self {
         Auth::And(Box::new(self), Box::new(other))
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn or(self, other: Self) -> Self {
         Auth::Or(Box::new(self), Box::new(other))
     }

@@ -1,5 +1,9 @@
 use async_graphql::Positioned;
-use async_graphql::parser::types::{ServiceDocument, SchemaDefinition, TypeSystemDefinition, TypeKind, InterfaceType, FieldDefinition, InputObjectType, InputValueDefinition, ObjectType, TypeDefinition, UnionType, EnumType, EnumValueDefinition, ConstDirective};
+use async_graphql::parser::types::{
+    ConstDirective, EnumType, EnumValueDefinition, FieldDefinition, InputObjectType,
+    InputValueDefinition, InterfaceType, ObjectType, SchemaDefinition, ServiceDocument,
+    TypeDefinition, TypeKind, TypeSystemDefinition, UnionType,
+};
 use async_graphql_value::{ConstValue, Name};
 use gqlforge_valid::Validator;
 
@@ -12,7 +16,10 @@ fn transform_default_value(value: Option<serde_json::Value>) -> Option<ConstValu
     value.map(ConstValue::from_json).and_then(Result::ok)
 }
 
-#[expect(clippy::too_many_lines, reason = "converts all config sections to document definitions")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "converts all config sections to document definitions"
+)]
 fn config_document(config: &Config) -> ServiceDocument {
     let mut definitions = Vec::new();
     let mut directives = vec![

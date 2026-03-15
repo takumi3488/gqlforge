@@ -69,10 +69,7 @@ mod test {
     #[test]
     fn test_schema_generator_with_mutation() {
         let schema_gen = SchemaGenerator::new(&GraphQLOperationType::Mutation, None);
-        let config = schema_gen
-            .transform(Config::default())
-            .to_result()
-            .unwrap();
+        let config = schema_gen.transform(Config::default()).to_result().unwrap();
         assert!(config.schema.mutation.is_some());
         assert_eq!(config.schema.mutation, Some("Mutation".to_owned()));
 
@@ -82,10 +79,7 @@ mod test {
     #[test]
     fn test_schema_generator_with_query() {
         let schema_gen = SchemaGenerator::new(&GraphQLOperationType::Query, None);
-        let config = schema_gen
-            .transform(Config::default())
-            .to_result()
-            .unwrap();
+        let config = schema_gen.transform(Config::default()).to_result().unwrap();
         assert!(config.schema.query.is_some());
         assert_eq!(config.schema.query, Some("Query".to_owned()));
 
@@ -95,11 +89,9 @@ mod test {
     #[test]
     fn test_schema_generator_with_headers() {
         let expected_header_keys = Some(BTreeSet::from(["X-Custom-Header".to_owned()]));
-        let schema_gen = SchemaGenerator::new(&GraphQLOperationType::Query, expected_header_keys.as_ref());
-        let config = schema_gen
-            .transform(Config::default())
-            .to_result()
-            .unwrap();
+        let schema_gen =
+            SchemaGenerator::new(&GraphQLOperationType::Query, expected_header_keys.as_ref());
+        let config = schema_gen.transform(Config::default()).to_result().unwrap();
         assert!(config.schema.query.is_some());
         assert_eq!(config.schema.query, Some("Query".to_owned()));
         assert_eq!(config.upstream.allowed_headers, expected_header_keys);

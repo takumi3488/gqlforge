@@ -12,14 +12,15 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::core::blueprint::telemetry::Telemetry;
 
-static HTTP_SERVER_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> = std::sync::LazyLock::new(|| {
-    let meter = opentelemetry::global::meter("http_request");
+static HTTP_SERVER_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> =
+    std::sync::LazyLock::new(|| {
+        let meter = opentelemetry::global::meter("http_request");
 
-    meter
-        .u64_counter("http.server.request.count")
-        .with_description("Number of incoming request handled")
-        .build()
-});
+        meter
+            .u64_counter("http.server.request.count")
+            .with_description("Number of incoming request handled")
+            .build()
+    });
 
 #[derive(Default)]
 pub struct RequestCounter {
@@ -68,7 +69,10 @@ impl RequestCounter {
 }
 
 pub fn get_response_status_code(response: &Response<Full<Bytes>>) -> KeyValue {
-    KeyValue::new(HTTP_RESPONSE_STATUS_CODE, i64::from(response.status().as_u16()))
+    KeyValue::new(
+        HTTP_RESPONSE_STATUS_CODE,
+        i64::from(response.status().as_u16()),
+    )
 }
 
 pub fn propagate_context(req: &Request<Full<Bytes>>) {

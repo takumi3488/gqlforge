@@ -104,7 +104,7 @@ fn eval_unsigned<
 impl Scalar {
     ///
     /// Check if the type is a predefined scalar
-    #[must_use] 
+    #[must_use]
     pub fn is_predefined(type_name: &str) -> bool {
         if PREDEFINED_SCALARS.iter().any(|v| type_name.eq(*v)) {
             true
@@ -141,20 +141,20 @@ impl Scalar {
             Scalar::UInt32 => eval_unsigned(value, u32::try_from),
         }
     }
-    #[must_use] 
+    #[must_use]
     pub fn find(name: &str) -> Option<&Scalar> {
         CUSTOM_SCALARS.get(name)
     }
-    #[must_use] 
+    #[must_use]
     pub fn name(&self) -> String {
         self.to_string()
     }
-    #[must_use] 
+    #[must_use]
     pub fn scalar_definition(&self) -> async_graphql::parser::types::TypeSystemDefinition {
         let schemars = self.schema();
         gqlforge_typedefs_common::scalar_definition::into_scalar_definition(&schemars, &self.name())
     }
-    #[must_use] 
+    #[must_use]
     ///
     /// # Panics
     ///

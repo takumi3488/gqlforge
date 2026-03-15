@@ -63,8 +63,7 @@ impl OperationTypeGenerator {
                 .insert(request_sample.field_name.clone(), field);
         } else {
             let mut ty = config::Type::default();
-            ty.fields
-                .insert(request_sample.field_name.clone(), field);
+            ty.fields.insert(request_sample.field_name.clone(), field);
             config.types.insert(req_op.clone(), ty);
         }
 
@@ -81,9 +80,9 @@ mod test {
 
     use super::OperationTypeGenerator;
     use crate::core::config::{Config, Field, Type};
-    use serde_json::Value;
     use crate::core::generator::{NameGenerator, RequestSample};
     use crate::core::http::Method;
+    use serde_json::Value;
 
     #[test]
     fn test_query() {
@@ -93,9 +92,10 @@ mod test {
 
         let sample = RequestSample::new(url, Value::default(), "postComments".into());
         let config = Config::default();
-        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
-            .to_result()
-            .unwrap();
+        let config =
+            OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
+                .to_result()
+                .unwrap();
 
         insta::assert_snapshot!(config.to_sdl());
     }
@@ -117,9 +117,10 @@ mod test {
         let type_ = Type { fields, ..Default::default() };
         config.types.insert("Query".to_owned(), type_);
 
-        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
-            .to_result()
-            .unwrap();
+        let config =
+            OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
+                .to_result()
+                .unwrap();
 
         insta::assert_snapshot!(config.to_sdl());
     }
@@ -145,9 +146,10 @@ mod test {
             .with_is_mutation(true);
 
         let config = Config::default();
-        let config = OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
-            .to_result()
-            .unwrap();
+        let config =
+            OperationTypeGenerator::generate(&sample, "T44", &NameGenerator::new("Input"), config)
+                .to_result()
+                .unwrap();
 
         insta::assert_snapshot!(config.to_sdl());
     }

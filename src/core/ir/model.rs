@@ -96,7 +96,7 @@ pub enum IO {
 }
 
 impl IO {
-    #[must_use] 
+    #[must_use]
     pub fn dedupe(&self) -> bool {
         match self {
             IO::Http { dedupe, .. }
@@ -104,7 +104,10 @@ impl IO {
             | IO::Grpc { dedupe, .. }
             | IO::Postgres { dedupe, .. }
             | IO::S3 { dedupe, .. } => *dedupe,
-            IO::GrpcStream { .. } | IO::GraphQLStream { .. } | IO::HttpStream { .. } | IO::Js { .. } => false,
+            IO::GrpcStream { .. }
+            | IO::GraphQLStream { .. }
+            | IO::HttpStream { .. }
+            | IO::Js { .. } => false,
         }
     }
 }
@@ -113,12 +116,12 @@ impl IO {
 pub struct DataLoaderId(usize);
 
 impl DataLoaderId {
-    #[must_use] 
+    #[must_use]
     pub fn new(id: usize) -> Self {
         Self(id)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn as_usize(&self) -> usize {
         self.0
     }
@@ -128,12 +131,12 @@ impl DataLoaderId {
 pub struct IoId(u64);
 
 impl IoId {
-    #[must_use] 
+    #[must_use]
     pub fn new(id: u64) -> Self {
         Self(id)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn as_u64(&self) -> u64 {
         self.0
     }
@@ -201,7 +204,9 @@ impl IR {
 
     fn modify_inner<F: FnMut(&IR) -> Option<IR>>(self, modifier: &mut F) -> IR {
         let replacement = modifier(&self);
-        if let Some(expr) = replacement { expr } else {
+        if let Some(expr) = replacement {
+            expr
+        } else {
             let expr = self;
             match expr {
                 IR::Pipe(first, second) => {
@@ -245,7 +250,10 @@ impl<'a, Ctx: ResolverContextLike + Sync> CacheKey<EvalContext<'a, Ctx>> for IO 
         match self {
             IO::Http { req_template, .. } => req_template.cache_key(ctx),
             IO::Grpc { req_template, .. } => req_template.cache_key(ctx),
-            IO::GrpcStream { .. } | IO::GraphQLStream { .. } | IO::HttpStream { .. } | IO::Js { .. } => None,
+            IO::GrpcStream { .. }
+            | IO::GraphQLStream { .. }
+            | IO::HttpStream { .. }
+            | IO::Js { .. } => None,
             IO::GraphQL { req_template, .. } => req_template.cache_key(ctx),
             IO::Postgres { req_template, .. } => req_template.cache_key(ctx),
             IO::S3 { req_template, .. } => req_template.cache_key(ctx),

@@ -34,7 +34,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// # Returns
     /// Returns a combined `And` structure that represents the sequential
     /// folding operation.
-    #[must_use] 
+    #[must_use]
     pub fn and(self, other: TryFold<'a, I, O, E>) -> Self {
         TryFold(Box::new(move |input, state| {
             self.try_fold(input, state.clone()).fold(
@@ -107,7 +107,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     ///
     /// # Returns
     /// Returns a `TryFold` that doesn't do anything.
-    #[must_use] 
+    #[must_use]
     pub fn empty() -> Self {
         TryFold::new(|_, o| Valid::succeed(o))
     }
@@ -121,7 +121,7 @@ impl<'a, I, O: Clone + 'a, E> TryFold<'a, I, O, E> {
     /// # Returns
     ///
     /// Returns a new `TryFold` with trace logging added.
-    #[must_use] 
+    #[must_use]
     pub fn trace(self, msg: &'a str) -> Self {
         TryFold::new(move |i, o| self.try_fold(i, o).trace(msg))
     }

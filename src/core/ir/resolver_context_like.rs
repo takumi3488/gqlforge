@@ -151,17 +151,17 @@ impl SelectionField {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn directives(&self) -> &Option<Vec<ConstDirective>> {
         &self.directives
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn arguments(&self) -> &[(String, String)] {
         &self.args
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }

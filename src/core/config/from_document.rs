@@ -172,8 +172,8 @@ fn to_types(
     })
     .map(|vec| {
         vec.into_iter()
-                .filter_map(|(name, option)| option.map(|tpe| (name, tpe)))
-                .collect::<BTreeMap<_, _>>()
+            .filter_map(|(name, option)| option.map(|tpe| (name, tpe)))
+            .collect::<BTreeMap<_, _>>()
     })
 }
 fn to_scalar_type() -> config::Type {
@@ -208,10 +208,7 @@ fn to_enum_types(
         let type_opt = match type_definition.node.kind.clone() {
             TypeKind::Enum(enum_type) => to_enum(
                 &enum_type,
-                type_definition
-                    .node
-                    .description.clone()
-                    .map(|pos| pos.node),
+                type_definition.node.description.clone().map(|pos| pos.node),
             ),
             _ => return Valid::succeed(None),
         };
@@ -371,7 +368,8 @@ fn to_args(field_definition: &FieldDefinition) -> IndexMap<String, config::Arg> 
 fn to_arg(input_value_definition: &InputValueDefinition) -> config::Arg {
     let type_of = &input_value_definition.ty.node;
     let doc = input_value_definition
-        .description.clone()
+        .description
+        .clone()
         .map(|pos| pos.node);
     let modify = Modify::from_directives(input_value_definition.directives.iter())
         .to_result()

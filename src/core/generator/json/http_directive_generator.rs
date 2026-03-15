@@ -61,7 +61,10 @@ impl<'a> HttpDirectiveGenerator<'a> {
         Self { url, http: Http::default() }
     }
 
-    #[expect(clippy::unwrap_used, reason = "regex literals are always valid and URL from a valid Url is always UTF-8")]
+    #[expect(
+        clippy::unwrap_used,
+        reason = "regex literals are always valid and URL from a valid Url is always UTF-8"
+    )]
     fn add_path_variables(&mut self, field: &mut Field) {
         let int_regex = Regex::new(r"/\b\d+\b").unwrap();
         let uuid_regex =

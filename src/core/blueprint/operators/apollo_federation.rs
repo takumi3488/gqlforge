@@ -18,7 +18,7 @@ pub struct CompileEntityResolver<'a> {
     pub entity_resolver: &'a EntityResolver,
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_entity_resolver(inputs: CompileEntityResolver<'_>) -> Valid<IR, BlueprintError> {
     let CompileEntityResolver { config_module, entity_resolver } = inputs;
     let mut resolver_by_type = HashMap::new();
@@ -63,7 +63,7 @@ pub fn compile_entity_resolver(inputs: CompileEntityResolver<'_>) -> Valid<IR, B
     .map_to(IR::Entity(resolver_by_type))
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_service(mut sdl: String) -> Valid<IR, BlueprintError> {
     writeln!(sdl).ok();
 
@@ -77,7 +77,7 @@ pub fn compile_service(mut sdl: String) -> Valid<IR, BlueprintError> {
     Valid::succeed(IR::Service(sdl))
 }
 
-#[must_use] 
+#[must_use]
 pub fn update_federation<'a>() -> TryFoldConfig<'a, Blueprint> {
     TryFoldConfig::<Blueprint>::new(|config_module, mut blueprint| {
         if !config_module.server.get_enable_federation() {

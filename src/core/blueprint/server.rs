@@ -11,8 +11,8 @@ use rustls_pki_types::CertificateDer;
 
 use super::BlueprintError;
 use crate::core::blueprint::Cors;
-use crate::core::config::{self, ConfigModule, HttpVersion, PrivateKey, Routes};
 use crate::core::config::headers::Headers;
+use crate::core::config::{self, ConfigModule, HttpVersion, PrivateKey, Routes};
 
 #[derive(Clone, Debug, Setters)]
 #[expect(
@@ -127,10 +127,7 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
                 &(config_server).get_experimental_headers(),
             ))
             .fuse(validate_cors(
-                config_server
-                    .headers
-                    .as_ref()
-                    .and_then(Headers::get_cors),
+                config_server.headers.as_ref().and_then(Headers::get_cors),
             ))
             .fuse(validate_spa_dir(config_server.get_spa_dir()))
             .map(
@@ -236,9 +233,7 @@ fn validate_hostname(hostname: &str) -> Valid<IpAddr, BlueprintError> {
     }
 }
 
-fn handle_response_headers(
-    resp_headers: &[(String, String)],
-) -> Valid<HeaderMap, BlueprintError> {
+fn handle_response_headers(resp_headers: &[(String, String)]) -> Valid<HeaderMap, BlueprintError> {
     Valid::from_iter(resp_headers.iter(), |(k, v)| {
         let name = match HeaderName::from_bytes(k.as_bytes()) {
             Ok(name) => Valid::succeed(name),

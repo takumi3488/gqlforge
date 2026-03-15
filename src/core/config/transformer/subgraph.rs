@@ -92,7 +92,9 @@ impl Transform for Subgraph {
             .types
             .insert(SERVICE_TYPE_NAME.to_owned(), service_type);
 
-        let query_type_name = if let Some(name) = config.schema.query.as_ref() { name } else {
+        let query_type_name = if let Some(name) = config.schema.query.as_ref() {
+            name
+        } else {
             config.schema.query = Some("Query".to_string());
             "Query"
         };
@@ -197,8 +199,10 @@ impl Display for Keys {
 }
 
 fn combine_keys(v: Vec<Keys>) -> Keys {
-    v.into_iter()
-        .fold(Keys::new(), crate::core::merge_right::MergeRight::merge_right)
+    v.into_iter().fold(
+        Keys::new(),
+        crate::core::merge_right::MergeRight::merge_right,
+    )
 }
 
 struct KeysExtractor;
@@ -272,22 +276,21 @@ impl KeysExtractor {
     fn extract_keys(resolver: &Resolver) -> Valid<Option<String>, String> {
         // TODO: add validation for available fields from the type
         match resolver {
-            Resolver::Http(http) => {
-                Valid::from_iter(
-                    [
-                        Self::parse_str(http.url.as_str()).trace("url"),
-                        Self::parse_json_option(http.body.as_ref()).trace("body"),
-                        Self::parse_key_value_iter(http.headers.iter()).trace("headers"),
-                        Self::parse_key_value_iter(http.query.iter().map(|q| KeyValue {
-                            key: q.key.clone(),
-                            value: q.value.clone(),
-                        }))
-                        .trace("query"),
-                    ],
-                    identity,
-                )
-                .trace(Http::directive_name().as_str())
-            }
+            Resolver::Http(http) => Valid::from_iter(
+                [
+                    Self::parse_str(http.url.as_str()).trace("url"),
+                    Self::parse_json_option(http.body.as_ref()).trace("body"),
+                    Self::parse_key_value_iter(http.headers.iter()).trace("headers"),
+                    Self::parse_key_value_iter(
+                        http.query
+                            .iter()
+                            .map(|q| KeyValue { key: q.key.clone(), value: q.value.clone() }),
+                    )
+                    .trace("query"),
+                ],
+                identity,
+            )
+            .trace(Http::directive_name().as_str()),
             Resolver::Grpc(grpc) => Valid::from_iter(
                 [
                     Self::parse_str(grpc.url.as_str()),
@@ -401,9 +404,10 @@ impl KeysExtractor {
             _ => return Valid::succeed(Keys::new()),
         }
         .map(|keys_vec| {
-            keys_vec
-                .into_iter()
-                .fold(Keys::new(), crate::core::merge_right::MergeRight::merge_right)
+            keys_vec.into_iter().fold(
+                Keys::new(),
+                crate::core::merge_right::MergeRight::merge_right,
+            )
         })
     }
 

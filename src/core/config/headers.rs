@@ -40,15 +40,15 @@ pub struct Headers {
 }
 
 impl Headers {
-    #[must_use] 
+    #[must_use]
     pub fn enable_cache_control(&self) -> bool {
         self.cache_control.unwrap_or(false)
     }
-    #[must_use] 
+    #[must_use]
     pub fn set_cookies(&self) -> bool {
         self.set_cookies.unwrap_or_default()
     }
-    #[must_use] 
+    #[must_use]
     pub fn get_cors(&self) -> Option<Cors> {
         self.cors.clone()
     }

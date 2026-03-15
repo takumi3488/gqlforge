@@ -23,7 +23,7 @@ pub struct ConfigReader {
 }
 
 impl ConfigReader {
-    #[must_use] 
+    #[must_use]
     pub fn init(runtime: TargetRuntime) -> Self {
         let resource_reader = ResourceReader::<Cached>::cached(runtime.clone());
         Self {
@@ -364,9 +364,7 @@ mod reader_tests {
                 .iter()
                 .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>(),
-            c.types
-                .keys().cloned()
-                .collect::<Vec<String>>()
+            c.types.keys().cloned().collect::<Vec<String>>()
         );
         foo_mock.assert();
         bar_mock.assert();
@@ -387,9 +385,7 @@ mod reader_tests {
                 .iter()
                 .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>(),
-            c.types
-                .keys().cloned()
-                .collect::<Vec<String>>()
+            c.types.keys().cloned().collect::<Vec<String>>()
         );
     }
 

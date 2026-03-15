@@ -57,7 +57,7 @@ testuser3:{SHA}Y2fEjdGT1W6nsLqtJbGUVeUp9e4=
 ";
 
     impl blueprint::Basic {
-        #[must_use] 
+        #[must_use]
         pub fn test_value() -> Self {
             Self { htpasswd: HTPASSWD_TEST.to_owned() }
         }

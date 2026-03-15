@@ -98,7 +98,10 @@ fn is_default_expiration_secs(val: u64) -> bool {
     val == DEFAULT_EXPIRATION_SECS
 }
 
-#[expect(clippy::trivially_copy_pass_by_ref, reason = "serde skip_serializing_if requires &T")]
+#[expect(
+    clippy::trivially_copy_pass_by_ref,
+    reason = "serde skip_serializing_if requires &T"
+)]
 fn is_default_expiration(val: &u64) -> bool {
     is_default_expiration_secs(*val)
 }

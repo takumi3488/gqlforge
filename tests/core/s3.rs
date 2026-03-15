@@ -4,7 +4,10 @@ use async_graphql_value::ConstValue;
 use gqlforge::core::s3::S3IO;
 
 /// A mock implementation of `S3IO` that returns fixed responses.
-#[expect(clippy::struct_field_names, reason = "field names mirror S3IO method names")]
+#[expect(
+    clippy::struct_field_names,
+    reason = "field names mirror S3IO method names"
+)]
 pub struct MockS3IO {
     get_presigned_url_response: String,
     put_presigned_url_response: String,

@@ -64,12 +64,15 @@ impl Debug for Runtime {
 }
 
 impl Runtime {
-    #[must_use] 
+    #[must_use]
     ///
     /// # Panics
     ///
     /// Panics if an internal assertion fails.
-    #[expect(clippy::expect_used, reason = "JS runtime initialization failure is fatal")]
+    #[expect(
+        clippy::expect_used,
+        reason = "JS runtime initialization failure is fatal"
+    )]
     pub fn new(script: blueprint::Script) -> Self {
         let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(1)

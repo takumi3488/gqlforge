@@ -134,11 +134,9 @@ pub async fn create_directory(folder_path: &str) -> anyhow::Result<()> {
     let folder_exists = fs::metadata(folder_path).is_ok();
 
     if !folder_exists {
-        let confirm = Confirm::new(&format!(
-            "Do you want to create the folder {folder_path}?"
-        ))
-        .with_default(false)
-        .prompt()?;
+        let confirm = Confirm::new(&format!("Do you want to create the folder {folder_path}?"))
+            .with_default(false)
+            .prompt()?;
 
         if confirm {
             fs::create_dir_all(folder_path)?;

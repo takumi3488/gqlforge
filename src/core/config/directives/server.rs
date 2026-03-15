@@ -216,64 +216,64 @@ pub enum HttpVersion {
 }
 
 impl Server {
-    #[must_use] 
+    #[must_use]
     pub fn enable_apollo_tracing(&self) -> bool {
         self.apollo_tracing.unwrap_or(false)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_global_response_timeout(&self) -> i64 {
         self.global_response_timeout.unwrap_or(0)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_workers(&self) -> usize {
         self.workers.unwrap_or(num_cpus::get())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_port(&self) -> u16 {
         self.port.unwrap_or(8000)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_http_validation(&self) -> bool {
         self.response_validation.unwrap_or(false)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_cache_control(&self) -> bool {
         self.headers
             .as_ref()
             .is_some_and(super::super::headers::Headers::enable_cache_control)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_set_cookies(&self) -> bool {
         self.headers
             .as_ref()
             .is_some_and(super::super::headers::Headers::set_cookies)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_introspection(&self) -> bool {
         self.introspection.unwrap_or(true)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_query_validation(&self) -> bool {
         self.query_validation.unwrap_or(false)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_batch_requests(&self) -> bool {
         self.batch_requests.unwrap_or(false)
     }
-    #[must_use] 
+    #[must_use]
     pub fn enable_showcase(&self) -> bool {
         self.showcase.unwrap_or(false)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_hostname(&self) -> String {
         self.hostname.clone().unwrap_or("127.0.0.1".to_string())
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_vars(&self) -> BTreeMap<String, String> {
         self.vars
             .clone()
@@ -282,7 +282,7 @@ impl Server {
             .collect()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_response_headers(&self) -> Vec<(String, String)> {
         self.headers
             .as_ref()
@@ -295,7 +295,7 @@ impl Server {
             })
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_experimental_headers(&self) -> BTreeSet<String> {
         self.headers
             .as_ref()
@@ -303,42 +303,42 @@ impl Server {
             .unwrap_or_default()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_version(self) -> HttpVersion {
         self.version.unwrap_or(HttpVersion::HTTP1)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_pipeline_flush(&self) -> bool {
         self.pipeline_flush.unwrap_or(true)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_routes(&self) -> Routes {
         self.routes.clone().unwrap_or_default()
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_enable_federation(&self) -> bool {
         self.enable_federation.unwrap_or(false)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_limit_complexity(&self) -> usize {
         self.limit_complexity.unwrap_or(1000)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_limit_depth(&self) -> usize {
         self.limit_depth.unwrap_or(15)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_limit_directives(&self) -> usize {
         self.limit_directives.unwrap_or(50)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_spa_dir(&self) -> Option<&str> {
         self.spa.as_ref().map(|s| s.dir.as_str())
     }

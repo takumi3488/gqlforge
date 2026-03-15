@@ -29,23 +29,21 @@ pub trait GraphQLRequestLike: Hash + Send {
     fn parse_query(&mut self) -> Option<&ExecutableDocument>;
 
     fn is_query(&mut self) -> bool {
-        self.parse_query()
-            .is_some_and(|a| {
-                let mut is_query = false;
-                for (_, operation) in a.operations.iter() {
-                    is_query = operation.node.ty == OperationType::Query;
-                }
-                is_query
-            })
+        self.parse_query().is_some_and(|a| {
+            let mut is_query = false;
+            for (_, operation) in a.operations.iter() {
+                is_query = operation.node.ty == OperationType::Query;
+            }
+            is_query
+        })
     }
 
     fn is_subscription(&mut self) -> bool {
-        self.parse_query()
-            .is_some_and(|doc| {
-                doc.operations
-                    .iter()
-                    .any(|(_, op)| op.node.ty == OperationType::Subscription)
-            })
+        self.parse_query().is_some_and(|doc| {
+            doc.operations
+                .iter()
+                .any(|(_, op)| op.node.ty == OperationType::Subscription)
+        })
     }
 
     fn operation_id(&self, headers: &HeaderMap) -> OperationId {
@@ -232,7 +230,12 @@ impl GraphQLResponse {
 
     fn flatten_response(data: &Value) -> &Value {
         match data {
-            Value::Object(map) if map.len() == 1 => map.iter().next().unwrap_or_else(|| unreachable!("len == 1 guarantees first")).1,
+            Value::Object(map) if map.len() == 1 => {
+                map.iter()
+                    .next()
+                    .unwrap_or_else(|| unreachable!("len == 1 guarantees first"))
+                    .1
+            }
             data => data,
         }
     }
@@ -323,7 +326,7 @@ impl Default for CacheControl {
 }
 
 impl CacheControl {
-    #[must_use] 
+    #[must_use]
     pub fn value(&self) -> Option<String> {
         let mut value = if self.max_age > 0 {
             format!("max-age={}", self.max_age)
@@ -343,7 +346,7 @@ impl CacheControl {
         if value.is_empty() { None } else { Some(value) }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn merge(self, other: &CacheControl) -> CacheControl {
         CacheControl {
             public: self.public && other.public,
@@ -363,12 +366,12 @@ pub struct GraphQLArcResponse {
 }
 
 impl GraphQLArcResponse {
-    #[must_use] 
+    #[must_use]
     pub fn new(response: JITBatchResponse<Vec<u8>>) -> Self {
         Self { response, cache_control: None }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn set_cache_control(self, enable_cache_header: bool, max_age: i32, public: bool) -> Self {
         Self {
             response: self.response,

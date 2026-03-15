@@ -18,7 +18,7 @@ pub struct Server {
 }
 
 impl Server {
-    #[must_use] 
+    #[must_use]
     pub fn new(config_module: ConfigModule) -> Self {
         Self { config_module, server_up_sender: None }
     }

@@ -57,7 +57,7 @@ impl Default for Type {
 
 impl Type {
     /// gets the name of the type
-    #[must_use] 
+    #[must_use]
     pub fn name(&self) -> &String {
         match self {
             Type::Named { name, .. } => name,
@@ -66,20 +66,20 @@ impl Type {
     }
 
     /// checks if the type is nullable
-    #[must_use] 
+    #[must_use]
     pub fn is_nullable(&self) -> bool {
         !match self {
             Type::Named { non_null, .. } | Type::List { non_null, .. } => *non_null,
         }
     }
     /// checks if the type is a list
-    #[must_use] 
+    #[must_use]
     pub fn is_list(&self) -> bool {
         matches!(self, Type::List { .. })
     }
 
     /// convert this type into `NonNull` type
-    #[must_use] 
+    #[must_use]
     pub fn into_required(self) -> Self {
         match self {
             Type::Named { name, .. } => Self::Named { name, non_null: true },
@@ -88,7 +88,7 @@ impl Type {
     }
 
     /// convert this into nullable type
-    #[must_use] 
+    #[must_use]
     pub fn into_nullable(self) -> Self {
         match self {
             Type::Named { name, .. } => Self::Named { name, non_null: false },
@@ -97,13 +97,13 @@ impl Type {
     }
 
     /// create a nullable list type from this type
-    #[must_use] 
+    #[must_use]
     pub fn into_list(self) -> Self {
         Type::List { of_type: Box::new(self), non_null: false }
     }
 
     /// convert this type from list to non-list for any level of nesting
-    #[must_use] 
+    #[must_use]
     pub fn into_single(self) -> Self {
         match self {
             Type::Named { .. } => self,
@@ -112,7 +112,7 @@ impl Type {
     }
 
     /// replace the name of the underlying type
-    #[must_use] 
+    #[must_use]
     pub fn with_name(self, name: String) -> Self {
         match self {
             Type::Named { non_null, .. } => Type::Named { name, non_null },

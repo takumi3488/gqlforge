@@ -139,7 +139,10 @@ where
         Ok(Field { args, selection, ..field })
     }
 
-    #[expect(clippy::expect_used, reason = "conversions here are guaranteed by type-system invariants")]
+    #[expect(
+        clippy::expect_used,
+        reason = "conversions here are guaranteed by type-system invariants"
+    )]
     fn recursive_parse_arg(
         index: &Index,
         parent_name: &str,

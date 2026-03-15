@@ -207,9 +207,7 @@ impl GrpcReflection {
                     .get("grpc-message")
                     .and_then(|v| v.to_str().ok())
                     .unwrap_or("unknown");
-                anyhow::bail!(
-                    "gRPC reflection error: grpc-status={code}, grpc-message={msg}"
-                );
+                anyhow::bail!("gRPC reflection error: grpc-status={code}, grpc-message={msg}");
             }
         }
 

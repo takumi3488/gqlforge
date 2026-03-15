@@ -27,7 +27,9 @@ pub async fn execute_http_streaming_request(
     // Add SSE accept header
     request.headers_mut().insert(
         reqwest::header::ACCEPT,
-        "text/event-stream".parse().unwrap_or_else(|_| unreachable!("text/event-stream is a valid HeaderValue")),
+        "text/event-stream"
+            .parse()
+            .unwrap_or_else(|_| unreachable!("text/event-stream is a valid HeaderValue")),
     );
 
     let response = runtime.http.execute_raw(request).await?;

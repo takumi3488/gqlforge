@@ -342,7 +342,10 @@ fn collect_from_table_names(query: &sqlparser::ast::Query) -> Vec<String> {
 /// Handles explicit column references (`SELECT id, name`), compound identifiers
 /// (`SELECT t.id`), aliased expressions (`SELECT id AS user_id`), bare
 /// wildcards (`SELECT *`), and qualified wildcards (`SELECT t.*`).
-#[expect(clippy::too_many_lines, reason = "infers columns from all projection expression kinds")]
+#[expect(
+    clippy::too_many_lines,
+    reason = "infers columns from all projection expression kinds"
+)]
 fn infer_view_columns_from_projection(
     query: &sqlparser::ast::Query,
     from_tables: &[String],

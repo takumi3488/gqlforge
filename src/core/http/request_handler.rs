@@ -74,7 +74,9 @@ pub fn update_response_headers(
 
     // Insert Cookie Headers
     if let Some(ref cookie_headers) = req_ctx.cookie_headers {
-        let cookie_headers = cookie_headers.lock().unwrap_or_else(PoisonError::into_inner);
+        let cookie_headers = cookie_headers
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         resp.headers_mut().extend(cookie_headers.deref().clone());
     }
 
@@ -118,8 +120,7 @@ pub async fn graphql_request<T: DeserializeOwned + GraphQLRequestLike>(
             );
 
             let mut response = async_graphql::Response::default();
-            let server_error =
-                ServerError::new(format!("Unexpected GraphQL Request: {err}"), None);
+            let server_error = ServerError::new(format!("Unexpected GraphQL Request: {err}"), None);
             response.errors = vec![server_error];
 
             Ok(GraphQLResponse::from(response).into_response()?)

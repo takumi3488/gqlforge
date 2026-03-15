@@ -96,7 +96,7 @@ pub struct Telemetry {
 }
 
 impl Telemetry {
-    #[must_use] 
+    #[must_use]
     pub fn merge_right(mut self, other: Self) -> Self {
         self.export = match (&self.export, other.export) {
             (None, None) => None,

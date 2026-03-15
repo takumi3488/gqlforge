@@ -30,7 +30,7 @@ pub struct KeyValue {
 // where both current and other have the same key, we use the value
 // from other. This simplifies the merge_right_vars function in
 // server.rs.
-#[must_use] 
+#[must_use]
 pub fn merge_key_value_vecs(current: &[KeyValue], other: &[KeyValue]) -> Vec<KeyValue> {
     let mut res = BTreeMap::new();
 

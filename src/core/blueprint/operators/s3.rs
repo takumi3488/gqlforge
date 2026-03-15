@@ -12,7 +12,7 @@ pub struct CompileS3<'a> {
     pub s3: &'a S3,
 }
 
-#[must_use] 
+#[must_use]
 pub fn compile_s3(inputs: CompileS3) -> Valid<IR, BlueprintError> {
     let s3 = inputs.s3;
     let dedupe = s3.dedupe.unwrap_or_default();

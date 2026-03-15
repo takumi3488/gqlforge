@@ -23,14 +23,15 @@ use crate::core::blueprint::Upstream;
 use crate::core::blueprint::telemetry::Telemetry;
 use crate::core::http::Response;
 
-static HTTP_CLIENT_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> = std::sync::LazyLock::new(|| {
-    let meter = opentelemetry::global::meter("http_request");
+static HTTP_CLIENT_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> =
+    std::sync::LazyLock::new(|| {
+        let meter = opentelemetry::global::meter("http_request");
 
-    meter
-        .u64_counter("http.client.request.count")
-        .with_description("Number of outgoing requests")
-        .build()
-});
+        meter
+            .u64_counter("http.client.request.count")
+            .with_description("Number of outgoing requests")
+            .build()
+    });
 
 #[derive(Default)]
 struct RequestCounter {
@@ -96,7 +97,7 @@ impl Default for NativeHttp {
 impl NativeHttp {
     /// Initialize the HTTP client with the given upstream configuration and
     /// telemetry settings.
-    #[must_use] 
+    #[must_use]
     ///
     /// # Panics
     ///

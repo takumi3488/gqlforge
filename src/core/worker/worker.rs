@@ -49,12 +49,12 @@ pub enum Command {
 }
 
 impl WorkerResponse {
-    #[must_use] 
+    #[must_use]
     pub fn status(&self) -> u16 {
         self.0.status.as_u16()
     }
 
-    #[must_use] 
+    #[must_use]
     ///
     /// # Panics
     ///
@@ -69,7 +69,7 @@ impl WorkerResponse {
         headers
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn body(&self) -> Option<String> {
         let b = self.0.body.as_bytes();
         Some(String::from_utf8_lossy(b).to_string())

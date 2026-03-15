@@ -1,12 +1,12 @@
 use gqlforge_valid::Valid;
 
-use crate::core::blueprint::{ConfigModule, FieldDefinition, BlueprintError};
+use crate::core::blueprint::{BlueprintError, ConfigModule, FieldDefinition};
 use crate::core::config;
 use crate::core::config::Field;
 use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
-#[must_use] 
+#[must_use]
 pub fn update_modify<'a>() -> TryFold<
     'a,
     (&'a ConfigModule, &'a Field, &'a config::Type, &'a str),

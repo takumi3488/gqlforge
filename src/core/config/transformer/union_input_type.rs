@@ -235,7 +235,10 @@ impl<'cfg> Visitor<'cfg> {
         type_: &Type,
         union_fields: &[(&String, &Vec<String>)],
     ) -> Vec<(String, Type)> {
-        #[expect(clippy::expect_used, reason = "only available fields are in union_fields list by construction")]
+        #[expect(
+            clippy::expect_used,
+            reason = "only available fields are in union_fields list by construction"
+        )]
         fn inner_create(
             type_name: String,                        // name of the new type to set
             base_type: Type,                          // current representation of the type

@@ -4,7 +4,7 @@ use std::hash::BuildHasher;
 use directive::to_directive;
 use gqlforge_valid::{Valid, Validator};
 
-use crate::core::blueprint::{directive, BlueprintError, TryFoldConfig, SchemaDefinition};
+use crate::core::blueprint::{BlueprintError, SchemaDefinition, TryFoldConfig, directive};
 use crate::core::config::{Config, Field, Type};
 use crate::core::directive::DirectiveCodec;
 
@@ -100,7 +100,7 @@ fn validate_subscription(config: &Config) -> Valid<(), BlueprintError> {
     }
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_schema<'a>() -> TryFoldConfig<'a, SchemaDefinition> {
     TryFoldConfig::new(|config, _| {
         validate_query(config)

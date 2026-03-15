@@ -46,8 +46,7 @@ impl Cors {
     ) -> Option<(HeaderName, HeaderValue)> {
         let request_private_network =
             HeaderName::from_static("access-control-request-private-network");
-        let allow_private_network =
-            HeaderName::from_static("access-control-allow-private-network");
+        let allow_private_network = HeaderName::from_static("access-control-allow-private-network");
         let true_val = HeaderValue::from_static("true");
 
         if !self.allow_private_network {

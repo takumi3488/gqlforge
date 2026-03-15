@@ -80,7 +80,11 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                     json!(ctx.vars()).to_string(),
                 ))),
                 "claims" => {
-                    let guard = ctx.request_ctx.auth_claims.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                    let guard = ctx
+                        .request_ctx
+                        .auth_claims
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
                     let claims = guard.clone()?;
                     Some(ValueString::String(Cow::Owned(claims.to_string())))
                 }
@@ -101,7 +105,11 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                 "env" => Some(ValueString::String(ctx.env_var(tail[0].as_ref())?)),
                 "claims" => {
                     let claims_value = {
-                        let guard = ctx.request_ctx.auth_claims.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+                        let guard = ctx
+                            .request_ctx
+                            .auth_claims
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
                         guard.clone()?
                     };
                     let mut current = &claims_value;
@@ -158,7 +166,6 @@ mod tests {
         use async_graphql_value::{ConstValue as Value, Name, Number};
         use http::header::{HeaderMap, HeaderValue};
         use indexmap::IndexMap;
-        
 
         use crate::core::EnvIO;
         use crate::core::http::RequestContext;
@@ -197,20 +204,21 @@ mod tests {
             Value::Object(root)
         });
 
-        static TEST_ARGS: std::sync::LazyLock<IndexMap<Name, Value>> = std::sync::LazyLock::new(|| {
-            let mut root = IndexMap::new();
-            let mut nested = IndexMap::new();
+        static TEST_ARGS: std::sync::LazyLock<IndexMap<Name, Value>> =
+            std::sync::LazyLock::new(|| {
+                let mut root = IndexMap::new();
+                let mut nested = IndexMap::new();
 
-            nested.insert(
-                Name::new("existing"),
-                Value::String("nested-test".to_owned()),
-            );
+                nested.insert(
+                    Name::new("existing"),
+                    Value::String("nested-test".to_owned()),
+                );
 
-            root.insert(Name::new("nested"), Value::Object(nested));
-            root.insert(Name::new("root"), Value::String("root-test".to_owned()));
+                root.insert(Name::new("nested"), Value::Object(nested));
+                root.insert(Name::new("root"), Value::String("root-test".to_owned()));
 
-            root
-        });
+                root
+            });
 
         static TEST_HEADERS: std::sync::LazyLock<HeaderMap> = std::sync::LazyLock::new(|| {
             let mut map = HeaderMap::new();
@@ -220,21 +228,23 @@ mod tests {
             map
         });
 
-        static TEST_VARS: std::sync::LazyLock<BTreeMap<String, String>> = std::sync::LazyLock::new(|| {
-            let mut map = BTreeMap::new();
+        static TEST_VARS: std::sync::LazyLock<BTreeMap<String, String>> =
+            std::sync::LazyLock::new(|| {
+                let mut map = BTreeMap::new();
 
-            map.insert("existing".to_owned(), "var".to_owned());
+                map.insert("existing".to_owned(), "var".to_owned());
 
-            map
-        });
+                map
+            });
 
-        static TEST_ENV_VARS: std::sync::LazyLock<BTreeMap<String, String>> = std::sync::LazyLock::new(|| {
-            let mut map = BTreeMap::new();
+        static TEST_ENV_VARS: std::sync::LazyLock<BTreeMap<String, String>> =
+            std::sync::LazyLock::new(|| {
+                let mut map = BTreeMap::new();
 
-            map.insert("existing".to_owned(), "env".to_owned());
+                map.insert("existing".to_owned(), "env".to_owned());
 
-            map
-        });
+                map
+            });
 
         #[derive(Clone)]
         struct MockGraphqlContext;
@@ -280,7 +290,10 @@ mod tests {
             std::sync::LazyLock::new(|| EvalContext::new(&REQ_CTX, &MockGraphqlContext));
 
         #[test]
-        #[expect(clippy::too_many_lines, reason = "comprehensive path evaluation test cases")]
+        #[expect(
+            clippy::too_many_lines,
+            reason = "comprehensive path evaluation test cases"
+        )]
         fn path_to_value() {
             let mut map = IndexMap::default();
             map.insert(

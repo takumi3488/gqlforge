@@ -40,7 +40,7 @@ pub enum PgType {
 impl PgType {
     /// Map a `PostgreSQL` type name (as returned by `information_schema` or
     /// `sqlparser`) to a `PgType`.
-    #[must_use] 
+    #[must_use]
     pub fn from_sql_name(name: &str) -> Self {
         match name.to_lowercase().as_str() {
             "smallint" | "int2" | "smallserial" | "serial2" => PgType::SmallInt,
@@ -77,7 +77,7 @@ impl PgType {
     }
 
     /// The corresponding GraphQL scalar name.
-    #[must_use] 
+    #[must_use]
     pub fn graphql_scalar(&self) -> &str {
         match self {
             PgType::SmallInt | PgType::Integer => "Int",
@@ -151,12 +151,12 @@ pub struct Table {
 }
 
 impl Table {
-    #[must_use] 
+    #[must_use]
     pub fn qualified_name(&self) -> String {
         format!("{}.{}", self.schema, self.name)
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn find_column(&self, name: &str) -> Option<&Column> {
         self.columns.iter().find(|c| c.name == name)
     }
@@ -170,7 +170,7 @@ pub struct DatabaseSchema {
 }
 
 impl DatabaseSchema {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self { tables: BTreeMap::new() }
     }
@@ -180,14 +180,14 @@ impl DatabaseSchema {
         self.tables.insert(key, table);
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn merge(mut self, other: Self) -> Self {
         self.tables.extend(other.tables);
         self
     }
 
     /// Look up a table by name (tries both `schema.name` and `public.name`).
-    #[must_use] 
+    #[must_use]
     pub fn find_table(&self, name: &str) -> Option<&Table> {
         self.tables.get(name).or_else(|| {
             if name.contains('.') {

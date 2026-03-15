@@ -16,7 +16,7 @@ impl Default for SseEventParser {
 }
 
 impl SseEventParser {
-    #[must_use] 
+    #[must_use]
     pub fn new() -> Self {
         Self { buffer: BytesMut::new() }
     }

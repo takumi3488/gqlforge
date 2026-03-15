@@ -3,9 +3,9 @@ use std::borrow::Cow;
 use std::collections::HashMap;
 #[cfg(test)]
 use std::collections::hash_map::RandomState;
-use std::hash::Hash;
 #[cfg(test)]
 use std::hash::BuildHasher;
+use std::hash::Hash;
 use std::marker::PhantomData;
 use std::num::NonZeroUsize;
 
@@ -136,7 +136,9 @@ where
     type Storage = LruCacheImpl<K, V>;
 
     fn create(&self) -> Self::Storage {
-        LruCacheImpl(lru::LruCache::new(NonZeroUsize::new(self.cap.max(1)).unwrap_or(NonZeroUsize::MIN)))
+        LruCacheImpl(lru::LruCache::new(
+            NonZeroUsize::new(self.cap.max(1)).unwrap_or(NonZeroUsize::MIN),
+        ))
     }
 }
 

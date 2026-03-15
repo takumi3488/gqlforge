@@ -104,7 +104,9 @@ impl Endpoint {
                                     ConstValue::Number(async_graphql_value::Number::from(0u8))
                                 }
                                 N::Float => ConstValue::Number(
-                                    async_graphql_value::Number::from_f64(0.0f64).unwrap_or_else(|| unreachable!("0.0f64 is always a valid finite number")),
+                                    async_graphql_value::Number::from_f64(0.0f64).unwrap_or_else(
+                                        || unreachable!("0.0f64 is always a valid finite number"),
+                                    ),
                                 ),
                             },
                             UrlParamType::Boolean => ConstValue::Boolean(false),

@@ -1,7 +1,7 @@
 use regex::Regex;
 use serde_json::Value;
 
-#[must_use] 
+#[must_use]
 pub fn detect_gql_data_type(value: &str) -> String {
     let trimmed_value = value.trim();
 
@@ -19,7 +19,7 @@ pub fn detect_gql_data_type(value: &str) -> String {
     }
 }
 
-#[must_use] 
+#[must_use]
 ///
 /// # Panics
 ///
@@ -30,7 +30,7 @@ pub fn is_valid_field_name(property_name: &str) -> bool {
     gql_field_name_validator.is_match(property_name)
 }
 
-#[must_use] 
+#[must_use]
 pub fn to_gql_type(value: &Value) -> String {
     match value {
         Value::Null => {
@@ -47,7 +47,7 @@ pub fn to_gql_type(value: &Value) -> String {
     .to_string()
 }
 
-#[must_use] 
+#[must_use]
 pub fn is_primitive(value: &Value) -> bool {
     let value_type = to_gql_type(value);
     value_type != "List" && value_type != "Object"

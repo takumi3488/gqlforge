@@ -50,44 +50,44 @@ impl From<Config> for Cache {
 }
 
 impl ConfigModule {
-    #[must_use] 
+    #[must_use]
     pub fn new(config: Config, extensions: Extensions) -> Self {
         ConfigModule { cache: Cache::from(config), extensions }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn set_extensions(mut self, extensions: Extensions) -> Self {
         self.extensions = extensions;
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn merge_extensions(mut self, extensions: Extensions) -> Self {
         self.extensions = self.extensions.merge_right(extensions);
         self
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn config(&self) -> &Config {
         &self.cache.config
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn extensions(&self) -> &Extensions {
         &self.extensions
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn input_types(&self) -> &HashSet<String> {
         &self.cache.input_types
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn output_types(&self) -> &HashSet<String> {
         &self.cache.output_types
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn interfaces_types_map(&self) -> &BTreeMap<String, BTreeSet<String>> {
         &self.cache.interfaces_types_map
     }
@@ -128,7 +128,7 @@ impl From<PrivateKeyDer<'static>> for PrivateKey {
 }
 
 impl PrivateKey {
-    #[must_use] 
+    #[must_use]
     pub fn into_inner(self) -> PrivateKeyDer<'static> {
         self.0
     }
@@ -191,12 +191,12 @@ impl Extensions {
         }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn get_file_descriptor_set(&self) -> FileDescriptorSet {
         FileDescriptorSet { file: self.grpc_file_descriptors.values().cloned().collect() }
     }
 
-    #[must_use] 
+    #[must_use]
     pub fn has_auth(&self) -> bool {
         !self.htpasswd.is_empty() || !self.jwks.is_empty()
     }
@@ -214,7 +214,7 @@ impl Extensions {
     /// - If `id` is `Some`, returns the matching schema.
     /// - If `id` is `None` and there is exactly one schema, returns it.
     /// - Otherwise returns `None`.
-    #[must_use] 
+    #[must_use]
     pub fn find_database_schema(&self, id: Option<&str>) -> Option<&DatabaseSchema> {
         match id {
             Some(id) => self
