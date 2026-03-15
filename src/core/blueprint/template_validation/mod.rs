@@ -20,7 +20,7 @@ fn path_validator<'a>(
                 Some(field_type) => {
                     path_validator(config, path_iter, field_type.type_of.name(), leaf_validator)
                 }
-                None => Valid::fail(BlueprintError::FieldNotFound(field.to_string())),
+                None => Valid::fail(BlueprintError::FieldNotFound(field.clone())),
             },
             None => Valid::fail(BlueprintError::ValueIsNotOfScalarType(type_of.to_string())),
         },
@@ -30,28 +30,32 @@ fn path_validator<'a>(
 }
 
 /// Function to validate the arguments in the HTTP resolver.
+#[expect(
+    clippy::unwrap_used,
+    reason = "field.args.get(arg_name) is Some due to the match guard above"
+)]
 pub fn validate_argument(
     config: &Config,
-    template: Mustache,
+    template: &Mustache,
     field: &Field,
 ) -> Valid<(), BlueprintError> {
     let scalar_validator =
         |type_: &str| Scalar::is_predefined(type_) || config.find_enum(type_).is_some();
 
     Valid::from_iter(template.segments(), |segment| match segment {
-        Segment::Expression(expr) if expr.first().is_some_and(|v| v.contains("args")) => match expr
-            .get(1)
-        {
-            Some(arg_name) if field.args.get(arg_name).is_some() => {
-                let arg_type_of = field.args.get(arg_name).as_ref().unwrap().type_of.name();
-                path_validator(config, expr.iter().skip(2), arg_type_of, scalar_validator)
-                    .trace(arg_name)
+        Segment::Expression(expr) if expr.first().is_some_and(|v| v.contains("args")) => {
+            match expr.get(1) {
+                Some(arg_name) if field.args.get(arg_name).is_some() => {
+                    let arg_type_of = field.args.get(arg_name).as_ref().unwrap().type_of.name();
+                    path_validator(config, expr.iter().skip(2), arg_type_of, scalar_validator)
+                        .trace(arg_name)
+                }
+                Some(arg_name) => {
+                    Valid::fail(BlueprintError::ArgumentNotFound(arg_name.clone())).trace(arg_name)
+                }
+                None => Valid::fail(BlueprintError::TooFewPartsInTemplate),
             }
-            Some(arg_name) => {
-                Valid::fail(BlueprintError::ArgumentNotFound(arg_name.to_string())).trace(arg_name)
-            }
-            None => Valid::fail(BlueprintError::TooFewPartsInTemplate),
-        },
+        }
         _ => Valid::succeed(()),
     })
     .unit()
@@ -59,6 +63,7 @@ pub fn validate_argument(
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::{Valid, Validator};
 
     use super::validate_argument;
@@ -75,7 +80,7 @@ mod test {
             .find_type("Query")
             .and_then(|ty| ty.fields.get("posts"))
             .unwrap();
-        let validation_result = validate_argument(&config, template, field);
+        let validation_result = validate_argument(&config, &template, field);
 
         assert!(validation_result.is_fail());
         assert_eq!(

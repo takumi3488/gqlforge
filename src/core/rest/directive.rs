@@ -32,7 +32,7 @@ impl TryFrom<&Directive> for Rest {
         let mut has_path = false;
         let mut has_method = false;
 
-        for (k, v) in directive.arguments.iter() {
+        for (k, v) in &directive.arguments {
             match k.node.as_str() {
                 "path" => {
                     rest.path = serde_json::from_str(v.node.to_string().as_str())?;
@@ -55,7 +55,7 @@ impl TryFrom<&Directive> for Rest {
                             })
                             .for_each(|(k, v)| {
                                 rest.query.insert(k, v);
-                            })
+                            });
                     }
                 }
                 "body" => {
@@ -64,7 +64,7 @@ impl TryFrom<&Directive> for Rest {
                     }
                 }
                 _ => {}
-            };
+            }
         }
 
         match (has_method, has_path) {
@@ -87,16 +87,16 @@ impl TryFrom<&Directive> for Rest {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashMap;
 
     use async_graphql::parser::types::Directive;
-    use once_cell::sync::Lazy;
 
     use super::*;
 
     const DEFAULT_QUERY_PARAM: &str = "$a: Int, $v: String";
-    static DEFAULT_REST_QUERY: Lazy<RestQueryParam> =
-        Lazy::new(|| RestQueryParam::new("/foo/$a", "$v"));
+    static DEFAULT_REST_QUERY: std::sync::LazyLock<RestQueryParam> =
+        std::sync::LazyLock::new(|| RestQueryParam::new("/foo/$a", "$v"));
 
     fn query_to_directive(query: &str) -> Directive {
         async_graphql::parser::parse_query(query)

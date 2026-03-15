@@ -35,6 +35,7 @@ struct ProcessedTestData<Value> {
 impl<'a, Value: JsonLike<'a> + Deserialize<'a> + Clone + 'a> TestData<Value> {
     const POSTS: &'static str = include_str!("posts.json");
     const USERS: &'static str = include_str!("users.json");
+    #[expect(clippy::unwrap_used, reason = "test fixture parsing always valid JSON")]
     fn init() -> Self {
         let posts = serde_json::from_str::<Vec<Value>>(Self::POSTS).unwrap();
         let users = serde_json::from_str::<Vec<Value>>(Self::USERS).unwrap();
@@ -48,7 +49,7 @@ impl<'a, Value: JsonLike<'a> + Deserialize<'a> + Clone + 'a> TestData<Value> {
             let id = user
                 .as_object()
                 .and_then(|v| v.get_key("id"))
-                .and_then(|u| u.as_u64());
+                .and_then(JsonLike::as_u64);
 
             if let Some(id) = id {
                 map.insert(id, user);
@@ -62,7 +63,7 @@ impl<'a, Value: JsonLike<'a> + Deserialize<'a> + Clone + 'a> TestData<Value> {
                 let user_id = post
                     .as_object()
                     .and_then(|v| v.get_key("userId"))
-                    .and_then(|u| u.as_u64());
+                    .and_then(JsonLike::as_u64);
 
                 if let Some(user_id) = user_id {
                     if let Some(user) = user_map.get(&user_id) {
@@ -86,6 +87,10 @@ impl<'a, Value: JsonLike<'a> + Deserialize<'a> + Clone + 'a> TestData<Value> {
 impl<'a, Value: Deserialize<'a> + Clone + 'a + JsonLike<'a> + std::fmt::Debug> JP<Value> {
     const CONFIG: &'static str = include_str!("../fixtures/jsonplaceholder-mutation.graphql");
 
+    #[expect(
+        clippy::unwrap_used,
+        reason = "test fixture - panics are acceptable in test helpers"
+    )]
     fn plan(query: &str, variables: &Variables<async_graphql::Value>) -> OperationPlan<Value> {
         let config = ConfigModule::from(Config::from_sdl(Self::CONFIG).to_result().unwrap());
         let doc = async_graphql::parser::parse_query(query).unwrap();
@@ -103,6 +108,14 @@ impl<'a, Value: Deserialize<'a> + Clone + 'a + JsonLike<'a> + std::fmt::Debug> J
         plan.try_map(Deserialize::deserialize).unwrap()
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    #[expect(
+        clippy::unwrap_used,
+        reason = "test fixture - panics are acceptable in test helpers"
+    )]
     pub fn init(query: &str, variables: Option<Variables<async_graphql::Value>>) -> Self {
         let vars = variables.unwrap_or_default();
 
@@ -113,18 +126,20 @@ impl<'a, Value: Deserialize<'a> + Clone + 'a + JsonLike<'a> + std::fmt::Debug> J
         JP { test_data, plan, vars }
     }
 
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    #[expect(
+        clippy::unwrap_used,
+        reason = "test fixture - panics are acceptable in test helpers"
+    )]
     pub fn synth(&'a self) -> Synth<'a, Value> {
         let ProcessedTestData { posts, users } = self.test_data.to_processed();
         let vars = self.vars.clone();
 
-        let posts_id = find_field_path(&self.plan, &["posts"])
-            .unwrap()
-            .id
-            .to_owned();
-        let users_id = find_field_path(&self.plan, &["posts", "user"])
-            .unwrap()
-            .id
-            .to_owned();
+        let posts_id = find_field_path(&self.plan, &["posts"]).unwrap().id;
+        let users_id = find_field_path(&self.plan, &["posts", "user"]).unwrap().id;
 
         let store = [(posts_id, Ok(posts)), (users_id, Ok(users))]
             .into_iter()

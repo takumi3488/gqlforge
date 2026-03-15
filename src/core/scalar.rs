@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 use std::fmt::Debug;
+use std::sync::LazyLock;
 
 use gqlforge_macros::Doc;
-use lazy_static::lazy_static;
 use schemars::Schema;
 use strum::IntoEnumIterator;
 
@@ -10,10 +10,8 @@ use crate::core::json::JsonLike;
 
 const PREDEFINED_SCALARS: &[&str] = &["Boolean", "Float", "ID", "Int", "String"];
 
-lazy_static! {
-    static ref CUSTOM_SCALARS: HashMap<String, Scalar> =
-        Scalar::iter().map(|v| (v.name(), v)).collect();
-}
+static CUSTOM_SCALARS: LazyLock<HashMap<String, Scalar>> =
+    LazyLock::new(|| Scalar::iter().map(|v| (v.name(), v)).collect());
 
 #[derive(
     schemars::JsonSchema, Debug, Clone, strum_macros::Display, strum_macros::EnumIter, Doc,
@@ -22,22 +20,22 @@ pub enum Scalar {
     /// Empty scalar type represents an empty value.
     #[gen_doc(ty = "Null")]
     Empty,
-    /// Field whose value conforms to the standard internet email address format as specified in HTML Spec: https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address.
+    /// Field whose value conforms to the standard internet email address format as specified in HTML Spec: <https://html.spec.whatwg.org/multipage/input.html#valid-e-mail-address>.
     #[gen_doc(ty = "String")]
     Email,
-    /// Field whose value conforms to the standard E.164 format as specified in E.164 specification (https://en.wikipedia.org/wiki/E.164).
+    /// Field whose value conforms to the standard E.164 format as specified in E.164 specification (<https://en.wikipedia.org/wiki/E.164>).
     #[gen_doc(ty = "String")]
     PhoneNumber,
-    /// Field whose value conforms to the standard date format as specified in RFC 3339 (https://datatracker.ietf.org/doc/html/rfc3339).
+    /// Field whose value conforms to the standard date format as specified in RFC 3339 (<https://datatracker.ietf.org/doc/html/rfc3339>).
     #[gen_doc(ty = "String")]
     Date,
-    /// Field whose value conforms to the standard datetime format as specified in RFC 3339 (https://datatracker.ietf.org/doc/html/rfc3339").
+    /// Field whose value conforms to the standard datetime format as specified in RFC 3339 (<https://datatracker.ietf.org/doc/html/rfc3339>").
     #[gen_doc(ty = "String")]
     DateTime,
-    /// Field whose value conforms to the standard URL format as specified in RFC 3986 (https://datatracker.ietf.org/doc/html/rfc3986).
+    /// Field whose value conforms to the standard URL format as specified in RFC 3986 (<https://datatracker.ietf.org/doc/html/rfc3986>).
     #[gen_doc(ty = "String")]
     Url,
-    /// Field whose value conforms to the standard JSON format as specified in RFC 8259 (https://datatracker.ietf.org/doc/html/rfc8259).
+    /// Field whose value conforms to the standard JSON format as specified in RFC 8259 (<https://datatracker.ietf.org/doc/html/rfc8259>).
     #[gen_doc(ty = "Object")]
     JSON,
     /// Field whose value is an 8-bit signed integer.
@@ -106,6 +104,7 @@ fn eval_unsigned<
 impl Scalar {
     ///
     /// Check if the type is a predefined scalar
+    #[must_use]
     pub fn is_predefined(type_name: &str) -> bool {
         if PREDEFINED_SCALARS.iter().any(|v| type_name.eq(*v)) {
             true
@@ -116,8 +115,7 @@ impl Scalar {
 
     pub fn validate<'a, Value: JsonLike<'a>>(&self, value: &'a Value) -> bool {
         match self {
-            Scalar::JSON => true,
-            Scalar::Empty => true,
+            Scalar::JSON | Scalar::Empty => true,
             Scalar::Email => eval_str(value, |s| {
                 async_graphql::validators::email(&s.to_string()).is_ok()
             }),
@@ -143,16 +141,25 @@ impl Scalar {
             Scalar::UInt32 => eval_unsigned(value, u32::try_from),
         }
     }
+    #[must_use]
     pub fn find(name: &str) -> Option<&Scalar> {
         CUSTOM_SCALARS.get(name)
     }
+    #[must_use]
     pub fn name(&self) -> String {
         self.to_string()
     }
+    #[must_use]
     pub fn scalar_definition(&self) -> async_graphql::parser::types::TypeSystemDefinition {
         let schemars = self.schema();
-        gqlforge_typedefs_common::scalar_definition::into_scalar_definition(schemars, &self.name())
+        gqlforge_typedefs_common::scalar_definition::into_scalar_definition(&schemars, &self.name())
     }
+    #[must_use]
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    #[expect(clippy::unwrap_used, reason = "scalar schema JSON is always valid")]
     pub fn schema(&self) -> Schema {
         let type_str = self.ty();
         let mut value = serde_json::json!(
@@ -172,6 +179,7 @@ impl Scalar {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql_value::ConstValue;
     use schemars::Schema;
 
@@ -278,7 +286,7 @@ mod test {
         test_scalar_valid! {
             Scalar::Int16,
             ConstValue::Number(Number::from(100u32)),
-            ConstValue::Number(Number::from(2 * i8::MAX as i64)),
+            ConstValue::Number(Number::from(2 * i64::from(i8::MAX))),
             ConstValue::Number(
                 Number::from(-15)
             )
@@ -287,8 +295,8 @@ mod test {
         test_scalar_invalid! {
             Scalar::Int16,
             ConstValue::Null,
-            ConstValue::Number(Number::from(i16::MAX as i64 + 1)),
-            ConstValue::Number(Number::from(i16::MIN as i64 - 1)),
+            ConstValue::Number(Number::from(i64::from(i16::MAX) + 1)),
+            ConstValue::Number(Number::from(i64::from(i16::MIN) - 1)),
             ConstValue::Number(
                 Number::from_f64(1.25).unwrap()
             ),
@@ -304,7 +312,7 @@ mod test {
         test_scalar_valid! {
             Scalar::Int32,
             ConstValue::Number(Number::from(100u32)),
-            ConstValue::Number(Number::from(i32::MAX as i64)),
+            ConstValue::Number(Number::from(i64::from(i32::MAX))),
             ConstValue::Number(
                 Number::from(-15)
             )
@@ -313,8 +321,8 @@ mod test {
         test_scalar_invalid! {
             Scalar::Int32,
             ConstValue::Null,
-            ConstValue::Number(Number::from(i32::MAX as i64 + 1)),
-            ConstValue::Number(Number::from(i32::MIN as i64 - 1)),
+            ConstValue::Number(Number::from(i64::from(i32::MAX) + 1)),
+            ConstValue::Number(Number::from(i64::from(i32::MIN) - 1)),
             ConstValue::Number(
                 Number::from_f64(1.25).unwrap()
             ),
@@ -417,13 +425,13 @@ mod test {
         test_scalar_valid! {
             Scalar::UInt16,
             ConstValue::Number(Number::from(100u32)),
-            ConstValue::Number(Number::from(2 * u8::MAX as u64))
+            ConstValue::Number(Number::from(2 * u64::from(u8::MAX)))
         }
 
         test_scalar_invalid! {
            Scalar::UInt16,
             ConstValue::Null,
-            ConstValue::Number(Number::from(u16::MAX as u64 + 1)),
+            ConstValue::Number(Number::from(u64::from(u16::MAX) + 1)),
             ConstValue::Number(Number::from(-1)),
             ConstValue::Number(
                 Number::from_f64(1.25).unwrap()
@@ -440,13 +448,13 @@ mod test {
         test_scalar_valid! {
             Scalar::UInt32,
             ConstValue::Number(Number::from(100u32)),
-            ConstValue::Number(Number::from(u32::MAX as u64))
+            ConstValue::Number(Number::from(u64::from(u32::MAX)))
         }
 
         test_scalar_invalid! {
             Scalar::UInt32,
             ConstValue::Null,
-            ConstValue::Number(Number::from(u32::MAX as u64 + 1)),
+            ConstValue::Number(Number::from(u64::from(u32::MAX) + 1)),
             ConstValue::Number(Number::from(-1)),
             ConstValue::Number(
                 Number::from_f64(1.25).unwrap()

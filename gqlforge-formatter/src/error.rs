@@ -28,6 +28,7 @@ impl std::fmt::Debug for Error {
 }
 
 impl Error {
+    #[must_use]
     pub fn with_context(self, context: String) -> Self {
         Error::Context { source: Arc::new(self), context }
     }

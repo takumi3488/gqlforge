@@ -17,13 +17,15 @@ pub struct GraphqlDataLoader {
 }
 
 impl GraphqlDataLoader {
+    #[must_use]
     pub fn new(runtime: TargetRuntime, batch: bool) -> Self {
         GraphqlDataLoader { runtime, batch }
     }
 
+    #[must_use]
     pub fn into_data_loader(
         self,
-        batch: Batch,
+        batch: &Batch,
     ) -> DataLoader<DataLoaderRequest, GraphqlDataLoader> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))
@@ -36,7 +38,6 @@ impl Loader<DataLoaderRequest> for GraphqlDataLoader {
     type Value = Response<async_graphql::Value>;
     type Error = Arc<anyhow::Error>;
 
-    #[allow(clippy::mutable_key_type)]
     async fn load(
         &self,
         keys: &[DataLoaderRequest],
@@ -52,7 +53,6 @@ impl Loader<DataLoaderRequest> for GraphqlDataLoader {
                 (key.clone(), result)
             });
             let results = join_all(results).await;
-            #[allow(clippy::mutable_key_type)]
             let mut hashmap = HashMap::new();
             for (key, value) in results {
                 hashmap.insert(key, value?.to_json()?);
@@ -76,9 +76,13 @@ fn collect_request_bodies(dataloader_requests: &[DataLoaderRequest]) -> String {
         })
         .collect::<Vec<_>>()
         .join(",");
-    format!("[{}]", batched_query)
+    format!("[{batched_query}]")
 }
 
+#[expect(
+    clippy::unwrap_used,
+    reason = "data loader always passes non-empty slices"
+)]
 fn create_batched_request(dataloader_requests: &[DataLoaderRequest]) -> reqwest::Request {
     let batched_query = collect_request_bodies(dataloader_requests);
 
@@ -90,7 +94,6 @@ fn create_batched_request(dataloader_requests: &[DataLoaderRequest]) -> reqwest:
     batched_req
 }
 
-#[allow(clippy::mutable_key_type)]
 fn extract_responses(
     result: Result<Response<async_graphql::Value>, anyhow::Error>,
     keys: &[DataLoaderRequest],
@@ -118,6 +121,7 @@ fn extract_responses(
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::BTreeSet;
 
     use reqwest::Url;

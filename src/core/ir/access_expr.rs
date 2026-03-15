@@ -1,3 +1,5 @@
+use std::sync::PoisonError;
+
 use nom::branch::alt;
 use nom::bytes::complete::{tag, take_while1};
 use nom::character::complete::{char, multispace0};
@@ -27,16 +29,24 @@ pub enum Operand {
 }
 
 impl AccessExpr {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn parse(input: &str) -> Result<Self, String> {
         let (remaining, expr) = parse_or_expr(input.trim())
-            .map_err(|e| format!("Failed to parse access expression: {}", e))?;
+            .map_err(|e| format!("Failed to parse access expression: {e}"))?;
         let remaining = remaining.trim();
         if !remaining.is_empty() {
-            return Err(format!("Unexpected trailing input: '{}'", remaining));
+            return Err(format!("Unexpected trailing input: '{remaining}'"));
         }
         Ok(expr)
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn evaluate<Ctx: ResolverContextLike + Sync>(
         &self,
         ctx: &EvalContext<'_, Ctx>,
@@ -66,8 +76,14 @@ fn resolve_operand<Ctx: ResolverContextLike + Sync>(
     match operand {
         Operand::Path(segments) => {
             // For claims paths, resolve directly from serde_json::Value to preserve types
-            if segments.first().map(|s| s.as_str()) == Some("claims") && segments.len() > 1 {
-                let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+            if segments.first().map(std::string::String::as_str) == Some("claims")
+                && segments.len() > 1
+            {
+                let guard = ctx
+                    .request_ctx
+                    .auth_claims
+                    .lock()
+                    .unwrap_or_else(PoisonError::into_inner);
                 let claims = guard.as_ref()?;
                 let mut current = claims;
                 for segment in &segments[1..] {
@@ -236,6 +252,7 @@ fn parse_or_expr(input: &str) -> IResult<&str, AccessExpr> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]
@@ -364,7 +381,7 @@ mod tests {
         use crate::core::http::RequestContext;
         use crate::core::ir::EmptyResolverContext;
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let req_ctx = RequestContext::new(runtime);
         req_ctx.set_auth_claims(serde_json::json!({
             "sub": "user123",
@@ -389,7 +406,7 @@ mod tests {
         use crate::core::http::RequestContext;
         use crate::core::ir::EmptyResolverContext;
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let req_ctx = RequestContext::new(runtime);
         // No claims set
 
@@ -406,7 +423,7 @@ mod tests {
         use crate::core::http::RequestContext;
         use crate::core::ir::EmptyResolverContext;
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let req_ctx = RequestContext::new(runtime);
         req_ctx.set_auth_claims(serde_json::json!({
             "role": "admin",
@@ -454,7 +471,7 @@ mod tests {
         use crate::core::http::RequestContext;
         use crate::core::ir::EmptyResolverContext;
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let req_ctx = RequestContext::new(runtime);
         req_ctx.set_auth_claims(serde_json::json!({
             "level": 42,

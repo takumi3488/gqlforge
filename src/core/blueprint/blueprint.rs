@@ -25,7 +25,7 @@ pub struct Blueprint {
     pub server: Server,
     pub upstream: Upstream,
     pub telemetry: Telemetry,
-    /// PostgreSQL connection definitions: `(connection_id, connection_url)`.
+    /// `PostgreSQL` connection definitions: `(connection_id, connection_url)`.
     #[setters(skip)]
     pub postgres_connections: Vec<(String, String)>,
 }
@@ -41,6 +41,7 @@ pub enum Definition {
 }
 impl Definition {
     /// gets the name of the definition
+    #[must_use]
     pub fn name(&self) -> &str {
         match self {
             Definition::Interface(def) => &def.name,
@@ -53,6 +54,7 @@ impl Definition {
     }
 
     /// gets directives associated with definition
+    #[must_use]
     pub fn directives(&self) -> &[Directive] {
         match self {
             Definition::Interface(def) => &def.directives,
@@ -139,7 +141,7 @@ impl FieldDefinition {
     /// Transforms the current expression if it exists on the provided field.
     pub fn map_expr<F: FnOnce(IR) -> IR>(&mut self, wrapper: F) {
         if let Some(resolver) = self.resolver.take() {
-            self.resolver = Some(wrapper(resolver))
+            self.resolver = Some(wrapper(resolver));
         }
     }
 }
@@ -171,6 +173,7 @@ pub struct SchemaModifiers {
 }
 
 impl SchemaModifiers {
+    #[must_use]
     pub fn with_no_resolver(mut self) -> Self {
         self.no_resolver = true;
         self
@@ -191,9 +194,9 @@ impl Blueprint {
     }
 
     fn drop_resolvers(mut self) -> Self {
-        for def in self.definitions.iter_mut() {
+        for def in &mut self.definitions {
             if let Definition::Object(def) = def {
-                for field in def.fields.iter_mut() {
+                for field in &mut def.fields {
                     field.resolver = None;
                 }
             }
@@ -205,13 +208,17 @@ impl Blueprint {
     ///
     /// This function is used to generate a schema from a blueprint.
     pub fn to_schema(&self) -> Schema {
-        self.to_schema_with(SchemaModifiers::default())
+        self.to_schema_with(&SchemaModifiers::default())
     }
 
     ///
     /// This function is used to generate a schema from a blueprint.
-    /// The generated schema can be modified using the SchemaModifiers.
-    pub fn to_schema_with(&self, schema_modifiers: SchemaModifiers) -> Schema {
+    /// The generated schema can be modified using the `SchemaModifiers`.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    pub fn to_schema_with(&self, schema_modifiers: &SchemaModifiers) -> Schema {
         let blueprint = if schema_modifiers.no_resolver {
             self.clone().drop_resolvers()
         } else {
@@ -257,6 +264,10 @@ impl Blueprint {
 
         // We should safely assume the blueprint is correct and,
         // generation of schema cannot fail.
+        #[expect(
+            clippy::unwrap_used,
+            reason = "schema.finish() cannot fail for a valid blueprint"
+        )]
         schema.finish().unwrap()
     }
 

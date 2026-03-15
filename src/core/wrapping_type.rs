@@ -1,5 +1,4 @@
 use std::fmt::Formatter;
-use std::ops::Deref;
 
 use async_graphql::Name;
 use async_graphql::parser::types as async_graphql_types;
@@ -34,16 +33,16 @@ impl std::fmt::Debug for Type {
         match self {
             Type::Named { name, non_null } => {
                 if *non_null {
-                    write!(f, "{}!", name)
+                    write!(f, "{name}!")
                 } else {
-                    write!(f, "{}", name)
+                    write!(f, "{name}")
                 }
             }
             Type::List { of_type, non_null } => {
                 if *non_null {
-                    write!(f, "[{:?}]!", of_type)
+                    write!(f, "[{of_type:?}]!")
                 } else {
-                    write!(f, "[{:?}]", of_type)
+                    write!(f, "[{of_type:?}]")
                 }
             }
         }
@@ -58,6 +57,7 @@ impl Default for Type {
 
 impl Type {
     /// gets the name of the type
+    #[must_use]
     pub fn name(&self) -> &String {
         match self {
             Type::Named { name, .. } => name,
@@ -66,18 +66,20 @@ impl Type {
     }
 
     /// checks if the type is nullable
+    #[must_use]
     pub fn is_nullable(&self) -> bool {
         !match self {
-            Type::Named { non_null, .. } => *non_null,
-            Type::List { non_null, .. } => *non_null,
+            Type::Named { non_null, .. } | Type::List { non_null, .. } => *non_null,
         }
     }
     /// checks if the type is a list
+    #[must_use]
     pub fn is_list(&self) -> bool {
         matches!(self, Type::List { .. })
     }
 
-    /// convert this type into NonNull type
+    /// convert this type into `NonNull` type
+    #[must_use]
     pub fn into_required(self) -> Self {
         match self {
             Type::Named { name, .. } => Self::Named { name, non_null: true },
@@ -86,6 +88,7 @@ impl Type {
     }
 
     /// convert this into nullable type
+    #[must_use]
     pub fn into_nullable(self) -> Self {
         match self {
             Type::Named { name, .. } => Self::Named { name, non_null: false },
@@ -94,11 +97,13 @@ impl Type {
     }
 
     /// create a nullable list type from this type
+    #[must_use]
     pub fn into_list(self) -> Self {
         Type::List { of_type: Box::new(self), non_null: false }
     }
 
     /// convert this type from list to non-list for any level of nesting
+    #[must_use]
     pub fn into_single(self) -> Self {
         match self {
             Type::Named { .. } => self,
@@ -107,6 +112,7 @@ impl Type {
     }
 
     /// replace the name of the underlying type
+    #[must_use]
     pub fn with_name(self, name: String) -> Self {
         match self {
             Type::Named { non_null, .. } => Type::Named { name, non_null },
@@ -139,7 +145,7 @@ impl From<&Type> for async_graphql_types::Type {
         let base = match value {
             Type::Named { name, .. } => async_graphql_types::BaseType::Named(Name::new(name)),
             Type::List { of_type, .. } => async_graphql_types::BaseType::List(Box::new(
-                async_graphql_types::Type::from(of_type.deref()),
+                async_graphql_types::Type::from(&**of_type),
             )),
         };
 
@@ -156,7 +162,7 @@ impl From<&Type> for async_graphql::dynamic::TypeRef {
                 async_graphql::dynamic::TypeRef::Named(name.to_owned().into())
             }
             Type::List { of_type, .. } => async_graphql::dynamic::TypeRef::List(Box::new(
-                async_graphql::dynamic::TypeRef::from(of_type.deref()),
+                async_graphql::dynamic::TypeRef::from(&**of_type),
             )),
         };
 

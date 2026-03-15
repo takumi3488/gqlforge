@@ -31,7 +31,7 @@ struct Payload {
 impl Payload {
     fn new(api_key: String, input: Event) -> Self {
         let mut properties = HashMap::new();
-        let distinct_id = input.client_id.to_string();
+        let distinct_id = input.client_id.clone();
         let event = input.event_name.to_string();
 
         if let Ok(Value::Object(map)) = serde_json::to_value(input) {

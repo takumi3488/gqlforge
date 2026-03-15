@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 use serde_json::json;
 
 use crate::core::blueprint::GrpcMethod;
-use crate::core::config::{ConfigReaderContext, KeyValue};
+use crate::core::config::{ConfigReaderContext, GraphQLOperationType, KeyValue};
 use crate::core::grpc::RequestTemplate;
 use crate::core::grpc::protobuf::ProtobufSet;
 use crate::core::grpc::request_template::RequestBody;
@@ -35,7 +35,7 @@ const REFLECTION_PROTO: &str = include_str!(concat!(
 fn get_protobuf_set(package: &str) -> Result<ProtobufSet> {
     let proto_content = REFLECTION_PROTO.replace(
         "package grpc.reflection.v1alpha;",
-        &format!("package {};", package),
+        &format!("package {package};"),
     );
     let descriptor = protox_parse::parse("reflection", &proto_content)?;
     let mut descriptor_set = FileDescriptorSet::default();
@@ -170,14 +170,14 @@ impl GrpcReflection {
         headers.push((HeaderName::from_static("te"), Mustache::parse("trailers")));
         let body_ = Some(RequestBody {
             mustache: Some(Mustache::parse(body.to_string().as_str())),
-            value: Default::default(),
+            value: String::new(),
         });
         let req_template = RequestTemplate {
             url: Mustache::parse(url.as_str()),
             headers,
             body: body_,
             operation: operation.clone(),
-            operation_type: Default::default(),
+            operation_type: GraphQLOperationType::default(),
         };
 
         let ctx = ConfigReaderContext::new(&self.target_runtime);
@@ -207,11 +207,7 @@ impl GrpcReflection {
                     .get("grpc-message")
                     .and_then(|v| v.to_str().ok())
                     .unwrap_or("unknown");
-                anyhow::bail!(
-                    "gRPC reflection error: grpc-status={}, grpc-message={}",
-                    code,
-                    msg
-                );
+                anyhow::bail!("gRPC reflection error: grpc-status={code}, grpc-message={msg}");
             }
         }
 
@@ -233,6 +229,7 @@ fn request_proto(response: ReflectionResponse) -> Result<FileDescriptorProto> {
 
 #[cfg(test)]
 mod grpc_fetch {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::path::PathBuf;
 
     use anyhow::Result;
@@ -287,11 +284,11 @@ mod grpc_fetch {
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
             None,
-            crate::core::runtime::test::init(None),
+            crate::core::runtime::test::init(&None),
             GRPC_REFLECTION_V1ALPHA,
         );
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let resp = grpc_reflection.get_by_service("news.NewsService").await?;
 
         let content = runtime.file.read(gqlforge_fixtures::protobuf::NEWS).await?;
@@ -317,11 +314,11 @@ mod grpc_fetch {
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
             None,
-            crate::core::runtime::test::init(None),
+            crate::core::runtime::test::init(&None),
             GRPC_REFLECTION_V1ALPHA,
         );
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let resp = grpc_reflection.get_file("news_dto.proto").await?;
 
         let content = runtime
@@ -347,7 +344,7 @@ mod grpc_fetch {
             then.status(200).body(get_fake_resp());
         });
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
@@ -383,7 +380,7 @@ mod grpc_fetch {
             then.status(200).body("\0\0\0\0\x02:\0"); // Mock an empty response
         });
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
@@ -414,7 +411,7 @@ mod grpc_fetch {
             then.status(404); // Mock a 404 not found response
         });
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
@@ -442,7 +439,7 @@ mod grpc_fetch {
             then.status(200).body(get_fake_resp());
         });
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),
@@ -470,7 +467,7 @@ mod grpc_fetch {
             then.status(200).body(get_fake_resp());
         });
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let grpc_reflection = GrpcReflection::new(
             format!("http://localhost:{}", server.port()),

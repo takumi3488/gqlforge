@@ -19,17 +19,18 @@ pub struct Endpoint {
 }
 
 impl Endpoint {
+    #[must_use]
     pub fn new(url: String) -> Endpoint {
         Self {
             path: url,
-            query: Default::default(),
-            method: Default::default(),
-            input: Default::default(),
-            output: Default::default(),
-            headers: Default::default(),
-            body: Default::default(),
-            description: Default::default(),
-            encoding: Default::default(),
+            query: Vec::new(),
+            method: Method::default(),
+            input: JsonSchema::default(),
+            output: JsonSchema::default(),
+            headers: HeaderMap::default(),
+            body: None,
+            description: None,
+            encoding: Encoding::default(),
         }
     }
 }

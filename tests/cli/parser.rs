@@ -1,3 +1,4 @@
+#![expect(clippy::expect_used, reason = "test code")]
 use std::collections::HashMap;
 use std::path::Path;
 use std::str::FromStr;
@@ -37,7 +38,9 @@ impl ConfigHolder {
         let mut paths = vec![];
         for (i, (source, content)) in self.configs.iter().enumerate() {
             let path = format!("config{}.{}", i, source.ext());
-            fs.write(&path, content.as_bytes()).await.unwrap();
+            fs.write(&path, content.as_bytes())
+                .await
+                .expect("writing test config should succeed");
             paths.push(path);
         }
         IO { fs, paths }
@@ -45,11 +48,12 @@ impl ConfigHolder {
 }
 
 impl ExecutionSpec {
-    pub fn from_source(path: &Path, contents: String) -> anyhow::Result<Self> {
-        let ast = markdown::to_mdast(&contents, &ParseOptions::default()).unwrap();
+    pub fn from_source(path: &Path, contents: &str) -> anyhow::Result<Self> {
+        let ast = markdown::to_mdast(contents, &ParseOptions::default())
+            .map_err(|e| anyhow::anyhow!("Failed to parse {}: {e}", path.display()))?;
         let children = ast
             .children()
-            .unwrap_or_else(|| panic!("Failed to parse {:?}: empty file unexpected", path))
+            .unwrap_or_else(|| panic!("Failed to parse {}: empty file unexpected", path.display()))
             .iter()
             .peekable();
 
@@ -71,22 +75,17 @@ impl ExecutionSpec {
                             }
                             _ => {
                                 return Err(anyhow!(
-                                    "Unexpected header annotation {:?} in {:?}",
+                                    "Unexpected header annotation {:?} in {}",
                                     expect.value,
-                                    path,
+                                    path.display(),
                                 ));
                             }
                         }
                     }
                 }
                 Node::Code(code) => {
-                    let (content, lang, meta) = {
-                        (
-                            code.value.to_owned(),
-                            code.lang.to_owned(),
-                            code.meta.to_owned(),
-                        )
-                    };
+                    let (content, lang, meta) =
+                        { (code.value.clone(), code.lang.clone(), code.meta.clone()) };
                     if let Some(meta_str) = meta.as_ref().filter(|s| s.contains('@')) {
                         let temp_cleaned_meta = meta_str.replace('@', "");
                         let name: &str = &temp_cleaned_meta;
@@ -94,8 +93,8 @@ impl ExecutionSpec {
                         let lang = match lang {
                             Some(x) => Ok(x),
                             None => Err(anyhow!(
-                                "Unexpected code block with no specific language in {:?}",
-                                path
+                                "Unexpected code block with no specific language in {}",
+                                path.display()
                             )),
                         }?;
                         let source = Source::from_str(&lang)?;
@@ -107,9 +106,9 @@ impl ExecutionSpec {
                                 let vars: HashMap<String, String> = match source {
                                     Source::Json => Ok(serde_json::from_str(&content)?),
                                     Source::Yml => Ok(serde_yaml_ng::from_str(&content)?),
-                                    _ => Err(anyhow!(
-                                        "Unexpected language in env block in {:?} (only JSON and YAML are supported)",
-                                        path
+                                    Source::GraphQL => Err(anyhow!(
+                                        "Unexpected language in env block in {} (only JSON and YAML are supported)",
+                                        path.display()
                                     )),
                                 }?;
 
@@ -117,16 +116,14 @@ impl ExecutionSpec {
                             }
                             _ => {
                                 return Err(anyhow!(
-                                    "Unexpected component {:?} in {:?}: {:#?}",
-                                    name,
-                                    path,
-                                    meta
+                                    "Unexpected component {name:?} in {}: {meta:#?}",
+                                    path.display()
                                 ));
                             }
                         }
                     }
                 }
-                _ => return Err(anyhow!("Unexpected node in {:?}: {:#?}", path, node)),
+                _ => return Err(anyhow!("Unexpected node in {}: {node:#?}", path.display())),
             }
         }
 

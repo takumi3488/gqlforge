@@ -50,9 +50,7 @@ impl TestFileIO {
 impl FileIO for TestFileIO {
     async fn write<'a>(&'a self, path: &'a str, content: &'a [u8]) -> anyhow::Result<()> {
         let mut file = tokio::fs::File::create(path).await?;
-        file.write_all(content)
-            .await
-            .map_err(|e| anyhow!("{}", e))?;
+        file.write_all(content).await.map_err(|e| anyhow!("{e}"))?;
         Ok(())
     }
 
@@ -61,7 +59,7 @@ impl FileIO for TestFileIO {
         let mut buffer = Vec::new();
         file.read_to_end(&mut buffer)
             .await
-            .map_err(|e| anyhow!("{}", e))?;
+            .map_err(|e| anyhow!("{e}"))?;
         Ok(String::from_utf8(buffer)?)
     }
 }

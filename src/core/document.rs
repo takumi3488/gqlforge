@@ -2,7 +2,10 @@ use std::borrow::Cow;
 use std::fmt::Display;
 
 use async_graphql::Positioned;
-use async_graphql::parser::types::*;
+use async_graphql::parser::types::{
+    ConstDirective, DirectiveDefinition, SchemaDefinition, ServiceDocument, TypeDefinition,
+    TypeKind, TypeSystemDefinition,
+};
 use async_graphql_value::ConstValue;
 use unicode_segmentation::UnicodeSegmentation;
 
@@ -47,7 +50,7 @@ impl<'a> Iterator for LineBreaker<'a> {
         }
 
         for grapheme in iter {
-            if grapheme.chars().any(|ch| ch.is_whitespace()) {
+            if grapheme.chars().any(char::is_whitespace) {
                 last_valid_index += grapheme.len();
                 break;
             }
@@ -70,11 +73,11 @@ fn get_formatted_docs(docs: Option<String>, indent: usize) -> String {
     if let Some(docs) = docs {
         let docs: String = docs.chars().filter(|ch| ch != &'\n').collect();
         let line_breaker = LineBreaker::new(&docs, 80);
-        formatted_docs.push_str(format!("{}\"\"\"", indent_str).as_str());
+        formatted_docs.push_str(format!("{indent_str}\"\"\"").as_str());
         for line in line_breaker {
-            formatted_docs.push_str(format!("\n{}{}", indent_str, line).as_str());
+            formatted_docs.push_str(format!("\n{indent_str}{line}").as_str());
         }
-        formatted_docs.push_str(format!("\n{}\"\"\"\n", indent_str).as_str());
+        formatted_docs.push_str(format!("\n{indent_str}\"\"\"\n").as_str());
     }
 
     formatted_docs
@@ -118,12 +121,10 @@ fn print_schema(schema: &SchemaDefinition) -> String {
     if mutation.is_empty() && query.is_empty() {
         return String::new();
     }
-    format!(
-        "schema {}{{\n{}{}{}}}\n",
-        directives, query, mutation, subscription
-    )
+    format!("schema {directives}{{\n{query}{mutation}{subscription}}}\n")
 }
 
+#[expect(clippy::too_many_lines, reason = "prints all type definition variants")]
 fn print_type_def(type_def: &TypeDefinition) -> String {
     match &type_def.kind {
         TypeKind::Scalar => {
@@ -161,7 +162,9 @@ fn print_type_def(type_def: &TypeDefinition) -> String {
             )
         }
         TypeKind::Interface(interface) => {
-            let implements = if !interface.implements.is_empty() {
+            let implements = if interface.implements.is_empty() {
+                String::new()
+            } else {
                 format!(
                     "implements {} ",
                     interface
@@ -171,8 +174,6 @@ fn print_type_def(type_def: &TypeDefinition) -> String {
                         .collect::<Vec<_>>()
                         .join(" & ")
                 )
-            } else {
-                String::new()
             };
             format!(
                 "interface {} {}{{\n{}\n}}\n",
@@ -187,7 +188,9 @@ fn print_type_def(type_def: &TypeDefinition) -> String {
             )
         }
         TypeKind::Object(object) => {
-            let implements = if !object.implements.is_empty() {
+            let implements = if object.implements.is_empty() {
+                String::new()
+            } else {
                 format!(
                     "implements {} ",
                     object
@@ -197,8 +200,6 @@ fn print_type_def(type_def: &TypeDefinition) -> String {
                         .collect::<Vec<_>>()
                         .join(" & ")
                 )
-            } else {
-                String::new()
             };
             let directives = print_pos_directives(&type_def.directives);
             let doc = type_def.description.as_ref().map_or(String::new(), |d| {
@@ -262,7 +263,9 @@ fn print_enum_value(value: &async_graphql::parser::types::EnumValueDefinition) -
 
 fn print_field(field: &async_graphql::parser::types::FieldDefinition) -> String {
     let directives = print_pos_directives(&field.directives);
-    let args_str = if !field.arguments.is_empty() {
+    let args_str = if field.arguments.is_empty() {
+        String::new()
+    } else {
         let args = field
             .arguments
             .iter()
@@ -278,9 +281,7 @@ fn print_field(field: &async_graphql::parser::types::FieldDefinition) -> String 
             })
             .collect::<Vec<String>>()
             .join(", ");
-        format!("({})", args)
-    } else {
-        String::new()
+        format!("({args})")
     };
     let doc = field.description.as_ref().map_or(String::new(), |d| {
         format!(r#"  """{}  {}{}  """{}"#, "\n", d.node, "\n", "\n")
@@ -371,7 +372,8 @@ fn print_directive_type_def(directive: &DirectiveDefinition) -> String {
     }
 }
 
-pub fn print(sd: ServiceDocument) -> String {
+#[must_use]
+pub fn print(sd: &ServiceDocument) -> String {
     // Separate the definitions by type
     let definitions_len = sd.definitions.len();
     let mut schemas = Vec::with_capacity(definitions_len);
@@ -383,7 +385,7 @@ pub fn print(sd: ServiceDocument) -> String {
     let mut inputs = Vec::with_capacity(definitions_len);
     let mut directives = Vec::with_capacity(definitions_len);
 
-    for def in sd.definitions.iter() {
+    for def in &sd.definitions {
         match def {
             TypeSystemDefinition::Schema(schema) => schemas.push(print_schema(&schema.node)),
             TypeSystemDefinition::Type(type_def) => match &type_def.node.kind {
@@ -395,7 +397,7 @@ pub fn print(sd: ServiceDocument) -> String {
                 TypeKind::InputObject(_) => inputs.push(print_type_def(&type_def.node)),
             },
             TypeSystemDefinition::Directive(type_def) => {
-                directives.push(print_directive_type_def(&type_def.node))
+                directives.push(print_directive_type_def(&type_def.node));
             }
         }
     }
@@ -435,13 +437,13 @@ impl<'a> From<&'a ConstDirective> for Directive<'a> {
                 .arguments
                 .iter()
                 .filter_map(|(k, v)| {
-                    if v.node != async_graphql_value::ConstValue::Null {
+                    if v.node == async_graphql_value::ConstValue::Null {
+                        None
+                    } else {
                         Some(Arg {
                             name: Cow::Borrowed(k.node.as_str()),
                             value: Cow::Owned(v.to_string()),
                         })
-                    } else {
-                        None
                     }
                 })
                 .collect(),
@@ -453,8 +455,7 @@ impl<'a, Input: JsonLikeOwned + Display> From<&'a JitDirective<Input>> for Direc
     fn from(value: &'a JitDirective<Input>) -> Self {
         let to_mustache = |s: &str| -> String {
             s.strip_prefix('$')
-                .map(|v| format!("{{{{{}}}}}", v))
-                .unwrap_or_else(|| s.to_string())
+                .map_or_else(|| s.to_string(), |v| format!("{{{{{v}}}}}"))
         };
         Self {
             name: Cow::Borrowed(value.name.as_str()),
@@ -462,11 +463,11 @@ impl<'a, Input: JsonLikeOwned + Display> From<&'a JitDirective<Input>> for Direc
                 .arguments
                 .iter()
                 .filter_map(|(k, v)| {
-                    if !v.is_null() {
+                    if v.is_null() {
+                        None
+                    } else {
                         let v_str = to_mustache(&v.to_string());
                         Some(Arg { name: Cow::Borrowed(k), value: Cow::Owned(v_str) })
-                    } else {
-                        None
                     }
                 })
                 .collect(),
@@ -490,7 +491,7 @@ mod tests {
             "    \"\"\"\n    This is a test string for get_formatted_docs function. You are typing a long sentence \n    for testing. What a nice, long sentence!\n    \"\"\"\n",
         );
 
-        assert_eq!(result, expected)
+        assert_eq!(result, expected);
     }
 
     #[test]
@@ -505,6 +506,6 @@ mod tests {
             "    \"\"\"\n    get_formatted_docs \u{D568}\u{C218} \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D55C} \u{BB38}\u{C7A5}\u{C785}\u{B2C8}\u{B2E4}. \u{D14C}\u{C2A4}\u{D2B8}\u{B97C} \u{C704}\u{D574} \n    \u{AE34} \u{BB38}\u{C7A5}\u{C744} \u{C785}\u{B825}\u{D558}\u{B294} \u{C911} \u{C785}\u{B2C8}\u{B2E4}. \u{30C6}\u{30B9}\u{30C8}\u{306E}\u{305F}\u{3081}\u{306B}\u{9577}\u{3044}\u{6587}\u{7AE0}\u{3092}\u{5165}\u{529B}\u{3057}\u{3066}\u{3044}\u{308B}\u{3068}\u{3053}\u{308D}\u{3067}\u{3059}\u{3002}\u{306A}\u{3093}\u{3066}\u{7D20}\u{6575}\u{306A}\u{9577}\u{6587}\u{3067}\u{3059}\u{FF01}\n    \"\"\"\n",
         );
 
-        assert_eq!(result, expected)
+        assert_eq!(result, expected);
     }
 }

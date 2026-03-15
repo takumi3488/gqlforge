@@ -1,3 +1,4 @@
+#![expect(clippy::unwrap_used, reason = "test code")]
 use std::collections::BTreeMap;
 use std::panic;
 use std::path::Path;

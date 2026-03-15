@@ -3,7 +3,7 @@ use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::hash::Hash;
 use std::sync::atomic::{AtomicBool, Ordering};
-use std::sync::{Arc, Mutex};
+use std::sync::{Arc, Mutex, PoisonError};
 use std::time::Duration;
 
 use futures_channel::oneshot;
@@ -32,7 +32,7 @@ where
     K: Send + Sync + Hash + Eq + Clone + 'static,
     T: Loader<K>,
 {
-    /// Use `Loader` to create a [DataLoader] that does not cache records.
+    /// Use `Loader` to create a [`DataLoader`] that does not cache records.
     pub fn new(loader: T) -> Self {
         Self {
             inner: Arc::new(DataLoaderInner {
@@ -52,11 +52,11 @@ where
     T: Loader<K>,
     C: CacheFactory<K, T::Value>,
 {
-    /// Use `Loader` to create a [DataLoader] with a cache factory.
-    pub fn with_cache(loader: T, cache_factory: C) -> Self {
+    /// Use `Loader` to create a [`DataLoader`] with a cache factory.
+    pub fn with_cache(loader: T, cache_factory: &C) -> Self {
         Self {
             inner: Arc::new(DataLoaderInner {
-                requests: Mutex::new(Requests::new(&cache_factory)),
+                requests: Mutex::new(Requests::new(cache_factory)),
                 loader,
             }),
             delay: Duration::from_millis(1),
@@ -93,16 +93,28 @@ where
     }
 
     /// Enable/Disable cache of specified loader.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn enable_cache(&self, enable: bool)
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         T: Loader<K>,
     {
-        let mut requests = self.inner.requests.lock().unwrap();
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests.disable_cache = !enable;
     }
 
     /// Use this `DataLoader` load a data.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn load_one(&self, key: K) -> Result<Option<T::Value>, T::Error>
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
@@ -113,6 +125,14 @@ where
     }
 
     /// Use this `DataLoader` to load some data.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub async fn load_many<I>(&self, keys: I) -> Result<HashMap<K, T::Value>, T::Error>
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
@@ -126,7 +146,11 @@ where
         }
 
         let (action, rx) = {
-            let mut requests = self.inner.requests.lock().unwrap();
+            let mut requests = self
+                .inner
+                .requests
+                .lock()
+                .unwrap_or_else(PoisonError::into_inner);
             let prev_count = requests.keys.len();
             let mut keys_set = HashSet::new();
             let mut use_cache_values = HashMap::new();
@@ -147,7 +171,7 @@ where
             if !use_cache_values.is_empty() && keys_set.is_empty() {
                 return Ok(use_cache_values);
             } else if use_cache_values.is_empty() && keys_set.is_empty() {
-                return Ok(Default::default());
+                return Ok(HashMap::new());
             }
 
             requests.keys.extend(keys_set.clone());
@@ -187,12 +211,15 @@ where
                     tokio::time::sleep(delay).await;
 
                     let keys = {
-                        let mut requests = inner.requests.lock().unwrap();
+                        let mut requests = inner
+                            .requests
+                            .lock()
+                            .unwrap_or_else(PoisonError::into_inner);
                         requests.take()
                     };
 
                     if !keys.0.is_empty() {
-                        inner.do_load(disable_cache, keys).await
+                        inner.do_load(disable_cache, keys).await;
                     }
                 };
                 tokio::spawn(Box::pin(task));
@@ -200,20 +227,29 @@ where
             Action::Delay => {}
         }
 
-        rx.await.unwrap()
+        rx.await
+            .unwrap_or_else(|_| unreachable!("data loader channel was unexpectedly dropped"))
     }
 
     /// Feed some data into the cache.
     ///
-    /// **NOTE: If the cache type is [NoCache], this function will not take
+    /// **NOTE: If the cache type is [`NoCache`], this function will not take
     /// effect. **
-    pub async fn feed_many<I>(&self, values: I)
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    pub fn feed_many<I>(&self, values: I)
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         I: IntoIterator<Item = (K, T::Value)>,
         T: Loader<K>,
     {
-        let mut requests = self.inner.requests.lock().unwrap();
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         for (key, value) in values {
             requests
                 .cache_storage
@@ -223,38 +259,54 @@ where
 
     /// Feed some data into the cache.
     ///
-    /// **NOTE: If the cache type is [NoCache], this function will not take
+    /// **NOTE: If the cache type is [`NoCache`], this function will not take
     /// effect. **
-    pub async fn feed_one(&self, key: K, value: T::Value)
+    pub fn feed_one(&self, key: K, value: T::Value)
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         T: Loader<K>,
     {
-        self.feed_many(std::iter::once((key, value))).await;
+        self.feed_many(std::iter::once((key, value)));
     }
 
     /// Clears the cache.
     ///
-    /// **NOTE: If the cache type is [NoCache], this function will not take
+    /// **NOTE: If the cache type is [`NoCache`], this function will not take
     /// effect. **
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn clear(&self)
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         T: Loader<K>,
     {
         let _tid = TypeId::of::<K>();
-        let mut requests = self.inner.requests.lock().unwrap();
+        let mut requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests.cache_storage.clear();
     }
 
     /// Gets all values in the cache.
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
     pub fn get_cached_values(&self) -> HashMap<K, T::Value>
     where
         K: Send + Sync + Hash + Eq + Clone + 'static,
         T: Loader<K>,
     {
         let _tid = TypeId::of::<K>();
-        let requests = self.inner.requests.lock().unwrap();
+        let requests = self
+            .inner
+            .requests
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner);
         requests
             .cache_storage
             .iter()
@@ -263,10 +315,11 @@ where
     }
 }
 
-#[allow(clippy::type_complexity)]
+type LoaderResult<K, T> = Result<HashMap<K, <T as Loader<K>>::Value>, <T as Loader<K>>::Error>;
+
 struct ResSender<K: Send + Sync + Hash + Eq + Clone + 'static, T: Loader<K>> {
     use_cache_values: HashMap<K, T::Value>,
-    tx: oneshot::Sender<Result<HashMap<K, T::Value>, T::Error>>,
+    tx: oneshot::Sender<LoaderResult<K, T>>,
 }
 
 struct Requests<
@@ -287,7 +340,7 @@ impl<K: Send + Sync + Hash + Eq + Clone + 'static, T: Loader<K>, C: CacheFactory
 {
     fn new(cache_factory: &C) -> Self {
         Self {
-            keys: Default::default(),
+            keys: HashSet::new(),
             pending: Vec::new(),
             cache_storage: cache_factory.create(),
             disable_cache: false,
@@ -327,7 +380,7 @@ where
         match self.loader.load(&keys).await {
             Ok(values) => {
                 // update cache
-                let mut requests = self.requests.lock().unwrap();
+                let mut requests = self.requests.lock().unwrap_or_else(PoisonError::into_inner);
                 let disable_cache = requests.disable_cache || disable_cache;
                 if !disable_cache {
                     for (key, value) in &values {
@@ -358,6 +411,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::sync::Arc;
     use std::time::Duration;
 
@@ -442,8 +496,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_dataloader_with_cache() {
-        let loader = DataLoader::with_cache(MyLoader, HashMapCache::default());
-        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]).await;
+        let loader = DataLoader::with_cache(MyLoader, &HashMapCache::default());
+        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]);
 
         // All from the cache
         assert_eq!(
@@ -473,8 +527,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_dataloader_with_cache_hashmap_fnv() {
-        let loader = DataLoader::with_cache(MyLoader, HashMapCache::<FnvBuildHasher>::new());
-        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]).await;
+        let loader = DataLoader::with_cache(MyLoader, &HashMapCache::<FnvBuildHasher>::new());
+        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]);
 
         // All from the cache
         assert_eq!(
@@ -504,8 +558,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_dataloader_disable_all_cache() {
-        let loader = DataLoader::with_cache(MyLoader, HashMapCache::default());
-        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]).await;
+        let loader = DataLoader::with_cache(MyLoader, &HashMapCache::default());
+        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]);
 
         // All from the loader
         loader.enable_all_cache(false);
@@ -524,8 +578,8 @@ mod tests {
 
     #[tokio::test]
     async fn test_dataloader_disable_cache() {
-        let loader = DataLoader::with_cache(MyLoader, HashMapCache::default());
-        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]).await;
+        let loader = DataLoader::with_cache(MyLoader, &HashMapCache::default());
+        loader.feed_many(vec![(1, 10), (2, 20), (3, 30)]);
 
         // All from the loader
         loader.enable_cache(false);
@@ -558,7 +612,7 @@ mod tests {
         }
 
         let loader =
-            Arc::new(DataLoader::with_cache(MyDelayLoader, NoCache).delay(Duration::from_secs(1)));
+            Arc::new(DataLoader::with_cache(MyDelayLoader, &NoCache).delay(Duration::from_secs(1)));
         let handle = tokio::spawn({
             let loader = loader.clone();
             async move {

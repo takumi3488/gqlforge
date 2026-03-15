@@ -45,7 +45,7 @@ pub fn to_directive(const_directive: ConstDirective) -> Valid<Directive, String>
 
 #[cfg(test)]
 mod tests {
-
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::parser::types::ConstDirective;
     use async_graphql_value::Name;
     use gqlforge_valid::Validator;

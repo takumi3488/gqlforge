@@ -24,7 +24,7 @@ impl QueryParams {
         let mut params = Vec::new();
         for (k, v) in map {
             let t = TypedVariable::try_from(
-                q.get(&k).ok_or(Error::UndefinedQueryParam(k.to_string()))?,
+                q.get(&k).ok_or(Error::UndefinedQueryParam(k.clone()))?,
                 &v,
             )?;
             params.push((k, t));
@@ -32,7 +32,7 @@ impl QueryParams {
         Ok(Self { params })
     }
 
-    pub fn matches(&self, query_params: BTreeMap<String, String>) -> Option<Variables> {
+    pub fn matches(&self, query_params: &BTreeMap<String, String>) -> Option<Variables> {
         let mut variables = Variables::default();
         for (key, t_var) in &self.params {
             if let Some(query_param) = query_params.get(key) {

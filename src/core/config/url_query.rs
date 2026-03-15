@@ -4,7 +4,7 @@ use crate::core::is_default;
 
 #[derive(Serialize, Deserialize, Clone, Debug, Default, Eq, PartialEq, schemars::JsonSchema)]
 #[serde(rename_all = "camelCase")]
-/// The URLQuery input type represents a query parameter to be included in a
+/// The `URLQuery` input type represents a query parameter to be included in a
 /// URL.
 pub struct URLQuery {
     /// The key or name of the query parameter.

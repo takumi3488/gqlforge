@@ -1,8 +1,15 @@
 use std::fmt::{Debug, Display};
+use std::sync::OnceLock;
 
 use regex::Regex;
 
 use super::Cause;
+
+fn serde_error_re() -> Option<&'static Regex> {
+    static RE: OnceLock<Option<Regex>> = OnceLock::new();
+    RE.get_or_init(|| Regex::new(r" at line \d+ column \d+$").ok())
+        .as_ref()
+}
 
 #[derive(Debug, PartialEq, Default, Clone)]
 pub struct ValidationError<E>(Vec<Cause<E>>);
@@ -34,15 +41,18 @@ impl<E: Display> Display for ValidationError<E> {
 }
 
 impl<E> ValidationError<E> {
+    #[must_use]
     pub fn as_vec(&self) -> &Vec<Cause<E>> {
         &self.0
     }
 
+    #[must_use]
     pub fn combine(mut self, mut other: ValidationError<E>) -> ValidationError<E> {
         self.0.append(&mut other.0);
         self
     }
 
+    #[must_use]
     pub fn empty() -> Self {
         ValidationError(Vec::new())
     }
@@ -51,18 +61,21 @@ impl<E> ValidationError<E> {
         ValidationError(vec![Cause::new(e)])
     }
 
+    #[must_use]
     pub fn is_empty(&self) -> bool {
         self.0.is_empty()
     }
 
+    #[must_use]
     pub fn trace(self, message: &str) -> Self {
         let mut errors = self.0;
-        for cause in errors.iter_mut() {
+        for cause in &mut errors {
             cause.trace.insert(0, message.to_owned());
         }
         Self(errors)
     }
 
+    #[must_use]
     pub fn append(self, error: E) -> Self {
         let mut errors = self.0;
         errors.push(Cause::new(error));
@@ -96,13 +109,13 @@ impl From<serde_path_to_error::Error<serde_json::Error>> for ValidationError<Str
         for (i, segment) in segments.enumerate() {
             match segment {
                 serde_path_to_error::Segment::Seq { index } => {
-                    trace.push(format!("[{}]", index));
+                    trace.push(format!("[{index}]"));
                 }
                 serde_path_to_error::Segment::Map { key } => {
-                    trace.push(key.to_string());
+                    trace.push(key.clone());
                 }
                 serde_path_to_error::Segment::Enum { variant } => {
-                    trace.push(variant.to_string());
+                    trace.push(variant.clone());
                 }
                 serde_path_to_error::Segment::Unknown => {
                     trace.push("?".to_owned());
@@ -113,15 +126,14 @@ impl From<serde_path_to_error::Error<serde_json::Error>> for ValidationError<Str
             }
         }
 
-        let re = Regex::new(r" at line \d+ column \d+$").unwrap();
-        let message = re
-            .replace(
-                format!("Parsing failed because of {}", error.inner()).as_str(),
-                "",
-            )
-            .into_owned();
+        let raw_message = format!("Parsing failed because of {}", error.inner());
+        let message = if let Some(re) = serde_error_re() {
+            re.replace(&raw_message, "").into_owned()
+        } else {
+            raw_message
+        };
 
-        ValidationError(vec![Cause::new(message).trace(trace)])
+        ValidationError(vec![Cause::new(message).trace(&trace)])
     }
 }
 
@@ -143,15 +155,16 @@ mod tests {
     #[test]
     fn test_error_display_formatting() {
         let error = ValidationError::from(vec![
-            Cause::new("1").trace(vec!["a", "b"]),
+            Cause::new("1").trace(&["a", "b"]),
             Cause::new("2"),
             Cause::new("3"),
         ]);
         let expected_output = "Validation Error\n\u{2022} 1 [a, b]\n\u{2022} 2\n\u{2022} 3\n";
-        assert_eq!(format!("{}", error), expected_output);
+        assert_eq!(format!("{error}"), expected_output);
     }
 
     #[test]
+    #[expect(clippy::unwrap_used, reason = "test code")]
     fn test_from_serde_error() {
         let foo = &mut serde_json::Deserializer::from_str("{ \"a\": true }");
         let actual =

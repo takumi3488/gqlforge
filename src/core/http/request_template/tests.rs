@@ -1,3 +1,4 @@
+#![expect(clippy::unwrap_used, reason = "test code")]
 use std::borrow::Cow;
 
 use derive_setters::Setters;
@@ -55,7 +56,7 @@ impl RequestTemplate {
             .into_request()
             .body()
             .and_then(|a| a.as_bytes())
-            .map(|a| a.to_vec())
+            .map(<[u8]>::to_vec)
             .unwrap_or_default();
 
         Ok(std::str::from_utf8(&body)?.to_string())
@@ -547,7 +548,7 @@ mod form_encoded_url {
             .body_path(Some(Mustache::parse(r#"{"foo": "bar"}"#)));
         let ctx = Context::default().value(json!({}));
         let body = tmpl.to_body(&ctx).unwrap();
-        assert_eq!(body, r#"foo=bar"#);
+        assert_eq!(body, r"foo=bar");
     }
 }
 

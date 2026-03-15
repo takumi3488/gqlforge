@@ -1,4 +1,8 @@
-extern crate core;
+#![expect(
+    clippy::similar_names,
+    reason = "test helper uses similar variable names for clarity"
+)]
+#![expect(clippy::unwrap_used, reason = "test code")]
 
 use std::collections::BTreeMap;
 use std::path::Path;
@@ -27,7 +31,7 @@ use serde::{Deserialize, Serialize};
 
 use super::file::File;
 use super::http::Http;
-use super::model::*;
+use super::model::{APIBody, APIRequest, APIResponse, Annotation};
 use super::runtime::ExecutionSpec;
 use crate::core::runtime;
 
@@ -42,7 +46,7 @@ impl<'a> From<Cause<&'a str>> for SDLError {
     fn from(value: Cause<&'a str>) -> Self {
         SDLError {
             message: value.message.to_string(),
-            trace: value.trace.iter().map(|e| e.to_string()).collect(),
+            trace: value.trace.iter().cloned().collect(),
             description: None,
         }
     }
@@ -51,27 +55,29 @@ impl<'a> From<Cause<&'a str>> for SDLError {
 impl From<Cause<String>> for SDLError {
     fn from(value: Cause<String>) -> Self {
         SDLError {
-            message: value.message.to_string(),
-            trace: value.trace.iter().map(|e| e.to_string()).collect(),
+            message: value.message.clone(),
+            trace: value.trace.iter().cloned().collect(),
             description: value.description,
         }
     }
 }
 
+#[expect(clippy::unused_async, reason = "kept async for caller consistency")]
 async fn is_sdl_error(spec: &ExecutionSpec, config_module: Valid<ConfigModule, String>) -> bool {
     if spec.sdl_error {
         // errors: errors are expected, make sure they match
         let blueprint = config_module.and_then(|cfg| match Blueprint::try_from(&cfg) {
             Ok(blueprint) => Valid::succeed(blueprint),
-            Err(e) => Valid::from_validation_err(BlueprintError::to_validation_string(e)),
+            Err(e) => Valid::from_validation_err(BlueprintError::to_validation_string(&e)),
         });
 
         match blueprint.to_result() {
             Ok(_) => {
                 tracing::error!("\terror FAIL");
                 panic!(
-                    "Spec {} {:?} with \"sdl error\" directive did not have a validation error.",
-                    spec.name, spec.path
+                    "Spec {} {} with \"sdl error\" directive did not have a validation error.",
+                    spec.name,
+                    spec.path.display()
                 );
             }
             Err(error) => {
@@ -82,7 +88,7 @@ async fn is_sdl_error(spec: &ExecutionSpec, config_module: Valid<ConfigModule, S
 
                 insta::assert_json_snapshot!(snapshot_name, errors);
             }
-        };
+        }
 
         return true;
     }
@@ -113,15 +119,13 @@ async fn check_identity(spec: &ExecutionSpec, reader_ctx: &ConfigReaderContext<'
             let content = content.replace("\r\n", "\n");
 
             let path_str = spec.path.display().to_string();
-            let context = format!("path: {}", path_str);
+            let context = format!("path: {path_str}");
 
             let actual = gqlforge_formatter::format(actual, &gqlforge_formatter::Parser::Gql)
-                .await
                 .map_err(|e| e.with_context(context.clone()))
                 .unwrap();
 
             let expected = gqlforge_formatter::format(content, &gqlforge_formatter::Parser::Gql)
-                .await
                 .map_err(|e| e.with_context(context.clone()))
                 .unwrap();
 
@@ -195,7 +199,7 @@ async fn test_spec(spec: ExecutionSpec) {
     let mock_http_client = Arc::new(Http::new(&spec));
 
     let mut runtime = runtime::create_runtime(
-        mock_http_client.clone(),
+        &mock_http_client,
         spec.env.clone(),
         None,
         runtime::RuntimeIO::default(),
@@ -219,7 +223,7 @@ async fn test_spec(spec: ExecutionSpec) {
             }),
         )
         // Apply required transformers to the configuration
-        .and_then(|cfg| cfg.transform(Required));
+        .and_then(|cfg| cfg.transform(&Required));
 
     // check sdl error if any
     if is_sdl_error(&spec, config_module.clone()).await {
@@ -229,9 +233,7 @@ async fn test_spec(spec: ExecutionSpec) {
     let config_module = config_module.to_result().unwrap();
     let merged = config_module.to_sdl();
 
-    let formatter = gqlforge_formatter::format(merged, &Parser::Gql)
-        .await
-        .unwrap();
+    let formatter = gqlforge_formatter::format(merged, &Parser::Gql).unwrap();
 
     let snapshot_name = format!("{}_merged", spec.safe_name);
 
@@ -241,15 +243,13 @@ async fn test_spec(spec: ExecutionSpec) {
 
     // client: Check if client spec matches snapshot
     let client = print_schema(
-        (Blueprint::try_from(&config_module)
+        &(Blueprint::try_from(&config_module)
             .context(format!("file: {}", spec.path.to_str().unwrap()))
             .unwrap())
         .to_schema(),
     );
 
-    let formatted = gqlforge_formatter::format(client, &Parser::Gql)
-        .await
-        .unwrap();
+    let formatted = gqlforge_formatter::format(client, &Parser::Gql).unwrap();
     let snapshot_name = format!("{}_client", spec.safe_name);
 
     insta::assert_snapshot!(snapshot_name, formatted);
@@ -268,7 +268,7 @@ pub async fn load_and_test_execution_spec(path: &Path) -> anyhow::Result<()> {
         Some(Annotation::Skip) => {
             println!("{} ... {}", spec.path.display(), "skipped".blue());
         }
-        None => test_spec(spec).await,
+        None => Box::pin(test_spec(spec)).await,
     }
 
     Ok(())

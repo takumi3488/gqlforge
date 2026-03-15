@@ -22,7 +22,7 @@ impl<'a> MustachePartsValidator<'a> {
         let mut type_of = self.type_of;
         for item in parts {
             let field = type_of.fields.get(item).ok_or_else(|| {
-                BlueprintError::NoValueFound(parts[0..parts.len() - len + 1].join("."))
+                BlueprintError::NoValueFound(parts[0..=(parts.len() - len)].join("."))
             })?;
             let val_type = &field.type_of;
 
@@ -135,7 +135,7 @@ impl<'a> MustachePartsValidator<'a> {
                                 })
                             })
                         } else {
-                            Valid::succeed(Default::default())
+                            Valid::succeed(Vec::new())
                         }
                     })
                     .unit()
@@ -153,7 +153,7 @@ impl<'a> MustachePartsValidator<'a> {
                         })
                         .unit(),
                     )
-                    .and_then(|_| {
+                    .and_then(|()| {
                         if let Some(body) = &req_template.body {
                             if let Some(mustache) = &body.mustache {
                                 Valid::from_iter(mustache.expression_segments(), |parts| {
@@ -161,10 +161,10 @@ impl<'a> MustachePartsValidator<'a> {
                                 })
                             } else {
                                 // TODO: needs review
-                                Valid::succeed(Default::default())
+                                Valid::succeed(Vec::new())
                             }
                         } else {
-                            Valid::succeed(Default::default())
+                            Valid::succeed(Vec::new())
                         }
                     })
                     .unit()
@@ -201,6 +201,7 @@ impl FieldDefinition {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
 
     use super::MustachePartsValidator;
@@ -253,7 +254,7 @@ mod test {
         let validation_result =
             parts_validator.validate(&["args".to_string(), "q".to_string()], true);
 
-        assert!(validation_result.is_succeed())
+        assert!(validation_result.is_succeed());
     }
 
     #[test]
@@ -265,6 +266,6 @@ mod test {
         let validation_result =
             parts_validator.validate(&["args".to_string(), "q".to_string()], false);
 
-        assert!(validation_result.to_result().is_err())
+        assert!(validation_result.to_result().is_err());
     }
 }

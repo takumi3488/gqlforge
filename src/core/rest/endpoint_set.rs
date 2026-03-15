@@ -35,6 +35,7 @@ impl From<Endpoint> for EndpointSet<Unchecked> {
 }
 
 impl EndpointSet<Unchecked> {
+    #[must_use]
     pub fn get_endpoints(&self) -> &Vec<Endpoint> {
         &self.endpoints
     }
@@ -43,6 +44,10 @@ impl EndpointSet<Unchecked> {
         self.endpoints.push(endpoint);
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_new(operations: &str) -> Result<EndpointSet<Unchecked>> {
         let mut set = EndpointSet::default();
 
@@ -57,6 +62,10 @@ impl EndpointSet<Unchecked> {
         self.endpoints.extend(other.endpoints);
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn into_checked(
         self,
         blueprint: &Blueprint,
@@ -67,9 +76,9 @@ impl EndpointSet<Unchecked> {
         let req_ctx = RequestContext::new(target_runtime);
         let req_ctx = Arc::new(req_ctx);
 
-        for endpoint in self.endpoints.iter() {
+        for endpoint in &self.endpoints {
             let req = endpoint.clone().into_request();
-            let operation_qry = OperationQuery::new(req, req_ctx.clone())?;
+            let operation_qry = OperationQuery::new(req, req_ctx.clone());
             operations.push(operation_qry);
         }
         super::operation::validate_operations(blueprint, operations)

@@ -25,6 +25,7 @@ pub struct Store {
 }
 
 impl HttpCacheManager {
+    #[must_use]
     pub fn new(cache_size: u64) -> Self {
         let cache = Cache::builder()
             .eviction_policy(EvictionPolicy::lru())
@@ -33,6 +34,9 @@ impl HttpCacheManager {
         Self { cache: Arc::new(cache) }
     }
 
+    /// # Errors
+    ///
+    /// Returns an error if cache invalidation fails.
     pub async fn clear(&self) -> Result<()> {
         self.cache.invalidate_all();
         self.cache.run_pending_tasks().await;
@@ -71,6 +75,8 @@ impl CacheManager for HttpCacheManager {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
+
     use http_cache::{HttpHeaders, HttpVersion};
     use url::Url;
 
@@ -89,18 +95,18 @@ mod tests {
             metadata: None,
         };
 
-        let http_req = http::Request::builder()
+        let request = http::Request::builder()
             .method("GET")
             .uri(request_url)
             .body(())
             .unwrap();
-        let http_res = http::Response::builder().status(200).body(()).unwrap();
+        let response = http::Response::builder().status(200).body(()).unwrap();
 
         let _ = manager
             .put(
                 key.to_string(),
                 http_resp,
-                CachePolicy::new(&http_req, &http_res),
+                CachePolicy::new(&request, &response),
             )
             .await
             .unwrap();
@@ -133,18 +139,18 @@ mod tests {
         let manager = HttpCacheManager::default();
         insert_key_into_cache(&manager, "test").await;
 
-        assert!(manager.cache.iter().count() as i32 == 1);
+        assert_eq!(manager.cache.iter().count(), 1);
         let _ = manager.delete("test").await;
-        assert!(manager.cache.iter().count() as i32 == 0);
+        assert_eq!(manager.cache.iter().count(), 0);
     }
 
     #[tokio::test]
     async fn test_clear() {
         let manager = HttpCacheManager::default();
         insert_key_into_cache(&manager, "test").await;
-        assert!(manager.cache.iter().count() as i32 == 1);
+        assert_eq!(manager.cache.iter().count(), 1);
         let _ = manager.clear().await;
-        assert!(manager.cache.iter().count() as i32 == 0);
+        assert_eq!(manager.cache.iter().count(), 0);
     }
 
     #[tokio::test]

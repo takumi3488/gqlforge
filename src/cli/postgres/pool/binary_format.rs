@@ -1,3 +1,5 @@
+use std::fmt::Write as _;
+
 pub(super) fn format_uuid(raw: &[u8]) -> anyhow::Result<String> {
     if raw.len() != 16 {
         anyhow::bail!("UUID binary unexpected length: {} bytes", raw.len());
@@ -27,10 +29,10 @@ pub(super) fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
     if raw.len() < 8 {
         anyhow::bail!("NUMERIC binary too short");
     }
-    let ndigits = i16::from_be_bytes([raw[0], raw[1]]) as i32;
-    let weight = i16::from_be_bytes([raw[2], raw[3]]) as i32;
+    let ndigits = i32::from(i16::from_be_bytes([raw[0], raw[1]]));
+    let weight = i32::from(i16::from_be_bytes([raw[2], raw[3]]));
     let sign = u16::from_be_bytes([raw[4], raw[5]]);
-    let dscale = i16::from_be_bytes([raw[6], raw[7]]) as i32;
+    let dscale = i32::from(i16::from_be_bytes([raw[6], raw[7]]));
 
     if ndigits < 0 {
         anyhow::bail!("NUMERIC ndigits is negative: {ndigits}");
@@ -52,20 +54,23 @@ pub(super) fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
         return Ok("-Infinity".to_string());
     }
 
+    let ndigits_usize = usize::try_from(ndigits).unwrap_or(0);
+    let dscale_usize = usize::try_from(dscale).unwrap_or(0);
+
     if ndigits == 0 {
         if dscale > 0 {
-            return Ok(format!("0.{}", "0".repeat(dscale as usize)));
+            return Ok(format!("0.{}", "0".repeat(dscale_usize)));
         }
         return Ok("0".to_string());
     }
 
-    let expected_len = 8 + ndigits as usize * 2;
+    let expected_len = 8 + ndigits_usize * 2;
     if raw.len() < expected_len {
         anyhow::bail!("NUMERIC binary too short for {ndigits} digits");
     }
 
-    let mut digits = Vec::with_capacity(ndigits as usize);
-    for i in 0..ndigits as usize {
+    let mut digits = Vec::with_capacity(ndigits_usize);
+    for i in 0..ndigits_usize {
         let offset = 8 + i * 2;
         digits.push(i16::from_be_bytes([raw[offset], raw[offset + 1]]));
     }
@@ -80,32 +85,29 @@ pub(super) fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
     if int_digits_count <= 0 {
         int_part.push('0');
     } else {
-        for i in 0..int_digits_count {
-            let d = if (i as usize) < digits.len() {
-                digits[i as usize]
-            } else {
-                0
-            };
+        let int_digits_usize = usize::try_from(int_digits_count).unwrap_or(0);
+        for i in 0..int_digits_usize {
+            let d = if i < digits.len() { digits[i] } else { 0 };
             if i == 0 {
-                int_part.push_str(&d.to_string());
+                let _ = write!(int_part, "{d}");
             } else {
-                int_part.push_str(&format!("{:04}", d));
+                let _ = write!(int_part, "{d:04}");
             }
         }
     }
 
     let mut result = if sign == 0x4000 {
-        format!("-{}", int_part)
+        format!("-{int_part}")
     } else {
         int_part
     };
 
     if dscale > 0 {
         let mut frac = String::new();
-        let frac_start = int_digits_count.max(0) as usize;
+        let frac_start = usize::try_from(int_digits_count.max(0)).unwrap_or(0);
         // If weight < 0, we need leading zero groups.
         let leading_zero_groups = if weight < 0 {
-            (-weight - 1) as usize
+            usize::try_from(-weight - 1).unwrap_or(0)
         } else {
             0
         };
@@ -113,14 +115,14 @@ pub(super) fn parse_pg_numeric(raw: &[u8]) -> anyhow::Result<String> {
             frac.push_str("0000");
         }
         for d in digits.iter().skip(frac_start) {
-            frac.push_str(&format!("{:04}", d));
+            let _ = write!(frac, "{d:04}");
         }
         // Pad with zeros if needed.
-        while frac.len() < dscale as usize {
+        while frac.len() < dscale_usize {
             frac.push('0');
         }
         // Truncate to dscale.
-        frac.truncate(dscale as usize);
+        frac.truncate(dscale_usize);
         result.push('.');
         result.push_str(&frac);
     }
@@ -156,17 +158,17 @@ pub(super) fn format_inet(raw: &[u8]) -> anyhow::Result<String> {
         let mut parts = Vec::with_capacity(8);
         for i in 0..8 {
             let val = u16::from_be_bytes([addr[i * 2], addr[i * 2 + 1]]);
-            parts.push(format!("{:x}", val));
+            parts.push(format!("{val:x}"));
         }
         let full = parts.join(":");
         compress_ipv6(&full)
     } else {
-        anyhow::bail!("Unknown INET address family: {}", family);
+        anyhow::bail!("Unknown INET address family: {family}");
     };
 
     let max_mask = if family == 2 { 32 } else { 128 };
     if is_cidr || mask != max_mask {
-        Ok(format!("{}/{}", addr_str, mask))
+        Ok(format!("{addr_str}/{mask}"))
     } else {
         Ok(addr_str)
     }
@@ -209,7 +211,7 @@ fn compress_ipv6(full: &str) -> String {
 
     let before = parts[..best_start].join(":");
     let after = parts[best_start + best_len..].join(":");
-    format!("{}::{}", before, after)
+    format!("{before}::{after}")
 }
 
 pub(super) fn format_macaddr(raw: &[u8]) -> anyhow::Result<String> {
@@ -245,25 +247,25 @@ pub(super) fn format_interval(raw: &[u8]) -> anyhow::Result<String> {
         let mons = months % 12;
         if years != 0 {
             if years == 1 || years == -1 {
-                parts.push(format!("{} year", years));
+                parts.push(format!("{years} year"));
             } else {
-                parts.push(format!("{} years", years));
+                parts.push(format!("{years} years"));
             }
         }
         if mons != 0 {
             if mons == 1 || mons == -1 {
-                parts.push(format!("{} mon", mons));
+                parts.push(format!("{mons} mon"));
             } else {
-                parts.push(format!("{} mons", mons));
+                parts.push(format!("{mons} mons"));
             }
         }
     }
 
     if days != 0 {
         if days == 1 || days == -1 {
-            parts.push(format!("{} day", days));
+            parts.push(format!("{days} day"));
         } else {
-            parts.push(format!("{} days", days));
+            parts.push(format!("{days} days"));
         }
     }
 
@@ -277,16 +279,16 @@ pub(super) fn format_interval(raw: &[u8]) -> anyhow::Result<String> {
         let seconds = total_secs % 60;
 
         let time_str = if us_remainder > 0 {
-            let frac = format!("{:06}", us_remainder)
+            let frac = format!("{us_remainder:06}")
                 .trim_end_matches('0')
                 .to_string();
-            format!("{:02}:{:02}:{:02}.{}", hours, minutes, seconds, frac)
+            format!("{hours:02}:{minutes:02}:{seconds:02}.{frac}")
         } else {
-            format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
+            format!("{hours:02}:{minutes:02}:{seconds:02}")
         };
 
         if negative {
-            parts.push(format!("-{}", time_str));
+            parts.push(format!("-{time_str}"));
         } else {
             parts.push(time_str);
         }
@@ -321,21 +323,18 @@ pub(super) fn format_timetz(raw: &[u8]) -> anyhow::Result<String> {
     let tz_minutes = (tz_abs % 3600) / 60;
 
     let time_str = if us_remainder > 0 {
-        let frac = format!("{:06}", us_remainder)
+        let frac = format!("{us_remainder:06}")
             .trim_end_matches('0')
             .to_string();
-        format!("{:02}:{:02}:{:02}.{}", hours, minutes, seconds, frac)
+        format!("{hours:02}:{minutes:02}:{seconds:02}.{frac}")
     } else {
-        format!("{:02}:{:02}:{:02}", hours, minutes, seconds)
+        format!("{hours:02}:{minutes:02}:{seconds:02}")
     };
 
     if tz_minutes > 0 {
-        Ok(format!(
-            "{}{}{:02}:{:02}",
-            time_str, tz_sign, tz_hours, tz_minutes
-        ))
+        Ok(format!("{time_str}{tz_sign}{tz_hours:02}:{tz_minutes:02}"))
     } else {
-        Ok(format!("{}{}{:02}", time_str, tz_sign, tz_hours))
+        Ok(format!("{time_str}{tz_sign}{tz_hours:02}"))
     }
 }
 
@@ -343,13 +342,14 @@ pub(super) fn format_bytea(raw: &[u8]) -> String {
     let mut s = String::with_capacity(2 + raw.len() * 2);
     s.push_str("\\x");
     for b in raw {
-        s.push_str(&format!("{:02x}", b));
+        let _ = write!(s, "{b:02x}");
     }
     s
 }
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

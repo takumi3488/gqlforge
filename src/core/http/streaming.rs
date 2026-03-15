@@ -12,6 +12,14 @@ use crate::core::runtime::TargetRuntime;
 /// Execute an HTTP SSE streaming request and return a stream of decoded JSON
 /// values. Unlike `execute_graphql_streaming_request`, this treats each SSE
 /// event's `data:` payload as raw JSON (not a GraphQL response wrapper).
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
 pub async fn execute_http_streaming_request(
     runtime: &TargetRuntime,
     mut request: Request,
@@ -19,7 +27,9 @@ pub async fn execute_http_streaming_request(
     // Add SSE accept header
     request.headers_mut().insert(
         reqwest::header::ACCEPT,
-        "text/event-stream".parse().unwrap(),
+        "text/event-stream"
+            .parse()
+            .unwrap_or_else(|_| unreachable!("text/event-stream is a valid HeaderValue")),
     );
 
     let response = runtime.http.execute_raw(request).await?;
@@ -40,7 +50,7 @@ pub async fn execute_http_streaming_request(
         while let Some(chunk_result) = byte_stream.next().await {
             match chunk_result {
                 Ok(chunk) => {
-                    let events = parser.decode(chunk);
+                    let events = parser.decode(&chunk);
                     for event_data in events {
                         match parse_sse_raw_json(&event_data) {
                             Ok(value) => yield Ok(value),
@@ -69,6 +79,7 @@ fn parse_sse_raw_json(event_data: &str) -> Result<ConstValue, Error> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]
@@ -105,7 +116,7 @@ mod tests {
 
     #[test]
     fn test_parse_sse_raw_json_array() {
-        let result = parse_sse_raw_json(r#"[1, 2, 3]"#);
+        let result = parse_sse_raw_json(r"[1, 2, 3]");
         assert!(result.is_ok());
         assert_eq!(
             result.unwrap(),

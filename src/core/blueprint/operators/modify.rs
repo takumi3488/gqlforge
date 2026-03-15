@@ -1,11 +1,12 @@
 use gqlforge_valid::Valid;
 
-use crate::core::blueprint::*;
+use crate::core::blueprint::{BlueprintError, ConfigModule, FieldDefinition};
 use crate::core::config;
 use crate::core::config::Field;
 use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
+#[must_use]
 pub fn update_modify<'a>() -> TryFold<
     'a,
     (&'a ConfigModule, &'a Field, &'a config::Type, &'a str),
@@ -17,7 +18,7 @@ pub fn update_modify<'a>() -> TryFold<
             if let Some(modify) = field.modify.as_ref()
                 && let Some(new_name) = &modify.name
             {
-                for name in type_of.implements.iter() {
+                for name in &type_of.implements {
                     let interface = config.find_type(name);
                     if let Some(interface) = interface
                         && interface.fields.iter().any(|(name, _)| name == new_name)

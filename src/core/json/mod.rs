@@ -19,7 +19,7 @@ pub fn gather_path_matches<'json, J: JsonLike<'json>>(
     mut vector: Vec<(&'json J, &'json J)>,
 ) -> Vec<(&'json J, &'json J)> {
     if let Some(root) = root.as_array() {
-        for value in root.iter() {
+        for value in root {
             vector = gather_path_matches(value, path, vector);
         }
     } else if let Some((key, tail)) = path.split_first()
@@ -43,7 +43,7 @@ fn group_by_key<'json, J: JsonLike<'json>>(
         // Need to handle number and string keys
         let key_str = key
             .as_str()
-            .map(|a| a.to_string())
+            .map(std::string::ToString::to_string)
             .or_else(|| key.as_f64().map(|a| a.to_string()));
 
         if let Some(key) = key_str {

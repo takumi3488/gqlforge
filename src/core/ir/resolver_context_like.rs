@@ -65,7 +65,7 @@ impl ResolverContextLike for ResolverContext<'_> {
     }
 
     fn add_error(&self, error: ServerError) {
-        self.inner.ctx.add_error(error)
+        self.inner.ctx.add_error(error);
     }
 }
 
@@ -91,7 +91,7 @@ impl<'a> From<&'a crate::core::jit::Field<ConstValue>> for SelectionField {
 
 impl SelectionField {
     fn from_jit_field(field: &crate::core::jit::Field<ConstValue>) -> SelectionField {
-        let name = field.output_name.to_string();
+        let name = field.output_name.clone();
         let type_name = field.type_of.name();
         let selection_set = field
             .iter()
@@ -104,7 +104,7 @@ impl SelectionField {
         let args = field
             .args
             .iter()
-            .filter_map(|a| a.value.as_ref().map(|v| (a.name.to_owned(), v.to_string())))
+            .filter_map(|a| a.value.as_ref().map(|v| (a.name.clone(), v.to_string())))
             .collect::<Vec<_>>();
 
         SelectionField {
@@ -117,7 +117,7 @@ impl SelectionField {
                     field
                         .directives
                         .iter()
-                        .map(|d| d.into())
+                        .map(std::convert::Into::into)
                         .collect::<Vec<ConstDirective>>(),
                 )
             },
@@ -151,14 +151,17 @@ impl SelectionField {
         }
     }
 
+    #[must_use]
     pub fn directives(&self) -> &Option<Vec<ConstDirective>> {
         &self.directives
     }
 
+    #[must_use]
     pub fn arguments(&self) -> &[(String, String)] {
         &self.args
     }
 
+    #[must_use]
     pub fn name(&self) -> &str {
         &self.name
     }

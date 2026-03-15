@@ -34,12 +34,15 @@ impl<Value> Default for Variables<Value> {
 }
 
 impl<Value> Variables<Value> {
+    #[must_use]
     pub fn new() -> Self {
         Self(HashMap::new())
     }
+    #[must_use]
     pub fn get(&self, key: &str) -> Option<&Value> {
         self.0.get(key)
     }
+    #[must_use]
     pub fn into_hashmap(self) -> HashMap<String, Value> {
         self.0
     }
@@ -47,6 +50,10 @@ impl<Value> Variables<Value> {
     pub fn insert(&mut self, key: String, value: Value) {
         self.0.insert(key, value);
     }
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_map<Output, Error>(
         self,
         map: impl Fn(Value) -> Result<Output, Error>,
@@ -66,14 +73,14 @@ impl<V> FromIterator<(String, V)> for Variables<V> {
 }
 
 impl<Input> Field<Input> {
-    #[inline(always)]
+    #[inline]
     pub fn skip<'json, Value: JsonLike<'json>>(&self, variables: &Variables<Value>) -> bool {
         let eval =
             |variable_option: Option<&Variable>, variables: &Variables<Value>, default: bool| {
                 variable_option
-                    .map(|a| a.as_str())
+                    .map(Variable::as_str)
                     .and_then(|name| variables.get(name))
-                    .and_then(|value| value.as_bool())
+                    .and_then(JsonLike::as_bool)
                     .unwrap_or(default)
             };
         let skip = eval(self.skip.as_ref(), variables, false);
@@ -106,21 +113,24 @@ pub struct Arg<Input> {
 
 impl<Input: Display> Display for Arg<Input> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
-        let v = self
-            .value
-            .as_ref()
-            .map(|v| v.to_string())
-            .unwrap_or_else(|| {
+        let v = self.value.as_ref().map_or_else(
+            || {
                 self.default_value
                     .as_ref()
-                    .map(|v| v.to_string())
+                    .map(std::string::ToString::to_string)
                     .unwrap_or_default()
-            });
+            },
+            std::string::ToString::to_string,
+        );
         write!(f, "{}: {}", self.name, v)
     }
 }
 
 impl<Input> Arg<Input> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_map<Output, Error>(
         self,
         map: &impl Fn(Input) -> Result<Output, Error>,
@@ -145,12 +155,13 @@ impl Debug for ArgId {
 }
 
 impl ArgId {
+    #[must_use]
     pub fn new(id: usize) -> Self {
         ArgId(id)
     }
 }
 
-#[derive(Clone, PartialEq, Eq, Hash, PartialOrd, Ord)]
+#[derive(Clone, Copy, PartialEq, Eq, Hash, PartialOrd, Ord)]
 pub struct FieldId(usize);
 
 impl Debug for FieldId {
@@ -160,9 +171,11 @@ impl Debug for FieldId {
 }
 
 impl FieldId {
+    #[must_use]
     pub fn new(id: usize) -> Self {
         FieldId(id)
     }
+    #[must_use]
     pub fn as_usize(&self) -> usize {
         self.0
     }
@@ -206,9 +219,8 @@ impl<'a, Input> Iterator for DFS<'a, Input> {
             if let Some(field) = iter.next() {
                 self.stack.push(field.selection.iter());
                 return Some(field);
-            } else {
-                self.stack.pop();
             }
+            self.stack.pop();
         }
         None
     }
@@ -218,18 +230,25 @@ impl<'a, Input> Iterator for DFS<'a, Input> {
 pub struct Variable(String);
 
 impl Variable {
+    #[must_use]
     pub fn new(name: String) -> Self {
         Variable(name)
     }
+    #[must_use]
     pub fn as_str(&self) -> &str {
         &self.0
     }
+    #[must_use]
     pub fn into_string(self) -> String {
         self.0
     }
 }
 
 impl<Input> Field<Input> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_map<Output, Error>(
         self,
         map: &impl Fn(Input) -> Result<Output, Error>,
@@ -266,6 +285,10 @@ impl<Input> Field<Input> {
     }
 }
 
+#[expect(
+    clippy::missing_fields_in_debug,
+    reason = "intentionally omits some fields for cleaner debug output"
+)]
 impl<Input: Debug> Debug for Field<Input> {
     fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         let mut debug_struct = f.debug_struct("Field");
@@ -299,12 +322,17 @@ impl<Input: Debug> Debug for Field<Input> {
 pub struct OPHash(u64);
 
 impl OPHash {
+    #[must_use]
     pub fn new(hash: u64) -> Self {
         OPHash(hash)
     }
 }
 
 #[derive(Debug, Clone)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "OperationPlan has multiple independent boolean query flags"
+)]
 pub struct OperationPlan<Input> {
     pub root_name: String,
     pub operation_type: OperationType,
@@ -321,6 +349,10 @@ pub struct OperationPlan<Input> {
 }
 
 impl<Input> OperationPlan<Input> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_map<Output, Error>(
         self,
         map: impl Fn(Input) -> Result<Output, Error>,
@@ -348,7 +380,7 @@ impl<Input> OperationPlan<Input> {
 }
 
 impl<Input> OperationPlan<Input> {
-    #[allow(clippy::too_many_arguments)]
+    #[must_use]
     pub fn new(
         root_name: &str,
         selection: Vec<Field<Input>>,
@@ -370,7 +402,7 @@ impl<Input> OperationPlan<Input> {
             is_const: false,
             is_protected: false,
             min_cache_ttl: None,
-            before: Default::default(),
+            before: None,
             interfaces,
         }
     }
@@ -451,6 +483,10 @@ pub struct Directive<Input> {
 }
 
 impl<Input> Directive<Input> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn try_map<Output, Error>(
         self,
         map: &impl Fn(Input) -> Result<Output, Error>,
@@ -470,14 +506,14 @@ impl<'a> From<&'a Directive<ConstValue>> for ConstDirective {
     fn from(value: &'a Directive<ConstValue>) -> Self {
         // we don't use pos required in Positioned struct, hence using defaults.
         ConstDirective {
-            name: AsyncPositioned::new(Name::new(&value.name), Default::default()),
+            name: AsyncPositioned::new(Name::new(&value.name), Pos::default().into()),
             arguments: value
                 .arguments
                 .iter()
                 .map(|a| {
                     (
-                        AsyncPositioned::new(Name::new(a.0.clone()), Default::default()),
-                        AsyncPositioned::new(a.1.clone(), Default::default()),
+                        AsyncPositioned::new(Name::new(a.0.clone()), Pos::default().into()),
+                        AsyncPositioned::new(a.1.clone(), Pos::default().into()),
                     )
                 })
                 .collect::<Vec<_>>(),
@@ -557,6 +593,7 @@ impl<Value> Positioned<Value>
 where
     Value: Clone,
 {
+    #[must_use]
     pub fn with_path(&mut self, path: Vec<PathSegment<'static>>) -> Self {
         Self { value: self.value.clone(), pos: self.pos, path }
     }
@@ -568,7 +605,7 @@ impl From<ServerError> for Positioned<Error> {
     fn from(val: ServerError) -> Self {
         Self {
             value: Error::ServerError(val.clone()),
-            pos: val.locations.first().cloned().unwrap_or_default().into(),
+            pos: val.locations.first().copied().unwrap_or_default().into(),
             path: val
                 .path
                 .into_iter()
@@ -580,6 +617,7 @@ impl From<ServerError> for Positioned<Error> {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::Request;
     use async_graphql::parser::types::ConstDirective;
     use async_graphql_value::ConstValue;
@@ -613,21 +651,21 @@ mod test {
 
     #[test]
     fn test_operation_plan_dedupe() {
-        let actual = plan(r#"{ posts { id } }"#);
+        let actual = plan(r"{ posts { id } }");
 
         assert!(!actual.is_dedupe);
     }
 
     #[test]
     fn test_operation_plan_dedupe_nested() {
-        let actual = plan(r#"{ posts { id users { id } } }"#);
+        let actual = plan(r"{ posts { id users { id } } }");
 
         assert!(!actual.is_dedupe);
     }
 
     #[test]
     fn test_operation_plan_dedupe_false() {
-        let actual = plan(r#"{ users { id comments {body} } }"#);
+        let actual = plan(r"{ users { id comments {body} } }");
 
         assert!(actual.is_dedupe);
     }

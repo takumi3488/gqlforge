@@ -27,12 +27,12 @@ fn to_message(descriptor: &MessageDescriptor, input: &str) -> Result<DynamicMess
     Ok(message)
 }
 
-fn message_to_bytes(message: DynamicMessage) -> Result<Vec<u8>> {
+fn message_to_bytes(message: &DynamicMessage) -> Result<Vec<u8>> {
     let mut buf: Vec<u8> = Vec::with_capacity(message.encoded_len() + 5);
     // set compression flag
     buf.put_u8(0);
     // next 4 bytes should encode message length
-    buf.put_u32(message.encoded_len() as u32);
+    buf.put_u32(u32::try_from(message.encoded_len()).unwrap_or(u32::MAX));
     // encode the message itself
     message.encode(&mut buf)?;
 
@@ -43,18 +43,21 @@ pub fn protobuf_value_as_str(value: &prost_reflect::Value) -> String {
     use prost_reflect::Value;
 
     match value {
-        Value::I32(v) => v.to_string(),
+        Value::I32(v) | Value::EnumNumber(v) => v.to_string(),
         Value::I64(v) => v.to_string(),
         Value::U32(v) => v.to_string(),
         Value::U64(v) => v.to_string(),
         Value::F32(v) => v.to_string(),
         Value::F64(v) => v.to_string(),
-        Value::EnumNumber(v) => v.to_string(),
         Value::String(s) => s.clone(),
-        _ => Default::default(),
+        _ => String::new(),
     }
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub fn get_field_value_as_str(message: &DynamicMessage, field_name: &str) -> Result<String> {
     let field = message
         .get_field_by_name(field_name)
@@ -73,11 +76,19 @@ impl ProtobufSet {
     // TODO: load definitions from proto file for now, but in future
     // it could be more convenient to load FileDescriptorSet instead
     // either from file or server reflection
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn from_proto_file(file_descriptor_set: FileDescriptorSet) -> Result<Self> {
         let descriptor_pool = DescriptorPool::from_file_descriptor_set(file_descriptor_set)?;
         Ok(Self { descriptor_pool })
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn find_service(&self, grpc_method: &GrpcMethod) -> Result<ProtobufService> {
         let service_name = format!("{}.{}", grpc_method.package, grpc_method.service);
 
@@ -96,6 +107,10 @@ pub struct ProtobufMessage {
 }
 
 impl ProtobufMessage {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn decode(&self, bytes: &[u8]) -> Result<Value> {
         let message = DynamicMessage::decode(self.message_descriptor.clone(), bytes)?;
 
@@ -111,6 +126,10 @@ pub struct ProtobufService {
 }
 
 impl ProtobufService {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn find_operation(&self, grpc_method: &GrpcMethod) -> Result<ProtobufOperation> {
         let method = self
             .service_descriptor
@@ -145,6 +164,7 @@ impl PartialEq for ProtobufOperation {
 
 // TODO: support compression
 impl ProtobufOperation {
+    #[must_use]
     pub fn new(
         method: MethodDescriptor,
         input_type: MessageDescriptor,
@@ -157,20 +177,30 @@ impl ProtobufOperation {
             serialize_options: SerializeOptions::default().skip_default_fields(false),
         }
     }
+    #[must_use]
     pub fn name(&self) -> &str {
         self.method.name()
     }
 
+    #[must_use]
     pub fn service_name(&self) -> &str {
         self.method.parent_service().name()
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn convert_input(&self, input: &str) -> Result<Vec<u8>> {
         let message = to_message(&self.input_type, input)?;
 
-        message_to_bytes(message)
+        message_to_bytes(&message)
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn convert_multiple_inputs<'a>(
         &self,
         child_inputs: impl Iterator<Item = &'a str>,
@@ -180,7 +210,7 @@ impl ProtobufOperation {
         let field_descriptor = self
             .input_type
             .fields()
-            .find(|field| field.is_list())
+            .find(prost_reflect::FieldDescriptor::is_list)
             .ok_or(anyhow!("Unable to find list field on type"))?;
         let field_kind = field_descriptor.kind();
         let child_message_descriptor = field_kind
@@ -207,9 +237,13 @@ impl ProtobufOperation {
             ),
         );
 
-        message_to_bytes(message).map(|result| (result, ids))
+        message_to_bytes(&message).map(|result| (result, ids))
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn convert_output<T: serde::de::DeserializeOwned>(&self, bytes: &[u8]) -> Result<T> {
         if bytes.len() < 5 {
             bail!("Empty response");
@@ -233,6 +267,10 @@ impl ProtobufOperation {
     }
 
     /// Decode a raw protobuf payload (without the 5-byte gRPC frame header).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn convert_output_raw<T: serde::de::DeserializeOwned>(&self, bytes: &[u8]) -> Result<T> {
         let message =
             DynamicMessage::decode(self.output_type.clone(), bytes).with_context(|| {
@@ -248,6 +286,7 @@ impl ProtobufOperation {
         Ok(json)
     }
 
+    #[must_use]
     pub fn find_message(&self, name: &str) -> Option<ProtobufMessage> {
         let message_descriptor = self.method.parent_pool().get_message_by_name(name)?;
 
@@ -257,10 +296,13 @@ impl ProtobufOperation {
 
 #[cfg(test)]
 pub mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
+    use std::collections::HashMap;
     use std::path::Path;
 
     use anyhow::Result;
     use gqlforge_fixtures::protobuf;
+    use prost::bytes::Bytes;
     use prost_reflect::Value;
     use serde_json::json;
 
@@ -269,6 +311,10 @@ pub mod tests {
     use crate::core::config::reader::ConfigReader;
     use crate::core::config::{Config, Field, Grpc, Link, LinkType, Resolver, Type};
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn get_proto_file(path: &str) -> Result<FileDescriptorSet> {
         get_proto_file_with_config(path, LinkConfig::default()).await
     }
@@ -278,11 +324,15 @@ pub mod tests {
         proto_paths: Option<Vec<String>>,
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn get_proto_file_with_config(
         path: &str,
         link_config: LinkConfig,
     ) -> Result<FileDescriptorSet> {
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let reader = ConfigReader::init(runtime);
 
         let id = Path::new(path)
@@ -329,18 +379,18 @@ pub mod tests {
             protobuf_value_as_str(&Value::EnumNumber(55)),
             "55".to_owned()
         );
-        assert_eq!(protobuf_value_as_str(&Value::Bool(false)), "".to_owned());
+        assert_eq!(protobuf_value_as_str(&Value::Bool(false)), String::new());
         assert_eq!(
-            protobuf_value_as_str(&Value::Map(Default::default())),
-            "".to_owned()
+            protobuf_value_as_str(&Value::Map(HashMap::new())),
+            String::new()
         );
         assert_eq!(
-            protobuf_value_as_str(&Value::List(Default::default())),
-            "".to_owned()
+            protobuf_value_as_str(&Value::List(Vec::new())),
+            String::new()
         );
         assert_eq!(
-            protobuf_value_as_str(&Value::Bytes(Default::default())),
-            "".to_owned()
+            protobuf_value_as_str(&Value::Bytes(Bytes::default())),
+            String::new()
         );
     }
 
@@ -591,7 +641,7 @@ pub mod tests {
         let service = file.find_service(&grpc_method)?;
         let operation = service.find_operation(&grpc_method)?;
 
-        let input = operation.convert_input(r#"{ }"#)?;
+        let input = operation.convert_input(r"{ }")?;
 
         assert_eq!(input, b"\0\0\0\0\0");
 

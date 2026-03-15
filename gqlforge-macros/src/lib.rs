@@ -52,7 +52,7 @@ pub fn input_definition_derive(input: TokenStream) -> TokenStream {
 #[proc_macro_derive(CustomResolver, attributes(resolver))]
 pub fn resolver_derive(input: TokenStream) -> TokenStream {
     let input = parse_macro_input!(input as DeriveInput);
-    expand_resolver_derive(input)
+    expand_resolver_derive(&input)
         .unwrap_or_else(syn::Error::into_compile_error)
         .into()
 }

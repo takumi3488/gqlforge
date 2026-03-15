@@ -12,11 +12,13 @@ use crate::core::config::{
 };
 use crate::core::ir::model::IR;
 
+#[derive(Clone, Copy)]
 pub struct CompileEntityResolver<'a> {
     pub config_module: &'a ConfigModule,
     pub entity_resolver: &'a EntityResolver,
 }
 
+#[must_use]
 pub fn compile_entity_resolver(inputs: CompileEntityResolver<'_>) -> Valid<IR, BlueprintError> {
     let CompileEntityResolver { config_module, entity_resolver } = inputs;
     let mut resolver_by_type = HashMap::new();
@@ -61,6 +63,7 @@ pub fn compile_entity_resolver(inputs: CompileEntityResolver<'_>) -> Valid<IR, B
     .map_to(IR::Entity(resolver_by_type))
 }
 
+#[must_use]
 pub fn compile_service(mut sdl: String) -> Valid<IR, BlueprintError> {
     writeln!(sdl).ok();
 
@@ -74,6 +77,7 @@ pub fn compile_service(mut sdl: String) -> Valid<IR, BlueprintError> {
     Valid::succeed(IR::Service(sdl))
 }
 
+#[must_use]
 pub fn update_federation<'a>() -> TryFoldConfig<'a, Blueprint> {
     TryFoldConfig::<Blueprint>::new(|config_module, mut blueprint| {
         if !config_module.server.get_enable_federation() {
@@ -81,7 +85,7 @@ pub fn update_federation<'a>() -> TryFoldConfig<'a, Blueprint> {
         }
 
         // first convert to sdl with definitions in place
-        let mut sdl = crate::core::document::print(ServiceDocument::from(&blueprint));
+        let mut sdl = crate::core::document::print(&ServiceDocument::from(&blueprint));
         // take definitions to update it below
         let definitions = std::mem::take(&mut blueprint.definitions);
         let query_name = blueprint.query();

@@ -46,8 +46,8 @@ impl core::Type {
 }
 
 impl Contravariant for core::Type {
-    /// Executes merge the way that the result type is non_null
-    /// if it is specified as non_null in at least one of the definitions.
+    /// Executes merge the way that the result type is `non_null`
+    /// if it is specified as `non_null` in at least one of the definitions.
     /// That's a narrows merge i.e. the result narrows the input definitions
     /// the way it could be handled by both self and other sources
     fn shrink(self, other: Self) -> Valid<Self, String> {
@@ -61,8 +61,8 @@ impl Contravariant for core::Type {
 }
 
 impl Covariant for core::Type {
-    /// Executes merge the way that the result type is non_null only
-    /// if it is specified as non_null in both sources.
+    /// Executes merge the way that the result type is `non_null` only
+    /// if it is specified as `non_null` in both sources.
     /// That's a wide merge i.e. the result wides the input definitions
     /// the way it could be handled by both self and other sources
     fn expand(self, other: Self) -> Valid<Self, String> {
@@ -419,6 +419,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use anyhow::Result;
     use gqlforge_valid::Validator;
     use insta::assert_snapshot;

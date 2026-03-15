@@ -20,6 +20,10 @@ fn build_serve_request(req: &Request<Full<Bytes>>) -> Result<Request<Full<Bytes>
         .body(Full::<Bytes>::default())?)
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn try_serve_spa(
     req: &Request<Full<Bytes>>,
     spa_dir: &Path,

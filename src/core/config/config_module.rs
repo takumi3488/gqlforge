@@ -50,41 +50,49 @@ impl From<Config> for Cache {
 }
 
 impl ConfigModule {
+    #[must_use]
     pub fn new(config: Config, extensions: Extensions) -> Self {
         ConfigModule { cache: Cache::from(config), extensions }
     }
 
+    #[must_use]
     pub fn set_extensions(mut self, extensions: Extensions) -> Self {
         self.extensions = extensions;
         self
     }
 
+    #[must_use]
     pub fn merge_extensions(mut self, extensions: Extensions) -> Self {
         self.extensions = self.extensions.merge_right(extensions);
         self
     }
 
+    #[must_use]
     pub fn config(&self) -> &Config {
         &self.cache.config
     }
 
+    #[must_use]
     pub fn extensions(&self) -> &Extensions {
         &self.extensions
     }
 
+    #[must_use]
     pub fn input_types(&self) -> &HashSet<String> {
         &self.cache.input_types
     }
 
+    #[must_use]
     pub fn output_types(&self) -> &HashSet<String> {
         &self.cache.output_types
     }
 
+    #[must_use]
     pub fn interfaces_types_map(&self) -> &BTreeMap<String, BTreeSet<String>> {
         &self.cache.interfaces_types_map
     }
 
-    pub fn transform<T: Transform<Value = Config>>(self, transformer: T) -> Valid<Self, T::Error> {
+    pub fn transform<T: Transform<Value = Config>>(self, transformer: &T) -> Valid<Self, T::Error> {
         transformer
             .transform(self.cache.config)
             .map(|config| ConfigModule::new(config, self.extensions))
@@ -120,6 +128,7 @@ impl From<PrivateKeyDer<'static>> for PrivateKey {
 }
 
 impl PrivateKey {
+    #[must_use]
     pub fn into_inner(self) -> PrivateKeyDer<'static> {
         self.0
     }
@@ -149,7 +158,8 @@ pub struct Extensions {
 
     pub jwks: Vec<Content<JwkSet>>,
 
-    /// Raw SQL migration contents, applied in order to build a DatabaseSchema.
+    /// Raw SQL migration contents, applied in order to build a
+    /// `DatabaseSchema`.
     pub sql_migrations: Vec<String>,
 
     /// Resolved database schemas for `@postgres` directives.
@@ -170,7 +180,7 @@ pub struct S3LinkConfig {
     pub endpoint: String,
     /// The AWS region.
     pub region: String,
-    /// Whether to use path-style addressing (for MinIO, R2, etc.).
+    /// Whether to use path-style addressing (for `MinIO`, R2, etc.).
     pub force_path_style: bool,
 }
 
@@ -182,10 +192,12 @@ impl Extensions {
         }
     }
 
+    #[must_use]
     pub fn get_file_descriptor_set(&self) -> FileDescriptorSet {
         FileDescriptorSet { file: self.grpc_file_descriptors.values().cloned().collect() }
     }
 
+    #[must_use]
     pub fn has_auth(&self) -> bool {
         !self.htpasswd.is_empty() || !self.jwks.is_empty()
     }
@@ -203,6 +215,7 @@ impl Extensions {
     /// - If `id` is `Some`, returns the matching schema.
     /// - If `id` is `None` and there is exactly one schema, returns it.
     /// - Otherwise returns `None`.
+    #[must_use]
     pub fn find_database_schema(&self, id: Option<&str>) -> Option<&DatabaseSchema> {
         match id {
             Some(id) => self
@@ -248,6 +261,7 @@ impl From<Config> for ConfigModule {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
     use crate::core::postgres::schema::DatabaseSchema;
 

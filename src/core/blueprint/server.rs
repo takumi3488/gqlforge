@@ -11,9 +11,14 @@ use rustls_pki_types::CertificateDer;
 
 use super::BlueprintError;
 use crate::core::blueprint::Cors;
+use crate::core::config::headers::Headers;
 use crate::core::config::{self, ConfigModule, HttpVersion, PrivateKey, Routes};
 
 #[derive(Clone, Debug, Setters)]
+#[expect(
+    clippy::struct_excessive_bools,
+    reason = "Server config has many independent boolean feature flags"
+)]
 pub struct Server {
     pub enable_apollo_tracing: bool,
     pub enable_cache_control_header: bool,
@@ -41,7 +46,7 @@ pub struct Server {
     pub spa_dir: Option<PathBuf>,
 }
 
-/// Mimic of mini_v8::Script that's wasm compatible
+/// Mimic of `mini_v8::Script` that's wasm compatible
 #[derive(Clone, Debug)]
 pub struct Script {
     pub source: String,
@@ -60,6 +65,7 @@ pub enum Http {
 impl Default for Server {
     fn default() -> Self {
         // NOTE: Using unwrap because try_from default will never fail
+        #[expect(clippy::unwrap_used, reason = "try_from default will never fail")]
         Server::try_from(ConfigModule::default()).unwrap()
     }
 }
@@ -108,23 +114,20 @@ impl TryFrom<crate::core::config::ConfigModule> for Server {
 
                 Valid::succeed(Http::HTTP2 { cert, key })
             }
-            _ => Valid::succeed(Http::HTTP1),
+            HttpVersion::HTTP1 => Valid::succeed(Http::HTTP1),
         };
 
-        validate_hostname((config_server).get_hostname().to_lowercase())
+        validate_hostname(&(config_server).get_hostname().to_lowercase())
             .fuse(http_server)
             .fuse(handle_response_headers(
-                (config_server).get_response_headers(),
+                &(config_server).get_response_headers(),
             ))
             .fuse(to_script(&config_module))
             .fuse(handle_experimental_headers(
-                (config_server).get_experimental_headers(),
+                &(config_server).get_experimental_headers(),
             ))
             .fuse(validate_cors(
-                config_server
-                    .headers
-                    .as_ref()
-                    .and_then(|headers| headers.get_cors()),
+                config_server.headers.as_ref().and_then(Headers::get_cors),
             ))
             .fuse(validate_spa_dir(config_server.get_spa_dir()))
             .map(
@@ -208,14 +211,14 @@ fn to_script(
 }
 
 fn validate_cors(cors: Option<config::cors::Cors>) -> Valid<Option<Cors>, BlueprintError> {
-    Valid::from(cors.map(|cors| cors.try_into()).transpose())
+    Valid::from(cors.map(std::convert::TryInto::try_into).transpose())
         .trace("cors")
         .trace("headers")
         .trace("@server")
         .trace("schema")
 }
 
-fn validate_hostname(hostname: String) -> Valid<IpAddr, BlueprintError> {
+fn validate_hostname(hostname: &str) -> Valid<IpAddr, BlueprintError> {
     if hostname == "localhost" {
         Valid::succeed(IpAddr::from([127, 0, 0, 1]))
     } else {
@@ -230,9 +233,7 @@ fn validate_hostname(hostname: String) -> Valid<IpAddr, BlueprintError> {
     }
 }
 
-fn handle_response_headers(
-    resp_headers: Vec<(String, String)>,
-) -> Valid<HeaderMap, BlueprintError> {
+fn handle_response_headers(resp_headers: &[(String, String)]) -> Valid<HeaderMap, BlueprintError> {
     Valid::from_iter(resp_headers.iter(), |(k, v)| {
         let name = match HeaderName::from_bytes(k.as_bytes()) {
             Ok(name) => Valid::succeed(name),
@@ -278,16 +279,16 @@ fn validate_spa_dir(spa_dir: Option<&str>) -> Valid<Option<PathBuf>, BlueprintEr
 }
 
 fn handle_experimental_headers(
-    headers: BTreeSet<String>,
+    headers: &BTreeSet<String>,
 ) -> Valid<HashSet<HeaderName>, BlueprintError> {
     Valid::from_iter(headers.iter(), |h| {
-        if !h.to_lowercase().starts_with("x-") {
-            Valid::fail(BlueprintError::ExperimentalHeaderInvalidFormat(h.clone()))
-        } else {
+        if h.to_lowercase().starts_with("x-") {
             match HeaderName::from_str(h) {
                 Ok(name) => Valid::succeed(name),
                 Err(e) => Valid::fail(BlueprintError::InvalidHeaderName(e)),
             }
+        } else {
+            Valid::fail(BlueprintError::ExperimentalHeaderInvalidFormat(h.clone()))
         }
     })
     .map(HashSet::from_iter)
@@ -304,6 +305,6 @@ mod tests {
     #[test]
     fn test_try_from_default() {
         let actual = super::Server::try_from(ConfigModule::default());
-        assert!(actual.is_ok())
+        assert!(actual.is_ok());
     }
 }

@@ -79,7 +79,7 @@ impl From<Error> for Errata {
 
 impl ErrorExtensions for Error {
     fn extend(&self) -> ExtensionError {
-        ExtensionError::new(format!("{}", self)).extend_with(|_err, e| {
+        ExtensionError::new(format!("{self}")).extend_with(|_err, e| {
             if let Error::GRPC {
                 grpc_code,
                 grpc_description,

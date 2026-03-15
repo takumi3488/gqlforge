@@ -4,6 +4,7 @@ use indexmap::IndexMap;
 use prost_reflect::prost_types::FileDescriptorProto;
 
 pub trait MergeRight {
+    #[must_use]
     fn merge_right(self, other: Self) -> Self;
 }
 
@@ -18,7 +19,7 @@ impl<A: MergeRight> MergeRight for Option<A> {
     }
 }
 
-impl<A> MergeRight for Vec<A> {
+impl<T> MergeRight for Vec<T> {
     fn merge_right(mut self, other: Self) -> Self {
         self.extend(other);
         self
@@ -35,7 +36,7 @@ where
     }
 }
 
-impl<V> MergeRight for HashSet<V>
+impl<V, S: std::hash::BuildHasher> MergeRight for HashSet<V, S>
 where
     V: Eq + std::hash::Hash,
 {
@@ -62,7 +63,7 @@ where
     }
 }
 
-impl<K, V> MergeRight for HashMap<K, V>
+impl<K, V, S: std::hash::BuildHasher> MergeRight for HashMap<K, V, S>
 where
     K: Eq + std::hash::Hash,
     V: MergeRight,
@@ -177,6 +178,7 @@ impl MergeRight for serde_yaml_ng::Value {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::{BTreeMap, BTreeSet, HashMap, HashSet};
 
     use serde_json::json;

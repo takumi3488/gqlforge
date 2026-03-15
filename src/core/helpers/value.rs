@@ -7,7 +7,7 @@ pub struct HashableConstValue(pub ConstValue);
 
 impl Hash for HashableConstValue {
     fn hash<H: Hasher>(&self, state: &mut H) {
-        hash(&self.0, state)
+        hash(&self.0, state);
     }
 }
 
@@ -29,10 +29,10 @@ pub fn hash<H: Hasher>(const_value: &ConstValue, state: &mut H) {
         ConstValue::Object(object) => {
             let mut tmp_list: Vec<_> = object.iter().collect();
             tmp_list.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
-            tmp_list.iter().for_each(|(key, value)| {
+            for (key, value) in &tmp_list {
                 key.hash(state);
                 hash(value, state);
-            })
+            }
         }
     }
 }

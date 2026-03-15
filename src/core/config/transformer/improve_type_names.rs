@@ -16,7 +16,7 @@ struct CandidateStats {
 
 struct CandidateConvergence<'a> {
     /// maintains the generated candidates in the form of
-    /// {TypeName: {{candidate_name: {frequency: 1, priority: 0}}}}
+    /// {`TypeName`: {{`candidate_name`: {frequency: 1, priority: 0}}}}
     candidates: BTreeMap<String, BTreeMap<String, CandidateStats>>,
     config: &'a Config,
 }
@@ -36,7 +36,7 @@ impl<'a> CandidateConvergence<'a> {
         let mut finalized_candidates = BTreeMap::new();
         let mut converged_candidate_set = HashSet::new();
 
-        for (type_name, candidate_list) in self.candidates.iter() {
+        for (type_name, candidate_list) in &self.candidates {
             // Filter out candidates that have already been converged or are already present
             // in types
             let candidates_to_consider = candidate_list.iter().filter(|(candidate_name, _)| {
@@ -62,22 +62,22 @@ impl<'a> CandidateConvergence<'a> {
 
 struct CandidateGeneration<'a> {
     /// maintains the generated candidates in the form of
-    /// {TypeName: {{candidate_name: {frequency: 1, priority: 0}}}}
+    /// {`TypeName`: {{`candidate_name`: {frequency: 1, priority: 0}}}}
     candidates: BTreeMap<String, BTreeMap<String, CandidateStats>>,
     config: &'a Config,
 }
 
 impl<'a> CandidateGeneration<'a> {
     fn new(config: &'a Config) -> Self {
-        Self { candidates: Default::default(), config }
+        Self { candidates: BTreeMap::new(), config }
     }
 
     /// Generates candidate type names based on the provided configuration.
     /// This method iterates over the configuration and collects candidate type
     /// names for each type.
     fn generate(mut self) -> CandidateConvergence<'a> {
-        for (type_name, type_info) in self.config.types.iter() {
-            for (field_name, field_info) in type_info.fields.iter() {
+        for (type_name, type_info) in &self.config.types {
+            for (field_name, field_info) in &type_info.fields {
                 if self.config.is_scalar(field_info.type_of.name())
                     || field_name.starts_with(PREFIX)
                 {
@@ -93,15 +93,12 @@ impl<'a> CandidateGeneration<'a> {
                 let singularized_candidate = pluralizer::pluralize(field_name, 1, false);
 
                 if let Some(key_val) = inner_map.get_mut(&singularized_candidate) {
-                    key_val.frequency += 1
+                    key_val.frequency += 1;
                 } else {
                     // in order to infer the types correctly, always prioritize the non-operation
                     // types but final selection will still depend upon the
                     // frequency.
-                    let priority = match self.config.is_root_operation_type(type_name) {
-                        true => 0,
-                        false => 1,
-                    };
+                    let priority = u8::from(!self.config.is_root_operation_type(type_name));
 
                     inner_map.insert(
                         singularized_candidate,
@@ -128,6 +125,7 @@ impl Transform for ImproveTypeNames {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::fs;
 
     use anyhow::Ok;

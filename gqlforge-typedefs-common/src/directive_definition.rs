@@ -1,4 +1,5 @@
 use std::collections::HashSet;
+use std::hash::BuildHasher;
 
 use async_graphql::Name;
 use async_graphql::parser::types::{DirectiveLocation, TypeSystemDefinition};
@@ -21,11 +22,11 @@ pub struct Attrs {
     pub is_lowercase_name: bool,
 }
 
+#[must_use]
 pub fn from_directive_location(str: DirectiveLocation) -> String {
     match str {
         DirectiveLocation::Schema => String::from("SCHEMA"),
         DirectiveLocation::Object => String::from("OBJECT"),
-        DirectiveLocation::FieldDefinition => String::from("FIELD_DEFINITION"),
         DirectiveLocation::EnumValue => String::from("ENUM_VALUE"),
         _ => String::from("FIELD_DEFINITION"),
     }
@@ -35,20 +36,18 @@ fn into_directive_location(str: &str) -> DirectiveLocation {
     match str {
         "Schema" => DirectiveLocation::Schema,
         "Object" => DirectiveLocation::Object,
-        "FieldDefinition" => DirectiveLocation::FieldDefinition,
         "EnumValue" => DirectiveLocation::EnumValue,
         _ => DirectiveLocation::FieldDefinition,
     }
 }
 
-pub fn into_directive_definition(
-    root_schema: Schema,
+pub fn into_directive_definition<S: BuildHasher>(
+    root_schema: &Schema,
     attrs: Attrs,
-    generated_types: &mut HashSet<String>,
+    generated_types: &mut HashSet<String, S>,
 ) -> Vec<TypeSystemDefinition> {
-    let root_obj = match root_schema.as_object() {
-        Some(o) => o,
-        None => return vec![],
+    let Some(root_obj) = root_schema.as_object() else {
+        return vec![];
     };
 
     let mut service_doc_definitions = vec![];

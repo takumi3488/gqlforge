@@ -26,6 +26,9 @@ impl fmt::Display for Parser {
 }
 
 impl Parser {
+    /// # Errors
+    ///
+    /// Returns an error if the file extension is missing or unsupported.
     pub fn detect(path: &str) -> Result<Self> {
         let ext = path
             .split('.')

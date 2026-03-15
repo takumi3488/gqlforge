@@ -63,6 +63,11 @@ pub fn compile_resolver(
     .map(Some)
 }
 
+#[must_use]
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
 pub fn update_resolver<'a>(
     operation_type: &'a GraphQLOperationType,
     object_name: &'a str,
@@ -79,9 +84,12 @@ pub fn update_resolver<'a>(
             Valid::from_iter(field.resolvers.iter(), |resolver| {
                 compile_resolver(&inputs, resolver)
             })
-            .map(|mut resolvers| match resolvers.len() {
+            .map(|resolvers| match resolvers.len() {
                 0 => None,
-                1 => resolvers.pop().unwrap(),
+                1 => resolvers
+                    .into_iter()
+                    .next()
+                    .unwrap_or_else(|| unreachable!("len == 1")),
                 _ => Some(IR::Merge(resolvers.into_iter().flatten().collect())),
             })
             .map(|resolver| b_field.resolver(resolver))

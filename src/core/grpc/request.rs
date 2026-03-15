@@ -15,7 +15,8 @@ use crate::core::runtime::TargetRuntime;
 
 pub static GRPC_STATUS: &str = "grpc-status";
 
-pub fn create_grpc_request(url: Url, headers: HeaderMap, body: Vec<u8>) -> Request {
+#[must_use]
+pub fn create_grpc_request(url: Url, headers: &HeaderMap, body: Vec<u8>) -> Request {
     let mut req = Request::new(Method::POST, url);
     req.headers_mut().extend(headers.clone());
     req.body_mut().replace(body.into());
@@ -23,6 +24,10 @@ pub fn create_grpc_request(url: Url, headers: HeaderMap, body: Vec<u8>) -> Reque
     req
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn execute_grpc_request(
     runtime: &TargetRuntime,
     operation: &ProtobufOperation,
@@ -47,6 +52,10 @@ pub async fn execute_grpc_request(
 
 /// Execute a gRPC server-streaming request and return a stream of decoded
 /// values.
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn execute_grpc_streaming_request(
     runtime: &TargetRuntime,
     operation: &ProtobufOperation,
@@ -71,7 +80,7 @@ pub async fn execute_grpc_streaming_request(
         while let Some(chunk_result) = byte_stream.next().await {
             match chunk_result {
                 Ok(chunk) => {
-                    let frames = decoder.decode(chunk);
+                    let frames = decoder.decode(&chunk);
                     for frame in frames {
                         match operation.convert_output_raw(&frame) {
                             Ok(value) => yield Ok(value),
@@ -92,6 +101,7 @@ pub async fn execute_grpc_streaming_request(
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::sync::Arc;
 
     use anyhow::Result;
@@ -153,10 +163,8 @@ mod tests {
             }
         }
     }
-    async fn prepare_args(
-        test_http: TestHttp,
-    ) -> Result<(TargetRuntime, ProtobufOperation, Request)> {
-        let mut runtime = crate::core::runtime::test::init(None);
+    fn prepare_args(test_http: TestHttp) -> Result<(TargetRuntime, ProtobufOperation, Request)> {
+        let mut runtime = crate::core::runtime::test::init(&None);
         runtime.http2_only = Arc::new(test_http);
 
         let file_descriptor_set =
@@ -173,7 +181,7 @@ mod tests {
     #[tokio::test]
     async fn test_grpc_request_success_without_grpc_status() -> Result<()> {
         let test_http = TestHttp { scenario: TestScenario::SuccessWithoutGrpcStatus };
-        let (runtime, operation, request) = prepare_args(test_http).await?;
+        let (runtime, operation, request) = prepare_args(test_http)?;
 
         let result = execute_grpc_request(&runtime, &operation, request).await;
 
@@ -187,7 +195,7 @@ mod tests {
     #[tokio::test]
     async fn test_grpc_request_success_with_ok_grpc_status() -> Result<()> {
         let test_http = TestHttp { scenario: TestScenario::SuccessWithOkGrpcStatus };
-        let (runtime, operation, request) = prepare_args(test_http).await?;
+        let (runtime, operation, request) = prepare_args(test_http)?;
 
         let result = execute_grpc_request(&runtime, &operation, request).await;
 
@@ -201,7 +209,7 @@ mod tests {
     #[tokio::test]
     async fn test_grpc_request_success_with_error_grpc_status() -> Result<()> {
         let test_http = TestHttp { scenario: TestScenario::SuccessWithErrorGrpcStatus };
-        let (runtime, operation, request) = prepare_args(test_http).await?;
+        let (runtime, operation, request) = prepare_args(test_http)?;
 
         let result = execute_grpc_request(&runtime, &operation, request).await;
 
@@ -242,7 +250,7 @@ mod tests {
     #[tokio::test]
     async fn test_grpc_request_error() -> Result<()> {
         let test_http = TestHttp { scenario: TestScenario::Error };
-        let (runtime, operation, request) = prepare_args(test_http).await?;
+        let (runtime, operation, request) = prepare_args(test_http)?;
 
         let result = execute_grpc_request(&runtime, &operation, request).await;
 

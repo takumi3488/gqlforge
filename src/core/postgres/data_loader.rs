@@ -12,23 +12,24 @@ use crate::core::http::Response;
 use crate::core::postgres::PostgresIO;
 use crate::core::postgres::request_template::RenderedQuery;
 
-/// Key type for the Postgres DataLoader.
+/// Key type for the Postgres `DataLoader`.
 #[derive(Debug, Clone, PartialEq, Eq, Hash)]
 pub struct PostgresDataLoaderRequest {
     pub query: RenderedQuery,
 }
 
-/// DataLoader implementation for PostgreSQL that batches
+/// `DataLoader` implementation for `PostgreSQL` that batches
 /// identical queries via deduplication.
 #[derive(Clone)]
 pub struct PostgresDataLoader {
     pub(crate) postgres: Arc<dyn PostgresIO>,
-    #[allow(dead_code)]
+    #[expect(dead_code, reason = "reserved for future group-by batching support")]
     pub(crate) group_by: Option<GroupBy>,
 }
 
 impl PostgresDataLoader {
-    pub fn into_data_loader(self, batch: Batch) -> DataLoader<PostgresDataLoaderRequest, Self> {
+    #[must_use]
+    pub fn into_data_loader(self, batch: &Batch) -> DataLoader<PostgresDataLoaderRequest, Self> {
         DataLoader::new(self)
             .delay(Duration::from_millis(batch.delay as u64))
             .max_batch_size(batch.max_size.unwrap_or_default())

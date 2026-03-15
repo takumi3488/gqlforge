@@ -61,7 +61,7 @@ impl<'a> TypeGenerator<'a> {
         Self { type_name_generator }
     }
 
-    fn generate_scalar(&self, config: &mut Config) -> Scalar {
+    fn generate_scalar(config: &mut Config) -> Scalar {
         let any_scalar = Scalar::JSON;
         if config.types.contains_key(&any_scalar.name()) {
             return any_scalar;
@@ -76,14 +76,7 @@ impl<'a> TypeGenerator<'a> {
     ) -> Type {
         let mut ty = Type::default();
         for (json_property, json_val) in json_object {
-            let mut field = if !JSONValidator::is_graphql_compatible(json_val) {
-                // if object, array is empty or object has in-compatible fields then
-                // generate scalar for it.
-                Field {
-                    type_of: self.generate_scalar(config).to_string().into(),
-                    ..Default::default()
-                }
-            } else {
+            let mut field = if JSONValidator::is_graphql_compatible(json_val) {
                 let mut field = Field::default();
                 if is_primitive(json_val) {
                     field.type_of = to_gql_type(json_val).into();
@@ -92,6 +85,13 @@ impl<'a> TypeGenerator<'a> {
                     field.type_of = type_name.into();
                 }
                 field
+            } else {
+                // if object, array is empty or object has in-compatible fields then
+                // generate scalar for it.
+                Field {
+                    type_of: Self::generate_scalar(config).to_string().into(),
+                    ..Default::default()
+                }
             };
             field.type_of = if json_val.is_array() {
                 field.type_of.into_list()
@@ -99,7 +99,7 @@ impl<'a> TypeGenerator<'a> {
                 field.type_of
             };
 
-            ty.fields.insert(json_property.to_string(), field);
+            ty.fields.insert(json_property.clone(), field);
         }
         ty
     }
@@ -118,7 +118,7 @@ impl<'a> TypeGenerator<'a> {
                 for json_item in json_arr {
                     if let Value::Object(json_obj) = json_item {
                         if !JSONValidator::is_graphql_compatible(json_item) {
-                            return self.generate_scalar(config).to_string();
+                            return Self::generate_scalar(config).to_string();
                         }
                         object_types.push(self.create_type_from_object(json_obj, config));
                     } else {
@@ -130,22 +130,20 @@ impl<'a> TypeGenerator<'a> {
                     // merge the generated types of list into single concrete type.
                     let merged_type = TypeMerger::merge_fields(object_types);
                     let generate_type_name = self.type_name_generator.next();
-                    config
-                        .types
-                        .insert(generate_type_name.to_owned(), merged_type);
+                    config.types.insert(generate_type_name.clone(), merged_type);
                     return generate_type_name;
                 }
 
                 // generate a scalar if array is empty.
-                self.generate_scalar(config).to_string()
+                Self::generate_scalar(config).to_string()
             }
             Value::Object(json_obj) => {
                 if !JSONValidator::is_graphql_compatible(json_value) {
-                    return self.generate_scalar(config).to_string();
+                    return Self::generate_scalar(config).to_string();
                 }
                 let ty = self.create_type_from_object(json_obj, config);
                 let generate_type_name = self.type_name_generator.next();
-                config.types.insert(generate_type_name.to_owned(), ty);
+                config.types.insert(generate_type_name.clone(), ty);
                 generate_type_name
             }
             other => to_gql_type(other),
@@ -174,7 +172,7 @@ impl Transform for GraphQLTypesGenerator<'_> {
             .generate_types(&self.request_sample.res_body, &mut config);
 
         // generate the required field in operation type.
-        OperationTypeGenerator.generate(
+        OperationTypeGenerator::generate(
             self.request_sample,
             &root_type,
             self.type_name_generator,

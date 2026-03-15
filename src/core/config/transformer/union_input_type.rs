@@ -96,15 +96,15 @@ impl<'cfg> Visitor<'cfg> {
         self.new_types
     }
 
-    /// Walks over the field's arguments and fills union_presence info
+    /// Walks over the field's arguments and fills `union_presence` info
     fn collect_nested_unions_for_args(&mut self, field: &'cfg Field) {
         field
             .args
             .values()
-            .for_each(|arg| self.collect_nested_unions_for_type(arg.type_of.name()))
+            .for_each(|arg| self.collect_nested_unions_for_type(arg.type_of.name()));
     }
 
-    /// Recursively walks over nested types and fills union_presence info
+    /// Recursively walks over nested types and fills `union_presence` info
     fn collect_nested_unions_for_type(&mut self, type_name: &'cfg String) {
         if self.union_presence.contains_key(type_name) || self.visited_types.contains(&type_name) {
             return;
@@ -160,7 +160,7 @@ impl<'cfg> Visitor<'cfg> {
                 // if there are union types we need to create new types
                 // without unions and add to list of result types
                 // and union_presence info
-                let union_types = self.create_types_from_union(type_name, type_, union_fields);
+                let union_types = Self::create_types_from_union(type_name, type_, &union_fields);
 
                 self.union_presence.insert(
                     type_name,
@@ -215,7 +215,7 @@ impl<'cfg> Visitor<'cfg> {
                     ..arg.clone()
                 };
 
-                current_field.args.insert(arg_name.to_string(), new_arg);
+                current_field.args.insert(arg_name.clone(), new_arg);
                 self.walk_arguments(
                     args,
                     (format!("{field_name}Var{i}").into(), current_field),
@@ -231,11 +231,14 @@ impl<'cfg> Visitor<'cfg> {
     /// All the fields that resolved to union type are replaced with specific
     /// union type member one at a time.
     fn create_types_from_union(
-        &self,
         type_name: &str,
         type_: &Type,
-        union_fields: Vec<(&String, &Vec<String>)>,
+        union_fields: &[(&String, &Vec<String>)],
     ) -> Vec<(String, Type)> {
+        #[expect(
+            clippy::expect_used,
+            reason = "only available fields are in union_fields list by construction"
+        )]
         fn inner_create(
             type_name: String,                        // name of the new type to set
             base_type: Type,                          // current representation of the type
@@ -271,7 +274,7 @@ impl<'cfg> Visitor<'cfg> {
         inner_create(
             type_name.to_owned(),
             type_.clone(),
-            &union_fields,
+            union_fields,
             &mut new_types,
         );
 
@@ -281,6 +284,7 @@ impl<'cfg> Visitor<'cfg> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
     use insta::assert_snapshot;
 

@@ -1,6 +1,7 @@
 use regex::Regex;
 use serde_json::Value;
 
+#[must_use]
 pub fn detect_gql_data_type(value: &str) -> String {
     let trimmed_value = value.trim();
 
@@ -18,11 +19,18 @@ pub fn detect_gql_data_type(value: &str) -> String {
     }
 }
 
+#[must_use]
+///
+/// # Panics
+///
+/// Panics if an internal assertion fails.
+#[expect(clippy::unwrap_used, reason = "regex literal is always valid")]
 pub fn is_valid_field_name(property_name: &str) -> bool {
     let gql_field_name_validator: Regex = Regex::new(r"^[a-zA-Z][a-zA-Z0-9_]*$").unwrap();
     gql_field_name_validator.is_match(property_name)
 }
 
+#[must_use]
 pub fn to_gql_type(value: &Value) -> String {
     match value {
         Value::Null => {
@@ -39,6 +47,7 @@ pub fn to_gql_type(value: &Value) -> String {
     .to_string()
 }
 
+#[must_use]
 pub fn is_primitive(value: &Value) -> bool {
     let value_type = to_gql_type(value);
     value_type != "List" && value_type != "Object"

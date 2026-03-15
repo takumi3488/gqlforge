@@ -43,7 +43,7 @@ fn to_field_value(value: async_graphql::Value) -> FieldValue<'static> {
     match value {
         ConstValue::List(vec) => FieldValue::list(vec.into_iter().map(to_field_value)),
         value => {
-            let type_name = value.get_type_name().map(|s| s.to_string());
+            let type_name = value.get_type_name().map(std::string::ToString::to_string);
 
             let field_value = FieldValue::from(value);
 
@@ -56,11 +56,19 @@ fn to_field_value(value: async_graphql::Value) -> FieldValue<'static> {
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "handles all type definition variants"
+)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "RequestContext is always present in the GraphQL resolver context"
+)]
 fn to_type(def: &Definition) -> dynamic::Type {
     match def {
         Definition::Object(def) => {
             let mut object = dynamic::Object::new(def.name.clone());
-            for field in def.fields.iter() {
+            for field in &def.fields {
                 let field = field.clone();
                 let type_ref = TypeRef::from(&field.of_type);
                 let field_name = &field.name.clone();
@@ -82,7 +90,10 @@ fn to_type(def: &Definition) -> dynamic::Type {
                                 let ctx: ResolverContext = ctx.into();
                                 let ctx = EvalContext::new(req_ctx, &ctx);
 
-                                match ctx.path_value(&[field_name]).map(|a| a.into_owned()) {
+                                match ctx
+                                    .path_value(&[field_name])
+                                    .map(std::borrow::Cow::into_owned)
+                                {
                                     Some(ConstValue::Null) => FieldFuture::Value(FieldValue::NONE),
                                     a => FieldFuture::from_value(a),
                                 }
@@ -123,7 +134,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
                 if let Some(description) = &field.description {
                     dyn_schema_field = dyn_schema_field.description(description);
                 }
-                for arg in field.args.iter() {
+                for arg in &field.args {
                     dyn_schema_field = dyn_schema_field.argument(set_default_value(
                         dynamic::InputValue::new(arg.name.clone(), TypeRef::from(&arg.of_type)),
                         arg.default_value.clone(),
@@ -134,7 +145,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
             if let Some(description) = &def.description {
                 object = object.description(description);
             }
-            for interface in def.implements.iter() {
+            for interface in &def.implements {
                 object = object.implement(interface.clone());
             }
 
@@ -142,7 +153,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
         }
         Definition::Interface(def) => {
             let mut interface = dynamic::Interface::new(def.name.clone());
-            for field in def.fields.iter() {
+            for field in &def.fields {
                 interface = interface.field(dynamic::InterfaceField::new(
                     field.name.clone(),
                     TypeRef::from(&field.of_type),
@@ -153,7 +164,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
         }
         Definition::InputObject(def) => {
             let mut input_object = dynamic::InputObject::new(def.name.clone());
-            for field in def.fields.iter() {
+            for field in &def.fields {
                 let mut input_field =
                     dynamic::InputValue::new(field.name.clone(), TypeRef::from(&field.of_type));
                 if let Some(description) = &field.description {
@@ -179,7 +190,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
         }
         Definition::Enum(def) => {
             let mut enum_type = dynamic::Enum::new(def.name.clone());
-            for value in def.enum_values.iter() {
+            for value in &def.enum_values {
                 enum_type = enum_type.item(dynamic::EnumItem::new(value.name.clone()));
             }
             if let Some(desc) = def.description.clone() {
@@ -189,7 +200,7 @@ fn to_type(def: &Definition) -> dynamic::Type {
         }
         Definition::Union(def) => {
             let mut union = dynamic::Union::new(def.name.clone());
-            for type_ in def.types.iter() {
+            for type_ in &def.types {
                 union = union.possible_type(type_.clone());
             }
             dynamic::Type::Union(union)
@@ -197,10 +208,18 @@ fn to_type(def: &Definition) -> dynamic::Type {
     }
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "handles all subscription field types"
+)]
+#[expect(
+    clippy::unwrap_used,
+    reason = "RequestContext is always present in the GraphQL subscription context"
+)]
 fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
     let mut subscription = dynamic::Subscription::new(def.name.clone());
 
-    for field in def.fields.iter() {
+    for field in &def.fields {
         let field = field.clone();
         let type_ref = TypeRef::from(&field.of_type);
         let field_for_closure = field.clone();
@@ -311,7 +330,7 @@ fn to_subscription_type(def: &ObjectTypeDefinition) -> dynamic::Type {
         if let Some(description) = &field.description {
             sub_field = sub_field.description(description);
         }
-        for arg in field.args.iter() {
+        for arg in &field.args {
             sub_field = sub_field.argument(set_default_value(
                 dynamic::InputValue::new(arg.name.clone(), TypeRef::from(&arg.of_type)),
                 arg.default_value.clone(),
@@ -337,7 +356,7 @@ impl From<&Blueprint> for SchemaBuilder {
 
         schema = inject_custom_scalars(schema, blueprint);
 
-        for def in blueprint.definitions.iter() {
+        for def in &blueprint.definitions {
             // Register subscription type definitions as Subscription, not Object
             if let Definition::Object(obj_def) = def
                 && subscription.as_deref() == Some(&obj_def.name)

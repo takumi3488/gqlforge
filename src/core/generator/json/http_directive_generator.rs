@@ -61,6 +61,10 @@ impl<'a> HttpDirectiveGenerator<'a> {
         Self { url, http: Http::default() }
     }
 
+    #[expect(
+        clippy::unwrap_used,
+        reason = "regex literals are always valid and URL from a valid Url is always UTF-8"
+    )]
     fn add_path_variables(&mut self, field: &mut Field) {
         let int_regex = Regex::new(r"/\b\d+\b").unwrap();
         let uuid_regex =
@@ -76,9 +80,9 @@ impl<'a> HttpDirectiveGenerator<'a> {
                 .into_iter()
                 .fold(path_url.to_string(), |acc, (regex, type_of)| {
                     regex
-                        .replace_all(&acc.to_string(), |_: &regex::Captures| {
-                            let arg_key = format!("{}{}", PREFIX, arg_index);
-                            let placeholder = format!("/{{{{.args.{}}}}}", arg_key);
+                        .replace_all(&acc.clone(), |_: &regex::Captures| {
+                            let arg_key = format!("{PREFIX}{arg_index}");
+                            let placeholder = format!("/{{{{.args.{arg_key}}}}}");
 
                             let arg = Arg {
                                 type_of: Type::from(type_of.to_owned()).into_required(),
@@ -119,7 +123,7 @@ impl<'a> HttpDirectiveGenerator<'a> {
 
             // Convert query key to camel case for better readability.
             let query_key = query.key.to_case(Case::Camel);
-            let value: String = format!("{{{{.args.{}}}}}", query_key);
+            let value: String = format!("{{{{.args.{query_key}}}}}");
 
             self.http
                 .query
@@ -138,6 +142,7 @@ impl<'a> HttpDirectiveGenerator<'a> {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashMap;
 
     use url::Url;
@@ -210,7 +215,7 @@ mod test {
         let args: HashMap<String, String> = field
             .args
             .iter()
-            .map(|(name, arg)| (name.to_string(), arg.type_of.name().to_owned()))
+            .map(|(name, arg)| (name.clone(), arg.type_of.name().to_owned()))
             .collect::<HashMap<_, _>>();
         let test_args = vec![
             ("GEN__1".to_string(), "Int".to_string()),

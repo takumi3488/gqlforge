@@ -2,7 +2,6 @@ use anyhow::Result;
 use bytes::Bytes;
 use http::{Request, Response};
 use http_body_util::Full;
-use once_cell::sync::Lazy;
 use opentelemetry::KeyValue;
 use opentelemetry::metrics::Counter;
 use opentelemetry_http::HeaderExtractor;
@@ -13,14 +12,15 @@ use tracing_opentelemetry::OpenTelemetrySpanExt;
 
 use crate::core::blueprint::telemetry::Telemetry;
 
-static HTTP_SERVER_REQUEST_COUNT: Lazy<Counter<u64>> = Lazy::new(|| {
-    let meter = opentelemetry::global::meter("http_request");
+static HTTP_SERVER_REQUEST_COUNT: std::sync::LazyLock<Counter<u64>> =
+    std::sync::LazyLock::new(|| {
+        let meter = opentelemetry::global::meter("http_request");
 
-    meter
-        .u64_counter("http.server.request.count")
-        .with_description("Number of incoming request handled")
-        .build()
-});
+        meter
+            .u64_counter("http.server.request.count")
+            .with_description("Number of incoming request handled")
+            .build()
+    });
 
 #[derive(Default)]
 pub struct RequestCounter {
@@ -43,8 +43,8 @@ impl RequestCounter {
         for name in observable_headers {
             if let Some(value) = headers.get(name) {
                 attributes.push(KeyValue::new(
-                    format!("http.request.header.{}", name),
-                    format!("{:?}", value),
+                    format!("http.request.header.{name}"),
+                    format!("{value:?}"),
                 ));
             }
         }
@@ -61,7 +61,7 @@ impl RequestCounter {
     pub fn update(self, response: &Result<Response<Full<Bytes>>>) {
         if let Some(mut attributes) = self.attributes {
             if let Ok(response) = response {
-                attributes.push(get_response_status_code(response))
+                attributes.push(get_response_status_code(response));
             }
             HTTP_SERVER_REQUEST_COUNT.add(1, &attributes);
         }
@@ -69,7 +69,10 @@ impl RequestCounter {
 }
 
 pub fn get_response_status_code(response: &Response<Full<Bytes>>) -> KeyValue {
-    KeyValue::new(HTTP_RESPONSE_STATUS_CODE, response.status().as_u16() as i64)
+    KeyValue::new(
+        HTTP_RESPONSE_STATUS_CODE,
+        i64::from(response.status().as_u16()),
+    )
 }
 
 pub fn propagate_context(req: &Request<Full<Bytes>>) {

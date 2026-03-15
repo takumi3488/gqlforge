@@ -8,7 +8,7 @@ use async_graphql_value::ConstValue;
 pub use request_template::RequestTemplate;
 pub use schema::DatabaseSchema;
 
-/// Build a rustls-based TLS connector for PostgreSQL connections.
+/// Build a rustls-based TLS connector for `PostgreSQL` connections.
 pub(crate) fn make_tls_connect() -> anyhow::Result<tokio_postgres_rustls::MakeRustlsConnect> {
     let native = rustls_native_certs::load_native_certs();
     if !native.errors.is_empty() {
@@ -35,7 +35,7 @@ pub(crate) fn make_tls_connect() -> anyhow::Result<tokio_postgres_rustls::MakeRu
     Ok(tokio_postgres_rustls::MakeRustlsConnect::new(config))
 }
 
-/// Trait for executing SQL queries against PostgreSQL.
+/// Trait for executing SQL queries against `PostgreSQL`.
 /// Concrete implementations live in the CLI crate (real connection pool)
 /// or in test utilities (mock).
 #[async_trait::async_trait]

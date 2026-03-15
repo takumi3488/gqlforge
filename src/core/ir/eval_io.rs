@@ -40,6 +40,7 @@ where
     }
 }
 
+#[expect(clippy::too_many_lines, reason = "dispatches all IO resolver variants")]
 async fn eval_io_inner<Ctx>(io: &IO, ctx: &mut EvalContext<'_, Ctx>) -> Result<ConstValue, Error>
 where
     Ctx: ResolverContextLike + Sync,
@@ -48,7 +49,7 @@ where
         IO::Http { req_template, dl_id, hook, .. } => {
             let event_worker = &ctx.request_ctx.runtime.cmd_worker;
             let js_worker = &ctx.request_ctx.runtime.worker;
-            let eval_http = EvalHttp::new(ctx, req_template, dl_id);
+            let eval_http = EvalHttp::new(ctx, req_template, dl_id.as_ref());
             let request = eval_http.init_request()?;
             let response = match (&event_worker, js_worker, hook) {
                 (Some(worker), Some(js_worker), Some(hook)) => {
@@ -123,8 +124,7 @@ where
                 .get(connection_id)
                 .ok_or_else(|| {
                     Error::IO(format!(
-                        "PostgreSQL connection '{}' not configured",
-                        connection_id
+                        "PostgreSQL connection '{connection_id}' not configured"
                     ))
                 })?;
             let result = pg
@@ -163,19 +163,21 @@ where
                 return Err(Error::IO("S3 bucket name must not be empty".to_string()));
             }
             let link_id = rendered.link_id.as_deref();
-            let s3 =
-                match link_id {
-                    Some(id) => ctx.request_ctx.runtime.s3.get(id).ok_or_else(|| {
-                        Error::IO(format!("S3 link '{}' not found in runtime", id))
-                    })?,
-                    None => ctx
-                        .request_ctx
-                        .runtime
-                        .s3
-                        .get("")
-                        .or_else(|| ctx.request_ctx.runtime.s3.values().next())
-                        .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?,
-                };
+            let s3 = match link_id {
+                Some(id) => ctx
+                    .request_ctx
+                    .runtime
+                    .s3
+                    .get(id)
+                    .ok_or_else(|| Error::IO(format!("S3 link '{id}' not found in runtime")))?,
+                None => ctx
+                    .request_ctx
+                    .runtime
+                    .s3
+                    .get("")
+                    .or_else(|| ctx.request_ctx.runtime.s3.values().next())
+                    .ok_or_else(|| Error::IO("S3 runtime not configured".to_string()))?,
+            };
 
             match rendered.operation {
                 S3Operation::GetPresignedUrl => {

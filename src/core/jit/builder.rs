@@ -10,7 +10,7 @@ use async_graphql::parser::types::{
 use async_graphql_value::Value;
 
 use super::BuildError;
-use super::model::{Directive as JitDirective, *};
+use super::model::{Arg, ArgId, Directive as JitDirective, Field, FieldId, Variable};
 use crate::core::blueprint::{Blueprint, Index, QueryField};
 use crate::core::counter::{Count, Counter};
 use crate::core::jit::model::OperationPlan;
@@ -84,11 +84,8 @@ impl<'a> Builder<'a> {
         }
     }
 
-    #[inline(always)]
-    fn include(
-        &self,
-        directives: &[Positioned<async_graphql::parser::types::Directive>],
-    ) -> Conditions {
+    #[inline]
+    fn include(directives: &[Positioned<async_graphql::parser::types::Directive>]) -> Conditions {
         fn get_condition(dir: &Directive) -> Option<Condition> {
             let arg = dir.get_argument("if").map(|pos| &pos.node);
             match arg {
@@ -125,9 +122,12 @@ impl<'a> Builder<'a> {
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
-    #[inline(always)]
-    fn iter(
+    #[inline]
+    #[expect(
+        clippy::too_many_lines,
+        reason = "JIT field collection handles all selection variants"
+    )]
+    fn collect_fields(
         &self,
         parent_fragment: Option<&str>,
         selection: &SelectionSet,
@@ -145,13 +145,12 @@ impl<'a> Builder<'a> {
                     let output_name = gql_field
                         .alias
                         .as_ref()
-                        .map(|a| a.node.as_str())
-                        .unwrap_or(field_name);
+                        .map_or(field_name, |a| a.node.as_str());
                     if visited.contains(output_name) {
                         continue;
                     }
                     visited.insert(output_name);
-                    let conditions = self.include(&gql_field.directives);
+                    let conditions = Self::include(&gql_field.directives);
 
                     // Skip fields based on GraphQL's skip/include conditions
                     if conditions.is_const_skip() {
@@ -178,10 +177,10 @@ impl<'a> Builder<'a> {
                     let request_args = gql_field
                         .arguments
                         .iter()
-                        .map(|(k, v)| (k.node.as_str().to_owned(), v.node.to_owned()))
+                        .map(|(k, v)| (k.node.as_str().to_owned(), v.node.clone()))
                         .collect::<HashMap<_, _>>();
 
-                    let parent_fragment = parent_fragment.map(|s| s.to_owned());
+                    let parent_fragment = parent_fragment.map(std::borrow::ToOwned::to_owned);
                     // Check if the field is present in the schema index
                     if let Some(field_def) = self.index.get_field(type_condition, field_name) {
                         let mut args = Vec::with_capacity(request_args.len());
@@ -213,7 +212,7 @@ impl<'a> Builder<'a> {
                         let id = FieldId::new(self.field_id.next());
 
                         // Recursively gather child fields for the selection set
-                        let child_fields = self.iter(
+                        let child_fields = self.collect_fields(
                             None,
                             &gql_field.selection_set.node,
                             type_of.name(),
@@ -222,7 +221,7 @@ impl<'a> Builder<'a> {
 
                         let ir = match field_def {
                             QueryField::Field(inner) => inner.0.resolver.clone(),
-                            _ => None,
+                            QueryField::InputField(_) => None,
                         };
 
                         let scalar = if self.index.type_is_scalar(type_of.name()) {
@@ -281,7 +280,7 @@ impl<'a> Builder<'a> {
                     if let Some(fragment) =
                         fragments.get(fragment_spread.fragment_name.node.as_str())
                     {
-                        fragments_fields.extend(self.iter(
+                        fragments_fields.extend(self.collect_fields(
                             Some(fragment.type_condition.node.on.node.as_str()),
                             &fragment.selection_set.node,
                             fragment.type_condition.node.on.node.as_str(),
@@ -293,9 +292,8 @@ impl<'a> Builder<'a> {
                     let type_of = fragment
                         .type_condition
                         .as_ref()
-                        .map(|cond| cond.node.on.node.as_str())
-                        .unwrap_or(type_condition);
-                    fragments_fields.extend(self.iter(
+                        .map_or(type_condition, |cond| cond.node.on.node.as_str());
+                    fragments_fields.extend(self.collect_fields(
                         Some(type_of),
                         &fragment.selection_set.node,
                         type_of,
@@ -313,7 +311,7 @@ impl<'a> Builder<'a> {
         fields.sort_by(|a, b| a.id.cmp(&b.id));
         fields
     }
-    #[inline(always)]
+    #[inline]
     fn get_type(&self, ty: OperationType) -> Option<&str> {
         match ty {
             OperationType::Query => Some(self.index.get_query()),
@@ -324,7 +322,7 @@ impl<'a> Builder<'a> {
 
     /// Resolves currently processed operation
     /// based on [spec](https://spec.graphql.org/October2021/#sec-Executing-Requests)
-    #[inline(always)]
+    #[inline]
     fn get_operation(
         &self,
         operation_name: Option<&str>,
@@ -341,7 +339,10 @@ impl<'a> Builder<'a> {
             match &self.document.operations {
                 DocumentOperations::Single(operation) => Ok(&operation.node),
                 DocumentOperations::Multiple(map) if map.len() == 1 => {
-                    let (_, operation) = map.iter().next().unwrap();
+                    let (_, operation) = map
+                        .iter()
+                        .next()
+                        .unwrap_or_else(|| unreachable!("len == 1 guarantees first entry"));
                     Ok(&operation.node)
                 }
                 DocumentOperations::Multiple(_) => Err(BuildError::OperationNameRequired),
@@ -349,11 +350,11 @@ impl<'a> Builder<'a> {
         }
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn build(&self, operation_name: Option<&str>) -> Result<OperationPlan<Value>, BuildError> {
         let mut fragments: HashMap<&str, &FragmentDefinition> = HashMap::new();
 
-        for (name, fragment) in self.document.fragments.iter() {
+        for (name, fragment) in &self.document.fragments {
             fragments.insert(name.as_str(), &fragment.node);
         }
 
@@ -362,7 +363,7 @@ impl<'a> Builder<'a> {
         let name = self
             .get_type(operation.ty)
             .ok_or(BuildError::RootOperationTypeNotDefined { operation: operation.ty })?;
-        let fields = self.iter(None, &operation.selection_set.node, name, &fragments);
+        let fields = self.collect_fields(None, &operation.selection_set.node, name, &fragments);
 
         let is_introspection_query = operation.selection_set.node.items.iter().any(|f| {
             if let Selection::Field(Positioned { node: gql_field, .. }) = &f.node {
@@ -387,6 +388,7 @@ impl<'a> Builder<'a> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
     use pretty_assertions::assert_eq;
 
@@ -407,11 +409,11 @@ mod tests {
     #[tokio::test]
     async fn test_from_document() {
         let plan = plan(
-            r#"
+            r"
             query {
                 posts { user { id name } }
             }
-        "#,
+        ",
         );
         assert!(plan.is_query());
         insta::assert_debug_snapshot!(plan.selection);
@@ -420,25 +422,25 @@ mod tests {
     #[tokio::test]
     async fn test_size() {
         let plan = plan(
-            r#"
+            r"
             query {
                 posts { user { id name } }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
-        assert_eq!(plan.size(), 4)
+        assert_eq!(plan.size(), 4);
     }
 
     #[test]
     fn test_simple_query() {
         let plan = plan(
-            r#"
+            r"
             query {
                 posts { user { id } }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -448,11 +450,11 @@ mod tests {
     #[test]
     fn test_alias_query() {
         let plan = plan(
-            r#"
+            r"
             query {
                 articles: posts { author: user { identifier: id } }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -490,7 +492,7 @@ mod tests {
     #[test]
     fn test_fragments() {
         let plan = plan(
-            r#"
+            r"
             fragment UserPII on User {
               name
               email
@@ -508,7 +510,7 @@ mod tests {
                 ...PostPII
               }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -518,7 +520,7 @@ mod tests {
     #[test]
     fn test_multiple_operations() {
         let plan = plan(
-            r#"
+            r"
             query {
               user(id:1) {
                 id
@@ -529,7 +531,7 @@ mod tests {
                 title
               }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -539,14 +541,14 @@ mod tests {
     #[test]
     fn test_variables() {
         let plan = plan(
-            r#"
+            r"
             query user($id: Int!) {
               user(id: $id) {
                 id
                 name
               }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -556,7 +558,7 @@ mod tests {
     #[test]
     fn test_unions() {
         let plan = plan(
-            r#"
+            r"
             query {
               getUserIdOrEmail(id:1) {
                 ...on UserId {
@@ -567,7 +569,7 @@ mod tests {
                 }
               }
             }
-        "#,
+        ",
         );
 
         assert!(plan.is_query());
@@ -695,14 +697,14 @@ mod tests {
     #[test]
     fn test_directives() {
         let plan = plan(
-            r#"
+            r"
             query($includeName: Boolean! = true) {
                 users {
                     id @options(paging: $includeName)
                     name @include(if: $includeName)
                 }
             }
-            "#,
+            ",
         );
 
         assert!(plan.is_query());

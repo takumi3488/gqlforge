@@ -150,57 +150,73 @@ pub struct Upstream {
 }
 
 impl Upstream {
+    #[must_use]
     pub fn get_pool_idle_timeout(&self) -> u64 {
         self.pool_idle_timeout.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_pool_max_idle_per_host(&self) -> usize {
         self.pool_max_idle_per_host.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_keep_alive_interval(&self) -> u64 {
         self.keep_alive_interval.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_keep_alive_timeout(&self) -> u64 {
         self.keep_alive_timeout.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_keep_alive_while_idle(&self) -> bool {
         self.keep_alive_while_idle.unwrap_or(false)
     }
+    #[must_use]
     pub fn get_connect_timeout(&self) -> u64 {
         self.connect_timeout.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_timeout(&self) -> u64 {
         self.timeout.unwrap_or(60)
     }
+    #[must_use]
     pub fn get_tcp_keep_alive(&self) -> u64 {
         self.tcp_keep_alive.unwrap_or(5)
     }
+    #[must_use]
     pub fn get_user_agent(&self) -> String {
         self.user_agent
             .clone()
             .unwrap_or("Gqlforge/1.0".to_string())
     }
+    #[must_use]
     pub fn get_http_cache_size(&self) -> u64 {
         self.http_cache.unwrap_or(0)
     }
+    #[must_use]
     pub fn get_allowed_headers(&self) -> BTreeSet<String> {
         self.allowed_headers.clone().unwrap_or_default()
     }
+    #[must_use]
     pub fn get_delay(&self) -> usize {
         self.batch.clone().unwrap_or_default().delay
     }
 
+    #[must_use]
     pub fn get_max_size(&self) -> usize {
         self.batch
             .as_ref()
             .map_or(DEFAULT_MAX_SIZE, |b| b.max_size.unwrap_or(DEFAULT_MAX_SIZE))
     }
+    #[must_use]
     pub fn get_http_2_only(&self) -> bool {
         self.http2_only.unwrap_or(false)
     }
 
+    #[must_use]
     pub fn get_on_request(&self) -> Option<String> {
         self.on_request.clone()
     }
+    #[must_use]
     pub fn get_verify_ssl(&self) -> bool {
         self.verify_ssl.unwrap_or(true)
     }
@@ -213,7 +229,12 @@ mod tests {
 
     fn setup_upstream_with_headers(headers: &[&str]) -> Upstream {
         Upstream {
-            allowed_headers: Some(headers.iter().map(|s| s.to_string()).collect()),
+            allowed_headers: Some(
+                headers
+                    .iter()
+                    .map(std::string::ToString::to_string)
+                    .collect(),
+            ),
             ..Default::default()
         }
     }
@@ -228,7 +249,7 @@ mod tests {
             Some(
                 ["a", "b", "c", "d", "e", "f"]
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect()
             )
         );
@@ -242,7 +263,12 @@ mod tests {
 
         assert_eq!(
             merged.allowed_headers,
-            Some(["a", "b", "c"].iter().map(|s| s.to_string()).collect())
+            Some(
+                ["a", "b", "c"]
+                    .iter()
+                    .map(std::string::ToString::to_string)
+                    .collect()
+            )
         );
     }
 
@@ -254,7 +280,12 @@ mod tests {
 
         assert_eq!(
             merged.allowed_headers,
-            Some(["a", "b", "c"].iter().map(|s| s.to_string()).collect())
+            Some(
+                ["a", "b", "c"]
+                    .iter()
+                    .map(std::string::ToString::to_string)
+                    .collect()
+            )
         );
     }
 }

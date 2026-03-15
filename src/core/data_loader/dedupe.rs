@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 use std::hash::Hash;
-use std::sync::{Arc, Mutex, Weak};
+use std::sync::{Arc, Mutex, PoisonError, Weak};
 
 use futures_util::Future;
 use tokio::sync::broadcast;
@@ -71,7 +71,7 @@ impl<K: Key, V: Value> Dedupe<K, V> {
                 },
                 Step::Init(tx) => {
                     let value = or_else().await;
-                    let mut guard = self.cache.lock().unwrap();
+                    let mut guard = self.cache.lock().unwrap_or_else(PoisonError::into_inner);
                     if self.persist {
                         guard.insert(key.to_owned(), State::Ready(value.clone()));
                     } else {
@@ -87,7 +87,7 @@ impl<K: Key, V: Value> Dedupe<K, V> {
     }
 
     fn step(&self, key: &K) -> Step<V> {
-        let mut this = self.cache.lock().unwrap();
+        let mut this = self.cache.lock().unwrap_or_else(PoisonError::into_inner);
 
         if let Some(state) = this.get(key) {
             match state {
@@ -117,12 +117,17 @@ impl<K: Key, V: Value> Dedupe<K, V> {
 pub struct DedupeResult<K, V, E>(Dedupe<K, Result<V, E>>);
 
 impl<K: Key, V: Value, E: Value> DedupeResult<K, V, E> {
+    #[must_use]
     pub fn new(persist: bool) -> Self {
         Self(Dedupe::new(1, persist))
     }
 }
 
 impl<K: Key, V: Value, E: Value> DedupeResult<K, V, E> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn dedupe<'a, Fn, Fut>(&'a self, key: &'a K, or_else: Fn) -> Result<V, E>
     where
         Fn: FnOnce() -> Fut,
@@ -134,6 +139,7 @@ impl<K: Key, V: Value, E: Value> DedupeResult<K, V, E> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, clippy::expect_used, reason = "test code")]
     use std::ops::Deref;
     use std::sync::atomic::{AtomicUsize, Ordering};
     use std::time::Duration;
@@ -208,7 +214,7 @@ mod tests {
         let mut handles = Vec::new();
 
         // Spawn multiple tasks to simulate concurrent access
-        for i in 0..1000000 {
+        for i in 0..1_000_000 {
             let cache = cache.clone();
             let counter = counter.clone();
             let handle = tokio::task::spawn(async move {
@@ -220,7 +226,7 @@ mod tests {
             handles.push(handle);
         }
         // Await each task for any potential deadlocks
-        for handle in handles.into_iter() {
+        for handle in handles {
             let _ = handle.await.unwrap();
         }
         // Check that compute_value was called exactly once
@@ -283,12 +289,11 @@ mod tests {
         task_1.abort();
 
         let actual = task_2.await.unwrap();
-        assert_eq!(actual, 200)
+        assert_eq!(actual, 200);
     }
 
-    // TODO: This is a failing test
     #[tokio::test]
-    #[ignore]
+    #[ignore = "TODO: This is a failing test - fix needed"]
     async fn test_should_not_abort_call_1() {
         #[derive(Debug, PartialEq, Clone)]
         struct Status {
@@ -312,9 +317,12 @@ mod tests {
             cache_1
                 .dedupe(&1, move || async move {
                     sleep(Duration::from_millis(100)).await;
-                    status_1.lock().unwrap().call_1 = true;
+                    status_1
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .call_1 = true;
                 })
-                .await
+                .await;
         });
 
         // Wait for 10ms
@@ -325,9 +333,12 @@ mod tests {
             cache_2
                 .dedupe(&1, move || async move {
                     sleep(Duration::from_millis(120)).await;
-                    status_2.lock().unwrap().call_2 = true;
+                    status_2
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .call_2 = true;
                 })
-                .await
+                .await;
         });
 
         // Wait for 10ms
@@ -339,8 +350,12 @@ mod tests {
         sleep(Duration::from_millis(300)).await;
 
         // Task 1 should still have completed because others are dependent on it.
-        let actual = status.lock().unwrap().deref().to_owned();
-        assert_eq!(actual, Status { call_1: true, call_2: false })
+        let actual = status
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .deref()
+            .to_owned();
+        assert_eq!(actual, Status { call_1: true, call_2: false });
     }
 
     #[tokio::test]
@@ -367,9 +382,12 @@ mod tests {
             cache_1
                 .dedupe(&1, move || async move {
                     sleep(Duration::from_millis(100)).await;
-                    status_1.lock().unwrap().call_1 = true;
+                    status_1
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .call_1 = true;
                 })
-                .await
+                .await;
         });
 
         // Task 2 completed in 150ms
@@ -377,9 +395,12 @@ mod tests {
             cache_2
                 .dedupe(&1, move || async move {
                     sleep(Duration::from_millis(150)).await;
-                    status_2.lock().unwrap().call_2 = true;
+                    status_2
+                        .lock()
+                        .unwrap_or_else(PoisonError::into_inner)
+                        .call_2 = true;
                 })
-                .await
+                .await;
         });
 
         // Wait for 10ms
@@ -392,7 +413,11 @@ mod tests {
         sleep(Duration::from_millis(300)).await;
 
         // No task should have completed
-        let actual = status.lock().unwrap().deref().to_owned();
-        assert_eq!(actual, Status { call_1: false, call_2: false })
+        let actual = status
+            .lock()
+            .unwrap_or_else(PoisonError::into_inner)
+            .deref()
+            .to_owned();
+        assert_eq!(actual, Status { call_1: false, call_2: false });
     }
 }

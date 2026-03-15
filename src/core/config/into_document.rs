@@ -1,5 +1,9 @@
 use async_graphql::Positioned;
-use async_graphql::parser::types::*;
+use async_graphql::parser::types::{
+    ConstDirective, EnumType, EnumValueDefinition, FieldDefinition, InputObjectType,
+    InputValueDefinition, InterfaceType, ObjectType, SchemaDefinition, ServiceDocument,
+    TypeDefinition, TypeKind, TypeSystemDefinition, UnionType,
+};
 use async_graphql_value::{ConstValue, Name};
 use gqlforge_valid::Validator;
 
@@ -12,6 +16,10 @@ fn transform_default_value(value: Option<serde_json::Value>) -> Option<ConstValu
     value.map(ConstValue::from_json).and_then(Result::ok)
 }
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "converts all config sections to document definitions"
+)]
 fn config_document(config: &Config) -> ServiceDocument {
     let mut definitions = Vec::new();
     let mut directives = vec![
@@ -33,7 +41,7 @@ fn config_document(config: &Config) -> ServiceDocument {
             // "type" needs to be filtered out, because when is the default value, it is not present
             // in the directive
             .filter(|(name, _)| name != &pos(Name::new("type")))
-            .map(|argument| argument.to_owned())
+            .map(std::borrow::ToOwned::to_owned)
             .chain(std::iter::once(type_directive))
             .collect();
 
@@ -58,7 +66,7 @@ fn config_document(config: &Config) -> ServiceDocument {
     definitions.push(TypeSystemDefinition::Schema(pos(schema_definition)));
     let interface_types = config.interfaces_types_map();
     let input_types = config.input_types();
-    for (type_name, type_def) in config.types.iter() {
+    for (type_name, type_def) in &config.types {
         let kind = if interface_types.contains_key(type_name) {
             TypeKind::Interface(InterfaceType {
                 implements: type_def
@@ -159,7 +167,7 @@ fn config_document(config: &Config) -> ServiceDocument {
             kind,
         })));
     }
-    for (name, union) in config.unions.iter() {
+    for (name, union) in &config.unions {
         definitions.push(TypeSystemDefinition::Type(pos(TypeDefinition {
             extend: false,
             description: None,
@@ -175,7 +183,7 @@ fn config_document(config: &Config) -> ServiceDocument {
         })));
     }
 
-    for (name, values) in config.enums.iter() {
+    for (name, values) in &config.enums {
         definitions.push(TypeSystemDefinition::Type(pos(TypeDefinition {
             extend: false,
             description: values.doc.clone().map(pos),

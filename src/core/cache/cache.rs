@@ -1,7 +1,7 @@
 use std::hash::Hash;
 use std::num::NonZeroU64;
 use std::sync::atomic::{AtomicUsize, Ordering};
-use std::sync::{Arc, RwLock};
+use std::sync::{Arc, PoisonError, RwLock};
 use std::time::Duration;
 
 use ttl_cache::TtlCache;
@@ -16,11 +16,12 @@ pub struct InMemoryCache<K: Hash + Eq, V> {
 
 impl<K: Hash + Eq, V: Clone> Default for InMemoryCache<K, V> {
     fn default() -> Self {
-        Self::new(100000)
+        Self::new(100_000)
     }
 }
 
 impl<K: Hash + Eq, V: Clone> InMemoryCache<K, V> {
+    #[must_use]
     pub fn new(capacity: usize) -> Self {
         InMemoryCache {
             data: Arc::new(RwLock::new(TtlCache::new(capacity))),
@@ -38,12 +39,20 @@ impl<K: Hash + Eq + Send + Sync, V: Clone + Send + Sync> crate::core::Cache
     type Value = V;
     async fn set<'a>(&'a self, key: K, value: V, ttl: NonZeroU64) -> Result<()> {
         let ttl = Duration::from_millis(ttl.get());
-        self.data.write().unwrap().insert(key, value, ttl);
+        self.data
+            .write()
+            .unwrap_or_else(PoisonError::into_inner)
+            .insert(key, value, ttl);
         Ok(())
     }
 
     async fn get<'a>(&'a self, key: &'a K) -> Result<Option<Self::Value>> {
-        let val = self.data.read().unwrap().get(key).cloned();
+        let val = self
+            .data
+            .read()
+            .unwrap_or_else(PoisonError::into_inner)
+            .get(key)
+            .cloned();
         if val.is_some() {
             self.hits.fetch_add(1, Ordering::Relaxed);
         } else {
@@ -53,14 +62,17 @@ impl<K: Hash + Eq + Send + Sync, V: Clone + Send + Sync> crate::core::Cache
     }
 
     fn hit_rate(&self) -> Option<f64> {
-        let cache = self.data.read().unwrap();
+        let cache = self.data.read().unwrap_or_else(PoisonError::into_inner);
         let hits = self.hits.load(Ordering::Relaxed);
         let misses = self.miss.load(Ordering::Relaxed);
 
         drop(cache);
 
         if hits + misses > 0 {
-            return Some(hits as f64 / (hits + misses) as f64);
+            return Some(
+                f64::from(u32::try_from(hits).unwrap_or(u32::MAX))
+                    / f64::from(u32::try_from(hits + misses).unwrap_or(u32::MAX)),
+            );
         }
 
         None
@@ -69,6 +81,7 @@ impl<K: Hash + Eq + Send + Sync, V: Clone + Send + Sync> crate::core::Cache
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::num::NonZeroU64;
     use std::time::Duration;
 

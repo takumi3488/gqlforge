@@ -1,6 +1,6 @@
 use super::datetime::{parse_naive_datetime, parse_naive_time, parse_uuid_to_bytes};
 
-/// Wrapper that accepts any PostgreSQL type and reads the raw binary data.
+/// Wrapper that accepts any `PostgreSQL` type and reads the raw binary data.
 pub(super) struct RawBytes(pub(super) Vec<u8>);
 
 impl<'a> postgres_types::FromSql<'a> for RawBytes {
@@ -16,7 +16,7 @@ impl<'a> postgres_types::FromSql<'a> for RawBytes {
     }
 }
 
-/// Wrapper that reads PostgreSQL enum values as UTF-8 strings.
+/// Wrapper that reads `PostgreSQL` enum values as UTF-8 strings.
 pub(super) struct EnumText(pub(super) String);
 
 impl<'a> postgres_types::FromSql<'a> for EnumText {
@@ -33,7 +33,7 @@ impl<'a> postgres_types::FromSql<'a> for EnumText {
     }
 }
 
-/// Wrapper that converts a string parameter to the type PostgreSQL expects.
+/// Wrapper that converts a string parameter to the type `PostgreSQL` expects.
 #[derive(Debug)]
 pub(super) struct TypedParam(pub(super) String);
 
@@ -133,6 +133,7 @@ impl postgres_types::ToSql for TypedParam {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     fn typed_param_to_bytes(
@@ -204,7 +205,7 @@ mod tests {
     #[test]
     fn test_typed_param_int8() {
         let bytes = typed_param_to_bytes("9999999999", &postgres_types::Type::INT8).unwrap();
-        assert_eq!(bytes, 9999999999i64.to_be_bytes().to_vec());
+        assert_eq!(bytes, 9_999_999_999_i64.to_be_bytes().to_vec());
     }
 
     #[test]

@@ -1,11 +1,15 @@
 use super::JsonLike;
 
 pub trait JsonLikeList<'json>: JsonLike<'json> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     fn map<Err>(self, mapper: &mut impl FnMut(Self) -> Result<Self, Err>) -> Result<Self, Err> {
         if self.as_array().is_some() {
             let new = self
                 .into_array()
-                .unwrap()
+                .unwrap_or_else(|| unreachable!("as_array() confirmed Some above"))
                 .into_iter()
                 .map(|value| value.map(mapper))
                 .collect::<Result<_, _>>()?;
@@ -16,6 +20,10 @@ pub trait JsonLikeList<'json>: JsonLike<'json> {
         }
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     fn map_ref<Err>(
         &self,
         mapper: &mut impl FnMut(&Self) -> Result<Self, Err>,
@@ -23,7 +31,7 @@ pub trait JsonLikeList<'json>: JsonLike<'json> {
         if self.as_array().is_some() {
             let new = self
                 .as_array()
-                .unwrap()
+                .unwrap_or_else(|| unreachable!("as_array() confirmed Some above"))
                 .iter()
                 .map(|value| value.map_ref(mapper))
                 .collect::<Result<_, _>>()?;
@@ -36,9 +44,11 @@ pub trait JsonLikeList<'json>: JsonLike<'json> {
 
     fn for_each(&'json self, f: &mut impl FnMut(&'json Self)) {
         if let Some(arr) = self.as_array() {
-            arr.iter().for_each(|value| value.for_each(f))
+            for value in arr {
+                value.for_each(f);
+            }
         } else {
-            f(self)
+            f(self);
         }
     }
 }
@@ -47,7 +57,8 @@ impl<'json, T: JsonLike<'json>> JsonLikeList<'json> for T {}
 
 #[cfg(test)]
 mod tests {
-    use serde_json::json;
+    #![expect(clippy::unwrap_used, reason = "test code")]
+    use serde_json::{Map, json};
 
     use super::*;
 
@@ -59,7 +70,7 @@ mod tests {
         ]);
 
         let value = value
-            .map(&mut |_| anyhow::Ok(serde_json::Value::Object(Default::default())))
+            .map(&mut |_| anyhow::Ok(serde_json::Value::Object(Map::new())))
             .unwrap();
 
         assert_eq!(
@@ -76,7 +87,7 @@ mod tests {
         ]);
 
         let value = value
-            .map_ref(&mut |_| anyhow::Ok(serde_json::Value::Object(Default::default())))
+            .map_ref(&mut |_| anyhow::Ok(serde_json::Value::Object(Map::new())))
             .unwrap();
 
         assert_eq!(

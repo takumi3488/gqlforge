@@ -14,7 +14,7 @@ pub struct Synth<'a, Value> {
 }
 
 impl<'a, Value> Synth<'a, Value> {
-    #[inline(always)]
+    #[inline]
     pub fn new(
         plan: &'a OperationPlan<Value>,
         store: ValueStore<Value>,
@@ -28,12 +28,12 @@ impl<'a, Value> Synth<'a, Value>
 where
     Value: JsonLike<'a> + Clone + std::fmt::Debug,
 {
-    #[inline(always)]
+    #[inline]
     fn include(&self, field: &Field<Value>) -> bool {
         !field.skip(&self.variables)
     }
 
-    #[inline(always)]
+    #[inline]
     pub fn synthesize<Output>(&'a self) -> Result<Output, Box<Positioned<Error>>>
     where
         Output: JsonLike<'a>,
@@ -42,22 +42,22 @@ where
         let mut path = Vec::new();
         let root_name = self.plan.root_name();
 
-        for child in self.plan.selection.iter() {
+        for child in &self.plan.selection {
             if !self.include(child) {
                 continue;
             }
             // TODO: in case of error set `child.output_name` to null
             // and append error to response error array
-            let val = self.iter(child, None, &DataPath::new(), &mut path, Some(root_name))?;
+            let val =
+                self.process_node(child, None, &DataPath::new(), &mut path, Some(root_name))?;
             data.insert_key(&child.output_name, val);
         }
 
         Ok(Output::object(data))
     }
 
-    #[allow(clippy::too_many_arguments)]
-    #[inline(always)]
-    fn iter<Output>(
+    #[inline]
+    fn process_node<Output>(
         &'a self,
         node: &'a Field<Value>,
         value: Option<&'a Value>,
@@ -70,7 +70,7 @@ where
     {
         path.push(PathSegment::Field(Cow::Borrowed(&node.output_name)));
 
-        let result = match self.store.get(&node.id) {
+        let result = match self.store.get(node.id) {
             Some(value) => {
                 let mut value = value.as_ref().map_err(|e| Box::new(e.clone()))?;
 
@@ -83,13 +83,13 @@ where
                 }
 
                 if node.type_of.is_list() != value.as_array().is_some() {
-                    return self.node_nullable_guard(node, path, None);
+                    return Self::node_nullable_guard(node, path, None);
                 }
                 self.iter_inner(node, value, data_path, path)
             }
             None => match value {
                 Some(result) => self.iter_inner(node, result, data_path, path),
-                None => self.node_nullable_guard(node, path, root_name),
+                None => Self::node_nullable_guard(node, path, root_name),
             },
         };
 
@@ -100,7 +100,6 @@ where
     /// This guard ensures to return Null value only if node type permits it, in
     /// case it does not it throws an Error
     fn node_nullable_guard<Output>(
-        &'a self,
         node: &'a Field<Value>,
         path: &[PathSegment],
         root_name: Option<&'a str>,
@@ -118,12 +117,11 @@ where
             Ok(Output::null())
         } else {
             Err(ValidationError::ValueRequired.into())
-                .map_err(|e| self.to_location_error(e, node, path))
+                .map_err(|e| Self::to_location_error(e, node, path))
         }
     }
 
-    #[allow(clippy::too_many_arguments)]
-    #[inline(always)]
+    #[inline]
     fn iter_inner<Output>(
         &'a self,
         node: &'a Field<Value>,
@@ -150,26 +148,20 @@ where
             } else {
                 Err(ValidationError::ValueRequired.into())
             }
-        } else if node.scalar.is_some() {
-            let scalar = node.scalar.as_ref().unwrap();
-
+        } else if let Some(scalar) = node.scalar.as_ref() {
             // TODO: add validation for input type as well. But input types are not checked
             // by async_graphql anyway so it should be done after replacing
             // default engine with JIT
             if scalar.validate(value) {
                 Ok(Output::clone_from(value))
             } else {
-                Err(
-                    ValidationError::ScalarInvalid { type_of: node.type_of.name().to_string() }
-                        .into(),
-                )
+                Err(ValidationError::ScalarInvalid { type_of: node.type_of.name().clone() }.into())
             }
         } else if node.is_enum {
             let check_valid_enum = |value: &Value| -> bool {
                 value
                     .as_str()
-                    .map(|v| self.plan.field_validate_enum_value(node, v))
-                    .unwrap_or(false)
+                    .is_some_and(|v| self.plan.field_validate_enum_value(node, v))
             };
 
             let is_valid_enum = if let Some(vec) = value.as_array() {
@@ -181,10 +173,7 @@ where
             if is_valid_enum {
                 Ok(Output::clone_from(value))
             } else {
-                Err(
-                    ValidationError::EnumInvalid { type_of: node.type_of.name().to_string() }
-                        .into(),
-                )
+                Err(ValidationError::EnumInvalid { type_of: node.type_of.name().clone() }.into())
             }
         } else {
             match (value.as_array(), value.as_object()) {
@@ -202,7 +191,7 @@ where
                                 Output::string(node.value_type(value).into())
                             } else {
                                 let val = obj.get_key(child.name.as_str());
-                                self.iter(child, val, data_path, path, None)?
+                                self.process_node(child, val, data_path, path, None)?
                             };
                             fields.push((child.output_name.as_str(), value));
                         }
@@ -225,11 +214,10 @@ where
             }
         };
 
-        eval_result.map_err(|e| self.to_location_error(e, node, path))
+        eval_result.map_err(|e| Self::to_location_error(e, node, path))
     }
 
     fn to_location_error(
-        &'a self,
         error: Error,
         node: &'a Field<Value>,
         path: &[PathSegment],
@@ -251,6 +239,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql_value::ConstValue;
     use gqlforge_valid::Validator;
     use serde::{Deserialize, Serialize};
@@ -372,11 +361,11 @@ mod tests {
         (plan, store, vars)
     }
 
-    fn assert_synths(query: &str, store: Vec<(FieldId, TestData)>) {
-        let (plan, value_store, vars) = make_store::<ConstValue>(query, store.clone());
+    fn assert_synths(query: &str, store: &[(FieldId, TestData)]) {
+        let (plan, value_store, vars) = make_store::<ConstValue>(query, store.to_vec());
         let synth_const = Synth::new(&plan, value_store, vars);
         let (plan, value_store, vars) =
-            make_store::<serde_json_borrow::Value>(query, store.clone());
+            make_store::<serde_json_borrow::Value>(query, store.to_vec());
         let synth_borrow = Synth::new(&plan, value_store, vars);
 
         let val_const: ConstValue = synth_const.synthesize().unwrap();
@@ -389,25 +378,25 @@ mod tests {
     #[test]
     fn test_posts() {
         let store = vec![(FieldId::new(0), TestData::Posts)];
-        let query = r#"
+        let query = r"
             query {
                 posts { id }
             }
-        "#;
+        ";
 
-        assert_synths(query, store);
+        assert_synths(query, &store);
     }
 
     #[test]
     fn test_user() {
         let store = vec![(FieldId::new(0), TestData::User1)];
-        let query = r#"
+        let query = r"
                 query {
                     user(id: 1) { id }
                 }
-            "#;
+            ";
 
-        assert_synths(query, store);
+        assert_synths(query, &store);
     }
 
     #[test]
@@ -416,12 +405,12 @@ mod tests {
             (FieldId::new(0), TestData::Posts),
             (FieldId::new(3), TestData::UsersData),
         ];
-        let query = r#"
+        let query = r"
                 query {
                     posts { id title user { id name } }
                 }
-            "#;
-        assert_synths(query, store);
+            ";
+        assert_synths(query, &store);
     }
 
     #[test]
@@ -431,13 +420,13 @@ mod tests {
             (FieldId::new(3), TestData::UsersData),
             (FieldId::new(6), TestData::Users),
         ];
-        let query = r#"
+        let query = r"
                 query {
                     posts { id title user { id name } }
                     users { id name }
                 }
-            "#;
-        assert_synths(query, store);
+            ";
+        assert_synths(query, &store);
     }
 
     #[test]
@@ -446,7 +435,7 @@ mod tests {
             JP::init("{ posts { id title userId user { id name } } }", None);
         let synth = jp.synth();
         let val: async_graphql::Value = synth.synthesize().unwrap();
-        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap())
+        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap());
     }
 
     #[test]
@@ -455,7 +444,7 @@ mod tests {
             JP::init("{ posts { id title userId user { id name } } }", None);
         let synth = jp.synth();
         let val: serde_json_borrow::Value = synth.synthesize().unwrap();
-        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap())
+        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap());
     }
 
     #[test]
@@ -464,7 +453,7 @@ mod tests {
             JP::init("{ posts { id __typename user { __typename id } } }", None);
         let synth = jp.synth();
         let val: serde_json_borrow::Value = synth.synthesize().unwrap();
-        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap())
+        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap());
     }
 
     #[test]
@@ -473,6 +462,6 @@ mod tests {
             JP::init("{ __typename posts { id user { id }} }", None);
         let synth = jp.synth();
         let val: serde_json_borrow::Value = synth.synthesize().unwrap();
-        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap())
+        insta::assert_snapshot!(serde_json::to_string_pretty(&val).unwrap());
     }
 }

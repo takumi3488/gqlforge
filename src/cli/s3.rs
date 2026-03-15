@@ -13,6 +13,10 @@ pub mod client {
 
     impl S3Client {
         /// Create a new S3 client from the given endpoint configuration.
+        ///
+        /// # Errors
+        ///
+        /// Returns an error if the operation fails.
         pub async fn new(
             endpoint: Option<&str>,
             region: &str,

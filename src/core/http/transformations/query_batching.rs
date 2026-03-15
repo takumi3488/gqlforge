@@ -22,7 +22,7 @@ impl Transform for QueryBatching<'_> {
     type Error = Infallible;
     fn transform(&self, mut base_request: Self::Value) -> Valid<Self::Value, Self::Error> {
         // Merge query params in the request
-        for key in self.dl_requests.iter() {
+        for key in self.dl_requests {
             let request = key.to_request();
             let url = request.url();
             let pairs: Vec<_> = if let Some(group_by_key) = self.group_by {
@@ -45,7 +45,8 @@ impl Transform for QueryBatching<'_> {
 
 #[cfg(test)]
 mod tests {
-    use std::collections::HashMap;
+    #![expect(clippy::unwrap_used, reason = "test code")]
+    use std::collections::{BTreeSet, HashMap};
 
     use gqlforge_valid::Validator;
     use http::Method;
@@ -66,7 +67,7 @@ mod tests {
             }
         }
         let request = Request::new(Method::GET, url);
-        DataLoaderRequest::new(request, Default::default())
+        DataLoaderRequest::new(request, BTreeSet::new())
     }
 
     fn get_query_params(request: &Request) -> HashMap<String, String> {
@@ -179,7 +180,7 @@ mod tests {
 
         let params = get_query_params(&result);
         // Verify URL encoding is preserved
-        assert!(params.values().any(|v| v.contains(" ") || v.contains("&")));
+        assert!(params.values().any(|v| v.contains(' ') || v.contains('&')));
     }
 
     #[test]

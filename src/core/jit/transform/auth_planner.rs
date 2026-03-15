@@ -30,7 +30,7 @@ impl<A: Debug> Transform for AuthPlanner<A> {
 
         plan.before = auth
             .into_iter()
-            .reduce(|a, b| a.and(b))
+            .reduce(Auth::and)
             .map(|auth| IR::Protect(auth, None, Box::new(IR::Dynamic(DynamicValue::default()))));
 
         Valid::succeed(plan)
@@ -38,7 +38,7 @@ impl<A: Debug> Transform for AuthPlanner<A> {
 }
 
 /// Used to recursively update the field ands its selections to remove
-/// IR::Protected
+/// `IR::Protected`
 fn update_field<A>(auth: &mut Vec<Auth>, field: &mut Field<A>) {
     if let Some(ref mut ir) = field.ir {
         update_ir(ir, auth);
@@ -51,8 +51,8 @@ fn update_field<A>(auth: &mut Vec<Auth>, field: &mut Field<A>) {
 }
 
 /// This function modifies an IR pipe chain by detecting and removing any
-/// instances of IR::Protect from the chain. Returns `true` when it modifies the
-/// IR.
+/// instances of `IR::Protect` from the chain. Returns `true` when it modifies
+/// the IR.
 pub fn update_ir(ir: &mut IR, vec: &mut Vec<Auth>) {
     match ir {
         IR::Dynamic(_)
@@ -62,7 +62,7 @@ pub fn update_ir(ir: &mut IR, vec: &mut Vec<Auth>) {
         | IR::Map(_)
         | IR::Entity(_)
         | IR::Service(_) => {}
-        IR::Path(ir, _) => {
+        IR::Path(ir, _) | IR::Discriminate(_, ir) => {
             update_ir(ir, vec);
         }
         IR::Protect(auth, access_expr, ir_0) => {
@@ -79,11 +79,10 @@ pub fn update_ir(ir: &mut IR, vec: &mut Vec<Auth>) {
             update_ir(ir1, vec);
             update_ir(ir2, vec);
         }
-        IR::Discriminate(_, ir) => {
-            update_ir(ir, vec);
-        }
         IR::Merge(irs) => {
-            irs.iter_mut().for_each(|ir| update_ir(ir, vec));
+            for ir in irs.iter_mut() {
+                update_ir(ir, vec);
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::Value;
     use gqlforge::core::blueprint::{Blueprint, DynamicValue};
     use gqlforge::core::http::RequestContext;

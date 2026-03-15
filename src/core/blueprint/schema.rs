@@ -1,9 +1,10 @@
 use std::collections::{BTreeMap, HashSet};
+use std::hash::BuildHasher;
 
 use directive::to_directive;
 use gqlforge_valid::{Valid, Validator};
 
-use crate::core::blueprint::*;
+use crate::core::blueprint::{BlueprintError, SchemaDefinition, TryFoldConfig, directive};
 use crate::core::config::{Config, Field, Type};
 use crate::core::directive::DirectiveCodec;
 
@@ -24,11 +25,11 @@ fn validate_query(config: &Config) -> Valid<(), BlueprintError> {
 
 /// Validates that all the root type fields has resolver
 /// making into the account the nesting
-fn validate_type_has_resolvers(
+fn validate_type_has_resolvers<S: BuildHasher>(
     name: &str,
     ty: &Type,
     types: &BTreeMap<String, Type>,
-    visited: &mut HashSet<String>,
+    visited: &mut HashSet<String, S>,
 ) -> Valid<(), BlueprintError> {
     if ty.scalar() || visited.contains(name) {
         return Valid::succeed(());
@@ -43,11 +44,11 @@ fn validate_type_has_resolvers(
     .unit()
 }
 
-pub fn validate_field_has_resolver(
+pub fn validate_field_has_resolver<S: BuildHasher>(
     name: &str,
     field: &Field,
     types: &BTreeMap<String, Type>,
-    visited: &mut HashSet<String>,
+    visited: &mut HashSet<String, S>,
 ) -> Valid<(), BlueprintError> {
     Valid::<(), BlueprintError>::fail(BlueprintError::NoResolverFoundInSchema)
         .when(|| {
@@ -99,6 +100,7 @@ fn validate_subscription(config: &Config) -> Valid<(), BlueprintError> {
     }
 }
 
+#[must_use]
 pub fn to_schema<'a>() -> TryFoldConfig<'a, SchemaDefinition> {
     TryFoldConfig::new(|config, _| {
         validate_query(config)

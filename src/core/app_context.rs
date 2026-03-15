@@ -33,6 +33,7 @@ pub struct AppContext {
 }
 
 impl AppContext {
+    #[expect(clippy::too_many_lines, reason = "complex initialization logic")]
     pub fn new(
         mut blueprint: Blueprint,
         runtime: TargetRuntime,
@@ -42,7 +43,7 @@ impl AppContext {
         let mut gql_data_loaders = vec![];
         let mut grpc_data_loaders = vec![];
 
-        for def in blueprint.definitions.iter_mut() {
+        for def in &mut blueprint.definitions {
             if let Definition::Object(def) = def {
                 for field in &mut def.fields {
                     let upstream_batch = &blueprint.upstream.batch;
@@ -59,7 +60,7 @@ impl AppContext {
                                         group_by.clone(),
                                         is_list,
                                     )
-                                    .to_data_loader(upstream_batch.clone().unwrap_or_default());
+                                    .to_data_loader(&upstream_batch.clone().unwrap_or_default());
 
                                     let result = Some(IR::IO(Box::new(IO::Http {
                                         req_template: req_template.clone(),
@@ -80,7 +81,7 @@ impl AppContext {
                                     let graphql_data_loader =
                                         GraphqlDataLoader::new(runtime.clone(), *batch)
                                             .into_data_loader(
-                                                upstream_batch.clone().unwrap_or_default(),
+                                                &upstream_batch.clone().unwrap_or_default(),
                                             );
 
                                     let result = Some(IR::IO(Box::new(IO::GraphQL {
@@ -104,7 +105,7 @@ impl AppContext {
                                         group_by: group_by.clone(),
                                     };
                                     let data_loader = data_loader.into_data_loader(
-                                        upstream_batch.clone().unwrap_or_default(),
+                                        &upstream_batch.clone().unwrap_or_default(),
                                     );
 
                                     let result = Some(IR::IO(Box::new(IO::Grpc {
@@ -165,7 +166,7 @@ impl AppContext {
         }
 
         let schema = blueprint
-            .to_schema_with(SchemaModifiers::default().extensions(runtime.extensions.clone()));
+            .to_schema_with(&SchemaModifiers::default().extensions(runtime.extensions.clone()));
 
         AppContext {
             schema,

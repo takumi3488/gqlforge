@@ -70,16 +70,19 @@ fn init_in_memory_cache<K: Hash + Eq, V: Clone>() -> InMemoryCache<K, V> {
     InMemoryCache::default()
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub fn init(blueprint: &Blueprint) -> anyhow::Result<TargetRuntime> {
     #[cfg(not(feature = "js"))]
     tracing::warn!("JS capabilities are disabled in this build");
 
-    #[allow(unused_mut)]
     let mut postgres: HashMap<String, Arc<dyn crate::core::postgres::PostgresIO>> = HashMap::new();
 
     for (id, url) in &blueprint.postgres_connections {
         let pool = crate::cli::postgres::pool::PostgresPool::new(url)
-            .map_err(|e| anyhow::anyhow!("Failed to create Postgres pool '{}': {}", id, e))?;
+            .map_err(|e| anyhow::anyhow!("Failed to create Postgres pool '{id}': {e}"))?;
         postgres.insert(id.clone(), Arc::new(pool));
     }
 
@@ -97,6 +100,10 @@ pub fn init(blueprint: &Blueprint) -> anyhow::Result<TargetRuntime> {
     })
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn confirm_and_write(
     runtime: TargetRuntime,
     path: &str,
@@ -119,27 +126,32 @@ pub async fn confirm_and_write(
     Ok(())
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn create_directory(folder_path: &str) -> anyhow::Result<()> {
     let folder_exists = fs::metadata(folder_path).is_ok();
 
     if !folder_exists {
-        let confirm = Confirm::new(&format!(
-            "Do you want to create the folder {}?",
-            folder_path
-        ))
-        .with_default(false)
-        .prompt()?;
+        let confirm = Confirm::new(&format!("Do you want to create the folder {folder_path}?"))
+            .with_default(false)
+            .prompt()?;
 
         if confirm {
             fs::create_dir_all(folder_path)?;
         } else {
             return Ok(());
-        };
+        }
     }
 
     Ok(())
 }
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub fn select_prompt<T: std::fmt::Display>(message: &str, options: Vec<T>) -> anyhow::Result<T> {
     Ok(Select::new(message, options).prompt()?)
 }

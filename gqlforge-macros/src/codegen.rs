@@ -23,9 +23,7 @@ fn extract_gen_doc_ty(attrs: &[Attribute]) -> String {
             }
             None
         })
-        .collect::<Vec<_>>()
-        .join("")
-        .to_string()
+        .collect::<String>()
 }
 
 pub fn doc(input: TokenStream) -> TokenStream {

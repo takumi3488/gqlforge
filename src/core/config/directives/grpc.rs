@@ -65,7 +65,7 @@ pub struct Grpc {
     /// * EXAMPLE 1: if we have a call that returns `{ "user": { "items": [...],
     ///   ... } ... }` we can use `"{{.user.items}}"`, to extract the `items`.
     /// * EXAMPLE 2: if we have a call that returns `{ "foo": "bar", "fizz": {
-    ///   "buzz": "eggs", ... }, ... }` we can use { foo: "{{.foo}}", buzz:
+    ///   "buzz": "eggs", ... }, ... }` we can use `{ foo: "{{.foo}}", buzz:
     ///   "{{.fizz.buzz}}" }`
     pub select: Option<Value>,
 

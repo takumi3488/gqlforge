@@ -11,10 +11,18 @@ use crate::core::postgres::schema::{Column, DatabaseSchema, PgType, PrimaryKey, 
 /// Generate a GraphQL `Config` from a `DatabaseSchema`.
 ///
 /// This follows the PostGraphile-style convention:
-/// - Each table -> an output type (PascalCase)
+/// - Each table -> an output type (`PascalCase`)
 /// - Query: `tableNameById`, `tableNameList`
 /// - Mutation: `createTableName`, `updateTableName`, `deleteTableName`
 /// - FK relationships -> nested object fields with `@postgres(batchKey: ...)`
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
+#[expect(
+    clippy::too_many_lines,
+    reason = "generates config for all database tables and columns"
+)]
 pub fn from_database(schema: &DatabaseSchema, connection_url: &str) -> anyhow::Result<Config> {
     let mut config = Config::default();
     config.schema.query = Some("Query".to_string());
@@ -335,9 +343,7 @@ fn build_pk_args_and_filter(
     let mut filter_map = serde_json::Map::new();
     for pk_col in &pk.columns {
         let col = table.find_column(pk_col);
-        let gql_type = col
-            .map(|c| scalar_type(&c.pg_type))
-            .unwrap_or("ID".to_string());
+        let gql_type = col.map_or("ID".to_string(), |c| scalar_type(&c.pg_type));
 
         args.insert(
             pk_col.to_case(Case::Camel),
@@ -389,6 +395,7 @@ fn pluralise(name: &str) -> String {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
     use crate::core::postgres::schema::{Column, ForeignKey, PgType, PrimaryKey, Table};
 

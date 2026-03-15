@@ -84,68 +84,12 @@ pub trait JsonObjectLike<'obj>: Sized {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use pretty_assertions::assert_eq;
     use serde_json::json;
 
     use super::super::gather_path_matches;
-    use super::{JsonLike, JsonObjectLike};
     use crate::core::json::group_by_key;
-
-    // for lifetime testing purposes
-    #[allow(dead_code)]
-    fn create_json_like<'a, Value: JsonLike<'a>>() -> Value {
-        unimplemented!("fake test fn")
-    }
-
-    // for lifetime testing purposes
-    #[allow(dead_code)]
-    fn test_json_like_lifetime<'a, Value: JsonLike<'a> + Clone>() -> Value {
-        let value: Value = create_json_like();
-
-        if value.is_null() {
-            return Value::null();
-        }
-
-        if value.as_bool().is_some() {
-            println!("bool");
-        }
-
-        if value.as_f64().is_some() {
-            println!("f64");
-        }
-
-        if let Some(s) = value.as_str() {
-            return Value::string(s.to_string().into());
-        }
-
-        if let Some(arr) = value.as_array() {
-            return Value::array(arr.clone());
-        }
-
-        if value.as_object().is_some() {
-            return Value::object(Value::JsonObject::new());
-        }
-
-        value
-    }
-
-    #[allow(dead_code)]
-    fn test_json_object_like_lifetime<'a, Value: JsonObjectLike<'a, Value = bool> + Clone + 'a>()
-    -> Value {
-        let mut value = Value::new();
-
-        value.insert_key("test_key", true);
-        let _key = value.get_key("test_key");
-
-        let it1 = value.iter();
-        let it2 = value.iter();
-
-        for _val in it1 {}
-
-        for _val in it2 {}
-
-        value
-    }
 
     #[test]
     fn test_gather_path_matches() {
@@ -166,7 +110,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -202,7 +146,7 @@ mod tests {
             ]
         );
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -226,7 +170,7 @@ mod tests {
             }
         );
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 
     #[test]
@@ -250,6 +194,6 @@ mod tests {
             }
         );
 
-        assert_eq!(actual, expected)
+        assert_eq!(actual, expected);
     }
 }

@@ -18,10 +18,11 @@ thread_local! {
 #[rquickjs::function]
 fn qjs_print(msg: String, is_err: bool) {
     if is_err {
-        tracing::error!("{msg}");
+        tracing::error!("{}", msg);
     } else {
-        tracing::info!("{msg}");
+        tracing::info!("{}", msg);
     }
+    drop(msg);
 }
 
 static CONSOLE_JS: &[u8] = include_bytes!("shim/console.js");
@@ -63,6 +64,15 @@ impl Debug for Runtime {
 }
 
 impl Runtime {
+    #[must_use]
+    ///
+    /// # Panics
+    ///
+    /// Panics if an internal assertion fails.
+    #[expect(
+        clippy::expect_used,
+        reason = "JS runtime initialization failure is fatal"
+    )]
     pub fn new(script: blueprint::Script) -> Self {
         let tokio_runtime = tokio::runtime::Builder::new_multi_thread()
             .worker_threads(1)

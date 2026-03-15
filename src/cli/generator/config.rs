@@ -113,8 +113,7 @@ pub struct Schema {
 
 fn between(threshold: f32, min: f32, max: f32) -> Valid<(), String> {
     Valid::<(), String>::fail(format!(
-        "Invalid threshold value ({:.2}). Allowed range is [{:.2} - {:.2}] inclusive.",
-        threshold, min, max
+        "Invalid threshold value ({threshold:.2}). Allowed range is [{min:.2} - {max:.2}] inclusive."
     ))
     .when(|| !(min..=max).contains(&threshold))
 }
@@ -180,22 +179,32 @@ impl Location<UnResolved> {
 }
 
 impl Headers {
+    #[must_use]
     pub fn into_btree_map(self) -> Option<BTreeMap<String, String>> {
         self.0
     }
 
+    #[must_use]
     pub fn as_btree_map(&self) -> &Option<BTreeMap<String, String>> {
         &self.0
     }
 }
 
 impl Output<UnResolved> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn resolve(self, parent_dir: Option<&Path>) -> anyhow::Result<Output<Resolved>> {
         Ok(Output { path: self.path.into_resolved(parent_dir) })
     }
 }
 
 impl Source<UnResolved> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn resolve(self, parent_dir: Option<&Path>) -> anyhow::Result<Source<Resolved>> {
         match self {
             Source::Curl {
@@ -242,6 +251,10 @@ impl Source<UnResolved> {
 }
 
 impl Input<UnResolved> {
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn resolve(self, parent_dir: Option<&Path>) -> anyhow::Result<Input<Resolved>> {
         let resolved_source = self.source.resolve(parent_dir)?;
         Ok(Input { source: resolved_source })
@@ -249,7 +262,11 @@ impl Input<UnResolved> {
 }
 
 impl Config {
-    /// Resolves all the relative paths present inside the GeneratorConfig.
+    /// Resolves all the relative paths present inside the `GeneratorConfig`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn into_resolved(self, config_path: &str) -> anyhow::Result<Config<Resolved>> {
         let parent_dir = Some(Path::new(config_path).parent().unwrap_or(Path::new("")));
 
@@ -267,6 +284,7 @@ impl Config {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::HashMap;
 
     use gqlforge_valid::{ValidateInto, ValidationError, Validator};
@@ -324,7 +342,7 @@ mod tests {
             },
         }]);
         let actual = serde_json::to_string_pretty(&config).unwrap();
-        insta::assert_snapshot!(actual)
+        insta::assert_snapshot!(actual);
     }
 
     #[test]

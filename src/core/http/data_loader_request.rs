@@ -27,6 +27,7 @@ impl DataLoaderRequest {
         Self { request: req, headers, batching_value: None }
     }
 
+    #[must_use]
     pub fn with_batching_value(self, body: Option<String>) -> Self {
         Self { batching_value: body, ..self }
     }
@@ -94,6 +95,7 @@ impl Deref for DataLoaderRequest {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use http::header::{HeaderName, HeaderValue};
 
     use super::*;

@@ -15,6 +15,10 @@ use crate::core::config::reader::ConfigReader;
 use crate::core::rest::EndpointSet;
 use crate::core::runtime::TargetRuntime;
 
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn create_app_ctx<T: DeserializeOwned + GraphQLRequestLike>(
     req: &Request<Full<Bytes>>,
     runtime: TargetRuntime,
@@ -26,9 +30,7 @@ pub async fn create_app_ctx<T: DeserializeOwned + GraphQLRequestLike>(
         .and_then(|x| serde_qs::from_str::<HashMap<String, String>>(x).ok())
         .and_then(|x| x.get("config").cloned());
 
-    let config_url = if let Some(config_url) = config_url {
-        config_url
-    } else {
+    let Some(config_url) = config_url else {
         let mut response = async_graphql::Response::default();
         let server_error = ServerError::new("No Config URL specified", None);
         response.errors = vec![server_error];
@@ -47,7 +49,7 @@ pub async fn create_app_ctx<T: DeserializeOwned + GraphQLRequestLike>(
         Ok(config) => config,
         Err(e) => {
             let mut response = async_graphql::Response::default();
-            let server_error = ServerError::new(format!("Failed to read config: {}", e), None);
+            let server_error = ServerError::new(format!("Failed to read config: {e}"), None);
             response.errors = vec![server_error];
             return Ok(Err(GraphQLResponse::from(response).into_response()?));
         }
@@ -57,7 +59,7 @@ pub async fn create_app_ctx<T: DeserializeOwned + GraphQLRequestLike>(
         Ok(blueprint) => blueprint,
         Err(e) => {
             let mut response = async_graphql::Response::default();
-            let server_error = ServerError::new(format!("{}", e), None);
+            let server_error = ServerError::new(format!("{e}"), None);
             response.errors = vec![server_error];
             return Ok(Err(GraphQLResponse::from(response).into_response()?));
         }
@@ -72,6 +74,7 @@ pub async fn create_app_ctx<T: DeserializeOwned + GraphQLRequestLike>(
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::sync::Arc;
 
     use bytes::Bytes;
@@ -93,7 +96,7 @@ mod tests {
             }).to_string())))
             .unwrap();
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let app = create_app_ctx::<GraphQLRequest>(&req, runtime, true)
             .await
             .unwrap()
@@ -114,6 +117,6 @@ mod tests {
             .await
             .unwrap();
 
-        assert!(res.status().is_success())
+        assert!(res.status().is_success());
     }
 }

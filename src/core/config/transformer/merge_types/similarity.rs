@@ -14,6 +14,11 @@ pub struct Similarity<'a> {
 
 /// holds the necessary information for comparing the similarity between two
 /// types.
+#[derive(Clone, Copy)]
+#[expect(
+    clippy::struct_field_names,
+    reason = "type_ prefix disambiguates from field-level variables in scope"
+)]
 struct SimilarityTypeInfo<'a> {
     type_1_name: &'a str,
     type_1: &'a Type,
@@ -32,7 +37,7 @@ impl<'a> Similarity<'a> {
         (type_2_name, type_2): (&str, &Type),
         threshold: f32,
     ) -> Valid<bool, String> {
-        let type_info = SimilarityTypeInfo { type_1_name, type_1, type_2, type_2_name };
+        let type_info = SimilarityTypeInfo { type_1_name, type_1, type_2_name, type_2 };
 
         self.similarity_inner(type_info, &mut PairSet::default(), threshold)
     }
@@ -57,7 +62,7 @@ impl<'a> Similarity<'a> {
             let config = self.config;
             let mut same_field_count = 0;
 
-            for (field_name_1, field_1) in type_1.fields.iter() {
+            for (field_name_1, field_1) in &type_1.fields {
                 if let Some(field_2) = type_2.fields.get(field_name_1) {
                     let field_1_type_of = field_1.type_of.name();
                     let field_2_type_of = field_2.type_of.name();
@@ -111,7 +116,7 @@ impl<'a> Similarity<'a> {
                             self.similarity_inner(type_info, visited_type, threshold);
 
                         if let Ok(result) = is_nested_type_similar.clone().to_result() {
-                            same_field_count += if result { 1 } else { 0 };
+                            same_field_count += u32::from(result);
                         } else {
                             return is_nested_type_similar;
                         }
@@ -119,10 +124,12 @@ impl<'a> Similarity<'a> {
                 }
             }
 
-            let total_field_count =
-                (type_1.fields.len() + type_2.fields.len()) as u32 - same_field_count;
+            let total_field_count = u32::try_from(type_1.fields.len() + type_2.fields.len())
+                .unwrap_or(u32::MAX)
+                - same_field_count;
 
-            let is_similar = (same_field_count as f32 / total_field_count as f32) >= threshold;
+            let is_similar = (f64::from(same_field_count) / f64::from(total_field_count))
+                >= f64::from(threshold);
 
             self.type_similarity_cache.add(
                 type_1_name.to_owned(),
@@ -137,6 +144,7 @@ impl<'a> Similarity<'a> {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::Validator;
 
     use super::Similarity;
@@ -194,8 +202,8 @@ mod test {
         );
 
         let mut cfg: Config = Config::default();
-        cfg.types.insert("Foo1".to_owned(), foo1.to_owned());
-        cfg.types.insert("Foo2".to_owned(), foo2.to_owned());
+        cfg.types.insert("Foo1".to_owned(), foo1.clone());
+        cfg.types.insert("Foo2".to_owned(), foo2.clone());
         cfg.types.insert("Bar1".to_owned(), bar1);
         cfg.types.insert("Bar2".to_owned(), bar2);
 
@@ -204,7 +212,7 @@ mod test {
             .similarity(("Foo1", &foo1), ("Foo2", &foo2), 0.5)
             .to_result();
 
-        assert!(is_similar.is_err())
+        assert!(is_similar.is_err());
     }
 
     #[test]
@@ -234,8 +242,8 @@ mod test {
         );
 
         let mut cfg: Config = Config::default();
-        cfg.types.insert("Foo1".to_owned(), foo1.to_owned());
-        cfg.types.insert("Foo2".to_owned(), foo2.to_owned());
+        cfg.types.insert("Foo1".to_owned(), foo1.clone());
+        cfg.types.insert("Foo2".to_owned(), foo2.clone());
         cfg.types.insert("Bar1".to_owned(), bar1);
         cfg.types.insert("Bar2".to_owned(), bar2);
 
@@ -245,7 +253,7 @@ mod test {
             .to_result()
             .unwrap();
 
-        assert!(is_similar)
+        assert!(is_similar);
     }
 
     #[test]
@@ -286,8 +294,8 @@ mod test {
         );
 
         let mut cfg: Config = Config::default();
-        cfg.types.insert("Foo1".to_owned(), foo1.to_owned());
-        cfg.types.insert("Foo2".to_owned(), foo2.to_owned());
+        cfg.types.insert("Foo1".to_owned(), foo1.clone());
+        cfg.types.insert("Foo2".to_owned(), foo2.clone());
         cfg.types.insert("Bar1".to_owned(), bar1);
         cfg.types.insert("Bar2".to_owned(), bar2);
         cfg.types.insert("Far1".to_owned(), far1);
@@ -299,7 +307,7 @@ mod test {
             .to_result()
             .unwrap();
 
-        assert!(is_similar)
+        assert!(is_similar);
     }
 
     #[test]
@@ -335,7 +343,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -366,7 +374,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -397,7 +405,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -423,7 +431,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -449,7 +457,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -478,7 +486,7 @@ mod test {
             .similarity(("Foo", &ty1), ("Bar", &ty2), 1.0)
             .to_result()
             .unwrap();
-        assert!(types_equal)
+        assert!(types_equal);
     }
 
     #[test]
@@ -512,19 +520,19 @@ mod test {
             .to_result();
 
         // Assert that merging incompatible list and non-list fields fails
-        assert!(result.is_err())
+        assert!(result.is_err());
     }
 
     #[test]
     fn test_unknown_types_similarity() {
-        let sdl = r#"
+        let sdl = r"
             type A {
                 primarySubcategoryId: String
             }
             type B {
                 primarySubcategoryId: JSON
             }
-        "#;
+        ";
         let config = Config::from_sdl(sdl).to_result().unwrap();
 
         let mut similarity = Similarity::new(&config);

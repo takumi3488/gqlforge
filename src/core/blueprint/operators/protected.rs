@@ -6,6 +6,7 @@ use crate::core::ir::access_expr::AccessExpr;
 use crate::core::ir::model::IR;
 use crate::core::try_fold::TryFold;
 
+#[must_use]
 pub fn update_protected<'a>(
     type_name: &'a str,
 ) -> TryFold<
@@ -82,7 +83,7 @@ pub fn update_protected<'a>(
                         }
                     })
                     .map(|provider| {
-                        let mut auth = provider.into_iter().reduce(|left, right| left.and(right));
+                        let mut auth = provider.into_iter().reduce(super::super::auth::Auth::and);
 
                         // If no protection is defined, use all providers
                         if auth.is_none() {

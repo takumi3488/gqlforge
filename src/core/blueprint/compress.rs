@@ -32,7 +32,7 @@ pub fn compress(mut blueprint: Blueprint) -> Blueprint {
     referenced_types.insert("__DirectiveLocation".to_string());
 
     let mut definitions = Vec::new();
-    for def in blueprint.definitions.iter() {
+    for def in &blueprint.definitions {
         if referenced_types.contains(def.name()) {
             definitions.push(def.clone());
         }

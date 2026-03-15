@@ -1,7 +1,7 @@
 use gqlforge_valid::{Valid, Validator};
 use template_validation::validate_argument;
 
-use crate::core::blueprint::*;
+use crate::core::blueprint::{BlueprintError, apply_select, template_validation};
 use crate::core::config::group_by::GroupBy;
 use crate::core::config::{Field, GraphQLOperationType};
 use crate::core::endpoint::Endpoint;
@@ -10,6 +10,10 @@ use crate::core::ir::model::{IO, IR};
 use crate::core::worker_hooks::WorkerHooks;
 use crate::core::{Mustache, config, helpers};
 
+#[expect(
+    clippy::too_many_lines,
+    reason = "HTTP compilation handles many field variants"
+)]
 pub fn compile_http(
     config_module: &config::ConfigModule,
     http: &config::Http,
@@ -20,7 +24,7 @@ pub fn compile_http(
     let dedupe = http.dedupe.unwrap_or_default();
     let mustache_headers = match helpers::headers::to_mustache_headers(&http.headers).to_result() {
         Ok(mustache_headers) => Valid::succeed(mustache_headers),
-        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
     };
 
     let is_subscription = matches!(operation_type, GraphQLOperationType::Subscription);
@@ -38,7 +42,7 @@ pub fn compile_http(
         )
         .and(
             Valid::from_iter(http.query.iter(), |query| {
-                validate_argument(config_module, Mustache::parse(query.value.as_str()), field)
+                validate_argument(config_module, &Mustache::parse(query.value.as_str()), field)
             })
             .unit()
             .trace("query"),
@@ -82,10 +86,10 @@ pub fn compile_http(
             if !http.batch_key.is_empty() && (http.body.is_some() || http.method != Method::GET) {
                 if let Some(body) = http.body.as_ref() {
                     let dynamic_paths = count_dynamic_paths(body);
-                    if dynamic_paths != 1 {
-                        Valid::fail(BlueprintError::BatchRequiresDynamicParameter).trace("body")
-                    } else {
+                    if dynamic_paths == 1 {
                         Valid::succeed(request_template)
+                    } else {
+                        Valid::fail(BlueprintError::BatchRequiresDynamicParameter).trace("body")
                     }
                 } else {
                     Valid::fail(BlueprintError::BatchRequiresDynamicParameter).trace("body")
@@ -149,12 +153,12 @@ fn count_dynamic_paths(json: &serde_json::Value) -> usize {
     match json {
         serde_json::Value::Array(arr) => {
             for v in arr {
-                count += count_dynamic_paths(v)
+                count += count_dynamic_paths(v);
             }
         }
         serde_json::Value::Object(obj) => {
             for (_, v) in obj {
-                count += count_dynamic_paths(v)
+                count += count_dynamic_paths(v);
             }
         }
         serde_json::Value::String(s) => {
@@ -169,6 +173,7 @@ fn count_dynamic_paths(json: &serde_json::Value) -> usize {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use serde_json::json;
 
     use super::*;
@@ -191,7 +196,7 @@ mod test {
 
     #[test]
     fn test_with_non_json_value() {
-        let json = json!(r#"{{.value}}"#);
+        let json = json!(r"{{.value}}");
         let keys = count_dynamic_paths(&json);
         assert_eq!(keys, 1);
     }

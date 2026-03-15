@@ -56,7 +56,7 @@ impl Default for Tracker {
 }
 
 impl Tracker {
-    pub async fn init_ping(&'static self, duration: Duration) {
+    pub fn init_ping(&'static self, duration: Duration) {
         let mut interval = tokio::time::interval(duration);
         tokio::task::spawn(async move {
             loop {
@@ -66,6 +66,9 @@ impl Tracker {
         });
     }
 
+    /// # Errors
+    ///
+    /// Returns an error if event collection fails.
     pub async fn dispatch(&'static self, event_kind: EventKind) -> Result<()> {
         if self.can_track {
             // Create a new event
@@ -106,7 +109,7 @@ impl Tracker {
 
 // Get the email address
 async fn email() -> HashSet<String> {
-    fn parse(output: Output) -> Option<String> {
+    fn parse(output: &Output) -> Option<String> {
         if output.status.success() {
             let text = String::from_utf8_lossy(&output.stdout).trim().to_string();
             if !text.is_empty() {
@@ -146,8 +149,9 @@ async fn email() -> HashSet<String> {
         .flat_map(|output| {
             output
                 .ok()
+                .as_ref()
                 .and_then(parse)
-                .map(parse_email)
+                .map(|s| parse_email(&s))
                 .unwrap_or_default()
         })
         .collect::<HashSet<String>>()
@@ -186,13 +190,13 @@ fn user() -> String {
 fn cwd() -> Option<String> {
     std::env::current_dir()
         .ok()
-        .and_then(|path| path.to_str().map(|s| s.to_string()))
+        .and_then(|path| path.to_str().map(std::string::ToString::to_string))
 }
 
 fn path() -> Option<String> {
     std::env::current_exe()
         .ok()
-        .and_then(|path| path.to_str().map(|s| s.to_string()))
+        .and_then(|path| path.to_str().map(std::string::ToString::to_string))
 }
 
 fn args() -> Vec<String> {
@@ -204,27 +208,24 @@ fn os_name() -> String {
 }
 
 // Should take arbitrary text and be able to extract email addresses
-fn parse_email(text: String) -> Vec<String> {
-    let mut email_ids = Vec::new();
-
-    let re = regex::Regex::new(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").unwrap();
-    for email in re.find_iter(&text) {
-        email_ids.push(email.as_str().to_string());
-    }
-
-    email_ids
+fn parse_email(text: &str) -> Vec<String> {
+    static RE: std::sync::OnceLock<Option<regex::Regex>> = std::sync::OnceLock::new();
+    let Some(re) = RE
+        .get_or_init(|| regex::Regex::new(r"[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}").ok())
+        .as_ref()
+    else {
+        return vec![];
+    };
+    re.find_iter(text).map(|m| m.as_str().to_string()).collect()
 }
 
 #[cfg(test)]
 mod tests {
-
-    use lazy_static::lazy_static;
+    use std::sync::LazyLock;
 
     use super::*;
 
-    lazy_static! {
-        static ref TRACKER: Tracker = Tracker::default();
-    }
+    static TRACKER: LazyLock<Tracker> = LazyLock::new(Tracker::default);
 
     #[tokio::test]
     async fn test_tracker() {
@@ -232,7 +233,7 @@ mod tests {
             .dispatch(EventKind::Command("ping".to_string()))
             .await
         {
-            panic!("Tracker dispatch error: {:?}", e);
+            panic!("Tracker dispatch error: {e:?}");
         }
     }
 }

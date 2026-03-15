@@ -685,7 +685,7 @@
           "const": "Sql"
         },
         {
-          "description": "Points to a PostgreSQL connection string. The database will be\nintrospected at startup to build a schema for the `@postgres` directive.",
+          "description": "Points to a `PostgreSQL` connection string. The database will be\nintrospected at startup to build a schema for the `@postgres` directive.",
           "type": "string",
           "const": "Postgres"
         },

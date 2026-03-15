@@ -114,19 +114,19 @@ mod tests {
             Self {
                 input_types: ["InputType1", "InputType2"]
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect(),
                 union_types: ["UnionType1", "UnionType2"]
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect(),
                 output_types: ["OutputType1", "OutputType2"]
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect(),
                 interface_types: ["InterfaceType1", "InterfaceType2"]
                     .iter()
-                    .map(|s| s.to_string())
+                    .map(std::string::ToString::to_string)
                     .collect(),
                 threshold: 0.5,
             }
@@ -201,25 +201,25 @@ mod tests {
     fn test_get_threshold() {
         let comparable_types = MergeableTypes::default();
 
-        assert_eq!(
-            comparable_types.get_threshold("InputType1", "InputType2"),
-            1.0
+        assert!(
+            (comparable_types.get_threshold("InputType1", "InputType2") - 1.0_f32).abs()
+                < f32::EPSILON
         );
-        assert_eq!(
-            comparable_types.get_threshold("OutputType1", "OutputType2"),
-            0.5
+        assert!(
+            (comparable_types.get_threshold("OutputType1", "OutputType2") - 0.5_f32).abs()
+                < f32::EPSILON
         );
-        assert_eq!(
-            comparable_types.get_threshold("UnionType1", "UnionType2"),
-            1.0
+        assert!(
+            (comparable_types.get_threshold("UnionType1", "UnionType2") - 1.0_f32).abs()
+                < f32::EPSILON
         );
-        assert_eq!(
-            comparable_types.get_threshold("InterfaceType1", "InterfaceType1"),
-            1.0
+        assert!(
+            (comparable_types.get_threshold("InterfaceType1", "InterfaceType1") - 1.0_f32).abs()
+                < f32::EPSILON
         );
-        assert_eq!(
-            comparable_types.get_threshold("InputType1", "UnionType1"),
-            0.5
+        assert!(
+            (comparable_types.get_threshold("InputType1", "UnionType1") - 0.5_f32).abs()
+                < f32::EPSILON
         );
     }
 

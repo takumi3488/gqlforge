@@ -8,22 +8,22 @@ use crate::core::ir::{EvalContext, ResolverContextLike};
 use crate::core::json::JsonLike;
 
 ///
-/// The PathString trait provides a method for accessing values from a JSON-like
-/// structure. The returned value is encoded as a plain string.
+/// The `PathString` trait provides a method for accessing values from a
+/// JSON-like structure. The returned value is encoded as a plain string.
 /// This is typically used in evaluating mustache templates.
 pub trait PathString {
     fn path_string<'a, T: AsRef<str>>(&'a self, path: &'a [T]) -> Option<Cow<'a, str>>;
 }
 
-/// PathValue trait provides a method for accessing values from JSON-like
-/// structure, the returned value is wrapped with RawValue enum, delegating
+/// `PathValue` trait provides a method for accessing values from JSON-like
+/// structure, the returned value is wrapped with `RawValue` enum, delegating
 /// encoding to the client of this method.
 pub trait PathValue {
     fn raw_value<'a, T: AsRef<str>>(&'a self, path: &[T]) -> Option<ValueString<'a>>;
 }
 
 ///
-/// The PathGraphql trait provides a method for accessing values from a
+/// The `PathGraphql` trait provides a method for accessing values from a
 /// JSON-like structure. The returned value is encoded as a GraphQL Value.
 pub trait PathGraphql {
     fn path_graphql<T: AsRef<str>>(&self, path: &[T]) -> Option<String>;
@@ -56,8 +56,8 @@ fn convert_value(value: Cow<'_, async_graphql::Value>) -> Option<Cow<'_, str>> {
 }
 
 ///
-/// An optimized version of async_graphql::Value that handles strings in a more
-/// efficient manner.
+/// An optimized version of `async_graphql::Value` that handles strings in a
+/// more efficient manner.
 #[derive(Clone, Debug, PartialEq)]
 pub enum ValueString<'a> {
     Value(Cow<'a, async_graphql::Value>),
@@ -80,7 +80,11 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                     json!(ctx.vars()).to_string(),
                 ))),
                 "claims" => {
-                    let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+                    let guard = ctx
+                        .request_ctx
+                        .auth_claims
+                        .lock()
+                        .unwrap_or_else(std::sync::PoisonError::into_inner);
                     let claims = guard.clone()?;
                     Some(ValueString::String(Cow::Owned(claims.to_string())))
                 }
@@ -101,11 +105,15 @@ impl<Ctx: ResolverContextLike> EvalContext<'_, Ctx> {
                 "env" => Some(ValueString::String(ctx.env_var(tail[0].as_ref())?)),
                 "claims" => {
                     let claims_value = {
-                        let guard = ctx.request_ctx.auth_claims.lock().unwrap();
+                        let guard = ctx
+                            .request_ctx
+                            .auth_claims
+                            .lock()
+                            .unwrap_or_else(std::sync::PoisonError::into_inner);
                         guard.clone()?
                     };
                     let mut current = &claims_value;
-                    for segment in tail.iter() {
+                    for segment in tail {
                         current = current.get(segment.as_ref())?;
                     }
                     match current {
@@ -150,7 +158,6 @@ impl<Ctx: ResolverContextLike> PathGraphql for EvalContext<'_, Ctx> {
 
 #[cfg(test)]
 mod tests {
-
     mod evaluation_context {
         use std::borrow::Cow;
         use std::collections::BTreeMap;
@@ -159,7 +166,6 @@ mod tests {
         use async_graphql_value::{ConstValue as Value, Name, Number};
         use http::header::{HeaderMap, HeaderValue};
         use indexmap::IndexMap;
-        use once_cell::sync::Lazy;
 
         use crate::core::EnvIO;
         use crate::core::http::RequestContext;
@@ -182,7 +188,7 @@ mod tests {
             }
         }
 
-        static TEST_VALUES: Lazy<Value> = Lazy::new(|| {
+        static TEST_VALUES: std::sync::LazyLock<Value> = std::sync::LazyLock::new(|| {
             let mut root = IndexMap::new();
             let mut nested = IndexMap::new();
 
@@ -198,22 +204,23 @@ mod tests {
             Value::Object(root)
         });
 
-        static TEST_ARGS: Lazy<IndexMap<Name, Value>> = Lazy::new(|| {
-            let mut root = IndexMap::new();
-            let mut nested = IndexMap::new();
+        static TEST_ARGS: std::sync::LazyLock<IndexMap<Name, Value>> =
+            std::sync::LazyLock::new(|| {
+                let mut root = IndexMap::new();
+                let mut nested = IndexMap::new();
 
-            nested.insert(
-                Name::new("existing"),
-                Value::String("nested-test".to_owned()),
-            );
+                nested.insert(
+                    Name::new("existing"),
+                    Value::String("nested-test".to_owned()),
+                );
 
-            root.insert(Name::new("nested"), Value::Object(nested));
-            root.insert(Name::new("root"), Value::String("root-test".to_owned()));
+                root.insert(Name::new("nested"), Value::Object(nested));
+                root.insert(Name::new("root"), Value::String("root-test".to_owned()));
 
-            root
-        });
+                root
+            });
 
-        static TEST_HEADERS: Lazy<HeaderMap> = Lazy::new(|| {
+        static TEST_HEADERS: std::sync::LazyLock<HeaderMap> = std::sync::LazyLock::new(|| {
             let mut map = HeaderMap::new();
 
             map.insert("x-existing", HeaderValue::from_static("header"));
@@ -221,21 +228,23 @@ mod tests {
             map
         });
 
-        static TEST_VARS: Lazy<BTreeMap<String, String>> = Lazy::new(|| {
-            let mut map = BTreeMap::new();
+        static TEST_VARS: std::sync::LazyLock<BTreeMap<String, String>> =
+            std::sync::LazyLock::new(|| {
+                let mut map = BTreeMap::new();
 
-            map.insert("existing".to_owned(), "var".to_owned());
+                map.insert("existing".to_owned(), "var".to_owned());
 
-            map
-        });
+                map
+            });
 
-        static TEST_ENV_VARS: Lazy<BTreeMap<String, String>> = Lazy::new(|| {
-            let mut map = BTreeMap::new();
+        static TEST_ENV_VARS: std::sync::LazyLock<BTreeMap<String, String>> =
+            std::sync::LazyLock::new(|| {
+                let mut map = BTreeMap::new();
 
-            map.insert("existing".to_owned(), "env".to_owned());
+                map.insert("existing".to_owned(), "env".to_owned());
 
-            map
-        });
+                map
+            });
 
         #[derive(Clone)]
         struct MockGraphqlContext;
@@ -260,7 +269,7 @@ mod tests {
             fn add_error(&self, _: async_graphql::ServerError) {}
         }
 
-        static REQ_CTX: Lazy<RequestContext> = Lazy::new(|| {
+        static REQ_CTX: std::sync::LazyLock<RequestContext> = std::sync::LazyLock::new(|| {
             let mut req_ctx = RequestContext::default().allowed_headers(TEST_HEADERS.clone());
 
             req_ctx.server.vars = TEST_VARS.clone();
@@ -277,10 +286,14 @@ mod tests {
             req_ctx
         });
 
-        static EVAL_CTX: Lazy<EvalContext<'static, MockGraphqlContext>> =
-            Lazy::new(|| EvalContext::new(&REQ_CTX, &MockGraphqlContext));
+        static EVAL_CTX: std::sync::LazyLock<EvalContext<'static, MockGraphqlContext>> =
+            std::sync::LazyLock::new(|| EvalContext::new(&REQ_CTX, &MockGraphqlContext));
 
         #[test]
+        #[expect(
+            clippy::too_many_lines,
+            reason = "comprehensive path evaluation test cases"
+        )]
         fn path_to_value() {
             let mut map = IndexMap::default();
             map.insert(

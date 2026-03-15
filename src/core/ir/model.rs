@@ -96,17 +96,18 @@ pub enum IO {
 }
 
 impl IO {
+    #[must_use]
     pub fn dedupe(&self) -> bool {
         match self {
-            IO::Http { dedupe, .. } => *dedupe,
-            IO::GraphQL { dedupe, .. } => *dedupe,
-            IO::Grpc { dedupe, .. } => *dedupe,
-            IO::GrpcStream { .. } => false,
-            IO::GraphQLStream { .. } => false,
-            IO::HttpStream { .. } => false,
-            IO::Js { .. } => false,
-            IO::Postgres { dedupe, .. } => *dedupe,
-            IO::S3 { dedupe, .. } => *dedupe,
+            IO::Http { dedupe, .. }
+            | IO::GraphQL { dedupe, .. }
+            | IO::Grpc { dedupe, .. }
+            | IO::Postgres { dedupe, .. }
+            | IO::S3 { dedupe, .. } => *dedupe,
+            IO::GrpcStream { .. }
+            | IO::GraphQLStream { .. }
+            | IO::HttpStream { .. }
+            | IO::Js { .. } => false,
         }
     }
 }
@@ -115,10 +116,12 @@ impl IO {
 pub struct DataLoaderId(usize);
 
 impl DataLoaderId {
+    #[must_use]
     pub fn new(id: usize) -> Self {
         Self(id)
     }
 
+    #[must_use]
     pub fn as_usize(&self) -> usize {
         self.0
     }
@@ -128,10 +131,12 @@ impl DataLoaderId {
 pub struct IoId(u64);
 
 impl IoId {
+    #[must_use]
     pub fn new(id: u64) -> Self {
         Self(id)
     }
 
+    #[must_use]
     pub fn as_u64(&self) -> u64 {
         self.0
     }
@@ -167,7 +172,7 @@ impl IR {
             IR::IO(io) => io_modifier(io),
             IR::Cache(cache) => io_modifier(&mut cache.io),
             IR::Discriminate(_, ir) | IR::Protect(_, _, ir) | IR::Path(ir, _) => {
-                ir.modify_io(io_modifier)
+                ir.modify_io(io_modifier);
             }
             IR::Pipe(ir1, ir2) => {
                 ir1.modify_io(io_modifier);
@@ -183,10 +188,12 @@ impl IR {
         }
     }
 
+    #[must_use]
     pub fn pipe(self, next: Self) -> Self {
         IR::Pipe(Box::new(self), Box::new(next))
     }
 
+    #[must_use]
     pub fn modify<F: FnMut(&IR) -> Option<IR>>(self, modifier: &mut F) -> IR {
         self.modify_inner(modifier)
     }
@@ -196,44 +203,42 @@ impl IR {
     }
 
     fn modify_inner<F: FnMut(&IR) -> Option<IR>>(self, modifier: &mut F) -> IR {
-        let modified = modifier(&self);
-        match modified {
-            Some(expr) => expr,
-            None => {
-                let expr = self;
-                match expr {
-                    IR::Pipe(first, second) => {
-                        IR::Pipe(first.modify_box(modifier), second.modify_box(modifier))
+        let replacement = modifier(&self);
+        if let Some(expr) = replacement {
+            expr
+        } else {
+            let expr = self;
+            match expr {
+                IR::Pipe(first, second) => {
+                    IR::Pipe(first.modify_box(modifier), second.modify_box(modifier))
+                }
+                IR::ContextPath(path) => IR::ContextPath(path),
+                IR::Dynamic(_) | IR::IO(_) => expr,
+                IR::Cache(Cache { io, max_age }) => {
+                    let expr = *IR::IO(io).modify_box(modifier);
+                    match expr {
+                        IR::IO(io) => IR::Cache(Cache { max_age, io }),
+                        expr => expr,
                     }
-                    IR::ContextPath(path) => IR::ContextPath(path),
-                    IR::Dynamic(_) => expr,
-                    IR::IO(_) => expr,
-                    IR::Cache(Cache { io, max_age }) => {
-                        let expr = *IR::IO(io).modify_box(modifier);
-                        match expr {
-                            IR::IO(io) => IR::Cache(Cache { io, max_age }),
-                            expr => expr,
-                        }
-                    }
-                    IR::Path(expr, path) => IR::Path(expr.modify_box(modifier), path),
-                    IR::Protect(auth, access_expr, expr) => {
-                        IR::Protect(auth, access_expr, expr.modify_box(modifier))
-                    }
-                    IR::Map(Map { input, map }) => {
-                        IR::Map(Map { input: input.modify_box(modifier), map })
-                    }
-                    IR::Discriminate(discriminator, expr) => {
-                        IR::Discriminate(discriminator, expr.modify_box(modifier))
-                    }
-                    IR::Entity(map) => IR::Entity(
-                        map.into_iter()
-                            .map(|(k, v)| (k, v.modify(modifier)))
-                            .collect(),
-                    ),
-                    IR::Service(sdl) => IR::Service(sdl),
-                    IR::Merge(vec) => {
-                        IR::Merge(vec.into_iter().map(|ir| ir.modify(modifier)).collect())
-                    }
+                }
+                IR::Path(expr, path) => IR::Path(expr.modify_box(modifier), path),
+                IR::Protect(auth, access_expr, expr) => {
+                    IR::Protect(auth, access_expr, expr.modify_box(modifier))
+                }
+                IR::Map(Map { input, map }) => {
+                    IR::Map(Map { input: input.modify_box(modifier), map })
+                }
+                IR::Discriminate(discriminator, expr) => {
+                    IR::Discriminate(discriminator, expr.modify_box(modifier))
+                }
+                IR::Entity(map) => IR::Entity(
+                    map.into_iter()
+                        .map(|(k, v)| (k, v.modify(modifier)))
+                        .collect(),
+                ),
+                IR::Service(sdl) => IR::Service(sdl),
+                IR::Merge(vec) => {
+                    IR::Merge(vec.into_iter().map(|ir| ir.modify(modifier)).collect())
                 }
             }
         }
@@ -245,11 +250,11 @@ impl<'a, Ctx: ResolverContextLike + Sync> CacheKey<EvalContext<'a, Ctx>> for IO 
         match self {
             IO::Http { req_template, .. } => req_template.cache_key(ctx),
             IO::Grpc { req_template, .. } => req_template.cache_key(ctx),
-            IO::GrpcStream { .. } => None,
-            IO::GraphQLStream { .. } => None,
-            IO::HttpStream { .. } => None,
+            IO::GrpcStream { .. }
+            | IO::GraphQLStream { .. }
+            | IO::HttpStream { .. }
+            | IO::Js { .. } => None,
             IO::GraphQL { req_template, .. } => req_template.cache_key(ctx),
-            IO::Js { .. } => None,
             IO::Postgres { req_template, .. } => req_template.cache_key(ctx),
             IO::S3 { req_template, .. } => req_template.cache_key(ctx),
         }

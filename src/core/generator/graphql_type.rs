@@ -127,10 +127,10 @@ impl GraphQLType<Unparsed> {
 impl GraphQLType<Parsed> {
     pub fn id(&self) -> String {
         let namespace = &self.0.namespace;
-        if !namespace.is_empty() {
-            format!("{}.{}", namespace.id(), self.0.name)
-        } else {
+        if namespace.is_empty() {
             self.0.name.clone()
+        } else {
+            format!("{}.{}", namespace.id(), self.0.name)
         }
     }
 }
@@ -159,8 +159,8 @@ impl Display for GraphQLType<Parsed> {
                 if !parsed.namespace.is_empty() {
                     f.write_str(parsed.namespace.to_string().as_str())?;
                     f.write_str(DEFAULT_SEPARATOR)?;
-                };
-                f.write_str(parsed.name.as_str())?
+                }
+                f.write_str(parsed.name.as_str())?;
             }
             Entity::Enum | Entity::ObjectType => {
                 // if output type is scalar, then skip the prefix.
@@ -170,10 +170,10 @@ impl Display for GraphQLType<Parsed> {
                 if !parsed.namespace.is_empty() {
                     f.write_str(parsed.namespace.to_string().as_str())?;
                     f.write_str(DEFAULT_SEPARATOR)?;
-                };
-                f.write_str(parsed.name.as_str())?
+                }
+                f.write_str(parsed.name.as_str())?;
             }
-        };
+        }
         Ok(())
     }
 }

@@ -67,6 +67,9 @@ pub trait Validator<A, E>: Sized {
         }
     }
 
+    /// # Errors
+    ///
+    /// Returns a `ValidationError` if validation failed.
     fn to_result(self) -> Result<A, ValidationError<E>>;
 
     fn and_then<B>(self, f: impl FnOnce(A) -> Valid<B, E>) -> Valid<B, E> {
@@ -106,10 +109,12 @@ impl<A, E> Valid<A, E> {
         ))
     }
 
+    #[must_use]
     pub fn from_validation_err(error: ValidationError<E>) -> Self {
         Valid(Err(error))
     }
 
+    #[must_use]
     pub fn from_vec_cause(error: Vec<Cause<E>>) -> Self {
         Valid(Err(error.into()))
     }
@@ -124,7 +129,7 @@ impl<A, E> Valid<A, E> {
     ) -> Valid<Vec<B>, E> {
         let mut values: Vec<B> = Vec::new();
         let mut errors: ValidationError<E> = ValidationError::empty();
-        for a in iter.into_iter() {
+        for a in iter {
             match f(a).to_result() {
                 Ok(b) => {
                     values.push(b);
@@ -297,7 +302,7 @@ mod tests {
     #[test]
     fn test_validate_fold_err() {
         let valid = Valid::<(), i32>::fail(1);
-        let result = valid.fold(|_| Valid::<(), i32>::fail(2), || Valid::<(), i32>::fail(3));
+        let result = valid.fold(|()| Valid::<(), i32>::fail(2), || Valid::<(), i32>::fail(3));
         assert_eq!(
             result,
             Valid::from_vec_cause(vec![Cause::new(1), Cause::new(3)])
@@ -312,6 +317,7 @@ mod tests {
     }
 
     #[test]
+    #[expect(clippy::unwrap_used, reason = "test code")]
     fn test_to_result() {
         let result = Valid::<(), i32>::fail(1).to_result().unwrap_err();
         assert_eq!(result, ValidationError::new(1));

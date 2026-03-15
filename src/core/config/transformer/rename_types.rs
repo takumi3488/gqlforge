@@ -36,7 +36,7 @@ impl Transform for RenameTypes {
             {
                 // handle for the types.
                 if let Some(type_info) = config.types.remove(existing_name) {
-                    config.types.insert(suggested_name.to_string(), type_info);
+                    config.types.insert(suggested_name.clone(), type_info);
                     lookup.insert(existing_name.clone(), suggested_name.clone());
 
                     // edge case where type is of operation type.
@@ -49,21 +49,20 @@ impl Transform for RenameTypes {
 
                 // handle for the enums.
                 if let Some(type_info) = config.enums.remove(existing_name) {
-                    config.enums.insert(suggested_name.to_string(), type_info);
+                    config.enums.insert(suggested_name.clone(), type_info);
                     lookup.insert(existing_name.clone(), suggested_name.clone());
                 }
 
                 // handle for the union.
                 if let Some(type_info) = config.unions.remove(existing_name) {
-                    config.unions.insert(suggested_name.to_string(), type_info);
+                    config.unions.insert(suggested_name.clone(), type_info);
                     lookup.insert(existing_name.clone(), suggested_name.clone());
                 }
 
                 Valid::succeed(())
             } else {
                 Valid::fail(format!(
-                    "Type '{}' not found in configuration.",
-                    existing_name
+                    "Type '{existing_name}' not found in configuration."
                 ))
             }
         })
@@ -103,7 +102,7 @@ impl Transform for RenameTypes {
                 let mut types_to_remove = HashSet::new();
                 let mut types_to_add = HashSet::new();
 
-                for type_name in union_type_.types.iter() {
+                for type_name in &union_type_.types {
                     if let Some(new_type_name) = lookup.get(type_name) {
                         types_to_remove.insert(type_name.clone());
                         types_to_add.insert(new_type_name.clone());
@@ -140,6 +139,7 @@ impl Transform for RenameTypes {
 
 #[cfg(test)]
 mod test {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use gqlforge_valid::{ValidationError, Validator};
     use indexmap::IndexMap;
     use maplit::hashmap;
@@ -196,7 +196,7 @@ mod test {
         .to_result()
         .unwrap();
 
-        insta::assert_snapshot!(cfg.to_sdl())
+        insta::assert_snapshot!(cfg.to_sdl());
     }
 
     #[test]
@@ -281,6 +281,6 @@ mod test {
             .transform(config)
             .to_result()
             .unwrap();
-        insta::assert_snapshot!(result.to_sdl())
+        insta::assert_snapshot!(result.to_sdl());
     }
 }

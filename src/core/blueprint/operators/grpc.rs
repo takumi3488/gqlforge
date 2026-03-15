@@ -70,12 +70,12 @@ fn validate_schema(
 
     let input_type = match JsonSchema::try_from(input_type) {
         Ok(input_schema) => Valid::succeed(input_schema),
-        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
     };
 
     let output_type = match JsonSchema::try_from(output_type) {
         Ok(output_type) => Valid::succeed(output_type),
-        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
     };
 
     input_type
@@ -86,7 +86,7 @@ fn validate_schema(
             let super_type = field_schema.field;
             match sub_type.is_a(&super_type, name).to_result() {
                 Ok(res) => Valid::succeed(res),
-                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
             }
         })
 }
@@ -94,7 +94,7 @@ fn validate_schema(
 fn validate_group_by(
     field_schema: &FieldSchema,
     operation: &ProtobufOperation,
-    group_by: Vec<String>,
+    group_by: &[String],
 ) -> Valid<(), BlueprintError> {
     let input_type = &operation.input_type;
     let output_type = &operation.output_type;
@@ -102,7 +102,7 @@ fn validate_group_by(
         .ok_or(ValidationError::new(BlueprintError::FieldNotFound(
             group_by[0].clone(),
         )));
-    for item in group_by.iter().take(&group_by.len() - 1) {
+    for item in group_by.iter().take(group_by.len() - 1) {
         field_descriptor =
             output_type
                 .get_field_by_json_name(item.as_str())
@@ -110,12 +110,13 @@ fn validate_group_by(
                     item.clone(),
                 )));
     }
-    let output_type = field_descriptor
-        .and_then(|f| JsonSchema::try_from(&f).map_err(BlueprintError::from_validation_string));
+    let output_type = field_descriptor.and_then(|f| {
+        JsonSchema::try_from(&f).map_err(|e| BlueprintError::from_validation_string(&e))
+    });
 
     let json_schema = match JsonSchema::try_from(input_type) {
         Ok(schema) => Valid::succeed(schema),
-        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+        Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
     };
 
     json_schema
@@ -130,11 +131,12 @@ fn validate_group_by(
                 .to_result()
             {
                 Ok(res) => Valid::succeed(res),
-                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
             }
         })
 }
 
+#[derive(Clone, Copy)]
 pub struct CompileGrpc<'a> {
     pub config_module: &'a ConfigModule,
     pub operation_type: &'a GraphQLOperationType,
@@ -198,7 +200,7 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
                 .to_result()
             {
                 Ok(data) => Valid::succeed(data),
-                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(e)),
+                Err(e) => Valid::from_validation_err(BlueprintError::from_validation_string(&e)),
             }
         })
         .and_then(|(operation, url, headers, body)| {
@@ -207,12 +209,12 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
                 if grpc.batch_key.is_empty() {
                     validate_schema(field_schema, &operation, field.type_of.name()).unit()
                 } else {
-                    validate_group_by(&field_schema, &operation, grpc.batch_key.clone()).unit()
+                    validate_group_by(&field_schema, &operation, &grpc.batch_key).unit()
                 }
             } else {
                 Valid::succeed(())
             };
-            validation.map(|_| (url, headers, operation, body))
+            validation.map(|()| (url, headers, operation, body))
         })
         .map(|(url, headers, operation, body)| {
             let req_template = RequestTemplate {
@@ -252,6 +254,7 @@ pub fn compile_grpc(inputs: CompileGrpc) -> Valid<IR, BlueprintError> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::convert::TryFrom;
 
     use gqlforge_valid::ValidationError;

@@ -33,6 +33,14 @@ fn run_blocking() -> anyhow::Result<()> {
     rt.block_on(async { gqlforge::cli::run().await })
 }
 
+#[expect(
+    clippy::unnecessary_wraps,
+    reason = "main returns Ok(()) after explicit process::exit on error"
+)]
+#[expect(
+    clippy::expect_used,
+    reason = "rustls provider initialization failure is fatal"
+)]
 fn main() -> anyhow::Result<()> {
     // Initialize rustls CryptoProvider first (using aws_lc_rs)
     // Explicit configuration required when both aws-lc-rs and ring are present as
@@ -47,7 +55,7 @@ fn main() -> anyhow::Result<()> {
     let _guard = tracing::subscriber::set_default(default_tracing_gqlforge());
     let result = run_blocking();
     match result {
-        Ok(_) => {}
+        Ok(()) => {}
         Err(error) => {
             // Ensure all errors are converted to Errata before being printed.
             let cli_error: Errata = error.into();

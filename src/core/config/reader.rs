@@ -15,7 +15,7 @@ use crate::core::runtime::TargetRuntime;
 use crate::core::variance::Invariant;
 
 /// Reads the configuration from a file or from an HTTP URL and resolves all
-/// linked extensions to create a ConfigModule.
+/// linked extensions to create a `ConfigModule`.
 pub struct ConfigReader {
     runtime: TargetRuntime,
     resource_reader: ResourceReader<Cached>,
@@ -23,6 +23,7 @@ pub struct ConfigReader {
 }
 
 impl ConfigReader {
+    #[must_use]
     pub fn init(runtime: TargetRuntime) -> Self {
         let resource_reader = ResourceReader::<Cached>::cached(runtime.clone());
         Self {
@@ -33,6 +34,7 @@ impl ConfigReader {
     }
 
     /// Reads the links in a Config and fill the content
+    #[expect(clippy::too_many_lines, reason = "handles all link type variants")]
     async fn ext_links(
         &self,
         config_module: ConfigModule,
@@ -60,7 +62,7 @@ impl ConfigReader {
         let mut extensions = config_module.extensions().clone();
         let mut config_module = Valid::succeed(config_module);
 
-        for link in links.iter() {
+        for link in &links {
             let path = Self::resolve_path(&link.src, parent_dir);
 
             match link.type_of {
@@ -94,12 +96,12 @@ impl ConfigReader {
                 LinkType::Cert => {
                     let source = self.resource_reader.read_file(path).await?;
                     let content = source.content;
-                    extensions.cert.extend(self.load_cert(content).await?);
+                    extensions.cert.extend(Self::load_cert(&content)?);
                 }
                 LinkType::Key => {
                     let source = self.resource_reader.read_file(path).await?;
                     let content = source.content;
-                    extensions.keys = self.load_private_key(content).await?
+                    extensions.keys = Self::load_private_key(&content);
                 }
                 LinkType::Operation => {
                     let source = self.resource_reader.read_file(path).await?;
@@ -124,7 +126,7 @@ impl ConfigReader {
                     extensions.jwks.push(Content {
                         id: link.id.clone(),
                         content: serde_path_to_error::deserialize(de)?,
-                    })
+                    });
                 }
                 LinkType::Grpc => {
                     let meta = self
@@ -163,7 +165,7 @@ impl ConfigReader {
                         .to_string();
                     let force_path_style = meta
                         .and_then(|m| m.get("forcePathStyle"))
-                        .and_then(|v| v.as_bool())
+                        .and_then(serde_json::Value::as_bool)
                         .unwrap_or(false);
                     let id = link.id.clone().unwrap_or_default();
 
@@ -183,7 +185,7 @@ impl ConfigReader {
     }
 
     /// Reads the certificate from a given file
-    async fn load_cert(&self, content: String) -> anyhow::Result<Vec<CertificateDer<'static>>> {
+    fn load_cert(content: &str) -> anyhow::Result<Vec<CertificateDer<'static>>> {
         let certificates: Vec<CertificateDer<'static>> =
             rustls_pemfile::certs(&mut content.as_bytes()).collect::<Result<Vec<_>, _>>()?;
 
@@ -191,8 +193,8 @@ impl ConfigReader {
     }
 
     /// Reads a private key from a given file
-    async fn load_private_key(&self, content: String) -> anyhow::Result<Vec<PrivateKey>> {
-        let keys: Vec<PrivateKey> = rustls_pemfile::read_all(&mut content.as_bytes())
+    fn load_private_key(content: &str) -> Vec<PrivateKey> {
+        rustls_pemfile::read_all(&mut content.as_bytes())
             .filter_map(|item| match item {
                 Ok(rustls_pemfile::Item::Pkcs1Key(key)) => {
                     Some(PrivateKey::from(PrivateKeyDer::Pkcs1(key)))
@@ -205,12 +207,14 @@ impl ConfigReader {
                 }
                 _ => None,
             })
-            .collect();
-
-        Ok(keys)
+            .collect()
     }
 
     /// Reads a single file and returns the config
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read<T: Into<Resource> + Clone + ToString + Send + Sync>(
         &self,
         file: T,
@@ -219,6 +223,10 @@ impl ConfigReader {
     }
 
     /// Reads all the files and returns a merged config
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read_all<T: Into<Resource> + Clone + ToString + Send + Sync>(
         &self,
         files: &[T],
@@ -263,7 +271,11 @@ impl ConfigReader {
         Ok(config_module.to_result()?)
     }
 
-    /// Resolves all the links in a Config to create a ConfigModule
+    /// Resolves all the links in a Config to create a `ConfigModule`
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn resolve(
         &self,
         mut config: Config,
@@ -306,6 +318,7 @@ fn to_validation_error(error: anyhow::Error) -> ValidationError<String> {
 
 #[cfg(test)]
 mod reader_tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::path::{Path, PathBuf};
 
     use pretty_assertions::assert_eq;
@@ -319,7 +332,7 @@ mod reader_tests {
 
     #[tokio::test]
     async fn test_all() {
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let server = start_mock_server();
         let mut cfg = Config::default();
@@ -349,12 +362,9 @@ mod reader_tests {
         assert_eq!(
             ["Test", "User"]
                 .iter()
-                .map(|i| i.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>(),
-            c.types
-                .keys()
-                .map(|i| i.to_string())
-                .collect::<Vec<String>>()
+            c.types.keys().cloned().collect::<Vec<String>>()
         );
         foo_mock.assert();
         bar_mock.assert();
@@ -362,29 +372,26 @@ mod reader_tests {
 
     #[tokio::test]
     async fn test_local_files() {
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
 
         let files: Vec<String> = ["examples/jsonplaceholder.graphql"]
             .iter()
-            .map(|x| x.to_string())
+            .map(std::string::ToString::to_string)
             .collect();
         let cr = ConfigReader::init(runtime);
         let c = cr.read_all(&files).await.unwrap();
         assert_eq!(
             ["Post", "Query", "User"]
                 .iter()
-                .map(|i| i.to_string())
+                .map(std::string::ToString::to_string)
                 .collect::<Vec<String>>(),
-            c.types
-                .keys()
-                .map(|i| i.to_string())
-                .collect::<Vec<String>>()
+            c.types.keys().cloned().collect::<Vec<String>>()
         );
     }
 
     #[tokio::test]
     async fn test_script_loader() {
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let file_rt = runtime.file.clone();
 
         let cargo_manifest = std::env::var("CARGO_MANIFEST_DIR").unwrap();
@@ -392,13 +399,12 @@ mod reader_tests {
 
         let config = reader
             .read(format!(
-                "{}/examples/jsonplaceholder_script.graphql",
-                cargo_manifest
+                "{cargo_manifest}/examples/jsonplaceholder_script.graphql"
             ))
             .await
             .unwrap();
 
-        let path = format!("{}/examples/scripts/echo.js", cargo_manifest);
+        let path = format!("{cargo_manifest}/examples/scripts/echo.js");
         let content = file_rt.read(&path).await;
 
         assert_eq!(

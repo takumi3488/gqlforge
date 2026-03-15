@@ -18,9 +18,9 @@ use crate::core::json::{JsonLike, JsonObjectLike};
 ///
 /// There are two types of discriminators:
 ///
-/// * [KeyedDiscriminator]: Uses the keys of an object to determine its type.
-/// * [TypeFieldDiscriminator]: Uses a specific field of an object to determine
-///   its type.
+/// * [`KeyedDiscriminator`]: Uses the keys of an object to determine its type.
+/// * [`TypeFieldDiscriminator`]: Uses a specific field of an object to
+///   determine its type.
 ///
 /// The [Discriminator] enum provides a way to construct and use these
 /// discriminators.
@@ -52,8 +52,7 @@ impl Discriminator {
             && typename_field.is_empty()
         {
             return Valid::fail(format!(
-                "The `field` cannot be an empty string for the `@discriminate` of type {}",
-                type_name
+                "The `field` cannot be an empty string for the `@discriminate` of type {type_name}"
             ));
         }
 
@@ -66,6 +65,10 @@ impl Discriminator {
 
     /// Resolves the `__typename` for an object and inserts the value into the
     /// object.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn resolve_type(&self, value: Value) -> Result<Value> {
         // if typename is already present we return it
         if value.get_type_name().is_some() {
@@ -100,6 +103,10 @@ pub trait TypedValue<'a> {
     type Error;
 
     fn get_type_name(&'a self) -> Option<&'a str>;
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     fn set_type_name(&'a mut self, type_name: String) -> Result<(), Self::Error>;
 }
 
@@ -131,11 +138,12 @@ where
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]
     fn empty_type_field_is_invalid() {
-        let result = Discriminator::new("Test".to_string(), BTreeSet::new(), Some("".to_string()));
+        let result = Discriminator::new("Test".to_string(), BTreeSet::new(), Some(String::new()));
         assert!(result.is_fail());
         assert_eq!(
             result.to_result().unwrap_err().to_string(),

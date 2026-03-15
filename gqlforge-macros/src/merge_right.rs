@@ -20,25 +20,26 @@ fn get_attrs(attrs: &[syn::Attribute]) -> syn::Result<Attrs> {
             attr.parse_nested_meta(|meta| {
                 if meta.path.is_ident(MERGE_RIGHT_FN) {
                     let p: syn::Expr = meta.value()?.parse()?;
-                    let lit =
-                        if let syn::Expr::Lit(syn::ExprLit { lit: syn::Lit::Str(lit), .. }) = p {
-                            let suffix = lit.suffix();
-                            if !suffix.is_empty() {
-                                return Err(syn::Error::new(
-                                    lit.span(),
-                                    format!("unexpected suffix `{}` on string literal", suffix),
-                                ));
-                            }
-                            lit
-                        } else {
+                    let lit = if let syn::Expr::Lit(syn::ExprLit {
+                        lit: syn::Lit::Str(lit), ..
+                    }) = p
+                    {
+                        let suffix = lit.suffix();
+                        if !suffix.is_empty() {
                             return Err(syn::Error::new(
-                                p.span(),
-                                format!(
-                                    "expected merge_right {} attribute to be a string.",
-                                    MERGE_RIGHT_FN
-                                ),
+                                lit.span(),
+                                format!("unexpected suffix `{suffix}` on string literal"),
                             ));
-                        };
+                        }
+                        lit
+                    } else {
+                        return Err(syn::Error::new(
+                            p.span(),
+                            format!(
+                                "expected merge_right {MERGE_RIGHT_FN} attribute to be a string.",
+                            ),
+                        ));
+                    };
                     let expr_path: syn::ExprPath = lit.parse()?;
                     attrs_ret.merge_right_fn = Some(expr_path);
                     Ok(())
@@ -75,11 +76,10 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
             };
 
             let merge_logic = fields.iter().enumerate().map(|(i, f)| {
-                let attrs = get_attrs(&f.attrs);
-                if let Err(err) = attrs {
-                    panic!("{}", err);
-                }
-                let attrs = attrs.unwrap();
+                let attrs = match get_attrs(&f.attrs) {
+                    Ok(a) => a,
+                    Err(err) => panic!("{err}"),
+                };
                 let name = &f.ident;
 
                 match &data.fields {
@@ -110,12 +110,12 @@ pub fn expand_merge_right_derive(input: TokenStream) -> TokenStream {
                 }
             });
 
-            let generics_lt = generics.lt_token;
-            let generics_gt = generics.gt_token;
+            let generics_open = generics.lt_token;
+            let generics_close = generics.gt_token;
             let generics_params = generics.params;
 
             let generics_del = quote! {
-                #generics_lt #generics_params #generics_gt
+                #generics_open #generics_params #generics_close
             };
 
             let initializer = match data.fields {

@@ -9,7 +9,6 @@ use gqlforge_hasher::GqlforgeHasher;
 use http::header::{CACHE_CONTROL, CONTENT_TYPE, HeaderMap, HeaderValue};
 use http::{Response, StatusCode};
 use http_body_util::Full;
-use once_cell::sync::Lazy;
 use serde::{Deserialize, Serialize};
 
 use super::jit::{BatchResponse as JITBatchResponse, JITExecutor};
@@ -19,6 +18,7 @@ pub struct OperationId(u64);
 
 #[async_trait::async_trait]
 pub trait GraphQLRequestLike: Hash + Send {
+    #[must_use]
     fn data<D: Any + Clone + Send + Sync>(self, data: D) -> Self;
     async fn execute<E>(self, executor: &E) -> GraphQLResponse
     where
@@ -29,31 +29,27 @@ pub trait GraphQLRequestLike: Hash + Send {
     fn parse_query(&mut self) -> Option<&ExecutableDocument>;
 
     fn is_query(&mut self) -> bool {
-        self.parse_query()
-            .map(|a| {
-                let mut is_query = false;
-                for (_, operation) in a.operations.iter() {
-                    is_query = operation.node.ty == OperationType::Query;
-                }
-                is_query
-            })
-            .unwrap_or(false)
+        self.parse_query().is_some_and(|a| {
+            let mut is_query = false;
+            for (_, operation) in a.operations.iter() {
+                is_query = operation.node.ty == OperationType::Query;
+            }
+            is_query
+        })
     }
 
     fn is_subscription(&mut self) -> bool {
-        self.parse_query()
-            .map(|doc| {
-                doc.operations
-                    .iter()
-                    .any(|(_, op)| op.node.ty == OperationType::Subscription)
-            })
-            .unwrap_or(false)
+        self.parse_query().is_some_and(|doc| {
+            doc.operations
+                .iter()
+                .any(|(_, op)| op.node.ty == OperationType::Subscription)
+        })
     }
 
     fn operation_id(&self, headers: &HeaderMap) -> OperationId {
         let mut hasher = GqlforgeHasher::default();
         let state = &mut hasher;
-        for (name, value) in headers.iter() {
+        for (name, value) in headers {
             name.hash(state);
             value.hash(state);
         }
@@ -194,8 +190,8 @@ impl GraphQLQuery {
     }
 }
 
-static APPLICATION_JSON: Lazy<HeaderValue> =
-    Lazy::new(|| HeaderValue::from_static("application/json"));
+static APPLICATION_JSON: std::sync::LazyLock<HeaderValue> =
+    std::sync::LazyLock::new(|| HeaderValue::from_static("application/json"));
 
 impl GraphQLResponse {
     fn build_response(
@@ -224,13 +220,22 @@ impl GraphQLResponse {
         Ok(Full::new(Bytes::from(serde_json::to_string(&self.0)?)))
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn into_response(self) -> Result<Response<Full<Bytes>>> {
         self.build_response(StatusCode::OK, self.default_body()?)
     }
 
     fn flatten_response(data: &Value) -> &Value {
         match data {
-            Value::Object(map) if map.len() == 1 => map.iter().next().unwrap().1,
+            Value::Object(map) if map.len() == 1 => {
+                map.iter()
+                    .next()
+                    .unwrap_or_else(|| unreachable!("len == 1 guarantees first"))
+                    .1
+            }
             data => data,
         }
     }
@@ -238,6 +243,10 @@ impl GraphQLResponse {
     /// Transforms a plain `GraphQLResponse` into a `Response<Body>`.
     /// Differs as `to_response` by flattening the response's data
     /// `{"data": {"user": {"name": "John"}}}` becomes `{"name": "John"}`.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn into_rest_response(self) -> Result<Response<Full<Bytes>>> {
         if !self.0.is_ok() {
             return self.build_response(StatusCode::INTERNAL_SERVER_ERROR, self.default_body()?);
@@ -279,6 +288,7 @@ impl GraphQLResponse {
     ///
     /// * A modified `GraphQLResponse` with updated `cache_control` `max_age`
     ///   and `public` flag.
+    #[must_use]
     pub fn set_cache_control(
         mut self,
         enable_cache_header: bool,
@@ -297,7 +307,7 @@ impl GraphQLResponse {
                         res.cache_control.public = cache_public;
                     }
                 }
-            };
+            }
         }
         self
     }
@@ -316,6 +326,7 @@ impl Default for CacheControl {
 }
 
 impl CacheControl {
+    #[must_use]
     pub fn value(&self) -> Option<String> {
         let mut value = if self.max_age > 0 {
             format!("max-age={}", self.max_age)
@@ -332,15 +343,15 @@ impl CacheControl {
             value += "private";
         }
 
-        if !value.is_empty() { Some(value) } else { None }
+        if value.is_empty() { None } else { Some(value) }
     }
 
+    #[must_use]
     pub fn merge(self, other: &CacheControl) -> CacheControl {
         CacheControl {
             public: self.public && other.public,
             max_age: match (self.max_age, other.max_age) {
-                (-1, _) => -1,
-                (_, -1) => -1,
+                (-1, _) | (_, -1) => -1,
                 (a, 0) => a,
                 (0, b) => b,
                 (a, b) => a.min(b),
@@ -355,10 +366,12 @@ pub struct GraphQLArcResponse {
 }
 
 impl GraphQLArcResponse {
+    #[must_use]
     pub fn new(response: JITBatchResponse<Vec<u8>>) -> Self {
         Self { response, cache_control: None }
     }
 
+    #[must_use]
     pub fn set_cache_control(self, enable_cache_header: bool, max_age: i32, public: bool) -> Self {
         Self {
             response: self.response,
@@ -392,7 +405,7 @@ impl GraphQLArcResponse {
         Ok(response)
     }
 
-    fn default_body(&self) -> Result<Full<Bytes>> {
+    fn default_body(&self) -> Full<Bytes> {
         let str_repr: Vec<u8> = match &self.response {
             JITBatchResponse::Batch(resp) => {
                 // Use iterators and collect for more efficient concatenation
@@ -415,16 +428,21 @@ impl GraphQLArcResponse {
             }
             JITBatchResponse::Single(resp) => resp.body.as_ref().to_owned(),
         };
-        Ok(Full::new(Bytes::from(str_repr)))
+        Full::new(Bytes::from(str_repr))
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn into_response(self) -> Result<Response<Full<Bytes>>> {
-        self.build_response(StatusCode::OK, self.default_body()?)
+        self.build_response(StatusCode::OK, self.default_body())
     }
 }
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::{Name, Response, ServerError, Value};
     use http::StatusCode;
     use http_body_util::BodyExt;
@@ -493,7 +511,7 @@ mod tests {
     #[tokio::test]
     async fn test_to_rest_response_with_error() {
         let errors = ["Some error", "Another error"];
-        let mut response: Response = Default::default();
+        let mut response: Response = Response::default();
         response.errors = errors
             .iter()
             .map(|error| ServerError::new(error.to_string(), None))

@@ -16,7 +16,7 @@ use crate::core::ir::model::{CacheKey, IoId};
 use crate::core::mustache::{Eval, Mustache, Segment};
 use crate::core::path::{PathString, PathValue, ValueString};
 
-/// RequestTemplate is an extension of a Mustache template.
+/// `RequestTemplate` is an extension of a Mustache template.
 /// Various parts of the template can be written as a mustache template.
 /// When `to_request` is called, all mustache templates are evaluated.
 /// To call `to_request` we need to provide a context.
@@ -68,14 +68,14 @@ impl RequestTemplate {
             .query_pairs()
             .filter_map(|(k, v)| if v.is_empty() { None } else { Some((k, v)) });
 
-        let qp_string = base_qp.map(|(k, v)| format!("{}={}", k, v));
+        let qp_string = base_qp.map(|(k, v)| format!("{k}={v}"));
         let qp_string = qp_string.chain(extra_qp).fold(String::new(), |str, item| {
             if str.is_empty() {
                 item
             } else if item.is_empty() {
                 str
             } else {
-                format!("{}&{}", str, item)
+                format!("{str}&{item}")
             }
         });
 
@@ -90,14 +90,15 @@ impl RequestTemplate {
 
     /// Checks if the template has any mustache templates or not
     /// Returns true if there are not templates
+    #[must_use]
     pub fn is_const(&self) -> bool {
         self.root_url.is_const()
-            && self.body_path.as_ref().is_none_or(|b| b.is_const())
+            && self.body_path.as_ref().is_none_or(Mustache::is_const)
             && self.query.iter().all(|query| query.value.is_const())
             && self.headers.iter().all(|(_, v)| v.is_const())
     }
 
-    /// Creates a HeaderMap for the context
+    /// Creates a `HeaderMap` for the context
     fn create_headers<C: PathString>(&self, ctx: &C) -> HeaderMap {
         let mut header_map = HeaderMap::new();
 
@@ -111,6 +112,10 @@ impl RequestTemplate {
     }
 
     /// Creates a Request for the given context
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_request<C: PathString + HasHeaders + PathValue>(
         &self,
         ctx: &C,
@@ -186,24 +191,33 @@ impl RequestTemplate {
         req
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn new(root_url: &str) -> anyhow::Result<Self> {
         Ok(Self {
             root_url: Mustache::parse(root_url),
-            query: Default::default(),
+            query: Vec::new(),
             method: reqwest::Method::GET,
-            headers: Default::default(),
-            body_path: Default::default(),
+            headers: Vec::new(),
+            body_path: None,
             endpoint: Endpoint::new(root_url.to_string()),
-            encoding: Default::default(),
-            query_encoder: Default::default(),
+            encoding: Encoding::default(),
+            query_encoder: QueryEncoder::default(),
         })
     }
 
-    /// Creates a new RequestTemplate with the given form encoded URL
+    /// Creates a new `RequestTemplate` with the given form encoded URL
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn form_encoded_url(url: &str) -> anyhow::Result<Self> {
         Ok(Self::new(url)?.encoding(Encoding::ApplicationXWwwFormUrlencoded))
     }
 
+    #[must_use]
     pub fn with_body(mut self, body: Mustache) -> Self {
         self.body_path = Some(body);
         self
@@ -246,7 +260,7 @@ impl TryFrom<Endpoint> for RequestTemplate {
             body_path: body,
             endpoint,
             encoding,
-            query_encoder: Default::default(),
+            query_encoder: QueryEncoder::default(),
         })
     }
 }
@@ -258,18 +272,18 @@ impl<Ctx: PathString + HasHeaders + PathValue> CacheKey<Ctx> for RequestTemplate
 
         self.method.hash(state);
 
-        for (name, mustache) in self.headers.iter() {
+        for (name, mustache) in &self.headers {
             name.hash(state);
             mustache.render(ctx).hash(state);
         }
 
-        for (name, value) in ctx.headers().iter() {
+        for (name, value) in ctx.headers() {
             name.hash(state);
             value.hash(state);
         }
 
         if let Some(body) = self.body_path.as_ref() {
-            body.render(ctx).hash(state)
+            body.render(ctx).hash(state);
         }
 
         let url = self.create_url(ctx).ok()?;
@@ -279,7 +293,7 @@ impl<Ctx: PathString + HasHeaders + PathValue> CacheKey<Ctx> for RequestTemplate
     }
 }
 
-/// ValueStringEval parses the mustache template and uses ctx to retrieve the
+/// `ValueStringEval` parses the mustache template and uses ctx to retrieve the
 /// values for templates.
 struct ValueStringEval<A>(std::marker::PhantomData<A>);
 impl<A> Default for ValueStringEval<A> {
@@ -296,13 +310,12 @@ impl<'a, A: PathValue> Eval<'a> for ValueStringEval<A> {
         mustache
             .segments()
             .iter()
-            .filter_map(|segment| match segment {
+            .find_map(|segment| match segment {
                 Segment::Literal(text) => Some(ValueString::Value(Cow::Owned(
                     async_graphql::Value::String(text.to_owned()),
                 ))),
                 Segment::Expression(parts) => in_value.raw_value(parts),
-            })
-            .next() // Return the first value that is found
+            }) // Return the first value that is found
     }
 }
 
@@ -333,7 +346,7 @@ impl<'a, A: PathString> Eval<'a> for ExpressionValueEval<A> {
         // - This approach eliminates the need for repeated JSON parsing/serialization
         //   during the batching process, significantly improving performance
         let mut first_expression_value = None;
-        for segment in mustache.segments().iter() {
+        for segment in mustache.segments() {
             match segment {
                 Segment::Literal(text) => result.push_str(text),
                 Segment::Expression(parts) => {

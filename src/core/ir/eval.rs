@@ -1,6 +1,5 @@
 use std::collections::HashMap;
 use std::future::Future;
-use std::ops::Deref;
 
 use async_graphql_value::ConstValue;
 use futures_util::future::join_all;
@@ -11,7 +10,6 @@ use super::model::{Cache, CacheKey, IR, Map};
 use super::{Error, EvalContext, ResolverContextLike, TypedValue};
 use crate::core::auth::verify::{AuthVerifier, Verify};
 use crate::core::json::{JsonLike, JsonObjectLike};
-use crate::core::merge_right::MergeRight;
 use crate::core::serde_value_ext::ValueExt;
 
 impl IR {
@@ -27,8 +25,7 @@ impl IR {
             match self {
                 IR::ContextPath(path) => Ok(ctx
                     .path_value(path)
-                    .map(|a| a.into_owned())
-                    .unwrap_or(async_graphql::Value::Null)),
+                    .map_or(async_graphql::Value::Null, std::borrow::Cow::into_owned)),
                 IR::Path(input, path) => {
                     let inp = input.eval(ctx).await?;
                     Ok(inp
@@ -58,20 +55,19 @@ impl IR {
                 }
                 IR::IO(io) => eval_io(io, ctx).await,
                 IR::Cache(Cache { max_age, io }) => {
-                    let io = io.deref();
+                    let io = &**io;
                     let key = io.cache_key(ctx);
                     if let Some(key) = key {
-                        match ctx.request_ctx.runtime.cache.get(&key).await? {
-                            Some(val) => Ok(val),
-                            _ => {
-                                let val = eval_io(io, ctx).await?;
-                                ctx.request_ctx
-                                    .runtime
-                                    .cache
-                                    .set(key, val.clone(), max_age.to_owned())
-                                    .await?;
-                                Ok(val)
-                            }
+                        if let Some(val) = ctx.request_ctx.runtime.cache.get(&key).await? {
+                            Ok(val)
+                        } else {
+                            let val = eval_io(io, ctx).await?;
+                            ctx.request_ctx
+                                .runtime
+                                .cache
+                                .set(key, val.clone(), max_age.to_owned())
+                                .await?;
+                            Ok(val)
                         }
                     } else {
                         eval_io(io, ctx).await
@@ -88,7 +84,7 @@ impl IR {
                                 if let Some(value) = map.get(&key) {
                                     Ok(ConstValue::String(value.to_owned()))
                                 } else {
-                                    Err(Error::ExprEval(format!("Can't find mapped key: {}.", key)))
+                                    Err(Error::ExprEval(format!("Can't find mapped key: {key}.")))
                                 }
                             }
                             ConstValue::List(vec) => {
@@ -125,7 +121,7 @@ impl IR {
                     // merging capabilities by adding an additional parameter to `Merge`.
                     Ok(results
                         .into_iter()
-                        .reduce(|acc, result| acc.merge_right(result))
+                        .reduce(super::super::merge_right::MergeRight::merge_right)
                         .unwrap_or_default())
                 }
                 IR::Discriminate(discriminator, expr) => expr
@@ -186,6 +182,7 @@ impl IR {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     mod merge {

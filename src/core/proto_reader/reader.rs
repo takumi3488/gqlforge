@@ -28,12 +28,17 @@ pub struct ProtoMetadata {
 
 impl ProtoReader {
     /// Initializes the proto reader with a resource reader and target runtime
+    #[must_use]
     pub fn init(reader: ResourceReader<Cached>, runtime: TargetRuntime) -> Self {
         Self { reader, runtime }
     }
 
     /// Fetches proto files from a grpc server (grpc reflection).
     /// Tries v1 first, falls back to v1alpha if v1 is unavailable.
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn fetch<T: AsRef<str>>(
         &self,
         url: T,
@@ -46,18 +51,17 @@ impl ProtoReader {
                 self.runtime.clone(),
                 GRPC_REFLECTION_V1,
             );
-            match v1.list_all_files().await {
-                Ok(services) => (v1, services),
-                Err(_) => {
-                    let v1alpha = GrpcReflection::new(
-                        url.as_ref(),
-                        headers,
-                        self.runtime.clone(),
-                        GRPC_REFLECTION_V1ALPHA,
-                    );
-                    let services = v1alpha.list_all_files().await?;
-                    (v1alpha, services)
-                }
+            if let Ok(services) = v1.list_all_files().await {
+                (v1, services)
+            } else {
+                let v1alpha = GrpcReflection::new(
+                    url.as_ref(),
+                    headers,
+                    self.runtime.clone(),
+                    GRPC_REFLECTION_V1ALPHA,
+                );
+                let services = v1alpha.list_all_files().await?;
+                (v1alpha, services)
             }
         };
 
@@ -84,6 +88,10 @@ impl ProtoReader {
     }
 
     /// Asynchronously reads all proto files from a list of paths
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read_all<T: AsRef<str>>(&self, paths: &[T]) -> anyhow::Result<Vec<ProtoMetadata>> {
         let resolved_protos = join_all(paths.iter().map(|v| self.read(v.as_ref(), None)))
             .await
@@ -93,6 +101,10 @@ impl ProtoReader {
     }
 
     /// Reads a proto file from a path
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub async fn read<T: AsRef<str>>(
         &self,
         path: T,
@@ -161,7 +173,7 @@ impl ProtoReader {
         proto_paths: Option<&[String]>,
     ) -> anyhow::Result<Vec<FileDescriptorProto>> {
         self.resolve_dependencies(parent_proto, |import| {
-            let parent_path = parent_path.map(|p| p.to_path_buf());
+            let parent_path = parent_path.map(std::path::Path::to_path_buf);
             let this = self.clone();
             let proto_paths = proto_paths.map(|paths| {
                 paths
@@ -248,6 +260,7 @@ impl ProtoReader {
 
 #[cfg(test)]
 mod test_proto_config {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::path::{Path, PathBuf};
 
     use anyhow::Result;
@@ -260,7 +273,7 @@ mod test_proto_config {
     #[tokio::test]
     async fn test_resolve() {
         // Skipping IO tests as they are covered in reader.rs
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let reader = ProtoReader::init(ResourceReader::<Cached>::cached(runtime.clone()), runtime);
         reader
             .read_proto("google/protobuf/empty.proto", None, None)
@@ -273,7 +286,7 @@ mod test_proto_config {
         let test_dir = Path::new(protobuf::SELF);
         let test_file = protobuf::NESTED_0;
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let file_rt = runtime.file.clone();
 
         let reader = ProtoReader::init(ResourceReader::<Cached>::cached(runtime.clone()), runtime);
@@ -301,7 +314,7 @@ mod test_proto_config {
 
     #[tokio::test]
     async fn test_proto_no_pkg() -> Result<()> {
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let reader = ProtoReader::init(ResourceReader::<Cached>::cached(runtime.clone()), runtime);
         let proto_no_pkg =
             PathBuf::from(gqlforge_fixtures::configs::SELF).join("proto_no_pkg.graphql");

@@ -1,3 +1,4 @@
+use std::fmt::Write as _;
 use std::hash::{Hash, Hasher};
 
 use gqlforge_hasher::GqlforgeHasher;
@@ -43,6 +44,10 @@ impl Hash for RenderedQuery {
 impl RequestTemplate {
     /// Render the template against the given context to produce a SQL string
     /// with positional parameters (`$1`, `$2`, ...).
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn render<C: PathString + HasHeaders>(&self, ctx: &C) -> anyhow::Result<RenderedQuery> {
         match self.operation {
             PostgresOperation::Select => self.render_select(ctx),
@@ -60,8 +65,8 @@ impl RequestTemplate {
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
+            let (where_clause, where_params) = Self::render_filter(filter, ctx, params.len())?;
+            let _ = write!(sql, " WHERE {where_clause}");
             params.extend(where_params);
         }
 
@@ -70,7 +75,7 @@ impl RequestTemplate {
             if !rendered.is_empty() {
                 let sanitized = sanitize_order_by(&rendered, &self.columns);
                 if !sanitized.is_empty() {
-                    sql.push_str(&format!(" ORDER BY {sanitized}"));
+                    let _ = write!(sql, " ORDER BY {sanitized}");
                 }
             }
         }
@@ -79,7 +84,7 @@ impl RequestTemplate {
             let rendered = limit.render(ctx);
             if !rendered.is_empty() {
                 params.push(rendered);
-                sql.push_str(&format!(" LIMIT ${}", params.len()));
+                let _ = write!(sql, " LIMIT ${}", params.len());
             }
         }
 
@@ -87,7 +92,7 @@ impl RequestTemplate {
             let rendered = offset.render(ctx);
             if !rendered.is_empty() {
                 params.push(rendered);
-                sql.push_str(&format!(" OFFSET ${}", params.len()));
+                let _ = write!(sql, " OFFSET ${}", params.len());
             }
         }
 
@@ -104,8 +109,8 @@ impl RequestTemplate {
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
+            let (where_clause, where_params) = Self::render_filter(filter, ctx, params.len())?;
+            let _ = write!(sql, " WHERE {where_clause}");
             params.extend(where_params);
         }
 
@@ -196,12 +201,12 @@ impl RequestTemplate {
         let mut sql = format!("UPDATE {table} SET {set_str}");
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
+            let (where_clause, where_params) = Self::render_filter(filter, ctx, params.len())?;
+            let _ = write!(sql, " WHERE {where_clause}");
             params.extend(where_params);
         }
 
-        sql.push_str(&format!(" RETURNING {ret_cols}"));
+        let _ = write!(sql, " RETURNING {ret_cols}");
         Ok(RenderedQuery { sql, params })
     }
 
@@ -215,8 +220,8 @@ impl RequestTemplate {
         let mut params = Vec::new();
 
         if let Some(filter) = &self.filter {
-            let (where_clause, where_params) = self.render_filter(filter, ctx, params.len())?;
-            sql.push_str(&format!(" WHERE {where_clause}"));
+            let (where_clause, where_params) = Self::render_filter(filter, ctx, params.len())?;
+            let _ = write!(sql, " WHERE {where_clause}");
             params.extend(where_params);
         }
 
@@ -226,7 +231,6 @@ impl RequestTemplate {
     /// Parse a JSON filter object into `col = $N` clauses, returning the clause
     /// string and the parameter values.
     fn render_filter<C: PathString + HasHeaders>(
-        &self,
         filter: &Mustache,
         ctx: &C,
         offset: usize,
@@ -286,7 +290,7 @@ fn sanitize_order_by(rendered: &str, columns: &[String]) -> String {
             if !columns.iter().any(|c| c == col) {
                 return None;
             }
-            let dir = tokens.next().map(|d| d.to_uppercase()).unwrap_or_default();
+            let dir = tokens.next().map(str::to_uppercase).unwrap_or_default();
             match dir.as_str() {
                 "ASC" => Some(format!("{} ASC", quote_ident(col))),
                 "DESC" => Some(format!("{} DESC", quote_ident(col))),
@@ -321,6 +325,7 @@ fn parse_json_object(json_str: &str) -> anyhow::Result<Vec<(String, String)>> {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::borrow::Cow;
 
     use http::HeaderMap;

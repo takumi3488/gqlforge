@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::core::merge_right::MergeRight;
 
-/// PostgreSQL type -> GraphQL scalar mapping.
+/// `PostgreSQL` type -> GraphQL scalar mapping.
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub enum PgType {
     SmallInt,
@@ -38,8 +38,9 @@ pub enum PgType {
 }
 
 impl PgType {
-    /// Map a PostgreSQL type name (as returned by `information_schema` or
+    /// Map a `PostgreSQL` type name (as returned by `information_schema` or
     /// `sqlparser`) to a `PgType`.
+    #[must_use]
     pub fn from_sql_name(name: &str) -> Self {
         match name.to_lowercase().as_str() {
             "smallint" | "int2" | "smallserial" | "serial2" => PgType::SmallInt,
@@ -76,17 +77,15 @@ impl PgType {
     }
 
     /// The corresponding GraphQL scalar name.
+    #[must_use]
     pub fn graphql_scalar(&self) -> &str {
         match self {
             PgType::SmallInt | PgType::Integer => "Int",
-            PgType::BigInt => "String",
             PgType::Real | PgType::DoublePrecision | PgType::Numeric => "Float",
             PgType::Boolean => "Boolean",
             PgType::Uuid => "ID",
-            PgType::Json | PgType::Jsonb => "JSON",
+            PgType::Json | PgType::Jsonb | PgType::Array(_) => "JSON",
             PgType::Date | PgType::Timestamp | PgType::TimestampTz => "DateTime",
-            PgType::Array(_) => "JSON",
-            PgType::Bytea => "String",
             _ => "String",
         }
     }
@@ -152,10 +151,12 @@ pub struct Table {
 }
 
 impl Table {
+    #[must_use]
     pub fn qualified_name(&self) -> String {
         format!("{}.{}", self.schema, self.name)
     }
 
+    #[must_use]
     pub fn find_column(&self, name: &str) -> Option<&Column> {
         self.columns.iter().find(|c| c.name == name)
     }
@@ -169,6 +170,7 @@ pub struct DatabaseSchema {
 }
 
 impl DatabaseSchema {
+    #[must_use]
     pub fn new() -> Self {
         Self { tables: BTreeMap::new() }
     }
@@ -178,12 +180,14 @@ impl DatabaseSchema {
         self.tables.insert(key, table);
     }
 
+    #[must_use]
     pub fn merge(mut self, other: Self) -> Self {
         self.tables.extend(other.tables);
         self
     }
 
     /// Look up a table by name (tries both `schema.name` and `public.name`).
+    #[must_use]
     pub fn find_table(&self, name: &str) -> Option<&Table> {
         self.tables.get(name).or_else(|| {
             if name.contains('.') {
@@ -204,6 +208,7 @@ impl MergeRight for DatabaseSchema {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
 
     #[test]

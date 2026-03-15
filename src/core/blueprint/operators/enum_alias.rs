@@ -2,12 +2,13 @@ use std::collections::HashMap;
 
 use gqlforge_valid::Valid;
 
-use crate::core::blueprint::*;
+use crate::core::blueprint::{BlueprintError, ConfigModule, FieldDefinition};
 use crate::core::config;
 use crate::core::config::Field;
 use crate::core::ir::model::{IR, Map};
 use crate::core::try_fold::TryFold;
 
+#[must_use]
 pub fn update_enum_alias<'a>() -> TryFold<
     'a,
     (&'a ConfigModule, &'a Field, &'a config::Type, &'a str),
@@ -23,7 +24,7 @@ pub fn update_enum_alias<'a>() -> TryFold<
                     return Valid::succeed(b_field);
                 }
                 let mut map = HashMap::<String, String>::new();
-                for v in enum_type.variants.iter() {
+                for v in &enum_type.variants {
                     map.insert(v.name.clone(), v.name.clone());
                     if let Some(alias) = &v.alias {
                         for option in &alias.options {

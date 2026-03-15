@@ -8,7 +8,7 @@ use super::TypedValue;
 
 /// Resolver for `__typename` of Union and Interface types.
 ///
-/// The [KeyedDiscriminator] expects an object with one key, the type of the
+/// The [`KeyedDiscriminator`] expects an object with one key, the type of the
 /// value. For example `{ "Foo": {...} }` the `__typename` will resolve to
 /// "Foo".
 ///
@@ -23,12 +23,12 @@ pub struct KeyedDiscriminator {
 }
 
 impl KeyedDiscriminator {
-    /// Constructs a new [KeyedDiscriminator] resolver.
+    /// Constructs a new [`KeyedDiscriminator`] resolver.
     ///
     /// `type_name`: The name of the type that this discriminator is applied at.
     /// `types`: The possible types that this discriminator can resolve.
     pub fn new(type_name: String, types: BTreeSet<String>) -> Valid<Self, String> {
-        let discriminator = Self { type_name, types };
+        let discriminator = Self { types, type_name };
 
         Valid::succeed(discriminator)
     }
@@ -44,7 +44,9 @@ impl KeyedDiscriminator {
             Value::Object(index_map) => {
                 let index_map_len = index_map.len();
                 if index_map_len == 1 {
-                    let (name, _) = index_map.first().unwrap();
+                    let (name, _) = index_map.iter().next().unwrap_or_else(|| {
+                        unreachable!("len == 1 guarantees first element exists")
+                    });
                     let type_name = name.to_string();
                     if self.types.contains(&type_name) {
                         Ok(type_name)
@@ -82,8 +84,10 @@ impl KeyedDiscriminator {
         let type_name = self.resolve_type(&value)?;
         let mut value = match value {
             Value::Object(index_map) => {
-                // this is safe to unwrap because we already validated it in `resolve_type``
-                let (_, value) = index_map.into_iter().next().unwrap();
+                // this is safe to unwrap because we already validated it in `resolve_type`
+                let (_, value) = index_map.into_iter().next().unwrap_or_else(|| {
+                    unreachable!("resolve_type already validated Object has exactly one entry")
+                });
                 value
             }
             _ => bail!(
@@ -98,6 +102,7 @@ impl KeyedDiscriminator {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use async_graphql::Value;
     use gqlforge_valid::Validator;
     use serde_json::json;

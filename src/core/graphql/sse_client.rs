@@ -16,13 +16,14 @@ impl Default for SseEventParser {
 }
 
 impl SseEventParser {
+    #[must_use]
     pub fn new() -> Self {
         Self { buffer: BytesMut::new() }
     }
 
     /// Feed a chunk of bytes and extract complete SSE event data payloads.
-    pub fn decode(&mut self, chunk: Bytes) -> Vec<String> {
-        self.buffer.extend_from_slice(&chunk);
+    pub fn decode(&mut self, chunk: &Bytes) -> Vec<String> {
+        self.buffer.extend_from_slice(chunk);
         let mut events = Vec::new();
 
         loop {
@@ -83,7 +84,7 @@ mod tests {
     fn test_single_event() {
         let mut parser = SseEventParser::new();
         let input = Bytes::from("data: {\"hello\":\"world\"}\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0], "{\"hello\":\"world\"}");
     }
@@ -92,7 +93,7 @@ mod tests {
     fn test_multiple_events() {
         let mut parser = SseEventParser::new();
         let input = Bytes::from("data: first\n\ndata: second\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 2);
         assert_eq!(events[0], "first");
         assert_eq!(events[1], "second");
@@ -103,11 +104,11 @@ mod tests {
         let mut parser = SseEventParser::new();
 
         // First chunk: partial event
-        let events = parser.decode(Bytes::from("data: hel"));
+        let events = parser.decode(&Bytes::from("data: hel"));
         assert_eq!(events.len(), 0);
 
         // Second chunk: rest of event
-        let events = parser.decode(Bytes::from("lo\n\n"));
+        let events = parser.decode(&Bytes::from("lo\n\n"));
         assert_eq!(events.len(), 1);
         assert_eq!(events[0], "hello");
     }
@@ -116,7 +117,7 @@ mod tests {
     fn test_multiline_data() {
         let mut parser = SseEventParser::new();
         let input = Bytes::from("data: line1\ndata: line2\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0], "line1\nline2");
     }
@@ -125,7 +126,7 @@ mod tests {
     fn test_event_and_id_lines_ignored() {
         let mut parser = SseEventParser::new();
         let input = Bytes::from("event: message\nid: 42\ndata: payload\nretry: 1000\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0], "payload");
     }
@@ -135,14 +136,14 @@ mod tests {
         let mut parser = SseEventParser::new();
         // An event block with no data: lines should not produce an event
         let input = Bytes::from("event: ping\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 0);
     }
 
     #[test]
     fn test_empty_chunk() {
         let mut parser = SseEventParser::new();
-        let events = parser.decode(Bytes::new());
+        let events = parser.decode(&Bytes::new());
         assert_eq!(events.len(), 0);
     }
 
@@ -150,7 +151,7 @@ mod tests {
     fn test_data_without_space() {
         let mut parser = SseEventParser::new();
         let input = Bytes::from("data:no-space\n\n");
-        let events = parser.decode(input);
+        let events = parser.decode(&input);
         assert_eq!(events.len(), 1);
         assert_eq!(events[0], "no-space");
     }

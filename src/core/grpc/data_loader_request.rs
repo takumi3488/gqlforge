@@ -41,10 +41,15 @@ impl PartialEq for DataLoaderRequest {
 }
 
 impl DataLoaderRequest {
+    #[must_use]
     pub fn new(template: RenderedRequestTemplate, batch_headers: BTreeSet<String>) -> Self {
         Self { template, batch_headers }
     }
 
+    ///
+    /// # Errors
+    ///
+    /// Returns an error if the operation fails.
     pub fn to_request(&self) -> Result<reqwest::Request> {
         self.template.to_request()
     }
@@ -52,6 +57,7 @@ impl DataLoaderRequest {
 
 #[cfg(test)]
 mod tests {
+    #![expect(clippy::unwrap_used, reason = "test code")]
     use std::collections::BTreeSet;
 
     use gqlforge_fixtures::protobuf;
@@ -90,7 +96,7 @@ mod tests {
             )]),
         );
 
-        let runtime = crate::core::runtime::test::init(None);
+        let runtime = crate::core::runtime::test::init(&None);
         let reader = ConfigReader::init(runtime);
         let config_module = reader.resolve(config, None).await.unwrap();
 

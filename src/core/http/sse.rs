@@ -17,6 +17,10 @@ pub type SseBody = StreamBody<
 ///
 /// Parses the GraphQL subscription query from the POST body,
 /// executes it as a stream, and returns each result as an SSE `data:` event.
+///
+/// # Errors
+///
+/// Returns an error if the operation fails.
 pub async fn handle_sse_request(
     req: http::Request<Full<Bytes>>,
     app_ctx: Arc<AppContext>,

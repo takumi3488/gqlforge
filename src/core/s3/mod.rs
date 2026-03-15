@@ -6,7 +6,6 @@ pub use request_template::RequestTemplate;
 /// Trait for executing S3 operations.
 /// Concrete implementations live in the CLI crate (real AWS SDK client)
 /// or in test utilities (mock).
-#[allow(clippy::too_many_arguments)]
 #[async_trait::async_trait]
 pub trait S3IO: Send + Sync + 'static {
     /// Generate a presigned GET URL for the given bucket/key.

@@ -133,6 +133,7 @@ impl<A> Chunk<A> {
     /// let chunk = Chunk::default().append(1).append(2);
     /// assert_eq!(chunk.as_vec(), vec![1, 2]);
     /// ```
+    #[must_use]
     pub fn append(self, a: A) -> Self {
         self.concat(Chunk::new(a))
     }
@@ -149,6 +150,7 @@ impl<A> Chunk<A> {
     /// let chunk = Chunk::default().prepend(1).prepend(2);
     /// assert_eq!(chunk.as_vec(), vec![2, 1]);
     /// ```
+    #[must_use]
     pub fn prepend(self, a: A) -> Self {
         if self.is_null() {
             Chunk::new(a)
@@ -175,6 +177,7 @@ impl<A> Chunk<A> {
     /// let combined = chunk1.concat(chunk2);
     /// assert_eq!(combined.as_vec(), vec![1, 2, 3, 4]);
     /// ```
+    #[must_use]
     pub fn concat(self, other: Chunk<A>) -> Chunk<A> {
         match (self, other) {
             // Handle null cases
@@ -222,6 +225,7 @@ impl<A> Chunk<A> {
     /// // The transformation happens here, when we call as_vec()
     /// assert_eq!(doubled.as_vec(), vec![2, 4, 6]);
     /// ```
+    #[must_use]
     pub fn transform(self, f: impl Fn(A) -> A + 'static) -> Self {
         self.transform_flatten(move |a| Chunk::new(f(a)))
     }
@@ -252,6 +256,7 @@ impl<A> Chunk<A> {
     ///
     /// assert_eq!(materialized.as_vec(), vec![2, 4]);
     /// ```
+    #[must_use]
     pub fn materialize(self) -> Chunk<A>
     where
         A: Clone,
@@ -286,6 +291,7 @@ impl<A> Chunk<A> {
     /// });
     /// assert_eq!(expanded.as_vec(), vec![1, 2, 2, 3]);
     /// ```
+    #[must_use]
     pub fn transform_flatten(self, f: impl Fn(A) -> Chunk<A> + 'static) -> Self {
         Chunk::TransformFlatten(Rc::new(self), Rc::new(f))
     }
@@ -336,7 +342,7 @@ impl<A> Chunk<A> {
             Chunk::TransformFlatten(a, f) => {
                 let mut tmp = Vec::new();
                 a.as_vec_mut(&mut tmp);
-                for elem in tmp.into_iter() {
+                for elem in tmp {
                     f(elem).as_vec_mut(buf);
                 }
             }

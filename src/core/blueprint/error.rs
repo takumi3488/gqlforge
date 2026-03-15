@@ -228,15 +228,16 @@ impl From<ValidationError<crate::core::blueprint::BlueprintError>> for Errata {
 }
 
 impl BlueprintError {
+    #[must_use]
     pub fn to_validation_string(
-        errors: ValidationError<BlueprintError>,
+        errors: &ValidationError<BlueprintError>,
     ) -> ValidationError<String> {
         let causes: Vec<Cause<_>> = errors
             .as_vec()
             .iter()
             .map(|cause| {
                 let new_cause =
-                    Cause::new(cause.message.to_string()).trace(cause.trace.clone().into());
+                    Cause::new(cause.message.to_string()).trace(&Vec::from(cause.trace.clone()));
 
                 if let Some(description) = &cause.description {
                     new_cause.description(description.to_string())
@@ -249,13 +250,14 @@ impl BlueprintError {
         ValidationError::from(causes)
     }
 
-    pub fn from_validation_str(errors: ValidationError<&str>) -> ValidationError<BlueprintError> {
+    #[must_use]
+    pub fn from_validation_str(errors: &ValidationError<&str>) -> ValidationError<BlueprintError> {
         let causes: Vec<Cause<_>> = errors
             .as_vec()
             .iter()
             .map(|cause| {
                 let new_cause = Cause::new(BlueprintError::Cause(cause.message.to_string()))
-                    .trace(cause.trace.clone().into());
+                    .trace(&Vec::from(cause.trace.clone()));
 
                 if let Some(description) = cause.description {
                     new_cause.description(BlueprintError::Description(description.to_string()))
@@ -268,18 +270,19 @@ impl BlueprintError {
         ValidationError::from(causes)
     }
 
+    #[must_use]
     pub fn from_validation_string(
-        errors: ValidationError<String>,
+        errors: &ValidationError<String>,
     ) -> ValidationError<BlueprintError> {
         let causes: Vec<Cause<_>> = errors
             .as_vec()
             .iter()
             .map(|cause| {
-                let new_cause = Cause::new(BlueprintError::Cause(cause.message.to_string()))
-                    .trace(cause.trace.clone().into());
+                let new_cause = Cause::new(BlueprintError::Cause(cause.message.clone()))
+                    .trace(&Vec::from(cause.trace.clone()));
 
                 if let Some(description) = &cause.description {
-                    new_cause.description(BlueprintError::Description(description.to_string()))
+                    new_cause.description(BlueprintError::Description(description.clone()))
                 } else {
                     new_cause
                 }

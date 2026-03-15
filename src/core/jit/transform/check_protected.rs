@@ -17,18 +17,13 @@ impl<A> CheckProtected<A> {
 /// Checks if the IR will always evaluate to a Protected Value
 pub fn is_protected(ir: &IR) -> bool {
     match ir {
-        IR::Dynamic(_) => false,
-        IR::IO(_) => false,
-        IR::Cache(_) => false,
-        IR::Path(ir, _) => is_protected(ir),
-        IR::ContextPath(_) => false,
+        IR::Dynamic(_) | IR::IO(_) | IR::Cache(_) | IR::ContextPath(_) | IR::Service(_) => false,
+        IR::Path(ir, _) | IR::Discriminate(_, ir) => is_protected(ir),
         IR::Protect(_, _, _) => true,
         IR::Map(map) => is_protected(&map.input),
         IR::Pipe(ir, ir1) => is_protected(ir) || is_protected(ir1),
         IR::Merge(vec) => vec.iter().all(is_protected),
-        IR::Discriminate(_, ir) => is_protected(ir),
         IR::Entity(hash_map) => hash_map.values().any(is_protected),
-        IR::Service(_) => false,
     }
 }
 

@@ -6,6 +6,7 @@ mod enum_definition;
 pub mod input_definition;
 pub mod scalar_definition;
 
+#[must_use]
 pub fn into_schemars<T>() -> Schema
 where
     T: JsonSchema,
@@ -24,10 +25,12 @@ impl Default for ServiceDocumentBuilder {
 }
 
 impl ServiceDocumentBuilder {
+    #[must_use]
     pub fn new() -> Self {
         Self { definitions: vec![] }
     }
 
+    #[must_use]
     pub fn add_directive(
         mut self,
         definitions: Vec<TypeSystemDefinition>,
@@ -36,16 +39,19 @@ impl ServiceDocumentBuilder {
         self
     }
 
+    #[must_use]
     pub fn add_scalar(mut self, definitions: TypeSystemDefinition) -> ServiceDocumentBuilder {
         self.definitions.push(definitions);
         self
     }
 
+    #[must_use]
     pub fn add_input(mut self, definitions: TypeSystemDefinition) -> ServiceDocumentBuilder {
         self.definitions.push(definitions);
         self
     }
 
+    #[must_use]
     pub fn build(self) -> ServiceDocument {
         ServiceDocument { definitions: self.definitions }
     }

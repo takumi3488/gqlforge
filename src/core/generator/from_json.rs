@@ -24,33 +24,38 @@ pub struct RequestSample {
 }
 
 impl RequestSample {
+    #[must_use]
     pub fn new(url: Url, response_body: Value, field_name: String) -> Self {
         Self {
             url,
             field_name,
             res_body: response_body,
-            method: Default::default(),
-            req_body: Default::default(),
-            headers: Default::default(),
-            operation_type: Default::default(),
+            method: Method::default(),
+            req_body: Value::default(),
+            headers: None,
+            operation_type: GraphQLOperationType::default(),
         }
     }
 
+    #[must_use]
     pub fn with_method(mut self, method: Method) -> Self {
         self.method = method;
         self
     }
 
+    #[must_use]
     pub fn with_req_body(mut self, req_body: Value) -> Self {
         self.req_body = req_body;
         self
     }
 
+    #[must_use]
     pub fn with_headers(mut self, headers: Option<BTreeMap<String, String>>) -> Self {
         self.headers = headers;
         self
     }
 
+    #[must_use]
     pub fn with_is_mutation(mut self, is_mutation: bool) -> Self {
         let operation_type = if is_mutation {
             GraphQLOperationType::Mutation
@@ -61,6 +66,7 @@ impl RequestSample {
         self
     }
 
+    #[must_use]
     pub fn with_is_subscription(mut self, is_subscription: bool) -> Self {
         if is_subscription {
             self.operation_type = GraphQLOperationType::Subscription;
@@ -78,7 +84,6 @@ pub struct FromJsonGenerator<'a> {
 }
 
 impl<'a> FromJsonGenerator<'a> {
-    #[allow(clippy::too_many_arguments)]
     pub fn new(
         request_samples: &'a [RequestSample],
         type_name_generator: &'a NameGenerator,
@@ -131,7 +136,7 @@ impl Transform for FromJsonGenerator<'_> {
             let header_keys = sample.headers.as_ref().map(|headers_inner| {
                 headers_inner
                     .keys()
-                    .map(|k| k.to_owned())
+                    .map(std::borrow::ToOwned::to_owned)
                     .collect::<BTreeSet<_>>()
             });
 
@@ -142,7 +147,7 @@ impl Transform for FromJsonGenerator<'_> {
             GraphQLTypesGenerator::new(sample, type_name_gen)
                 .pipe(json::SchemaGenerator::new(
                     &sample.operation_type,
-                    &header_keys,
+                    header_keys.as_ref(),
                 ))
                 .pipe(RenameTypes::new(rename_types.into_iter()))
                 .transform(config.clone())

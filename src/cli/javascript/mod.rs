@@ -11,6 +11,7 @@ pub use runtime::Runtime;
 
 use crate::core::{WorkerIO, blueprint};
 
+#[must_use]
 pub fn init_worker_io<T, V>(script: blueprint::Script) -> Arc<dyn WorkerIO<T, V> + Send + Sync>
 where
     Runtime: WorkerIO<T, V>,
@@ -18,9 +19,9 @@ where
     (Arc::new(Runtime::new(script))) as _
 }
 
-fn create_header_map(headers: BTreeMap<String, String>) -> anyhow::Result<headers::HeaderMap> {
+fn create_header_map(headers: &BTreeMap<String, String>) -> anyhow::Result<headers::HeaderMap> {
     let mut header_map = headers::HeaderMap::new();
-    for (key, value) in headers.iter() {
+    for (key, value) in headers {
         let key = HeaderName::from_bytes(key.as_bytes())?;
         let value = HeaderValue::from_str(value.as_str())?;
         header_map.insert(key, value);

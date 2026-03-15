@@ -1,4 +1,4 @@
-use colored::*;
+use colored::Colorize;
 
 use crate::core::config::{Config, QueryPath};
 
@@ -13,11 +13,11 @@ impl Fmt {
         format!("{}", meta.yellow())
     }
 
-    pub fn display(s: String) {
-        println!("{}", s);
+    pub fn display(s: &str) {
+        println!("{s}");
     }
 
-    pub fn format_n_plus_one_queries(n_plus_one_info: QueryPath) -> String {
+    pub fn format_n_plus_one_queries(n_plus_one_info: &QueryPath) -> String {
         Fmt::meta(&n_plus_one_info.to_string())
     }
 
@@ -27,7 +27,7 @@ impl Fmt {
 
         if show_npo {
             message.push('\n');
-            message.push_str(&Fmt::format_n_plus_one_queries(n_plus_one_info));
+            message.push_str(&Fmt::format_n_plus_one_queries(&n_plus_one_info));
         }
 
         tracing::info!("{}", message);

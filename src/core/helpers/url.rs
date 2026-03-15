@@ -2,6 +2,7 @@ use gqlforge_valid::Valid;
 
 use crate::core::mustache::Mustache;
 
+#[must_use]
 pub fn to_url(url: &str) -> Valid<Mustache, String> {
     Valid::succeed(Mustache::parse(url))
 }
