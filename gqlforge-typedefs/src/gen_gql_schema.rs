@@ -82,7 +82,7 @@ mod tests {
     fn it_works_for_into_scalar() {
         let builder = ServiceDocumentBuilder::new();
         let doc = builder.add_scalar(FooScalar::scalar_definition()).build();
-        let actual = gqlforge::core::document::print(doc);
+        let actual = gqlforge::core::document::print(&doc);
         let expected = "scalar FooScalar".to_string();
         assert_eq!(actual, expected);
     }
@@ -93,7 +93,7 @@ mod tests {
         let doc = builder
             .add_directive(ComplexDirective::directive_definition(&mut HashSet::new()))
             .build();
-        let actual = gqlforge::core::document::print(doc);
+        let actual = gqlforge::core::document::print(&doc);
         let expected = "directive @complexDirective(\n  field1: Int!\n  enum_field: FooEnum\n  custom_type: FooType\n) repeatable on SCHEMA\n\ninput FooType {\n  field1: Int!\n  field2: Int\n  field3: [String!]\n  inner_type: BarType\n}\n\ninput BarType {\n  field2: BazType\n}\n\ninput BazType {\n  field: Int!\n}\n\nenum FooEnum {\n  Variant\n  Variant2\n  Variat3\n}".to_string();
 
         assert_eq!(actual, expected);

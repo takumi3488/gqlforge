@@ -149,5 +149,5 @@ fn get_updated_json() -> Result<Value> {
 fn get_updated_graphql() -> String {
     let doc = gen_gql_schema::build_service_document();
 
-    gqlforge::core::document::print(doc)
+    gqlforge::core::document::print(&doc)
 }
