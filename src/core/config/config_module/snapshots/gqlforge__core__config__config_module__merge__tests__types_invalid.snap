@@ -3,5 +3,5 @@ source: src/core/config/config_module/merge.rs
 expression: merged.unwrap_err()
 ---
 Validation Error
-• Type mismatch: expected `String`, got `Int` [A, a]
-• Type mismatch: expected list, got singular value [A, b]
+* Type mismatch: expected `String`, got `Int` [A, a]
+* Type mismatch: expected list, got singular value [A, b]

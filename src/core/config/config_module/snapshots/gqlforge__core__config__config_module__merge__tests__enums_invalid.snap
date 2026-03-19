@@ -3,4 +3,4 @@ source: src/core/config/config_module/merge.rs
 expression: merged.unwrap_err()
 ---
 Validation Error
-• Enum is used as input type in one subgraph and output type in another [enumOutput]
+* Enum is used as input type in one subgraph and output type in another [enumOutput]
