@@ -1,0 +1,17 @@
+---
+source: tests/core/spec.rs
+expression: formatted
+---
+type Query {
+  reservations: [Reservation]
+}
+
+type Reservation {
+  bookingPeriod: String
+  id: Int
+  priceRange: String
+}
+
+schema {
+  query: Query
+}

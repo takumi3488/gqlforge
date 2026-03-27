@@ -154,6 +154,7 @@ async fn fetch_columns(
         SELECT
             column_name,
             data_type,
+            udt_name,
             is_nullable,
             column_default,
             is_generated
@@ -167,13 +168,20 @@ async fn fetch_columns(
     for row in rows {
         let name: String = row.get("column_name");
         let data_type: String = row.get("data_type");
+        let udt_name: String = row.get("udt_name");
         let is_nullable: String = row.get("is_nullable");
         let column_default: Option<String> = row.get("column_default");
         let is_generated: String = row.get("is_generated");
 
+        let type_name = if data_type == "USER-DEFINED" {
+            udt_name
+        } else {
+            data_type
+        };
+
         columns.push(Column {
             name,
-            pg_type: PgType::from_sql_name(&data_type),
+            pg_type: PgType::from_sql_name(&type_name),
             is_nullable: is_nullable == "YES",
             has_default: column_default.is_some(),
             is_generated: is_generated != "NEVER",

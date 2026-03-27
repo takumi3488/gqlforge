@@ -1,0 +1,21 @@
+---
+source: tests/core/spec.rs
+expression: formatter
+---
+schema
+@server
+@upstream
+@link(id: "main", src: "reservations.sql", type: Sql)
+@link(src: "schema_0.graphql", type: Config) {
+  query: Query
+}
+
+type Query {
+  reservations: [Reservation] @postgres(table: "reservations")
+}
+
+type Reservation {
+  bookingPeriod: String
+  id: Int
+  priceRange: String
+}

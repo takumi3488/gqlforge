@@ -17,4 +17,4 @@ const server = new ApolloServer({
 })
 
 const {url} = await startStandaloneServer(server)
-console.log(`🚀  Server ready at ${url}`)
+console.log(`Server ready at ${url}`)

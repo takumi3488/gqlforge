@@ -338,6 +338,139 @@ pub(super) fn format_timetz(raw: &[u8]) -> anyhow::Result<String> {
     }
 }
 
+#[expect(
+    clippy::expect_used,
+    reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid"
+)]
+fn pg_epoch_date() -> chrono::NaiveDate {
+    chrono::NaiveDate::from_ymd_opt(2000, 1, 1).expect("2000-01-01 is a valid date")
+}
+
+#[expect(
+    clippy::expect_used,
+    reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid"
+)]
+fn pg_epoch() -> chrono::NaiveDateTime {
+    pg_epoch_date()
+        .and_hms_opt(0, 0, 0)
+        .expect("00:00:00 is a valid time")
+}
+
+pub(super) fn format_timestamp(raw: &[u8]) -> anyhow::Result<String> {
+    let us = i64::from_be_bytes(raw.try_into()?);
+    if us == i64::MAX {
+        return Ok("infinity".to_string());
+    }
+    if us == i64::MIN {
+        return Ok("-infinity".to_string());
+    }
+    let dt = pg_epoch() + chrono::Duration::microseconds(us);
+    Ok(dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string())
+}
+
+pub(super) fn format_timestamptz(raw: &[u8]) -> anyhow::Result<String> {
+    let us = i64::from_be_bytes(raw.try_into()?);
+    if us == i64::MAX {
+        return Ok("infinity".to_string());
+    }
+    if us == i64::MIN {
+        return Ok("-infinity".to_string());
+    }
+    let dt = pg_epoch().and_utc() + chrono::Duration::microseconds(us);
+    Ok(dt.to_rfc3339())
+}
+
+pub(super) fn format_date(raw: &[u8]) -> anyhow::Result<String> {
+    let days = i32::from_be_bytes(raw.try_into()?);
+    if days == i32::MAX {
+        return Ok("infinity".to_string());
+    }
+    if days == i32::MIN {
+        return Ok("-infinity".to_string());
+    }
+    let d = pg_epoch_date() + chrono::Duration::days(i64::from(days));
+    Ok(d.to_string())
+}
+
+/// Convert a single range bound's raw binary data to a string for the given element type.
+fn format_range_bound(raw: &[u8], ty: &postgres_types::Type) -> anyhow::Result<String> {
+    use postgres_types::Type;
+    match *ty {
+        Type::INT4 => Ok(i32::from_be_bytes(raw.try_into()?).to_string()),
+        Type::INT8 => Ok(i64::from_be_bytes(raw.try_into()?).to_string()),
+        Type::NUMERIC => parse_pg_numeric(raw),
+        Type::TIMESTAMP => format_timestamp(raw),
+        Type::TIMESTAMPTZ => format_timestamptz(raw),
+        Type::DATE => format_date(raw),
+        _ => match std::str::from_utf8(raw) {
+            Ok(s) => Ok(s.to_string()),
+            Err(_) => anyhow::bail!("range bound is not valid UTF-8"),
+        },
+    }
+}
+
+const RANGE_EMPTY: u8 = 0x01;
+const RANGE_LB_INC: u8 = 0x02;
+const RANGE_UB_INC: u8 = 0x04;
+const RANGE_LB_INF: u8 = 0x08;
+const RANGE_UB_INF: u8 = 0x10;
+
+fn read_range_bound(
+    raw: &[u8],
+    pos: &mut usize,
+    elem_type: &postgres_types::Type,
+    side: &str,
+) -> anyhow::Result<String> {
+    if *pos + 4 > raw.len() {
+        anyhow::bail!("range binary truncated at {side} bound length");
+    }
+    let len_i32 = i32::from_be_bytes(raw[*pos..*pos + 4].try_into()?);
+    *pos += 4;
+    let len = usize::try_from(len_i32)
+        .map_err(|_| anyhow::anyhow!("range {side} bound length is negative"))?;
+    if *pos + len > raw.len() {
+        anyhow::bail!("range binary truncated at {side} bound data");
+    }
+    let data = &raw[*pos..*pos + len];
+    *pos += len;
+    format_range_bound(data, elem_type)
+}
+
+/// Decode a `PostgreSQL` range binary value into its text representation.
+///
+/// The output format mirrors `PostgreSQL`'s standard text representation:
+/// `[lower,upper)`, `[1,10]`, `(,10]`, `[1,]`, `empty`, etc.
+pub(super) fn format_range(raw: &[u8], elem_type: &postgres_types::Type) -> anyhow::Result<String> {
+    if raw.is_empty() {
+        anyhow::bail!("range binary too short");
+    }
+
+    let flags = raw[0];
+
+    if flags & RANGE_EMPTY != 0 {
+        return Ok("empty".to_string());
+    }
+
+    let lb_bracket = if flags & RANGE_LB_INC != 0 { '[' } else { '(' };
+    let ub_bracket = if flags & RANGE_UB_INC != 0 { ']' } else { ')' };
+
+    let mut pos = 1usize;
+
+    let lower_str = if flags & RANGE_LB_INF != 0 {
+        String::new()
+    } else {
+        read_range_bound(raw, &mut pos, elem_type, "lower")?
+    };
+
+    let upper_str = if flags & RANGE_UB_INF != 0 {
+        String::new()
+    } else {
+        read_range_bound(raw, &mut pos, elem_type, "upper")?
+    };
+
+    Ok(format!("{lb_bracket}{lower_str},{upper_str}{ub_bracket}"))
+}
+
 pub(super) fn format_bytea(raw: &[u8]) -> String {
     let mut s = String::with_capacity(2 + raw.len() * 2);
     s.push_str("\\x");
@@ -600,6 +733,97 @@ mod tests {
     fn test_parse_pg_numeric_short_input() {
         let raw = [0u8; 7]; // needs at least 8
         assert!(parse_pg_numeric(&raw).is_err());
+    }
+
+    /// Build a range binary with the given flags and optional int4 (i32) bounds.
+    ///
+    /// - `lower`: if `Some(v)`, writes 4-byte length + big-endian i32 value.
+    /// - `upper`: same for the upper bound.
+    ///
+    /// When a bound is `None`, no data is written (caller must ensure the
+    /// corresponding INF flag is set in `flags`).
+    fn build_int4_range(flags: u8, lower: Option<i32>, upper: Option<i32>) -> Vec<u8> {
+        let mut buf = vec![flags];
+        if let Some(v) = lower {
+            buf.extend_from_slice(&4i32.to_be_bytes());
+            buf.extend_from_slice(&v.to_be_bytes());
+        }
+        if let Some(v) = upper {
+            buf.extend_from_slice(&4i32.to_be_bytes());
+            buf.extend_from_slice(&v.to_be_bytes());
+        }
+        buf
+    }
+
+    #[test]
+    fn test_format_range_int4_inclusive() {
+        let raw = build_int4_range(0x06, Some(1), Some(10));
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "[1,10]"
+        );
+    }
+
+    #[test]
+    fn test_format_range_int4_exclusive() {
+        let raw = build_int4_range(0x00, Some(1), Some(10));
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "(1,10)"
+        );
+    }
+
+    #[test]
+    fn test_format_range_empty() {
+        assert_eq!(
+            format_range(&[0x01u8], &postgres_types::Type::INT4).unwrap(),
+            "empty"
+        );
+    }
+
+    #[test]
+    fn test_format_range_unbounded_lower() {
+        // RANGE_LB_INF (0x08) | RANGE_UB_INC (0x04) = 0x0C: lower is infinite, upper is inclusive.
+        // PostgreSQL text representation: (,10]  (infinite lower is always exclusive)
+        let raw = build_int4_range(0x0C, None, Some(10));
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "(,10]"
+        );
+    }
+
+    #[test]
+    fn test_format_range_unbounded_upper() {
+        // RANGE_LB_INC (0x02) | RANGE_UB_INF (0x10) = 0x12: lower is inclusive, upper is infinite.
+        // PostgreSQL text representation: [1,)  (infinite upper is always exclusive)
+        let raw = build_int4_range(0x12, Some(1), None);
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "[1,)"
+        );
+    }
+
+    #[test]
+    fn test_format_range_int4_lb_inc_ub_exc() {
+        let raw = build_int4_range(0x02, Some(1), Some(10));
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "[1,10)"
+        );
+    }
+
+    #[test]
+    fn test_format_range_too_short() {
+        assert!(format_range(&[], &postgres_types::Type::INT4).is_err());
+    }
+
+    #[test]
+    fn test_format_range_int4_negative_bounds() {
+        let raw = build_int4_range(0x06, Some(-5), Some(0));
+        assert_eq!(
+            format_range(&raw, &postgres_types::Type::INT4).unwrap(),
+            "[-5,0]"
+        );
     }
 
     #[test]

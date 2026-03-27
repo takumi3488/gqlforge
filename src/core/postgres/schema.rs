@@ -33,6 +33,13 @@ pub enum PgType {
     MacAddr,
     /// Array of another type.
     Array(Box<PgType>),
+    // Range types (built-in)
+    Int4Range,
+    Int8Range,
+    NumRange,
+    TsRange,
+    TstzRange,
+    DateRange,
     /// Fallback for unrecognised types.
     Other(String),
 }
@@ -66,6 +73,12 @@ impl PgType {
             "inet" => PgType::Inet,
             "cidr" => PgType::Cidr,
             "macaddr" | "macaddr8" => PgType::MacAddr,
+            "int4range" => PgType::Int4Range,
+            "int8range" => PgType::Int8Range,
+            "numrange" => PgType::NumRange,
+            "tsrange" => PgType::TsRange,
+            "tstzrange" => PgType::TstzRange,
+            "daterange" => PgType::DateRange,
             other => {
                 if let Some(inner) = other.strip_suffix("[]") {
                     PgType::Array(Box::new(PgType::from_sql_name(inner)))
@@ -210,6 +223,43 @@ impl MergeRight for DatabaseSchema {
 mod tests {
     #![expect(clippy::unwrap_used, reason = "test code")]
     use super::*;
+
+    #[test]
+    fn pg_type_from_sql_name_range_types() {
+        assert_eq!(PgType::from_sql_name("int4range"), PgType::Int4Range);
+        assert_eq!(PgType::from_sql_name("int8range"), PgType::Int8Range);
+        assert_eq!(PgType::from_sql_name("numrange"), PgType::NumRange);
+        assert_eq!(PgType::from_sql_name("tsrange"), PgType::TsRange);
+        assert_eq!(PgType::from_sql_name("tstzrange"), PgType::TstzRange);
+        assert_eq!(PgType::from_sql_name("daterange"), PgType::DateRange);
+    }
+
+    #[test]
+    fn pg_type_from_sql_name_range_types_case_insensitive() {
+        assert_eq!(PgType::from_sql_name("INT4RANGE"), PgType::Int4Range);
+        assert_eq!(PgType::from_sql_name("NUMRANGE"), PgType::NumRange);
+        assert_eq!(PgType::from_sql_name("TSTZRANGE"), PgType::TstzRange);
+    }
+
+    #[test]
+    fn graphql_scalar_range_types_return_string() {
+        assert_eq!(PgType::Int4Range.graphql_scalar(), "String");
+        assert_eq!(PgType::Int8Range.graphql_scalar(), "String");
+        assert_eq!(PgType::NumRange.graphql_scalar(), "String");
+        assert_eq!(PgType::TsRange.graphql_scalar(), "String");
+        assert_eq!(PgType::TstzRange.graphql_scalar(), "String");
+        assert_eq!(PgType::DateRange.graphql_scalar(), "String");
+    }
+
+    #[test]
+    fn pg_type_display_range_types() {
+        assert_eq!(PgType::Int4Range.to_string(), "Int4Range");
+        assert_eq!(PgType::Int8Range.to_string(), "Int8Range");
+        assert_eq!(PgType::NumRange.to_string(), "NumRange");
+        assert_eq!(PgType::TsRange.to_string(), "TsRange");
+        assert_eq!(PgType::TstzRange.to_string(), "TstzRange");
+        assert_eq!(PgType::DateRange.to_string(), "DateRange");
+    }
 
     #[test]
     fn pg_type_from_sql_name() {

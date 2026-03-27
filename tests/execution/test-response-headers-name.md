@@ -7,6 +7,7 @@ error: true
 ```yaml @config
 server:
   headers:
+    # sakoku-ignore-next-line
     custom: [{ key: "🤣", value: "a" }]
 ```
 

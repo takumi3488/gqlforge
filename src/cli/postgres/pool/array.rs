@@ -1,18 +1,15 @@
 use async_graphql_value::ConstValue;
 
 use super::binary_format::{
-    format_bytea, format_inet, format_interval, format_macaddr, format_timetz, format_uuid,
-    parse_pg_numeric,
+    format_bytea, format_date, format_inet, format_interval, format_macaddr, format_range,
+    format_timestamp, format_timestamptz, format_timetz, format_uuid, parse_pg_numeric,
 };
 
-#[expect(
-    clippy::unwrap_used,
-    reason = "chrono date/time constants 2000-01-01 and 00:00:00 are always valid"
-)]
 pub(super) fn raw_element_to_const(
     ty: &postgres_types::Type,
     raw: &[u8],
 ) -> anyhow::Result<ConstValue> {
+    use postgres_types::Kind;
     use postgres_types::Type;
 
     match *ty {
@@ -50,35 +47,9 @@ pub(super) fn raw_element_to_const(
         Type::UUID => Ok(ConstValue::String(format_uuid(raw)?)),
         Type::BYTEA => Ok(ConstValue::String(format_bytea(raw))),
         Type::NUMERIC => Ok(ConstValue::String(parse_pg_numeric(raw)?)),
-        Type::TIMESTAMP => {
-            // PostgreSQL binary TIMESTAMP: i64 microseconds since 2000-01-01.
-            let us = i64::from_be_bytes(raw.try_into()?);
-            let epoch = chrono::NaiveDate::from_ymd_opt(2000, 1, 1)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap();
-            let dt = epoch + chrono::Duration::microseconds(us);
-            Ok(ConstValue::String(
-                dt.format("%Y-%m-%dT%H:%M:%S%.f").to_string(),
-            ))
-        }
-        Type::TIMESTAMPTZ => {
-            let us = i64::from_be_bytes(raw.try_into()?);
-            let epoch = chrono::NaiveDate::from_ymd_opt(2000, 1, 1)
-                .unwrap()
-                .and_hms_opt(0, 0, 0)
-                .unwrap()
-                .and_utc();
-            let dt = epoch + chrono::Duration::microseconds(us);
-            Ok(ConstValue::String(dt.to_rfc3339()))
-        }
-        Type::DATE => {
-            // i32 days since 2000-01-01.
-            let days = i32::from_be_bytes(raw.try_into()?);
-            let epoch = chrono::NaiveDate::from_ymd_opt(2000, 1, 1).unwrap();
-            let d = epoch + chrono::Duration::days(i64::from(days));
-            Ok(ConstValue::String(d.to_string()))
-        }
+        Type::TIMESTAMP => Ok(ConstValue::String(format_timestamp(raw)?)),
+        Type::TIMESTAMPTZ => Ok(ConstValue::String(format_timestamptz(raw)?)),
+        Type::DATE => Ok(ConstValue::String(format_date(raw)?)),
         Type::TIME => {
             // i64 microseconds since midnight.
             let us = i64::from_be_bytes(raw.try_into()?);
@@ -103,6 +74,10 @@ pub(super) fn raw_element_to_const(
             Ok(ConstValue::from_json(v).unwrap_or(ConstValue::Null))
         }
         _ => {
+            // For range types (e.g., arrays of ranges), format as PostgreSQL text.
+            if let Kind::Range(elem_ty) = ty.kind() {
+                return Ok(ConstValue::String(format_range(raw, elem_ty)?));
+            }
             // For enum and other types, try UTF-8 string.
             match std::str::from_utf8(raw) {
                 Ok(s) => Ok(ConstValue::String(s.to_string())),

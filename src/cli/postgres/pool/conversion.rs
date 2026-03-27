@@ -2,8 +2,8 @@ use async_graphql_value::ConstValue;
 
 use super::array::parse_pg_array;
 use super::binary_format::{
-    format_bytea, format_inet, format_interval, format_macaddr, format_timetz, format_uuid,
-    parse_pg_numeric,
+    format_bytea, format_inet, format_interval, format_macaddr, format_range, format_timetz,
+    format_uuid, parse_pg_numeric,
 };
 use super::types::{EnumText, RawBytes};
 
@@ -156,6 +156,14 @@ pub(super) fn row_value_to_const(
                 let v: Option<RawBytes> = row.try_get(idx)?;
                 return match v {
                     Some(raw) => Ok(parse_pg_array(&raw.0, elem_ty)?),
+                    None => Ok(ConstValue::Null),
+                };
+            }
+
+            if let Kind::Range(elem_ty) = ty.kind() {
+                let v: Option<RawBytes> = row.try_get(idx)?;
+                return match v {
+                    Some(raw) => Ok(ConstValue::String(format_range(&raw.0, elem_ty)?)),
                     None => Ok(ConstValue::Null),
                 };
             }
