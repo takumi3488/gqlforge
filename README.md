@@ -74,9 +74,9 @@ Head out to [docs] to learn about other powerful gqlforge features.
 
 ### Support Us
 
-⭐️ Give us a star.
+Give us a star.
 
-👀 Watch us for updates.
+Watch us for updates.
 
 ### Acknowledgements
 
