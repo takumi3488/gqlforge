@@ -392,7 +392,8 @@ pub(super) fn format_date(raw: &[u8]) -> anyhow::Result<String> {
     Ok(d.to_string())
 }
 
-/// Convert a single range bound's raw binary data to a string for the given element type.
+/// Convert a single range bound's raw binary data to a string for the given
+/// element type.
 fn format_range_bound(raw: &[u8], ty: &postgres_types::Type) -> anyhow::Result<String> {
     use postgres_types::Type;
     match *ty {
@@ -735,7 +736,8 @@ mod tests {
         assert!(parse_pg_numeric(&raw).is_err());
     }
 
-    /// Build a range binary with the given flags and optional int4 (i32) bounds.
+    /// Build a range binary with the given flags and optional int4 (i32)
+    /// bounds.
     ///
     /// - `lower`: if `Some(v)`, writes 4-byte length + big-endian i32 value.
     /// - `upper`: same for the upper bound.
@@ -783,8 +785,9 @@ mod tests {
 
     #[test]
     fn test_format_range_unbounded_lower() {
-        // RANGE_LB_INF (0x08) | RANGE_UB_INC (0x04) = 0x0C: lower is infinite, upper is inclusive.
-        // PostgreSQL text representation: (,10]  (infinite lower is always exclusive)
+        // RANGE_LB_INF (0x08) | RANGE_UB_INC (0x04) = 0x0C: lower is infinite, upper is
+        // inclusive. PostgreSQL text representation: (,10]  (infinite lower is
+        // always exclusive)
         let raw = build_int4_range(0x0C, None, Some(10));
         assert_eq!(
             format_range(&raw, &postgres_types::Type::INT4).unwrap(),
@@ -794,8 +797,9 @@ mod tests {
 
     #[test]
     fn test_format_range_unbounded_upper() {
-        // RANGE_LB_INC (0x02) | RANGE_UB_INF (0x10) = 0x12: lower is inclusive, upper is infinite.
-        // PostgreSQL text representation: [1,)  (infinite upper is always exclusive)
+        // RANGE_LB_INC (0x02) | RANGE_UB_INF (0x10) = 0x12: lower is inclusive, upper
+        // is infinite. PostgreSQL text representation: [1,)  (infinite upper is
+        // always exclusive)
         let raw = build_int4_range(0x12, Some(1), None);
         assert_eq!(
             format_range(&raw, &postgres_types::Type::INT4).unwrap(),

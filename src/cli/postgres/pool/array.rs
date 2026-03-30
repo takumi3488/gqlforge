@@ -9,8 +9,7 @@ pub(super) fn raw_element_to_const(
     ty: &postgres_types::Type,
     raw: &[u8],
 ) -> anyhow::Result<ConstValue> {
-    use postgres_types::Kind;
-    use postgres_types::Type;
+    use postgres_types::{Kind, Type};
 
     match *ty {
         Type::BOOL => {
