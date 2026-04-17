@@ -17,13 +17,6 @@ pub trait CacheStorage: Send + Sync + 'static {
     /// cache, then it updates the key's value.
     fn insert(&mut self, key: Cow<'_, Self::Key>, val: Cow<'_, Self::Value>);
 
-    /// Removes the value corresponding to the key from the cache.
-    #[expect(
-        dead_code,
-        reason = "part of the CacheStorage interface, reserved for future use"
-    )]
-    fn remove(&mut self, key: &Self::Key);
-
     /// Clears the cache, removing all key-value pairs.
     fn clear(&mut self);
 
