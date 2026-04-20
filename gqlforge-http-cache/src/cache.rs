@@ -44,7 +44,6 @@ impl HttpCacheManager {
     }
 }
 
-#[async_trait::async_trait]
 impl CacheManager for HttpCacheManager {
     async fn get(&self, cache_key: &str) -> Result<Option<(HttpResponse, CachePolicy)>> {
         let store: Store = match self.cache.get(cache_key).await {

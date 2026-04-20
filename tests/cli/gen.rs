@@ -29,7 +29,6 @@ pub mod cacache_manager {
         }
     }
 
-    #[async_trait::async_trait]
     impl CacheManager for CaCacheManager {
         async fn put(
             &self,
@@ -191,7 +190,6 @@ pub mod test {
             }
         }
 
-        #[async_trait::async_trait]
         impl CacheManager for CaCacheManager {
             async fn put(
                 &self,
